@@ -1,0 +1,167 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<charts>
+  <barchart name="Average CPU Utilization" shortName="CPU" stacked="true"
+    categoriesNamedBy="HOST" barsNamedBy="FIELD">
+    <yAxis label="% CPU" asPercent="true" />
+    <data>
+      <type name="CPU_ALL" />
+      <field name="User%" alias="User" />
+      <field name="Sys%" alias="System" />
+      <field name="Wait%" alias="Wait" />
+    </data>
+  </barchart>
+
+  <barchart name="Average Disk Activity" shortName="Disk Activity" stacked="true"
+    categoriesNamedBy="HOST" barsNamedBy="FIELD">
+    <yAxis label="KB / s" />
+    <data>
+      <type name="DISKREAD" />
+      <field name="Total" alias="Read" />
+    </data>
+    <data>
+      <type name="DISKWRITE" />
+      <field name="Total" alias="Write" />
+    </data>
+  </barchart>
+
+  <barchart name="Average Disk Transfers" shortName="Disk Transfers" stacked="true"
+    categoriesNamedBy="HOST" barsNamedBy="FIELD">
+    <yAxis label="Transfers / s" />
+    <data>
+      <type name="DISKXFER" />
+      <field name="Total" />
+    </data>
+  </barchart>
+
+  <barchart name="Average Memory Usage" shortName="Memory" stacked="true"
+    categoriesNamedBy="HOST" barsNamedBy="FIELD">
+    <yAxis label="MB" />
+    <data>
+      <type name="MEM" />
+      <!-- Linux -->
+      <field name="active" />
+      <field name="inactive" />
+      <field name="memfree" />
+      <!-- AIX -->
+      <field name="Real used(MB)" />
+      <field name="Real free(MB)" />
+    </data>
+  </barchart>
+
+  <barchart name="Average Swap Usage" shortName="Swap" stacked="true" categoriesNamedBy="HOST"
+    barsNamedBy="FIELD">
+    <yAxis label="MB" />
+    <data>
+      <type name="MEM" />
+      <!-- Linux -->
+      <field name="swapused" />
+      <field name="swapfree" />
+      <!-- AIX -->
+      <field name="Virtual used(MB)" />
+      <field name="Virtual free(MB)" />
+    </data>
+  </barchart>
+
+  <barchart name="Average Ethernet Traffic" shortName="Network Data" stacked="true"
+    categoriesNamedBy="HOST" barsNamedBy="FIELD">
+    <yAxis label="KB / s" />
+    <data>
+      <type name="NETETOTAL" />
+      <field name="total-read-KB/s" alias="Read" />
+    </data>
+    <data>
+      <type name="NETETOTAL" />
+      <field name="total-write-KB/s" alias="Write" />
+    </data>
+  </barchart>
+
+  <barchart name="Average Ethernet Packets" shortName="Network Packets" stacked="true"
+    categoriesNamedBy="HOST" barsNamedBy="FIELD">
+    <yAxis label="Packets / s" />
+    <data>
+      <type name="NETETOTAL" />
+      <field name="total-read-packets/s" alias="Read" />
+    </data>
+    <data>
+      <type name="NETETOTAL" />
+      <field name="total-write-packets/s" alias="Write" />
+    </data>
+  </barchart>
+
+  <barchart name="Average Shared Ethernet Traffic" shortName="Shared Network Data" stacked="true"
+    categoriesNamedBy="HOST" barsNamedBy="FIELD">
+    <yAxis label="KB / s" />
+    <data>
+      <host os="VIOS" />
+      <type name="SEAETOTAL" />
+      <field name="total-read-KB/s" alias="Read" />
+    </data>
+    <data>
+      <host os="VIOS" />
+      <type name="SEAETOTAL" />
+      <field name="total-write-KB/s" alias="Write" />
+    </data>
+  </barchart>
+
+  <barchart name="Average Shared Ethernet Packets" shortName="Shared Network Packets" stacked="true"
+    categoriesNamedBy="HOST" barsNamedBy="FIELD">
+    <yAxis label="Packets / s" />
+    <data>
+      <host os="VIOS" />
+      <type name="SEAETOTAL" />
+      <field name="total-read-packets/s" alias="Read" />
+    </data>
+    <data>
+      <host os="VIOS" />
+      <type name="SEAETOTAL" />
+      <field name="total-write-packets/s" alias="Write" />
+    </data>
+  </barchart>
+  
+  <barchart name="Average Run Queue Length" shortName="Run Queue" stacked="true"
+    categoriesNamedBy="HOST" barsNamedBy="FIELD">
+    <yAxis label="Queue Length" />
+    <data>
+      <type name="PROC" />
+      <field name="Runnable" alias="Run Queue" />
+    </data>
+  </barchart>
+
+  <barchart name="Average Process Switches" shortName="Process Switches" stacked="true"
+    categoriesNamedBy="HOST" barsNamedBy="FIELD">
+    <yAxis label="Switches / s" />
+    <data>
+      <type name="PROC" />
+      <field name="pswitch" alias="Process Switches" />
+      <field name="fork" alias="Forks" />
+    </data>
+  </barchart>
+
+  <linechart name="CPU Utilization" shortName="CPU over Time" linesNamedBy="HOST">
+    <yAxis label="% CPU" asPercent="true" />
+    <data>
+      <type name="CPU_ALL" />
+      <field name="CPU%" />
+    </data>
+  </linechart>
+
+  <linechart name="CPUs Used" shortName="CPUs Used" linesNamedBy="HOST">
+    <yAxis label="CPUs" />
+    <data>
+      <host os="AIX" />
+      <type name="PCPU_ALL" />
+
+      <field name="Total" />
+    </data>
+  </linechart>
+  
+  <linechart name="% Entitlement Used" shortName="CPU Entitlement" linesNamedBy="HOST">
+    <yAxis label="% Entitlement Used" />
+    <data>
+      <host os="AIX" />
+      <type name="LPAR" />
+
+      <field name="EC_CPU%" />
+    </data>
+  </linechart>
+</charts>

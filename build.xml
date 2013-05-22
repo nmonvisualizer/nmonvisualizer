@@ -1,0 +1,70 @@
+<?xml version="1.1" encoding="UTF-8"?>
+<project name="NMON Parser" default="jar">
+  <property name="dir.build" value="${basedir}/build" />
+  <property name="dir.src" value="${basedir}/src" />
+  <property name="dir.lib" value="${basedir}/lib" />
+
+  <target name="jar" depends="clean-jar,compile,-get-version">
+    <manifest file="${basedir}/MANIFEST.MF">
+      <attribute name="Main-Class" value="org.eclipse.jdt.internal.jarinjarloader.JarRsrcLoader" />
+      <attribute name="Class-Path" value="." />
+      <attribute name="Rsrc-Class-Path" value="./ jcommon-1.0.17.jar jfreechart-1.0.14.jar slf4j-api-1.7.2.jar slf4j-jdk14-1.7.2.jar jackson-annotations-2.1.2.jar jackson-core-2.1.2.jar jackson-databind-2.1.2.jar" />
+      <attribute name="Rsrc-Main-Class" value="com.ibm.nmon.DelegatingMain" />
+    </manifest>
+
+    <property name="file.jar" value="${basedir}/NMONVisualizer_${version}.jar" />
+
+    <jar destfile="${file.jar}" basedir="${dir.build}" manifest="${basedir}/MANIFEST.MF">
+      <!-- include the jar-in-jar-loader files _unpacked_ in the WAR file so they can be read as the Main-Class -->
+      <zipfileset src="${dir.lib}/jar-in-jar-loader.zip" />
+
+      <!-- do not include the jar-in-jar-loader; the loader is included unpacked -->
+      <fileset dir="${dir.lib}">
+        <exclude name="*.zip" />
+      </fileset>
+
+      <fileset dir="${basedir}">
+        <include name="LICENSE" />
+        <include name="NOTICE" />
+      </fileset>
+    </jar>
+  </target>
+
+  <target name="compile" depends="-get-version">
+    <mkdir dir="${dir.build}" />
+
+    <javac srcdir="${dir.src}" destdir="${dir.build}" debug="on" target="6" source="6" includeantruntime="false">
+      <classpath>
+        <fileset dir="${dir.lib}">
+          <include name="**/*.jar" />
+        </fileset>
+      </classpath>
+    </javac>
+
+    <copy todir="${dir.build}">
+      <fileset dir="${dir.src}" excludes="**/*.java" />
+    </copy>
+
+    <!-- version file needs to be in the classpath so it can be read by the program -->
+    <propertyfile file="${dir.build}/com/ibm/nmon/version.properties">
+      <entry key="version" value="${version}" />
+    </propertyfile>
+  </target>
+
+  <target name="clean" depends="clean-jar" description="deletes the build directory">
+    <delete dir="${dir.build}" />
+  </target>
+
+  <target name="clean-jar" description="deletes the deployed jar file and manifest">
+    <delete dir="${basedir}">
+      <include name="MANIFEST.MF" />
+      <include name="*.jar" />
+    </delete>
+  </target>
+
+  <target name="-get-version">
+    <tstamp>
+      <format property="version" pattern="yyyy-MM-dd" />
+    </tstamp>
+  </target>
+</project>

@@ -1,0 +1,279 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<charts>
+  <linechart name="CPU Utilization" shortName="CPU" stacked="true">
+    <yAxis label="% CPU" asPercent="true" />
+    <data>
+      <type name="CPU_ALL" />
+      <field name="User%" alias="User" />
+      <field name="Sys%" alias="System" />
+      <field name="Wait%" alias="Wait" />
+    </data>
+  </linechart>
+
+  <linechart name="Total Disk Read and Write" shortName="Disk" stacked="true">
+    <yAxis label="KB / s" />
+    <data>
+      <type name="DISKREAD" />
+      <field name="Total" alias="Read" />
+    </data>
+    <data>
+      <type name="DISKWRITE" />
+      <field name="Total" alias="Write" />
+    </data>
+  </linechart>
+
+  <linechart name="Memory Usage" shortName="Memory" stacked="true">
+    <yAxis label="MB" />
+    <data>
+      <type name="MEM" />
+      <!-- Linux -->
+      <field name="active" />
+      <field name="inactive" />
+      <field name="memfree" />
+      <!-- AIX -->
+      <field name="Real used(MB)" />
+      <field name="Real free(MB)" />
+    </data>
+  </linechart>
+
+  <linechart name="Swap Usage" shortName="Swap" stacked="true">
+    <yAxis label="MB" />
+    <data>
+      <type name="MEM" />
+      <!-- Linux -->
+      <field name="swapused" />
+      <field name="swapfree" />
+      <!-- AIX -->
+      <field name="Virtual used(MB)" />
+      <field name="Virtual free(MB)" />
+    </data>
+  </linechart>
+
+  <linechart name="Total Ethernet Read and Write" shortName="Network" stacked="true">
+    <yAxis label="KB / s" />
+    <data>
+      <type name="NETETOTAL" />
+      <field name="total-read-KB/s" alias="Read" />
+      <field name="total-write-KB/s" alias="Write" />
+    </data>
+  </linechart>
+
+<linechart name="Total Shared Ethernet Read and Write" shortName="Virtual Network" stacked="true">
+    <yAxis label="KB / s" />
+    <data>
+      <host os="VIOS" />
+      <type name="SEAETOTAL" />
+      <field name="total-read-KB/s" alias="Read" />
+      <field name="total-write-KB/s" alias="Write" />
+    </data>
+  </linechart>
+
+  <linechart name="Total Disk Reads" shortName="Disk Reads" stacked="true">
+    <yAxis label="KB / s" />
+    <data>
+      <type name="DISKREAD" />
+      <field name="$DISKS" />
+    </data>
+  </linechart>
+
+  <linechart name="Total Disk Writes" shortName="Disk Writes" stacked="true">
+    <yAxis label="KB / s" />
+    <data>
+      <type name="DISKWRITE" />
+      <field name="$DISKS" />
+    </data>
+  </linechart>
+
+  <linechart name="Disk Percent Busy" shortName="Disk Busy">
+    <yAxis label="% Busy" asPercent="true" />
+    <data>
+      <type name="DISKBUSY" />
+      <field name="$DISKS" />
+    </data>
+  </linechart>
+
+  <linechart name="Total Disk Transfers" shortName="Disk Transfers" stacked="true">
+    <yAxis label="Transfers / s" />
+    <data>
+      <type name="DISKXFER" />
+      <field name="$DISKS" />
+    </data>
+  </linechart>
+
+  <linechart name="Network Reads" shortName="Network Reads" stacked="true">
+    <yAxis label="KB / s" />
+    <data>
+      <type name="NET" />
+      <field regex="((eth|en|lo).*)-read-KB/s" aliasRegex="((eth|en|lo).*)-read-KB/s" />
+    </data>
+  </linechart>
+
+  <linechart name="Network Writes" shortName="Network Writes" stacked="true">
+    <yAxis label="KB / s" />
+    <data>
+      <type name="NET" />
+      <field regex="((eth|en|lo).*)-write-KB/s" aliasRegex="((eth|en|lo).*)-write-KB/s" />
+    </data>
+  </linechart>
+
+ <linechart name="Shared Network Reads" shortName="Shared Network Reads" stacked="true">
+    <yAxis label="KB / s" />
+    <data>
+      <host os="VIOS" />
+      <type name="SEA" />
+      <field regex="((eth|en|lo).*)-read-KB/s" aliasRegex="((eth|en|lo).*)-read-KB/s" />
+    </data>
+  </linechart>
+
+  <linechart name="Shared Network Writes" shortName="Shared Network Writes" stacked="true">
+    <yAxis label="KB / s" />
+    <data>
+      <host os="VIOS" />
+      <type name="SEA" />
+      <field regex="((eth|en|lo).*)-write-KB/s" aliasRegex="((eth|en|lo).*)-write-KB/s" />
+    </data>
+  </linechart>
+  
+  <linechart name="Run Queue">
+    <yAxis label="Queue Length" />
+    <data>
+      <type name="PROC" />
+      <field name="Runnable" alias="Run Queue" />
+    </data>
+  </linechart>
+
+  <linechart name="Process Switches">
+    <yAxis label="Switches / s" />
+    <data>
+      <type name="PROC" />
+      <field name="pswitch" alias="Process Switches" />
+      <field name="fork" alias="Forks" />
+    </data>
+  </linechart>
+
+  <linechart name="Page Faults">
+    <yAxis label="Faults / s" />
+    <data>
+      <host os="linux" />
+      <type name="VM" />
+      <field name="pgmajfault" alias="Major" />
+      <field name="pgfault" alias="Minor" />
+    </data>
+    <data>
+      <host os="aix" />
+      <type name="PAGE" />
+      <field name="faults" alias="Faults" />
+    </data>
+  </linechart>
+
+  <linechart name="Amount Paged to File System" shortName="Paging Amount">
+    <yAxis label="KB / s" />
+    <data>
+      <host os="Linux" />
+      <type name="VM" />
+      <field regex="pgpg.*" />
+
+      <fieldAlias name="pgpgin" value="In" />
+      <fieldAlias name="pgpgout" value="Out" />
+      <fieldAlias name="pgsin" value="In" />
+      <fieldAlias name="pgsout" value="Out" />
+    </data>
+  </linechart>
+
+  <linechart name="Amount Paged to File System" shortName="Paging Amount">
+    <yAxis label="Pages / s" />
+    <data>
+      <host os="AIX" />
+      <type name="PAGE" />
+      <field regex="pgs.*" />
+
+      <fieldAlias name="pgpgin" value="In" />
+      <fieldAlias name="pgpgout" value="Out" />
+      <fieldAlias name="pgsin" value="In" />
+      <fieldAlias name="pgsout" value="Out" />
+    </data>
+  </linechart>
+
+  <linechart name="CPUs Used vs Entitlement" shortName="CPU Entitlement">
+    <yAxis label="CPUs" />
+    <data>
+      <host os="AIX" />
+      <type name="PCPU_ALL" />
+
+      <field name="Entitled Capacity" alias="Entitled" />
+      <field name="Total" alias="Used" />
+    </data>
+  </linechart>
+
+  <linechart name="Virtual CPU Folding" shortName="vCPU Folding" stacked="true">
+    <yAxis label="CPUs" />
+    <data>
+      <host os="AIX" />
+      <type name="LPAR" />
+
+      <field name="Unfolded" />
+      <field name="Folded" />
+    </data>
+  </linechart>
+
+  <linechart name="CPU Utilization by Process" shortName="CPU by Process" linesNamedBy="TYPE">
+    <yAxis label="% CPU" asPercent="true" />
+    <data>
+      <type name="$PROCESSES" />
+      <field name="%CPU" alias="% CPU" />
+    </data>
+  </linechart>
+
+  <linechart name="CPU Utilization by Logical Core" shortName="All CPUs" linesNamedBy="TYPE">
+    <yAxis label="% CPU" asPercent="true" />
+    <data>
+      <host os="Linux" />
+      <type regex="CPU\d*" aliasRegex="CPU(\d*)" />
+      <field name="CPU%" alias="% CPU" />
+    </data>
+  </linechart>
+
+  <linechart name="CPU Utilization by Thread" shortName="All CPUs" linesNamedBy="TYPE">
+    <yAxis label="% CPU" asPercent="true" />
+    <data>
+      <host os="AIX" />
+      <type regex="CPU\d*" aliasRegex="CPU(\d*)" />
+      <field name="CPU%" alias="% CPU" />
+    </data>
+  </linechart>
+
+  <barchart name="CPU Utilization by Logical Core" shortName="CPU Balance" stacked="true">
+    <yAxis label="% CPU" asPercent="true" />
+    <data>
+      <host os="Linux" />
+      <type regex="CPU\d*" aliasRegex="CPU(\d*)" />
+      <field name="User%" alias="User" />
+      <field name="Sys%" alias="System" />
+      <field name="Wait%" alias="Wait" />
+    </data>
+  </barchart>
+
+  <barchart name="CPU Utilization by Thread" shortName="CPU Balance" stacked="true">
+    <yAxis label="% CPU" asPercent="true" />
+    <data>
+      <host os="AIX" />
+      <type regex="CPU\d*" aliasRegex="CPU(\d*)" />
+      <field name="User%" alias="User" />
+      <field name="Sys%" alias="System" />
+      <field name="Wait%" alias="Wait" />
+    </data>
+  </barchart>
+
+  <barchart name="Percent Disk Spaced Used by File System" shortName="Disk Space" categoriesNamedBy="FIELD" barsNamedBy="STAT" stacked="true" subtractionNeeded="true">
+    <yAxis label="% Used" asPercent="true" />
+    <data stat="MINIMUM">
+      <type name="JFSFILE" />
+    </data>
+    <data stat="AVERAGE">
+      <type name="JFSFILE" />
+    </data>
+    <data stat="MAXIMUM">
+      <type name="JFSFILE" />
+    </data>
+  </barchart>
+</charts>
