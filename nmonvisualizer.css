@@ -1,0 +1,109 @@
+html {
+  font-family: arial, helvetica, sans-serif;
+}
+
+body {
+  background-color: #FCFCFF;
+}
+
+h1 {
+  margin: .5em 0 0 0;
+  font-size: 150%;
+  text-align: center;
+}
+
+h2 {
+  margin: 0;
+  font-size: 125%;
+  font-variant: small-caps;
+  color: #444444;
+}
+
+.b {
+  font-weight: bold;
+}
+
+.i {
+  font-style: italic;
+}
+
+.c {
+  font-family: monospace;
+  white-space: pre;
+  color: #111111;
+}
+
+a {
+  color: black;
+  text-decoration: none;
+  border-bottom: 1px dotted;
+}
+
+a:hover {
+   color: gray;
+   border-bottom: 1px solid gray;
+}
+
+a.img {
+  border: none;
+}
+
+a.img:hover {
+  border: none;
+}
+
+p {
+  margin: .5em;
+}
+
+ul {
+  margin: 0 0 0 1.25em;
+  padding: 0 0 0 1em;
+}
+
+ul ul {
+  padding: 0;
+}
+
+li {
+  padding: 0;
+  margin-bottom: .5em;
+}
+
+img {
+  margin-left: .5em;
+}
+
+a img {
+  margin-left: .25em;
+}
+
+hr {
+  border: 1px solid #777777;
+  margin-right: 1em;
+  margin-left: .25em;
+  margin-bottom: 1em;
+  margin-top: 1em;
+}
+
+div.section {
+  margin: 1em 1em 1.5em 1em;
+}
+
+div#nav {
+  float: left;
+  width: 9em;
+}
+
+div#nav a {
+  line-height: 1.75em;
+  display: inline-block;
+  margin: 0 .25em 0 .5em;
+}
+
+div#content {
+  overflow: hidden;
+  min-height: 250px;
+  width: 75%;
+  border-left: thin solid gray;
+}
