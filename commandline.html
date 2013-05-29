@@ -1,0 +1,37 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd">
+<head>
+<title>NMON Visualizer - Command Line</title>
+<link rel="stylesheet"href="nmonvisualizer.css" type="text/css" />
+<link rel="icon" href="favicon.ico" type="image/png" />
+</head>
+<body>
+<h1>NMON Visualizer</h1>
+<h2 style="text-align: center; color: gray;">command line</h2>
+
+<div id="nav">
+  <a href="index.html">Home</a><br/>
+  <a href="screenshots.html">Screenshots</a><br/>
+  <a href="iostat.html">IO Stat</a><br/>
+  <a href="json.html">JSON</a><br/>
+  <a class="b" href="commandline.html">Command Line</a><br/>
+  <hr/>
+  <a href="http://w3.opensource.ibm.com/projects/nmonvisualizer/">Project on IIOSB</a>
+  <a href="http://w3.opensource.ibm.com/frs/?group_id=2873">Releases</a>
+  <a href="http://w3.opensource.ibm.com/tracker/?func=add&group_id=2873&atid=8221">Submit a Bug</a>
+</div>
+
+<div id="content">
+  <div class="section">
+    <h2>Report Generator</h2>
+    <p>NMON Visualizer supports generating charts as PNG files from the command line. Currently, it will create the same charts that are avaiable in the GUI. Both the summary charts at the 'All Systems' level and charts for each host will be created in a <span class="c">charts</span> subdirectory. There will be another subdirectory for each host's set of charts.
+    </p>
+  </div>
+  <div class="section">
+    <p>To run the ReportGenerator, specify the class from the command line like the following:<br/>
+       <span class="c">java -jar NMONVisualizer_&lt;release_date&gt;.jar com.ibm.nmon.ReportGenerator &lt;file|directory to parse&gt;</span><br/>
+      Note that only NMON files are parsed. If a directory is given, then this directory will be searched <span class="i">recursively</span> so ensure that the JVM has enough memory allocated to it (via <span class="c">-Xmx</span>).
+    </p>
+  </div>
+</div>
+</body>
+</html>

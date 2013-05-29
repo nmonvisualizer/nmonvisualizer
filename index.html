@@ -1,0 +1,64 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd">
+<head>
+<title>NMON Visualizer</title>
+<link rel="stylesheet"href="nmonvisualizer.css" type="text/css" />
+<link rel="icon" href="favicon.ico" type="image/png" />
+</head>
+<body>
+<h1>NMON Visualizer</h1>
+<h2 style="text-align: center; color: gray;">the graphical nmon analysis tool</h2>
+
+<div id="nav">
+  <a class="b" href="index.html">Home</a><br/>
+  <a href="screenshots.html">Screenshots</a><br/>
+  <a href="iostat.html">IO Stat</a><br/>
+  <a href="json.html">JSON</a><br/>
+  <a href="commandline.html">Command Line</a><br/>
+  <hr/>
+  <a href="http://w3.opensource.ibm.com/projects/nmonvisualizer/">Project on IIOSB</a>
+  <a href="http://w3.opensource.ibm.com/frs/?group_id=2873">Releases</a>
+  <a href="http://w3.opensource.ibm.com/tracker/?func=add&group_id=2873&atid=8221">Submit a Bug</a>
+</div>
+
+<div id="content">
+  <div class="section">
+    <h2>About</h2>
+    <p>NMON Visualizer is a Java GUI tool for analyzing <a href="http://www.ibm.com/developerworks/wikis/display/WikiPtype/nmon">NMON</a> system files from both AIX and Linux. It also parses IOStat files, IBM verbose GC logs, ESXTop CSV data and JSON data.
+    <p/>
+    <p>
+    The latest version is <a href="http://w3.opensource.ibm.com/frs/download.php/18324/NMONVisualizer_2013-02-14.jar">2013-02-14</a>.</p>
+    <img width="480" height="360" src="screenshots/SingleSystemReport.jpg" />
+  </div>
+
+  <div class="section">
+    <h2>Features</h2>
+    <ul>
+      <li>Parse multiple files at once</li>
+      <ul>
+        <li>Data for different datetimes</li>
+        <li>Data from different systems</li>
+        <li>Recursively search a directory tree</li>
+      </ul>
+      <li>Parse the following file types</li>
+      <ul>
+        <li>NMON output from Linux &amp; AIX</li>
+        <li><a href="iostat.html">IOStat</a> output from Linux &amp; AIX</li>
+        <li>IBM Java 6 &amp; 7 verbose GC output</li>
+        <li>ESXTop CSV ouput</li>
+        <li>JSON files using a <a href="json.html">custom format</a>
+      </ul>
+      <li>Display graphs at various levels of detail</li>
+      <ul>
+        <li>All systems</li>
+        <li>Single system</li>
+        <li>Single metric</li>
+      </ul>
+      <li>Customize and view summary information across all systems in a single table view</li>
+      <li>Define intervals and view data for only a particular subset of the time logged</li>
+      <li>Export raw data and chart data in CSV format</li>
+      <li>Save graphs as PNG</li>
+    </ul>
+  </div>
+</div>
+</body>
+</html>
