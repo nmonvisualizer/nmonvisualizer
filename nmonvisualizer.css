@@ -21,6 +21,7 @@ h2 {
 
 .b {
   font-weight: bold;
+  color: #444444;
 }
 
 .i {
@@ -74,10 +75,6 @@ img {
   margin-left: .5em;
 }
 
-a img {
-  margin-left: .25em;
-}
-
 hr {
   border: 1px solid #777777;
   margin-right: 1em;
@@ -92,13 +89,15 @@ div.section {
 
 div#nav {
   float: left;
-  width: 9em;
+  width: 11em;
 }
 
 div#nav a {
-  line-height: 1.75em;
   display: inline-block;
-  margin: 0 .25em 0 .5em;
+  margin: 0 .35em .6em .5em;
+  color: #222222; 
+  font-size: 105%;
+  letter-spacing: .1em;
 }
 
 div#content {

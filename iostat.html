@@ -1,17 +1,17 @@
 <!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd">
 <head>
-<title>NMON Visualizer - IO Stat</title>
+<title>NMON Visualizer - IOStat</title>
 <link rel="stylesheet"href="nmonvisualizer.css" type="text/css" />
 <link rel="icon" href="favicon.ico" type="image/png" />
 </head>
 <body>
 <h1>NMON Visualizer</h1>
-<h2 style="text-align: center; color: gray;">io stat</h2>
+<h2 style="text-align: center; color: gray;">iostat</h2>
 
 <div id="nav">
   <a href="index.html">Home</a><br/>
   <a href="screenshots.html">Screenshots</a><br/>
-  <a class="b" href="iostat.html">IO Stat</a><br/>
+  <a class="b" href="iostat.html">IOStat</a><br/>
   <a href="json.html">JSON</a><br/>
   <a href="commandline.html">Command Line</a><br/>
   <hr/>
@@ -23,13 +23,13 @@
 <div id="content">
   <div class="section">
     <h2>Overview</h2>
-    <p>NMON Visualizer can process IO Stat files from both AIX and Linux. But the correct command line switches must be used.<p/>
+    <p>NMON Visualizer can process IOStat files from both AIX and Linux. But the correct command line switches must be used.<p/>
   </div>
 
   <div class="section">
     <h2>Linux</h2>
     <ul>
-      <li>Must use the <span class="c">-t</span> option to include timestamps.<br>By default, timestamps will be in the default locale of the OS. To ensure consistency, the ISO 8601 format should be used. This can be changed in newer versions of iostat by exporting <span class="c">S_TIME_FORMAT=ISO</span>. This has the added benefit of including a time zone in each timestamp. Note that this option is not avaiable on older versions of IO Stat. For these versions, the GUI will prompt for a time zone.</li>
+      <li>Must use the <span class="c">-t</span> option to include timestamps.<br>By default, timestamps will be in the default locale of the OS. To ensure consistency, the ISO 8601 format should be used. This can be changed in newer versions of iostat by exporting <span class="c">S_TIME_FORMAT=ISO</span>. This has the added benefit of including a time zone in each timestamp. Note that this option is not avaiable on older versions of IOStat. For these versions, the GUI will prompt for a time zone.</li>
       <li>May use
         <ul>
           <li><span class="c">-c</span>, CPU data</li>
