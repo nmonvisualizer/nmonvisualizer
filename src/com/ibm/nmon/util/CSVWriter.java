@@ -24,6 +24,13 @@ public final class CSVWriter {
     private static final SimpleDateFormat DATETIME = new SimpleDateFormat("yyyy-MM-dd,HH:mm:ss");
     private static final DecimalFormat FORMAT = new DecimalFormat("0.000");
 
+    static {
+        // get and set required because DecimalFormat clones the symbols
+        java.text.DecimalFormatSymbols symbols = FORMAT.getDecimalFormatSymbols();
+        symbols.setNaN("");
+        FORMAT.setDecimalFormatSymbols(symbols);
+    }
+
     public static final void write(DataSet data, Interval interval, Writer writer) throws IOException {
         writer.write("Date,Time,");
 
