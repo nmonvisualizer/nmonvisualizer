@@ -43,6 +43,7 @@ public abstract class NMONVisualizerApp implements IntervalListener {
     private final VerboseGCParser gcParser;
     private final IOStatParser iostatParser;
     private final JSONParser jsonParser;
+    private final HATJParser hatJParser;
     private final ESXTopParser esxTopParser;
 
     // assume event order does not matter
@@ -69,6 +70,7 @@ public abstract class NMONVisualizerApp implements IntervalListener {
         gcParser = new VerboseGCParser();
         iostatParser = new IOStatParser();
         jsonParser = new JSONParser();
+        hatJParser = new HATJParser();
         esxTopParser = new ESXTopParser();
 
         TimeZone defaultTz = TimeZone.getDefault();
@@ -76,7 +78,7 @@ public abstract class NMONVisualizerApp implements IntervalListener {
         // use the timezone names from TimeZoneFactory, if possible
         for (TimeZone timeZone : TimeZoneFactory.TIMEZONES) {
             long defaultOffset = defaultTz.getOffset(System.currentTimeMillis());
-            
+
             if (timeZone.getOffset(System.currentTimeMillis()) == defaultOffset) {
                 displayTimeZone = timeZone;
                 break;
@@ -203,6 +205,23 @@ public abstract class NMONVisualizerApp implements IntervalListener {
         else if (filter.getJSONFileFilter().accept(fileToParse)) {
             data = jsonParser.parse(fileToParse);
         }
+        else if (filter.getHATJFileFilter().accept(fileToParse)) {
+            data = hatJParser.parse(fileToParse);
+
+            String hostname = data.getHostname();
+
+            if (hostname.equals(HATJParser.DEFAULT_HOSTNAME)) {
+                Object[] values = getDataForIOStatParse(fileToParse, hostname);
+
+                if (values == null) {
+                    logger.info("skipping file '{}'", fileToParse);
+                    return;
+                }
+
+                hostname = (String) values[0];
+                data.setHostname(hostname);
+            }
+        }
         else if (filter.getESXTopFileFilter().accept(fileToParse)) {
             data = esxTopParser.parse(fileToParse);
         }
@@ -256,6 +275,11 @@ public abstract class NMONVisualizerApp implements IntervalListener {
     protected Object[] getDataForIOStatParse(String fileToParse, String hostname) {
         // hostname, date
         return new Object[] { IOStatParser.DEFAULT_HOSTNAME, IOStatParser.getDefaultDate() };
+    }
+
+    protected Object[] getDataForHATJParse(String fileToParse, String hostname) {
+        // hostname
+        return new Object[] { HATJParser.DEFAULT_HOSTNAME };
     }
 
     // this is a separate function in order to allow subclasses (i.e. the gui) to run parsing in

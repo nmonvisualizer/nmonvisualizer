@@ -473,7 +473,7 @@ public final class IOStatParser {
         // DATA_SPLITTER adds a null first element to temp; ignore it
         int n = 1;
 
-        DataType tty = data.getType("TTY");
+        DataType tty = data.getType("IOStat TTY");
         double[] ttyData = new double[tty.getFieldCount()];
 
         for (int i = 0; i < ttyData.length; i++) {

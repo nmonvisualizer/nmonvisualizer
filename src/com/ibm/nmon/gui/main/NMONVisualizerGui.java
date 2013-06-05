@@ -33,6 +33,7 @@ import com.ibm.nmon.util.TimeFormatCache;
 import com.ibm.nmon.gui.tree.TreePanel;
 import com.ibm.nmon.gui.util.LogViewerDialog;
 
+import com.ibm.nmon.gui.parse.HATJPostParser;
 import com.ibm.nmon.gui.parse.IOStatPostParser;
 import com.ibm.nmon.gui.parse.VerboseGCPreParser;
 
@@ -66,6 +67,7 @@ public final class NMONVisualizerGui extends NMONVisualizerApp {
 
     private VerboseGCPreParser gcPreParser;
     private IOStatPostParser ioStatPostParser;
+    private HATJPostParser hatJPostParser;
 
     private final GranularityHelper granularityHelper;
 
@@ -278,7 +280,7 @@ public final class NMONVisualizerGui extends NMONVisualizerApp {
                         gcPreParser.setHostname(parent.getName());
                     }
 
-                    gcPreParser.preParseDataSet(fileToParse);
+                    gcPreParser.parseDataSet(fileToParse);
                 }
             });
         }
@@ -310,7 +312,7 @@ public final class NMONVisualizerGui extends NMONVisualizerApp {
                         ioStatPostParser.setHostname(hostname);
                     }
 
-                    ioStatPostParser.postParseDataSet(fileToParse);
+                    ioStatPostParser.parseDataSet(fileToParse);
                 }
             });
         }
@@ -323,6 +325,38 @@ public final class NMONVisualizerGui extends NMONVisualizerApp {
         }
         else {
             return new Object[] { ioStatPostParser.getHostname(), ioStatPostParser.getDate() };
+        }
+    }
+
+    @Override
+    protected Object[] getDataForHATJParse(final String fileToParse, final String hostname) {
+        if (hatJPostParser == null) {
+            hatJPostParser = new HATJPostParser(this);
+        }
+
+        try {
+            // wait here so parsing does not continue in the background, possibly throwing up more
+            // postparser dialogs
+            SwingUtilities.invokeAndWait(new Runnable() {
+                @Override
+                public void run() {
+                    if (!hostname.equals(IOStatParser.DEFAULT_HOSTNAME)) {
+                        hatJPostParser.setHostname(hostname);
+                    }
+
+                    hatJPostParser.parseDataSet(fileToParse);
+                }
+            });
+        }
+        catch (Exception e) {
+            logger.error("cannot get hostname and JVM name for file '{}'", fileToParse, e);
+        }
+
+        if (hatJPostParser.isSkipped()) {
+            return null;
+        }
+        else {
+            return new Object[] { hatJPostParser.getHostname() };
         }
     }
 

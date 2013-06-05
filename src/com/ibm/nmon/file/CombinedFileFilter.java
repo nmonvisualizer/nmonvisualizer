@@ -45,8 +45,12 @@ public final class CombinedFileFilter implements FileFilter {
         return (JSONFileFilter) filters.get(3).getFilter();
     }
 
+    public HATJFileFilter getHATJFileFilter() {
+        return (HATJFileFilter) filters.get(4).getFilter();
+    }
+
     public ESXTopFileFilter getESXTopFileFilter() {
-        return (ESXTopFileFilter) filters.get(4).getFilter();
+        return (ESXTopFileFilter) filters.get(5).getFilter();
     }
 
     private CombinedFileFilter(boolean acceptDirectories) {
@@ -54,6 +58,7 @@ public final class CombinedFileFilter implements FileFilter {
         filters.add(new SwingAndIOFileFilter("Verbose GC Logs", new GCFileFilter(), acceptDirectories));
         filters.add(new SwingAndIOFileFilter("IOStat Files", new IOStatFileFilter(), acceptDirectories));
         filters.add(new SwingAndIOFileFilter("JSON Files", new JSONFileFilter(), acceptDirectories));
+        filters.add(new SwingAndIOFileFilter("HATJ CSV Files", new HATJFileFilter(), acceptDirectories));
         filters.add(new SwingAndIOFileFilter("ESXTop CSV Files", new ESXTopFileFilter(), acceptDirectories));
     }
 
