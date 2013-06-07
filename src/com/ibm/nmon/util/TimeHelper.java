@@ -3,6 +3,9 @@ package com.ibm.nmon.util;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
 
+/**
+ * Utility methods for working with times.
+ */
 public final class TimeHelper {
     public static final SimpleDateFormat TIMESTAMP_FORMAT_ISO = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ssZZ");
     public static final SimpleDateFormat DATE_FORMAT_ISO = new SimpleDateFormat("yyyy-MM-dd");

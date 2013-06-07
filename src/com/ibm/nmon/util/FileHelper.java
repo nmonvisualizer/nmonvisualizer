@@ -5,6 +5,9 @@ import java.io.FileFilter;
 
 import java.util.List;
 
+/**
+ * Utility methods for recursive directory searches.
+ */
 public final class FileHelper {
     public static void recurseDirectories(File[] files, FileFilter filter, List<String> toParse) {
         for (int i = 0; i < files.length; i++) {

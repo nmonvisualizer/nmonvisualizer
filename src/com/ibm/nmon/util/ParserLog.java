@@ -10,6 +10,22 @@ import java.io.PrintWriter;
 
 import com.ibm.nmon.parser.NMONParser;
 
+/**
+ * <p>
+ * Custom {@link java.util.logging.Handler Handler} that writes log messages to an internal buffer.
+ * The buffer can be retrieved using the {@link #getMessages()} method.
+ * </p>
+ * 
+ * <p>
+ * To allow tracking by the application, parsers should call {@link #setCurrentFilename(String)}
+ * when parsing a file.
+ * </p>
+ * 
+ * <p>
+ * This class is a singleton to ensure that only on instance is added to the Logger for
+ * 'com.ibm.nmon.parser' package.
+ * </p>
+ */
 public final class ParserLog extends Handler {
     private Logger logger;
     private String currentFilename;

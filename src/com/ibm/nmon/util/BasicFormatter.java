@@ -10,6 +10,13 @@ import java.text.SimpleDateFormat;
 
 import com.ibm.nmon.gui.Styles;
 
+/**
+ * Custom {@link java.util.logging.Formatter Formatter} that displays basic information and stack
+ * trace output.
+ * 
+ * @see com.ibm.nmon.gui.util.LogViewerDialog LogViewerDialog
+ * @see ParserLog
+ */
 public final class BasicFormatter extends Formatter {
     private final SimpleDateFormat format = new SimpleDateFormat(Styles.DATE_FORMAT_STRING_SHORT);
 
