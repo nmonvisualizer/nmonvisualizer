@@ -56,11 +56,14 @@ public final class HATJParser {
             // create DataTypes from header line
             String[] values = DATA_SPLITTER.split(line);
 
-            // data[0] = Duration; data[1] = Throughput; data[2] = # of Users
-            String[] fields = new String[values.length - 3];
-            System.arraycopy(values, 3, fields, 0, fields.length);
+            // data[0] = Duration; data[1] = Throughput; data[2] = Hits/sec; data[3] = # of Users
+            String[] fields = new String[values.length - 4];
 
-            DataType info = new DataType("INFO", "HATJ Test Information", "throughput", "users");
+            for (int i = 0; i < fields.length; i++) {
+                fields[i] = DataHelper.newString(values[i + 4]);
+            }
+
+            DataType info = new DataType("INFO", "HATJ Test Information", "throughput", "hits", "users");
             DataType response = new DataType("RESP", "HATJ Response Times", fields);
 
             data.addType(info);
@@ -73,12 +76,13 @@ public final class HATJParser {
 
                 DataRecord record = new DataRecord(startTime + (duration * 1000), DataHelper.newString(values[0]));
 
-                record.addData(info, new double[] { Double.parseDouble(values[1]), Double.parseDouble(values[2]) });
+                record.addData(info, new double[] { Double.parseDouble(values[1]), Double.parseDouble(values[2]),
+                        Double.parseDouble(values[3]) });
 
                 double[] recordData = new double[response.getFieldCount()];
                 int n = 0;
 
-                for (int i = 3; i < values.length; i++) {
+                for (int i = 4; i < values.length; i++) {
                     if ("".equals(values[i]) || values[i].contains("nan")) {
                         recordData[n] = Double.NaN;
                     }

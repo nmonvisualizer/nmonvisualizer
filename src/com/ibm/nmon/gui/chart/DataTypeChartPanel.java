@@ -287,6 +287,7 @@ public final class DataTypeChartPanel extends LineChartPanel implements Interval
         tempTypes.put("FCWRITE", "KB / s");
         tempTypes.put("FCXFERIN", "Frames / s");
         tempTypes.put("FCXFEROUT", "Frames / s");
+        tempTypes.put("RESP", "Seconds");
 
         tempFields.put("CPUs", "Count");
         tempFields.put("CPU%", "% CPU");
@@ -336,6 +337,9 @@ public final class DataTypeChartPanel extends LineChartPanel implements Interval
         tempFields.put("flipped", "Objects");
         tempFields.put("tenured", "Objects");
         tempFields.put("moved", "Objects");
+        
+        tempFields.put("throughput", "Tx / s");
+        tempFields.put("hits", "Hits / s");
 
         tempExceptions.add("EC_User%");
         tempExceptions.add("EC_Sys%");
