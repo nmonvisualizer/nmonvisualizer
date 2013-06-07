@@ -1,0 +1,78 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd">
+<head>
+<title>NMON Visualizer - Start nmon at Boot</title>
+<link rel="stylesheet"href="nmonvisualizer.css" type="text/css" />
+<link rel="icon" href="favicon.ico" type="image/png" />
+</head>
+<body>
+<h1>NMON Visualizer</h1>
+<h2 style="text-align: center; color: gray;">start nmon at boot</h2>
+
+<div id="nav">
+  <a href="index.html">Home</a><br/>
+  <a href="screenshots.html">Screenshots</a><br/>
+  <a href="iostat.html">IOStat</a><br/>
+  <a href="json.html">JSON</a><br/>
+  <a href="commandline.html">Command Line</a><br/>
+  <a class="b" href="startup.html">Start nmon at Boot</a><br/>
+  <hr/>
+  <a href="https://github.com/nmonvisualizer/nmonvisualizer">Project on GitHub</a>
+  <a href="https://bintray.com/pkg/show/general/nmonvisualizer/NMONVisualizer/com.ibm.nmon">Releases</a>
+  <a href="https://github.com/nmonvisualizer/nmonvisualizer/issues/new">Submit a Bug</a>
+</div>
+
+<div id="content">
+  <div class="section">
+    <p>In many cases, it is easiest to just have nmon start when the system starts. The instructions here detail how to do this on both Linux and AIX.</p>
+  </div>
+
+  <div class="section">
+    <h2>Linux</h2>
+    <ul>
+      <li>Copy the <a href="scripts/nmon_initd">nmon init.d script</a> to <span class="c">/etc/init.d/nmon</span></li>
+      <li>Copy the <a href="scripts/nmon_logrotated">nmon logrotate.d script</a> to <span class="c">/etc/logrotate.d/nmon</span></li>
+      <li>Create a symbolic link from the nmon executable to <span class="c">/usr/bin/nmon</span></li>
+      <li>Setup permissions and start the nmon service
+        <span class="c">
+chown root:root /etc/init.d/nmon
+chmod 755 /etc/init.d/nmon
+chown root:root /etc/logrotate.d/nmon
+chcon --reference /etc/init.d/network /etc/init.d/nmon
+chmod 644 /etc/logrotate.d/nmon
+chown root:root /usr/bin/nmon_x86_64_rhel6
+chcon --reference /etc/logrotate.d/yum /etc/logrotate.d/nmon
+chmod 755 /usr/bin/nmon_x86_64_rhel6
+ln -s -f /usr/bin/nmon_x86_64_rhel6 /usr/bin/nmon
+chkconfig --add nmon
+service nmon start
+        </span>
+      </li>
+    </ul>
+    <p>The above script is specific to RedHat Linux variants. Modifications, especially the use of <span class="c">chkconfig</span> and the reference scripts for <span class="c">chcon</span> may be needed on other distributions.
+    <p>With this setup nmon collects data every 30 seconds and 15 days of logs are retained in <span class="c">/var/log/nmon/old</span>.</p>
+  </div>  
+
+  <div class="section">
+    <h2>AIX</h2>
+    <p>AIX supports daily nmon collection out of the box. Run <span class="c">smit topas</span> to start smit.
+    <ul>
+      <li>Select <span class="c">Start New Recording &#8594; Start Persistent local recording</span>
+      <li>Select nmon as type</li>
+      <li>Set the following options</li>
+        <ul>
+          <li>Recording interval in seconds: <span class="c">30</span></li>
+          <li>Number of Days to retain: <span class="c">15</span></li>
+          <li>Include Fiber Channel Section: <span class="c">yes</span> (if applicable)</li>
+          <li>Include Shared Ethernet Section: <span class="c">yes</span> (on VIOS)</li>
+          <li>Include Large Page Section: <span class="c">yes</span></li>
+          <li>Include Asynchronus IO: <span class="c">yes</span></li>
+        </ul>
+      <li>Hit enter to run the command</li>
+      <li><span class="c">Esc 0</span> to exit smit</li>
+    </ul>
+    <p>There should now be an NMON file in <span class="c">/etc/perf/daily</span>.</p>
+    <p>To stop nmon collection, run <span class="c">smit topas</span>. Then select <span class="c">Stop Recording &#8594; Stop Persistent Recording &#8594; Stop Persistent local nmon Record</span>.</p>
+  </div>
+</div>
+</body>
+</html>

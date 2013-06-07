@@ -1,0 +1,18 @@
+/var/log/nmon/*.nmon {
+  olddir old
+  daily
+  rotate 15
+  size 0
+  nocreate
+  nocopy
+  nomail
+  missingok
+  extension .nmon
+  sharedscripts
+  prerotate
+    service nmon stop
+  endscript
+  postrotate
+    service nmon start
+  endscript
+}
