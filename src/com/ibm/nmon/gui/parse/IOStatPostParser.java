@@ -18,7 +18,7 @@ import com.ibm.nmon.gui.Styles;
 
 import com.ibm.nmon.gui.main.NMONVisualizerGui;
 
-import com.ibm.nmon.util.DataHelper;
+import com.ibm.nmon.util.TimeHelper;
 
 /**
  * Dialog to get the JVM name and hostname for a particular verbose GC file.
@@ -35,7 +35,7 @@ public final class IOStatPostParser extends BaseParserDialog {
     protected void addComponents(JPanel content, GridBagConstraints labelConstraints,
             GridBagConstraints fieldConstraints) {
 
-        date = new JSpinner(new SpinnerDateModel(new Date(DataHelper.today()), null, null, Calendar.DAY_OF_WEEK));
+        date = new JSpinner(new SpinnerDateModel(new Date(TimeHelper.today()), null, null, Calendar.DAY_OF_WEEK));
         date.setEditor(new DateEditor(date, "MMM dd yyyy"));
 
         JLabel dateLabel = new JLabel("Date:");

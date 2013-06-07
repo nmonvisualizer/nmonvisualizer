@@ -25,15 +25,17 @@ import com.ibm.nmon.data.DataType;
 import com.ibm.nmon.data.SubDataType;
 import com.ibm.nmon.util.DataHelper;
 
+import com.ibm.nmon.util.TimeHelper;
+import static com.ibm.nmon.util.TimeHelper.TIMESTAMP_FORMAT_ISO;
+import static com.ibm.nmon.util.TimeHelper.DATE_FORMAT_ISO;
+
 public final class IOStatParser {
     private static final Logger LOGGER = org.slf4j.LoggerFactory.getLogger(IOStatParser.class);
 
-    private static final SimpleDateFormat TIMESTAMP_FORMAT_ISO = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ssZZ");
     private static final SimpleDateFormat TIMESTAMP_FORMAT_US = new SimpleDateFormat("MM/dd/yy HH:mm:ss");
     private static final SimpleDateFormat TIMESTAMP_FORMAT_OLD = new SimpleDateFormat("'Time: 'hh:mm:ss a");
     private static final SimpleDateFormat TIMESTAMP_FORMAT_AIX = new SimpleDateFormat("HH:mm:ss");
     private static final SimpleDateFormat DATE_FORMAT_US = new SimpleDateFormat("MM/dd/yyyy");
-    private static final SimpleDateFormat DATE_FORMAT_ISO = new SimpleDateFormat("yyyy-MM-dd");
 
     private static final Pattern INFO = Pattern
             .compile("(.+)\\s(.+)\\s\\((.+)\\)\\s+(\\d{2}\\/\\d{2}\\/\\d{2,4})(\\s+_(.+)_)?(\\s+\\((.+)\\sCPU\\))?");
@@ -216,7 +218,7 @@ public final class IOStatParser {
                 }
 
                 dateFormat.setTimeZone(timeZone);
-                dateOffset = DataHelper.dayFromDatetime(dateFormat.parse(date).getTime());
+                dateOffset = TimeHelper.dayFromDatetime(dateFormat.parse(date).getTime());
 
                 if (arch != null) {
                     data.setMetadata("ARCH", DataHelper.newString(arch));
@@ -593,6 +595,6 @@ public final class IOStatParser {
     }
 
     public static long getDefaultDate() {
-        return DataHelper.today();
+        return TimeHelper.today();
     }
 }

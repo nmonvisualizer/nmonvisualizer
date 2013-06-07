@@ -4,8 +4,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.SortedSet;
 
-import java.util.Calendar;
-
 import com.ibm.nmon.data.DataType;
 import com.ibm.nmon.data.ProcessDataSet;
 
@@ -123,23 +121,6 @@ public final class DataHelper {
             // without an extra array copy
             return new String(original.trim());
         }
-    }
-
-    public static long dayFromDatetime(long datetime) {
-        Calendar cal = new java.util.GregorianCalendar();
-        cal.setTimeInMillis(datetime);
-
-        // today
-        cal.set(Calendar.HOUR_OF_DAY, 0);
-        cal.set(Calendar.MINUTE, 0);
-        cal.set(Calendar.SECOND, 0);
-        cal.set(Calendar.MILLISECOND, 0);
-
-        return cal.getTime().getTime();
-    }
-
-    public static long today() {
-        return dayFromDatetime(System.currentTimeMillis());
     }
 
     private DataHelper() {}
