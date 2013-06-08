@@ -35,6 +35,8 @@ public final class ChartDefinitionParser extends BasicXMLParser {
 
     private Statistic currentStat;
 
+    private boolean useSecondaryYAxis;
+
     public ChartDefinitionParser() {
         reset();
     }
@@ -109,6 +111,26 @@ public final class ChartDefinitionParser extends BasicXMLParser {
                         + " at line {}", getLineNumber());
             }
         }
+        else if ("yAxis2".equals(element)) {
+            if (currentChart instanceof LineChartDefinition) {
+                Map<String, String> attributes = parseAttributes(unparsedAttributes);
+
+                if (attributes.get("asPercent") != null) {
+                    logger.warn(
+                            "ignoring " + " " + "asPercent" + " attribute for " + "<yAxis2>" + " element for chart "
+                                    + (currentChart == null ? currentChart : currentChart.getShortName())
+                                    + " at line {}" + "; secondary axes do not support percentages", getLineNumber());
+                }
+
+                ((LineChartDefinition) currentChart).setSecondaryYAxisLabel(attributes.get("label"));
+                ((LineChartDefinition) currentChart).setHasYAxis2(true);
+            }
+            else {
+                logger.warn("ignoring " + "<yAxis2>" + " element for chart "
+                        + (currentChart == null ? currentChart : currentChart.getShortName()) + " without a Y axis"
+                        + " at line {}", getLineNumber());
+            }
+        }
         else if ("data".equals(element)) {
             if (currentChart == null) {
                 logger.warn("ignoring " + "<data>" + " element outside of a chart");
@@ -126,6 +148,8 @@ public final class ChartDefinitionParser extends BasicXMLParser {
                 if (stat != null) {
                     currentStat = Statistic.valueOf(stat);
                 }
+
+                useSecondaryYAxis = Boolean.parseBoolean(attributes.get("useYAxis2"));
             }
         }
         else if ("host".equals(element)) {
@@ -170,6 +194,7 @@ public final class ChartDefinitionParser extends BasicXMLParser {
             logger.warn("ignoring " + "<linechart>" + " element inside another chart definition" + " at line {}",
                     getLineNumber());
             skip = true;
+            return;
         }
 
         String title = attributes.get("name");
@@ -211,6 +236,7 @@ public final class ChartDefinitionParser extends BasicXMLParser {
             logger.warn("ignoring " + "<barchart>" + " element inside another chart definition" + " at line {}",
                     getLineNumber());
             skip = true;
+            return;
         }
 
         String title = attributes.get("name");
@@ -238,13 +264,19 @@ public final class ChartDefinitionParser extends BasicXMLParser {
             logger.warn("ignoring " + "<host>" + " element outside of <data>" + " at line {}"
                     + "; <data> will be skipped", getLineNumber());
             skip = true;
+            return;
         }
 
         if (hostMatcher == null) {
             String name = attributes.get("name");
 
             if (name != null) {
-                hostMatcher = new ExactHostMatcher(name);
+                if (HostMatcher.ALL.toString().equals(name)) {
+                    hostMatcher = HostMatcher.ALL;
+                }
+                else {
+                    hostMatcher = new ExactHostMatcher(name);
+                }
             }
             else {
                 String regex = attributes.get("regex");
@@ -278,6 +310,7 @@ public final class ChartDefinitionParser extends BasicXMLParser {
             logger.warn("ignoring " + "<type>" + " element outside of <data>" + " at line {}"
                     + "; <data> will be skipped", getLineNumber());
             skip = true;
+            return;
         }
 
         if (typeMatcher == null) {
@@ -286,6 +319,9 @@ public final class ChartDefinitionParser extends BasicXMLParser {
             if (name != null) {
                 if ("$PROCESSES".equals(name)) {
                     typeMatcher = ProcessMatcher.INSTANCE;
+                }
+                else if (TypeMatcher.ALL.toString().equals(name)) {
+                    typeMatcher = TypeMatcher.ALL;
                 }
                 else {
                     typeMatcher = new ExactTypeMatcher(name);
@@ -316,12 +352,19 @@ public final class ChartDefinitionParser extends BasicXMLParser {
             logger.warn("ignoring " + "<field>" + " element outside of <data>" + " at line {}"
                     + "; <data> will be skipped", getLineNumber());
             skip = true;
+            return;
         }
 
         String name = attributes.get("name");
 
         if (name != null) {
-            fieldMatchers.add(new ExactFieldMatcher(name));
+            if (FieldMatcher.ALL.toString().equals(name)) {
+                fieldMatchers.add(FieldMatcher.ALL);
+            }
+            else {
+                fieldMatchers.add(new ExactFieldMatcher(name));
+            }
+
             NameTransformer transformer = createTransformer(attributes, true, null);
 
             if (transformer != null) {
@@ -355,6 +398,7 @@ public final class ChartDefinitionParser extends BasicXMLParser {
             logger.warn("ignoring " + "<fieldAlias>" + " element outside of <data>" + "at line {}"
                     + "; <data> will be skipped", getLineNumber());
             skip = true;
+            return;
         }
 
         String name = attributes.get("name");
@@ -414,7 +458,7 @@ public final class ChartDefinitionParser extends BasicXMLParser {
         // for each matcher create new DataDefinition
         for (FieldMatcher fieldMatcher : consolidatedMatchers) {
             DefaultDataDefinition definition = new DefaultDataDefinition(hostMatcher, typeMatcher, fieldMatcher,
-                    currentStat);
+                    currentStat, useSecondaryYAxis);
 
             for (String field : fieldTransformers.keySet()) {
                 definition.addFieldTransformer(field, fieldTransformers.get(field));
@@ -526,5 +570,7 @@ public final class ChartDefinitionParser extends BasicXMLParser {
         skip = false;
 
         currentStat = Statistic.AVERAGE;
+
+        useSecondaryYAxis = false;
     }
 }

@@ -167,4 +167,13 @@ public final class DataTupleXYDataset extends TimeTableXYDataset implements Data
     public int hashCode() {
         return tuples.hashCode();
     }
+
+    public static final DataTupleXYDataset merge(DataTupleXYDataset d1, DataTupleXYDataset d2) {
+        DataTupleXYDataset toReturn = new DataTupleXYDataset(d1.stacked || d2.stacked);
+
+        toReturn.tuples.addAll(d1.tuples);
+        toReturn.tuples.addAll(d2.tuples);
+
+        return toReturn;
+    }
 }

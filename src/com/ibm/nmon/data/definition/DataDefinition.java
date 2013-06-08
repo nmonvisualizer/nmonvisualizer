@@ -18,20 +18,27 @@ import com.ibm.nmon.analysis.Statistic;
 public abstract class DataDefinition {
     private final Statistic stat;
 
+    private boolean useSecondaryYAxis;
+
     protected DataDefinition() {
-        this(null);
+        this(null, false);
     }
 
-    protected DataDefinition(Statistic stat) {
+    protected DataDefinition(Statistic stat, boolean useSecondaryYAxis) {
         if (stat == null) {
             stat = Statistic.AVERAGE;
         }
 
         this.stat = stat;
+        this.useSecondaryYAxis = useSecondaryYAxis;
     }
 
     public Statistic getStatistic() {
         return stat;
+    }
+
+    public boolean usesSecondaryYAxis() {
+        return useSecondaryYAxis;
     }
 
     /**

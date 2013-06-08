@@ -118,7 +118,7 @@ public final class ChartFactory {
             lineChartBuilder.initChart(lineDefinition);
 
             for (DataSet data : dataSets) {
-                lineChartBuilder.addData(lineDefinition, data);
+                lineChartBuilder.addLine(lineDefinition, data);
                 ++dataSetCount;
             }
 
@@ -160,7 +160,7 @@ public final class ChartFactory {
                 // this check is really a hack for event interactions between the tree and the
                 // ReportPanel when removing data with selected charts
                 if (record != null) {
-                    barChartBuilder.addData(barDefinition, record);
+                    barChartBuilder.addBar(barDefinition, record);
                 }
 
                 ++dataSetCount;

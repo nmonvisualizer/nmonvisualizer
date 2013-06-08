@@ -134,7 +134,7 @@ public final class DataTypeChartPanel extends LineChartPanel implements Interval
             List<String> fields = definition.getMatchingFields(type);
 
             chartBuilder.initChart();
-            chartBuilder.addData(definition, data, NamingMode.FIELD);
+            chartBuilder.addLinesForData(definition, data, NamingMode.FIELD);
 
             JFreeChart chart = chartBuilder.getChart();
 

@@ -110,7 +110,7 @@ public final class BarChartBuilder extends BaseChartBuilder {
         plot.setRangeGridlineStroke(GRID_LINES);
     }
 
-    public void addData(BarChartDefinition barDefinition, AnalysisRecord record) {
+    public void addBar(BarChartDefinition barDefinition, AnalysisRecord record) {
         if (chart == null) {
             throw new IllegalStateException("initChart() must be called first");
         }

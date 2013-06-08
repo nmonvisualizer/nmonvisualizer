@@ -34,6 +34,7 @@ import com.ibm.nmon.chart.definition.LineChartDefinition;
 
 public class LineChartBuilder extends BaseChartBuilder {
     private boolean stacked = false;
+    private boolean hasYAxis2 = false;
 
     public LineChartBuilder() {
         super();
@@ -41,12 +42,17 @@ public class LineChartBuilder extends BaseChartBuilder {
 
     public void initChart(LineChartDefinition definition) {
         stacked = definition.isStacked();
+        hasYAxis2 = definition.hasSecondaryYAxis();
 
         initChart();
 
         chart.setTitle(definition.getTitle());
 
         chart.getXYPlot().getRangeAxis().setLabel(definition.getYAxisLabel());
+
+        if (hasYAxis2) {
+            chart.getXYPlot().getRangeAxis(1).setLabel(definition.getSecondaryYAxisLabel());
+        }
 
         if ("".equals(definition.getXAxisLabel())) {
             chart.getXYPlot().getDomainAxis().setLabel("Time");
@@ -82,6 +88,33 @@ public class LineChartBuilder extends BaseChartBuilder {
             plot = new XYPlot(dataset, timeAxis, valueAxis, renderer);
         }
 
+        if (hasYAxis2) {
+            // second Y axis uses a separate dataset and axis
+            plot.setDataset(1, new DataTupleXYDataset(stacked));
+
+            valueAxis = new NumberAxis();
+            valueAxis.setAutoRangeIncludesZero(true);
+
+            plot.setRangeAxis(1, valueAxis);
+            plot.mapDatasetToRangeAxis(1, 1);
+
+            if (stacked) {
+                // secondary axis data cannot be stacked, use a new renderer
+                StandardXYItemRenderer renderer = new StandardXYItemRenderer();
+                renderer.setBaseSeriesVisible(true, false);
+
+                plot.setRenderer(1, renderer);
+            }
+            else {
+                // reuse the existing rendering to ensure consistent appearance and continue color
+                // cycling
+                plot.setRenderer(1, plot.getRenderer());
+                // TODO fix by creating rederer subclass that extends lookup series paint to
+                // multiplex the series number
+                // overwrite drawItem to set the series for paint to be series + plot1.seriesSize
+            }
+        }
+
         // null title font = it will be set in format
         // legend will be decided by callers
         return new JFreeChart("", null, plot, false);
@@ -114,8 +147,10 @@ public class LineChartBuilder extends BaseChartBuilder {
             renderer.setBaseToolTipGenerator(tooltipGenerator);
         }
 
-        plot.getRangeAxis().setLabelFont(LABEL_FONT);
-        plot.getRangeAxis().setTickLabelFont(AXIS_FONT);
+        for (int i = 0; i < plot.getRangeAxisCount(); i++) {
+            plot.getRangeAxis(i).setLabelFont(LABEL_FONT);
+            plot.getRangeAxis(i).setTickLabelFont(AXIS_FONT);
+        }
 
         plot.getDomainAxis().setLabelFont(LABEL_FONT);
         plot.getDomainAxis().setTickLabelFont(AXIS_FONT);
@@ -125,17 +160,33 @@ public class LineChartBuilder extends BaseChartBuilder {
         plot.setRangeGridlineStroke(GRID_LINES);
     }
 
-    public void addData(LineChartDefinition lineDefinition, DataSet data) {
+    public void addLine(LineChartDefinition lineDefinition, DataSet data) {
         if (chart == null) {
             throw new IllegalStateException("initChart() must be called first");
         }
 
         for (DataDefinition definition : lineDefinition.getLines()) {
-            addData(definition, data, lineDefinition.getLineNamingMode());
+            DataTupleXYDataset dataset = (DataTupleXYDataset) chart.getXYPlot().getDataset(
+                    definition.usesSecondaryYAxis() ? 1 : 0);
+
+            addMatchingData(dataset, definition, data, lineDefinition.getLineNamingMode());
         }
+
+        updateChart();
+
     }
 
-    public void addData(DataDefinition definition, DataSet data, NamingMode lineNamingMode) {
+    public void addLinesForData(DataDefinition definition, DataSet data, NamingMode lineNamingMode) {
+        DataTupleXYDataset dataset = (DataTupleXYDataset) chart.getXYPlot().getDataset(
+                definition.usesSecondaryYAxis() ? 1 : 0);
+
+        addMatchingData(dataset, definition, data, lineNamingMode);
+
+        updateChart();
+    }
+
+    private void addMatchingData(DataTupleXYDataset dataset, DataDefinition definition, DataSet data,
+            NamingMode lineNamingMode) {
         if (definition.matchesHost(data)) {
             for (DataType type : definition.getMatchingTypes(data)) {
                 List<String> fields = definition.getMatchingFields(type);
@@ -145,12 +196,13 @@ public class LineChartBuilder extends BaseChartBuilder {
                     fieldNames.add(lineNamingMode.getName(definition, data, type, field, granularity));
                 }
 
-                addData(data, type, fields, fieldNames);
+                addData(dataset, data, type, fields, fieldNames);
             }
         }
     }
 
-    private void addData(DataSet data, DataType type, List<String> fields, List<String> fieldNames) {
+    private void addData(DataTupleXYDataset dataset, DataSet data, DataType type, List<String> fields,
+            List<String> fieldNames) {
         double[] totals = new double[fields.size()];
         // use NaN as chart data when no values are defined rather than 0
         java.util.Arrays.fill(totals, Double.NaN);
@@ -158,8 +210,6 @@ public class LineChartBuilder extends BaseChartBuilder {
         int n = 0;
 
         long lastOutputTime = Math.max(interval.getStart(), data.getStartTime());
-
-        DataTupleXYDataset dataset = (DataTupleXYDataset) chart.getXYPlot().getDataset();
 
         for (DataRecord record : data.getRecords(interval)) {
             if ((record != null) && record.hasData(type)) {
@@ -224,13 +274,6 @@ public class LineChartBuilder extends BaseChartBuilder {
             }
         }
 
-        recalculateGapThreshold(chart);
-        chart.getXYPlot().getRangeAxis().configure();
-
-        if ((dataset.getSeriesCount() > 1) && (chart.getLegend() == null)) {
-            addLegend();
-        }
-
         // fieldName may not have been used if there was no data
         // so, search the dataset first before associating tuples
         for (int i = 0; i < dataset.getSeriesCount(); i++) {
@@ -242,7 +285,27 @@ public class LineChartBuilder extends BaseChartBuilder {
         }
     }
 
+    private void updateChart() {
+        recalculateGapThreshold(chart);
+
+        chart.getXYPlot().getRangeAxis(0).configure();
+
+        int seriesCount = chart.getXYPlot().getDataset(0).getSeriesCount();
+
+        if (chart.getXYPlot().getDatasetCount() > 1) {
+            seriesCount += chart.getXYPlot().getDataset(1).getSeriesCount();
+
+            NumberAxis a = (NumberAxis) chart.getXYPlot().getRangeAxis(1);
+            a.configure();
+        }
+
+        if ((seriesCount > 1) && (chart.getLegend() == null)) {
+            addLegend();
+        }
+    }
+
     private void recalculateGapThreshold(JFreeChart chart) {
+        // TODO handle stacked and 2 axis
         if (!stacked) {
             XYPlot plot = chart.getXYPlot();
 
@@ -283,6 +346,7 @@ public class LineChartBuilder extends BaseChartBuilder {
                     }
                 }
 
+                //((StandardXYItemRenderer) plot.getRenderer()).setGapThreshold(Integer.MAX_VALUE);
                 ((StandardXYItemRenderer) plot.getRenderer()).setGapThreshold(maxAverage * 1.25);
             }
             else {
@@ -291,6 +355,9 @@ public class LineChartBuilder extends BaseChartBuilder {
         }
     }
 
+    /**
+     * Sets the X axis to display time relative to the given start time.
+     */
     // for relative time, format the x axis differently
     // the data _does not_ change
     public static void setRelativeAxis(JFreeChart chart, long startTime) {
@@ -312,6 +379,11 @@ public class LineChartBuilder extends BaseChartBuilder {
         }
     }
 
+    /**
+     * Sets the X axis to display absolute time. This is the default.
+     * 
+     * @param chart
+     */
     public static void setAbsoluteAxis(JFreeChart chart) {
         if (chart != null) {
             XYPlot plot = chart.getXYPlot();
@@ -320,6 +392,10 @@ public class LineChartBuilder extends BaseChartBuilder {
         }
     }
 
+    /**
+     * This only sets the first Y axis as a percent. There is no support for having other axes with
+     * percent scales.
+     */
     public static void setPercentYAxis(JFreeChart chart) {
         NumberAxis yAxis = (NumberAxis) chart.getXYPlot().getRangeAxis();
         yAxis.setRange(0, 100);

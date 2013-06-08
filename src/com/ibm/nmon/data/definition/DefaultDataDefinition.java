@@ -44,24 +44,12 @@ public final class DefaultDataDefinition extends DataDefinition {
     private final FieldMatcher fieldMatcher;
 
     public DefaultDataDefinition(HostMatcher hostMatcher, TypeMatcher typeMatcher, FieldMatcher fieldMatcher,
-            Statistic stat) {
-        super(stat);
+            Statistic stat, boolean useSecondaryYAxis) {
+        super(stat, useSecondaryYAxis);
 
         this.hostMatcher = hostMatcher == null ? HostMatcher.ALL : hostMatcher;
         this.typeMatcher = typeMatcher == null ? TypeMatcher.ALL : typeMatcher;
         this.fieldMatcher = fieldMatcher == null ? FieldMatcher.ALL : fieldMatcher;
-    }
-
-    public DefaultDataDefinition(HostMatcher hostMatcher, TypeMatcher typeMatcher, FieldMatcher fieldMatcher) {
-        this(hostMatcher, typeMatcher, fieldMatcher, null);
-    }
-
-    public DefaultDataDefinition(TypeMatcher typeMatcher, FieldMatcher fieldMatcher) {
-        this(null, typeMatcher, fieldMatcher);
-    }
-
-    public DefaultDataDefinition(TypeMatcher typeMatcher, FieldMatcher fieldMatcher, Statistic stat) {
-        this(null, typeMatcher, fieldMatcher, stat);
     }
 
     public void addHostnameTransformer(String hostname, NameTransformer transformer) {

@@ -37,6 +37,7 @@ import org.jfree.chart.plot.XYPlot;
 import org.jfree.ui.ExtensionFileFilter;
 
 import com.ibm.nmon.gui.chart.data.DataTupleDataset;
+import com.ibm.nmon.gui.chart.data.DataTupleXYDataset;
 import com.ibm.nmon.gui.main.NMONVisualizerGui;
 
 import com.ibm.nmon.util.CSVWriter;
@@ -72,7 +73,7 @@ public class BaseChartPanel extends ChartPanel implements PropertyChangeListener
         clearChart();
     }
 
-    public void setChart(JFreeChart chart) {
+    public final void setChart(JFreeChart chart) {
         JFreeChart old = getChart();
 
         if (chart != old) {
@@ -132,7 +133,7 @@ public class BaseChartPanel extends ChartPanel implements PropertyChangeListener
      * Get the dataset associated with this chart or <code>null</code> if there the chart does not
      * have one.
      */
-    public DataTupleDataset getDataset() {
+    public final DataTupleDataset getDataset() {
         if (getChart() == null) {
             return null;
         }
@@ -140,7 +141,16 @@ public class BaseChartPanel extends ChartPanel implements PropertyChangeListener
         Plot plot = getChart().getPlot();
 
         if (plot instanceof XYPlot) {
-            return (DataTupleDataset) getChart().getXYPlot().getDataset();
+            XYPlot xyPlot = getChart().getXYPlot();
+
+            if (xyPlot.getDatasetCount() == 1) {
+                return (DataTupleDataset) xyPlot.getDataset();
+            }
+            else {
+                // assume only 2 datasets / 2 axes
+                return DataTupleXYDataset.merge((DataTupleXYDataset) xyPlot.getDataset(0),
+                        (DataTupleXYDataset) xyPlot.getDataset(1));
+            }
         }
         else if (plot instanceof CategoryPlot) {
             return (DataTupleDataset) ((CategoryPlot) plot).getDataset();
