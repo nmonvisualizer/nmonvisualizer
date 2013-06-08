@@ -6,6 +6,7 @@ import java.io.File;
 import java.io.IOException;
 import java.io.LineNumberReader;
 
+import java.util.TimeZone;
 import java.util.regex.Pattern;
 
 import com.ibm.nmon.data.BasicDataSet;
@@ -20,11 +21,11 @@ public final class HATJParser {
 
     public static final String DEFAULT_HOSTNAME = "hatj";
 
-    public BasicDataSet parse(File file) throws IOException {
-        return parse(file.getAbsolutePath());
+    public BasicDataSet parse(File file, TimeZone timeZone) throws IOException {
+        return parse(file.getAbsolutePath(), timeZone);
     }
 
-    public BasicDataSet parse(String filename) throws IOException {
+    public BasicDataSet parse(String filename, TimeZone timeZone) throws IOException {
         long start = System.nanoTime();
 
         // assume HATJ file is like graph<timeinmillis>.csv
@@ -32,8 +33,10 @@ public final class HATJParser {
 
         String temp = filename.substring(idx + "graph".length(), filename.length() - ".csv".length());
         long startTime = 0;
+        long tzOffset = timeZone.getOffset(System.currentTimeMillis());
+
         try {
-            startTime = Long.parseLong(temp);
+            startTime = Long.parseLong(temp) - timeZone.getOffset(System.currentTimeMillis());
         }
         catch (NumberFormatException nfe) {
             LOGGER.warn("no valid start time in the file name, using the current time", filename);
@@ -52,6 +55,7 @@ public final class HATJParser {
 
             BasicDataSet data = new BasicDataSet(filename);
             data.setHostname(DEFAULT_HOSTNAME);
+            data.setMetadata("parsed_gmt_offset", Double.toString(tzOffset / 3600000.0d));
 
             // create DataTypes from header line
             String[] values = DATA_SPLITTER.split(line);

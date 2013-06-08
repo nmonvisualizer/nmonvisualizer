@@ -119,6 +119,12 @@ public final class BarChartBuilder extends BaseChartBuilder {
             throw new IllegalArgumentException("BarChartDefintion cannot be null");
         }
 
+        // Note that both this builder and the AnalysisRecord have an Interval stored. Note that
+        // these are _not_ synchronized here under the assumption that a) the client application has
+        // already done this and b) the client application is caching a number of records and does
+        // not expect different records to have different Intervals. So, the record's internal
+        // Interval is used rather than this class' record.
+
         CategoryPlot plot = (CategoryPlot) chart.getPlot();
         DataTupleCategoryDataset dataset = (DataTupleCategoryDataset) plot.getDataset();
         DataSet data = record.getDataSet();

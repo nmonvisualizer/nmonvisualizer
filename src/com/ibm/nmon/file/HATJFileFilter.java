@@ -6,5 +6,5 @@ public final class HATJFileFilter extends BaseFileFilter {
         return name.contains("graph") && name.endsWith(".csv");
     }
 
-    HATJFileFilter() {}
+    public HATJFileFilter() {}
 }

@@ -24,8 +24,8 @@ import com.ibm.nmon.util.TimeFormatCache;
  * <p>
  * This class caches statistics for measurements during a given Interval rather than recalculating
  * from the raw data each time. Calculations are done lazily, when a statistic is requested, not
- * when a measurement is added to the record. Data is cached as SoftReference objects, so this class
- * could potentially use a large amount of memory.
+ * when a measurement is added to the record. Data is cached as SoftReference objects, so while this
+ * class could potentially use a large amount of memory, it should not cause OutOfMemoryExceptions.
  * </p
  */
 public final class AnalysisRecord {
@@ -71,9 +71,11 @@ public final class AnalysisRecord {
     }
 
     public void setInterval(Interval interval) {
-        this.interval = interval;
+        if (!this.interval.equals(interval)) {
+            this.interval = interval;
 
-        values.clear();
+            values.clear();
+        }
     }
 
     public void setGranularity(int granularity) {

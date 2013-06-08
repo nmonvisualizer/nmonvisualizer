@@ -7,7 +7,8 @@ import java.util.Calendar;
  * Utility methods for working with times.
  */
 public final class TimeHelper {
-    public static final SimpleDateFormat TIMESTAMP_FORMAT_ISO = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ssZZ");
+    // not thread safe!
+    public static final SimpleDateFormat TIMESTAMP_FORMAT_ISO = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ssX");
     public static final SimpleDateFormat DATE_FORMAT_ISO = new SimpleDateFormat("yyyy-MM-dd");
 
     public static long dayFromDatetime(long datetime) {
