@@ -38,7 +38,7 @@ public final class IOStatParser {
     private static final SimpleDateFormat DATE_FORMAT_US = new SimpleDateFormat("MM/dd/yyyy");
 
     private static final Pattern INFO = Pattern
-            .compile("(.+)\\s(.+)\\s\\((.+)\\)\\s+(\\d{2}\\/\\d{2}\\/\\d{2,4})(\\s+_(.+)_)?(\\s+\\((.+)\\sCPU\\))?");
+            .compile("(.+)\\s(.+)\\s\\((.+)\\)\\s+(\\d{2,4}[\\/-]\\d{2}[\\/-]\\d{2,4})(\\s+_(.+)_)?(\\s+\\((.+)\\sCPU\\))?");
     private static final Pattern DATA_SPLITTER = Pattern.compile(":?\\s+");
 
     private static final Set<Integer> NO_IGNORED_FIELDS = java.util.Collections.emptySet();
@@ -215,10 +215,11 @@ public final class IOStatParser {
                     }
 
                     dateFormat = DATE_FORMAT_US;
+                    dateOffset = TimeHelper.dayFromDatetime(dateFormat.parse(date).getTime());
                 }
+                // else ISO includes date time, so offset can stay 0
 
                 dateFormat.setTimeZone(timeZone);
-                dateOffset = TimeHelper.dayFromDatetime(dateFormat.parse(date).getTime());
 
                 if (arch != null) {
                     data.setMetadata("ARCH", DataHelper.newString(arch));
