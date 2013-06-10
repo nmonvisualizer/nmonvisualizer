@@ -143,7 +143,7 @@ public final class ChartFactory {
                     analysis.add(record);
                 }
 
-                intervalChartBuilder.addData(lineDefinition, analysis);
+                intervalChartBuilder.addLine(lineDefinition, analysis);
                 ++dataSetCount;
             }
 

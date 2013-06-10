@@ -1,14 +1,17 @@
 package com.ibm.nmon.chart.definition;
 
 /**
- * Chart definition that has a labeled Y axis. The axis can also be set to display as a percentage.
- * Y axis charts can also be 'stacked', where the values are somehow overlaid on top of previous
- * values.
+ * Chart definition that has one or two labeled Y axes. The primary axis can also be set to display
+ * as a percentage. Y axis charts can also be 'stacked', where the values are somehow overlaid on
+ * top of previous values. Depending on the implementation, stacking may not be allowed with
+ * multiple axes.
  */
 public abstract class YAxisChartDefinition extends BaseChartDefinition {
     private String yAxisLabel = "";
+    private String secondaryYAxisLabel = "";
 
     private boolean percentYAxis = false;
+    private boolean hasSecondaryYAxis = false;
 
     private final boolean stacked;
 
@@ -18,23 +21,23 @@ public abstract class YAxisChartDefinition extends BaseChartDefinition {
         this.stacked = stacked;
     }
 
-    public boolean isStacked() {
+    public final boolean isStacked() {
         return stacked;
     }
 
-    public void setUsePercentYAxis(boolean percentYAxis) {
+    public final void setUsePercentYAxis(boolean percentYAxis) {
         this.percentYAxis = percentYAxis;
     }
 
-    public boolean usePercentYAxis() {
+    public final boolean usePercentYAxis() {
         return percentYAxis;
     }
 
-    public String getYAxisLabel() {
+    public final String getYAxisLabel() {
         return yAxisLabel;
     }
 
-    public void setYAxisLabel(String yAxisLabel) {
+    public final void setYAxisLabel(String yAxisLabel) {
         if (yAxisLabel == null) {
             this.yAxisLabel = "";
         }
@@ -42,4 +45,26 @@ public abstract class YAxisChartDefinition extends BaseChartDefinition {
             this.yAxisLabel = yAxisLabel;
         }
     }
+
+    public final String getSecondaryYAxisLabel() {
+        return secondaryYAxisLabel;
+    }
+
+    public final void setSecondaryYAxisLabel(String secondaryYAxisLabel) {
+        if (secondaryYAxisLabel == null) {
+            this.secondaryYAxisLabel = "";
+        }
+        else {
+            this.secondaryYAxisLabel = secondaryYAxisLabel;
+        }
+    }
+
+    public final boolean hasSecondaryYAxis() {
+        return hasSecondaryYAxis;
+    }
+
+    public final void setHasSecondaryYAxis(boolean secondaryYAxis) {
+        this.hasSecondaryYAxis = secondaryYAxis;
+    }
+
 }

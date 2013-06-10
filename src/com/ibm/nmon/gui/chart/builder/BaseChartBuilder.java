@@ -49,6 +49,9 @@ abstract class BaseChartBuilder {
 
     private List<ChartBuilderPlugin> plugins;
 
+    protected boolean stacked = false;
+    protected boolean hasSecondaryYAxis = false;
+
     protected BaseChartBuilder() {
         interval = Interval.DEFAULT;
     }

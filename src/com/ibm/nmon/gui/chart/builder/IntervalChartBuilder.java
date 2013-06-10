@@ -49,6 +49,14 @@ public final class IntervalChartBuilder extends BaseChartBuilder {
 
         CategoryPlot plot = new CategoryPlot(new DataTupleCategoryDataset(true), categoryAxis, valueAxis, renderer);
 
+        if (hasSecondaryYAxis) {
+            renderer = new LineAndShapeRenderer();
+            renderer.setBaseSeriesVisible(true, false);
+
+            plot.setRenderer(1, renderer);
+            plot.mapDatasetToRangeAxis(1, 1);
+        }
+
         // null title font => it will be set in format
         // legend will be decided by callers
         return new JFreeChart("", null, plot, false);
@@ -66,6 +74,10 @@ public final class IntervalChartBuilder extends BaseChartBuilder {
         CategoryPlot plot = (CategoryPlot) chart.getPlot();
 
         plot.getRangeAxis().setLabel(definition.getYAxisLabel());
+
+        if (hasSecondaryYAxis) {
+            ((CategoryPlot) chart.getPlot()).getRangeAxis(1).setLabel(definition.getSecondaryYAxisLabel());
+        }
 
         if ("".equals(definition.getXAxisLabel())) {
             plot.getDomainAxis().setLabel("Interval");
@@ -93,8 +105,10 @@ public final class IntervalChartBuilder extends BaseChartBuilder {
         plot.getDomainAxis().setLowerMargin(.015);
         plot.getDomainAxis().setUpperMargin(.015);
 
-        plot.getRangeAxis().setLabelFont(LABEL_FONT);
-        plot.getRangeAxis().setTickLabelFont(AXIS_FONT);
+        for (int i = 0; i < plot.getRangeAxisCount(); i++) {
+            plot.getRangeAxis(i).setLabelFont(LABEL_FONT);
+            plot.getRangeAxis(i).setTickLabelFont(AXIS_FONT);
+        }
 
         plot.getDomainAxis().setLabelFont(LABEL_FONT);
         plot.getDomainAxis().setTickLabelFont(AXIS_FONT);
@@ -112,7 +126,7 @@ public final class IntervalChartBuilder extends BaseChartBuilder {
         plot.setRangeGridlineStroke(GRID_LINES);
     }
 
-    public void addData(IntervalChartDefinition lineDefinition, List<AnalysisRecord> records) {
+    public void addLine(IntervalChartDefinition lineDefinition, List<AnalysisRecord> records) {
         if (chart == null) {
             throw new IllegalStateException("initChart() must be called first");
         }
@@ -126,7 +140,8 @@ public final class IntervalChartBuilder extends BaseChartBuilder {
             ((CategoryPlot) chart.getPlot()).getDomainAxis().setCategoryLabelPositions(CategoryLabelPositions.UP_45);
         }
 
-        DataTupleCategoryDataset dataset = (DataTupleCategoryDataset) ((CategoryPlot) chart.getPlot()).getDataset();
+        DataTupleCategoryDataset dataset = (DataTupleCategoryDataset) ((CategoryPlot) chart.getPlot())
+                .getDataset(lineDefinition.hasSecondaryYAxis() ? 1 : 0);
         // assume all records are from the same DataSet
         DataSet data = records.get(0).getDataSet();
 

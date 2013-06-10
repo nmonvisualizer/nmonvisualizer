@@ -10,16 +10,9 @@ import com.ibm.nmon.data.definition.NamingMode;
  * Defines a line chart which has a labeled X axis. Lines are defined as a collection of
  * {@link DataDefinition DataDefinitions}. Lines are named by a single {@link NamingMode}.
  * </p>
- * 
- * <p>
- * Line charts also support a secondary Y axis.
- * </p>
  */
 public class LineChartDefinition extends YAxisChartDefinition {
     private String xAxisLabel = "";
-
-    private String secondaryYAxisLabel = "";
-    private boolean hasSecondaryYAxis = false;
 
     private NamingMode lineNamingMode;
 
@@ -42,27 +35,6 @@ public class LineChartDefinition extends YAxisChartDefinition {
 
     public final void setXAxisLabel(String xAxisLabel) {
         this.xAxisLabel = xAxisLabel;
-    }
-
-    public String getSecondaryYAxisLabel() {
-        return secondaryYAxisLabel;
-    }
-
-    public void setSecondaryYAxisLabel(String secondaryYAxisLabel) {
-        if (secondaryYAxisLabel == null) {
-            this.secondaryYAxisLabel = "";
-        }
-        else {
-            this.secondaryYAxisLabel = secondaryYAxisLabel;
-        }
-    }
-
-    public boolean hasSecondaryYAxis() {
-        return hasSecondaryYAxis;
-    }
-
-    public void setHasYAxis2(boolean secondaryYAxis) {
-        this.hasSecondaryYAxis = secondaryYAxis;
     }
 
     public final NamingMode getLineNamingMode() {

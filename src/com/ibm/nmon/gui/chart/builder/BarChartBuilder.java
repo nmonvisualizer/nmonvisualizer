@@ -32,18 +32,13 @@ import com.ibm.nmon.chart.definition.BarChartDefinition;
 public final class BarChartBuilder extends BaseChartBuilder {
     private static final java.awt.Color OUTLINE_COLOR = new java.awt.Color(0xCCCCCC);
 
-    private boolean stacked = false;
-
     public BarChartBuilder() {
         super();
     }
 
-    public void setStacked(boolean stacked) {
-        this.stacked = stacked;
-    }
-
     public void initChart(BarChartDefinition definition) {
-        setStacked(definition.isStacked());
+        stacked = definition.isStacked();
+        hasSecondaryYAxis = definition.hasSecondaryYAxis();
 
         initChart();
 
@@ -55,6 +50,10 @@ public final class BarChartBuilder extends BaseChartBuilder {
 
         ((CategoryPlot) chart.getPlot()).getRangeAxis().setLabel(definition.getYAxisLabel());
         ((CategoryPlot) chart.getPlot()).getDomainAxis().setLabel(definition.getCategoryAxisLabel());
+
+        if (hasSecondaryYAxis) {
+            ((CategoryPlot) chart.getPlot()).getRangeAxis(1).setLabel(definition.getSecondaryYAxisLabel());
+        }
     }
 
     protected JFreeChart createChart() {
@@ -72,6 +71,11 @@ public final class BarChartBuilder extends BaseChartBuilder {
 
         CategoryPlot plot = new CategoryPlot(new DataTupleCategoryDataset(false), categoryAxis, valueAxis, renderer);
 
+        if (hasSecondaryYAxis) {
+            plot.setRenderer(1, new BarRenderer());
+            plot.mapDatasetToRangeAxis(1, 1);
+        }
+
         return new HighlightableBarChart("", JFreeChart.DEFAULT_TITLE_FONT, plot, false);
     }
 
@@ -81,15 +85,20 @@ public final class BarChartBuilder extends BaseChartBuilder {
 
         CategoryPlot plot = (CategoryPlot) chart.getPlot();
 
-        BarRenderer renderer = (BarRenderer) plot.getRenderer();
-        renderer.setShadowVisible(false);
-        renderer.setDrawBarOutline(false);
-        renderer.setBarPainter(new SimpleGradientBarPainter());
-        renderer.setBaseToolTipGenerator(new StandardCategoryToolTipGenerator("{1} {0} - {2} ({3})",
-                Styles.NUMBER_FORMAT));
+        for (int i = 0; i < plot.getRendererCount(); i++) {
+            BarRenderer renderer = (BarRenderer) plot.getRenderer(i);
+            renderer.setShadowVisible(false);
+            renderer.setDrawBarOutline(false);
+            renderer.setBarPainter(new SimpleGradientBarPainter());
+            renderer.setBaseToolTipGenerator(new StandardCategoryToolTipGenerator("{1} {0} - {2} ({3})",
+                    Styles.NUMBER_FORMAT));
 
-        renderer.setBaseOutlineStroke(new BasicStroke(3));
-        renderer.setBaseOutlinePaint(OUTLINE_COLOR);
+            renderer.setBaseOutlineStroke(new BasicStroke(3));
+            renderer.setBaseOutlinePaint(OUTLINE_COLOR);
+
+            plot.getRangeAxis(i).setLabelFont(LABEL_FONT);
+            plot.getRangeAxis(i).setTickLabelFont(AXIS_FONT);
+        }
 
         plot.getDomainAxis().setCategoryMargin(0.15d);
         plot.getDomainAxis().setTickMarksVisible(false);
@@ -98,9 +107,6 @@ public final class BarChartBuilder extends BaseChartBuilder {
         // 1.5% of the chart area within the axis will be blank space on each end
         plot.getDomainAxis().setLowerMargin(.015);
         plot.getDomainAxis().setUpperMargin(.015);
-
-        plot.getRangeAxis().setLabelFont(LABEL_FONT);
-        plot.getRangeAxis().setTickLabelFont(AXIS_FONT);
 
         plot.getDomainAxis().setLabelFont(LABEL_FONT);
         plot.getDomainAxis().setTickLabelFont(AXIS_FONT);
@@ -126,7 +132,8 @@ public final class BarChartBuilder extends BaseChartBuilder {
         // Interval is used rather than this class' record.
 
         CategoryPlot plot = (CategoryPlot) chart.getPlot();
-        DataTupleCategoryDataset dataset = (DataTupleCategoryDataset) plot.getDataset();
+        DataTupleCategoryDataset dataset = (DataTupleCategoryDataset) plot
+                .getDataset(barDefinition.hasSecondaryYAxis() ? 1 : 0);
         DataSet data = record.getDataSet();
         Statistic previousStat = null;
 

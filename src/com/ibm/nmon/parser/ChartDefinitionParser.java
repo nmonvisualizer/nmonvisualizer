@@ -122,8 +122,15 @@ public final class ChartDefinitionParser extends BasicXMLParser {
                                     + " at line {}" + "; secondary axes do not support percentages", getLineNumber());
                 }
 
-                ((LineChartDefinition) currentChart).setSecondaryYAxisLabel(attributes.get("label"));
-                ((LineChartDefinition) currentChart).setHasYAxis2(true);
+                if (currentChart instanceof BarChartDefinition && ((BarChartDefinition) currentChart).isStacked()) {
+                    logger.warn("ignoring " + "<yAxis2>" + " element for chart "
+                            + (currentChart == null ? currentChart : currentChart.getShortName()) + " at line {}"
+                            + "; stacked bar charts do not support secondary axes", getLineNumber());
+                }
+                else {
+                    ((YAxisChartDefinition) currentChart).setSecondaryYAxisLabel(attributes.get("label"));
+                    ((YAxisChartDefinition) currentChart).setHasSecondaryYAxis(true);
+                }
             }
             else {
                 logger.warn("ignoring " + "<yAxis2>" + " element for chart "

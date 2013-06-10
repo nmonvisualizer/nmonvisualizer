@@ -33,16 +33,13 @@ import com.ibm.nmon.gui.chart.data.DataTupleXYDataset;
 import com.ibm.nmon.chart.definition.LineChartDefinition;
 
 public class LineChartBuilder extends BaseChartBuilder {
-    private boolean stacked = false;
-    private boolean hasYAxis2 = false;
-
     public LineChartBuilder() {
         super();
     }
 
     public void initChart(LineChartDefinition definition) {
         stacked = definition.isStacked();
-        hasYAxis2 = definition.hasSecondaryYAxis();
+        hasSecondaryYAxis = definition.hasSecondaryYAxis();
 
         initChart();
 
@@ -50,7 +47,7 @@ public class LineChartBuilder extends BaseChartBuilder {
 
         chart.getXYPlot().getRangeAxis().setLabel(definition.getYAxisLabel());
 
-        if (hasYAxis2) {
+        if (hasSecondaryYAxis) {
             chart.getXYPlot().getRangeAxis(1).setLabel(definition.getSecondaryYAxisLabel());
         }
 
@@ -88,7 +85,7 @@ public class LineChartBuilder extends BaseChartBuilder {
             plot = new XYPlot(dataset, timeAxis, valueAxis, renderer);
         }
 
-        if (hasYAxis2) {
+        if (hasSecondaryYAxis) {
             // second Y axis uses a separate dataset and axis
             plot.setDataset(1, new DataTupleXYDataset(stacked));
 
@@ -98,21 +95,11 @@ public class LineChartBuilder extends BaseChartBuilder {
             plot.setRangeAxis(1, valueAxis);
             plot.mapDatasetToRangeAxis(1, 1);
 
-            if (stacked) {
-                // secondary axis data cannot be stacked, use a new renderer
-                StandardXYItemRenderer renderer = new StandardXYItemRenderer();
-                renderer.setBaseSeriesVisible(true, false);
-
-                plot.setRenderer(1, renderer);
-            }
-            else {
-                // reuse the existing rendering to ensure consistent appearance and continue color
-                // cycling
-                plot.setRenderer(1, plot.getRenderer());
-                // TODO fix by creating rederer subclass that extends lookup series paint to
-                // multiplex the series number
-                // overwrite drawItem to set the series for paint to be series + plot1.seriesSize
-            }
+            // secondary axis data cannot be stacked, so use the the standard, line based rendering
+            // for both types
+            StandardXYItemRenderer renderer = new StandardXYItemRenderer();
+            renderer.setBaseSeriesVisible(true, false);
+            plot.setRenderer(1, renderer);
         }
 
         // null title font = it will be set in format
@@ -133,7 +120,7 @@ public class LineChartBuilder extends BaseChartBuilder {
         }
         else {
             // show filled markers at each data point
-            StandardXYItemRenderer renderer = (StandardXYItemRenderer) plot.getRenderer();
+            StandardXYItemRenderer renderer = (StandardXYItemRenderer) plot.getRenderer(0);
 
             renderer.setBaseShapesVisible(true);
             renderer.setBaseShapesFilled(true);
@@ -142,7 +129,24 @@ public class LineChartBuilder extends BaseChartBuilder {
             renderer.setPlotDiscontinuous(true);
             renderer.setGapThresholdType(UnitType.ABSOLUTE);
 
-            recalculateGapThreshold(chart);
+            recalculateGapThreshold(chart, 0);
+
+            renderer.setBaseToolTipGenerator(tooltipGenerator);
+        }
+
+        if (hasSecondaryYAxis) {
+            // show filled markers at each data point
+            StandardXYItemRenderer renderer = new StandardXYItemRenderer();
+            plot.setRenderer(1, renderer);
+
+            renderer.setBaseShapesVisible(true);
+            renderer.setBaseShapesFilled(true);
+
+            // if no data for more than 1 granularity's time period, do not draw a connecting line
+            renderer.setPlotDiscontinuous(true);
+            renderer.setGapThresholdType(UnitType.ABSOLUTE);
+
+            recalculateGapThreshold(chart, 1);
 
             renderer.setBaseToolTipGenerator(tooltipGenerator);
         }
@@ -286,31 +290,39 @@ public class LineChartBuilder extends BaseChartBuilder {
     }
 
     private void updateChart() {
-        recalculateGapThreshold(chart);
+        recalculateGapThreshold(chart, 0);
+
+        if (hasSecondaryYAxis) {
+            recalculateGapThreshold(chart, 1);
+        }
 
         chart.getXYPlot().getRangeAxis(0).configure();
 
-        int seriesCount = chart.getXYPlot().getDataset(0).getSeriesCount();
+        if (chart.getLegend() != null) {
+            int seriesCount = chart.getXYPlot().getDataset(0).getSeriesCount();
 
-        if (chart.getXYPlot().getDatasetCount() > 1) {
-            seriesCount += chart.getXYPlot().getDataset(1).getSeriesCount();
+            if (hasSecondaryYAxis) {
+                seriesCount += chart.getXYPlot().getDataset(1).getSeriesCount();
 
-            NumberAxis a = (NumberAxis) chart.getXYPlot().getRangeAxis(1);
-            a.configure();
-        }
+                NumberAxis a = (NumberAxis) chart.getXYPlot().getRangeAxis(1);
+                a.configure();
+            }
 
-        if ((seriesCount > 1) && (chart.getLegend() == null)) {
-            addLegend();
+            if (seriesCount > 1) {
+                addLegend();
+            }
         }
     }
 
-    private void recalculateGapThreshold(JFreeChart chart) {
-        // TODO handle stacked and 2 axis
-        if (!stacked) {
+    private void recalculateGapThreshold(JFreeChart chart, int datasetIndex) {
+        if (stacked && (datasetIndex == 0)) {
+            return;
+        }
+        else {
             XYPlot plot = chart.getXYPlot();
 
-            if (plot.getDataset().getItemCount(0) > 0) {
-                DataTupleXYDataset dataset = (DataTupleXYDataset) plot.getDataset();
+            if (plot.getDataset(datasetIndex).getItemCount(0) > 0) {
+                DataTupleXYDataset dataset = (DataTupleXYDataset) plot.getDataset(datasetIndex);
                 int seriesCount = dataset.getSeriesCount();
 
                 double[] averageDistance = new double[seriesCount];
@@ -346,8 +358,7 @@ public class LineChartBuilder extends BaseChartBuilder {
                     }
                 }
 
-                //((StandardXYItemRenderer) plot.getRenderer()).setGapThreshold(Integer.MAX_VALUE);
-                ((StandardXYItemRenderer) plot.getRenderer()).setGapThreshold(maxAverage * 1.25);
+                ((StandardXYItemRenderer) plot.getRenderer(datasetIndex)).setGapThreshold(maxAverage * 1.25);
             }
             else {
                 ((StandardXYItemRenderer) plot.getRenderer()).setGapThreshold(Integer.MAX_VALUE);
