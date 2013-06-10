@@ -42,17 +42,19 @@ public final class BarChartBuilder extends BaseChartBuilder {
 
         initChart();
 
-        if (definition.usePercentYAxis()) {
-            setPercentYAxis();
-        }
-
         chart.setTitle(definition.getTitle());
 
-        ((CategoryPlot) chart.getPlot()).getRangeAxis().setLabel(definition.getYAxisLabel());
-        ((CategoryPlot) chart.getPlot()).getDomainAxis().setLabel(definition.getCategoryAxisLabel());
+        CategoryPlot plot = (CategoryPlot) chart.getPlot();
+        plot.getRangeAxis().setLabel(definition.getYAxisLabel());
 
         if (hasSecondaryYAxis) {
-            ((CategoryPlot) chart.getPlot()).getRangeAxis(1).setLabel(definition.getSecondaryYAxisLabel());
+            plot.getRangeAxis(1).setLabel(definition.getSecondaryYAxisLabel());
+        }
+
+        plot.getDomainAxis().setLabel(definition.getCategoryAxisLabel());
+
+        if (definition.usePercentYAxis()) {
+            setPercentYAxis();
         }
     }
 
@@ -72,7 +74,13 @@ public final class BarChartBuilder extends BaseChartBuilder {
         CategoryPlot plot = new CategoryPlot(new DataTupleCategoryDataset(false), categoryAxis, valueAxis, renderer);
 
         if (hasSecondaryYAxis) {
+            // second Y axis uses a separate dataset and axis
+            plot.setDataset(1, new DataTupleCategoryDataset(stacked));
+
+            valueAxis = new NumberAxis();
+
             plot.setRenderer(1, new BarRenderer());
+            plot.setRangeAxis(1, valueAxis);
             plot.mapDatasetToRangeAxis(1, 1);
         }
 
@@ -87,9 +95,11 @@ public final class BarChartBuilder extends BaseChartBuilder {
 
         for (int i = 0; i < plot.getRendererCount(); i++) {
             BarRenderer renderer = (BarRenderer) plot.getRenderer(i);
+
             renderer.setShadowVisible(false);
             renderer.setDrawBarOutline(false);
             renderer.setBarPainter(new SimpleGradientBarPainter());
+
             renderer.setBaseToolTipGenerator(new StandardCategoryToolTipGenerator("{1} {0} - {2} ({3})",
                     Styles.NUMBER_FORMAT));
 

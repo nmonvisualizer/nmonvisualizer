@@ -33,6 +33,34 @@ public final class IntervalChartBuilder extends BaseChartBuilder {
         super();
     }
 
+    public void initChart(IntervalChartDefinition definition) {
+        // stacked is always false for IntervalCharts
+        hasSecondaryYAxis = definition.hasSecondaryYAxis();
+
+        initChart();
+
+        chart.setTitle(definition.getTitle());
+
+        CategoryPlot plot = (CategoryPlot) chart.getPlot();
+
+        plot.getRangeAxis().setLabel(definition.getYAxisLabel());
+
+        if (hasSecondaryYAxis) {
+            plot.getRangeAxis(1).setLabel(definition.getSecondaryYAxisLabel());
+        }
+
+        if ("".equals(definition.getXAxisLabel())) {
+            plot.getDomainAxis().setLabel("Interval");
+        }
+        else {
+            plot.getDomainAxis().setLabel(definition.getXAxisLabel());
+        }
+
+        if (definition.usePercentYAxis()) {
+            setPercentYAxis();
+        }
+    }
+
     @Override
     protected JFreeChart createChart() {
         // note that IntervalChartDefinition is a line chart but this class creates a JFreeChart
@@ -50,10 +78,17 @@ public final class IntervalChartBuilder extends BaseChartBuilder {
         CategoryPlot plot = new CategoryPlot(new DataTupleCategoryDataset(true), categoryAxis, valueAxis, renderer);
 
         if (hasSecondaryYAxis) {
+            // second Y axis uses a separate dataset and axis
+            plot.setDataset(1, new DataTupleCategoryDataset(stacked));
+
+            valueAxis = new NumberAxis();
+            valueAxis.setAutoRangeIncludesZero(true);
+
             renderer = new LineAndShapeRenderer();
             renderer.setBaseSeriesVisible(true, false);
 
             plot.setRenderer(1, renderer);
+            plot.setRangeAxis(1, valueAxis);
             plot.mapDatasetToRangeAxis(1, 1);
         }
 
@@ -62,58 +97,34 @@ public final class IntervalChartBuilder extends BaseChartBuilder {
         return new JFreeChart("", null, plot, false);
     }
 
-    public void initChart(IntervalChartDefinition definition) {
-        initChart();
-
-        if (definition.usePercentYAxis()) {
-            setPercentYAxis();
-        }
-
-        chart.setTitle(definition.getTitle());
-
-        CategoryPlot plot = (CategoryPlot) chart.getPlot();
-
-        plot.getRangeAxis().setLabel(definition.getYAxisLabel());
-
-        if (hasSecondaryYAxis) {
-            ((CategoryPlot) chart.getPlot()).getRangeAxis(1).setLabel(definition.getSecondaryYAxisLabel());
-        }
-
-        if ("".equals(definition.getXAxisLabel())) {
-            plot.getDomainAxis().setLabel("Interval");
-        }
-        else {
-            plot.getDomainAxis().setLabel(definition.getXAxisLabel());
-        }
-    }
-
     @Override
     protected void formatChart() {
         super.formatChart();
 
         CategoryPlot plot = (CategoryPlot) chart.getPlot();
 
-        LineAndShapeRenderer renderer = (LineAndShapeRenderer) plot.getRenderer();
+        for (int i = 0; i < plot.getRendererCount(); i++) {
+            LineAndShapeRenderer renderer = (LineAndShapeRenderer) plot.getRenderer(i);
 
-        renderer.setBaseShapesVisible(true);
-        renderer.setBaseShapesFilled(true);
-        renderer.setBaseToolTipGenerator(new StandardCategoryToolTipGenerator("{1} {0} - {2}", new DecimalFormat(
-                "#,##0.00")));
+            renderer.setBaseShapesVisible(true);
+            renderer.setBaseShapesFilled(true);
 
-        // position of first bar start and last bar end
-        // 1.5% of the chart area within the axis will be blank space on each end
-        plot.getDomainAxis().setLowerMargin(.015);
-        plot.getDomainAxis().setUpperMargin(.015);
+            renderer.setBaseToolTipGenerator(new StandardCategoryToolTipGenerator("{1} {0} - {2}", new DecimalFormat(
+                    "#,##0.00")));
 
-        for (int i = 0; i < plot.getRangeAxisCount(); i++) {
             plot.getRangeAxis(i).setLabelFont(LABEL_FONT);
             plot.getRangeAxis(i).setTickLabelFont(AXIS_FONT);
         }
 
+        // position of fist lint start and last line end
+        // 1.5% of the chart area within the axis will be blank space on each end
+        plot.getDomainAxis().setLowerMargin(.015);
+        plot.getDomainAxis().setUpperMargin(.015);
+
         plot.getDomainAxis().setLabelFont(LABEL_FONT);
         plot.getDomainAxis().setTickLabelFont(AXIS_FONT);
 
-        // position of first point start and last bar end
+        // position of first point start and last line end
         // 1.5% of the chart area within the axis will be blank space on each end
         plot.getDomainAxis().setLowerMargin(.015);
         plot.getDomainAxis().setUpperMargin(.015);

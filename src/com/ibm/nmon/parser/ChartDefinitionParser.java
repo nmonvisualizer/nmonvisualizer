@@ -112,14 +112,14 @@ public final class ChartDefinitionParser extends BasicXMLParser {
             }
         }
         else if ("yAxis2".equals(element)) {
-            if (currentChart instanceof LineChartDefinition) {
+            if (currentChart instanceof YAxisChartDefinition) {
                 Map<String, String> attributes = parseAttributes(unparsedAttributes);
 
                 if (attributes.get("asPercent") != null) {
                     logger.warn(
-                            "ignoring " + " " + "asPercent" + " attribute for " + "<yAxis2>" + " element for chart "
+                            "ignoring " + "asPercent" + " attribute for " + "<yAxis2>" + " element for chart '"
                                     + (currentChart == null ? currentChart : currentChart.getShortName())
-                                    + " at line {}" + "; secondary axes do not support percentages", getLineNumber());
+                                    + '\'' +  " at line {}" + "; secondary axes do not support percentages", getLineNumber());
                 }
 
                 if (currentChart instanceof BarChartDefinition && ((BarChartDefinition) currentChart).isStacked()) {

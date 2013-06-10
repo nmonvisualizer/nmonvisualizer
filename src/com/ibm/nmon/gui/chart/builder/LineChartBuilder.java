@@ -45,17 +45,19 @@ public class LineChartBuilder extends BaseChartBuilder {
 
         chart.setTitle(definition.getTitle());
 
-        chart.getXYPlot().getRangeAxis().setLabel(definition.getYAxisLabel());
+        XYPlot plot = chart.getXYPlot();
+
+        plot.getRangeAxis().setLabel(definition.getYAxisLabel());
 
         if (hasSecondaryYAxis) {
-            chart.getXYPlot().getRangeAxis(1).setLabel(definition.getSecondaryYAxisLabel());
+            plot.getRangeAxis(1).setLabel(definition.getSecondaryYAxisLabel());
         }
 
         if ("".equals(definition.getXAxisLabel())) {
-            chart.getXYPlot().getDomainAxis().setLabel("Time");
+            plot.getDomainAxis().setLabel("Time");
         }
         else {
-            chart.getXYPlot().getDomainAxis().setLabel(definition.getXAxisLabel());
+            plot.getDomainAxis().setLabel(definition.getXAxisLabel());
         }
 
         if (definition.usePercentYAxis()) {
@@ -82,6 +84,7 @@ public class LineChartBuilder extends BaseChartBuilder {
         else {
             StandardXYItemRenderer renderer = new StandardXYItemRenderer();
             renderer.setBaseSeriesVisible(true, false);
+
             plot = new XYPlot(dataset, timeAxis, valueAxis, renderer);
         }
 
@@ -92,14 +95,14 @@ public class LineChartBuilder extends BaseChartBuilder {
             valueAxis = new NumberAxis();
             valueAxis.setAutoRangeIncludesZero(true);
 
-            plot.setRangeAxis(1, valueAxis);
-            plot.mapDatasetToRangeAxis(1, 1);
-
             // secondary axis data cannot be stacked, so use the the standard, line based rendering
             // for both types
             StandardXYItemRenderer renderer = new StandardXYItemRenderer();
             renderer.setBaseSeriesVisible(true, false);
+
+            plot.setRangeAxis(1, valueAxis);
             plot.setRenderer(1, renderer);
+            plot.mapDatasetToRangeAxis(1, 1);
         }
 
         // null title font = it will be set in format
@@ -129,15 +132,14 @@ public class LineChartBuilder extends BaseChartBuilder {
             renderer.setPlotDiscontinuous(true);
             renderer.setGapThresholdType(UnitType.ABSOLUTE);
 
-            recalculateGapThreshold(chart, 0);
+            recalculateGapThreshold(0);
 
             renderer.setBaseToolTipGenerator(tooltipGenerator);
         }
 
         if (hasSecondaryYAxis) {
             // show filled markers at each data point
-            StandardXYItemRenderer renderer = new StandardXYItemRenderer();
-            plot.setRenderer(1, renderer);
+            StandardXYItemRenderer renderer = (StandardXYItemRenderer) plot.getRenderer(1);
 
             renderer.setBaseShapesVisible(true);
             renderer.setBaseShapesFilled(true);
@@ -146,7 +148,7 @@ public class LineChartBuilder extends BaseChartBuilder {
             renderer.setPlotDiscontinuous(true);
             renderer.setGapThresholdType(UnitType.ABSOLUTE);
 
-            recalculateGapThreshold(chart, 1);
+            recalculateGapThreshold(1);
 
             renderer.setBaseToolTipGenerator(tooltipGenerator);
         }
@@ -290,15 +292,15 @@ public class LineChartBuilder extends BaseChartBuilder {
     }
 
     private void updateChart() {
-        recalculateGapThreshold(chart, 0);
+        recalculateGapThreshold(0);
 
         if (hasSecondaryYAxis) {
-            recalculateGapThreshold(chart, 1);
+            recalculateGapThreshold(1);
         }
 
         chart.getXYPlot().getRangeAxis(0).configure();
 
-        if (chart.getLegend() != null) {
+        if (chart.getLegend() == null) {
             int seriesCount = chart.getXYPlot().getDataset(0).getSeriesCount();
 
             if (hasSecondaryYAxis) {
@@ -314,7 +316,7 @@ public class LineChartBuilder extends BaseChartBuilder {
         }
     }
 
-    private void recalculateGapThreshold(JFreeChart chart, int datasetIndex) {
+    private void recalculateGapThreshold(int datasetIndex) {
         if (stacked && (datasetIndex == 0)) {
             return;
         }
