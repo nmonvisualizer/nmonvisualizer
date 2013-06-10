@@ -1,115 +1,264 @@
 package com.ibm.nmon;
 
-import java.io.File;
-import java.io.FileOutputStream;
 import java.io.IOException;
+
+import java.io.File;
+
+import java.io.FileFilter;
+
+import com.ibm.nmon.file.HATJFileFilter;
+import com.ibm.nmon.file.NMONFileFilter;
+
 import java.io.InputStream;
+
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
+
 import java.io.PrintStream;
 
-import java.text.SimpleDateFormat;
 import java.util.List;
 import java.util.Map;
-import java.util.logging.Handler;
-import java.util.logging.Logger;
+
+import com.ibm.nmon.util.ParserLog;
+
+import java.text.SimpleDateFormat;
+import java.text.ParseException;
 
 import org.jfree.chart.JFreeChart;
 import org.jfree.chart.ChartUtilities;
 
-import com.ibm.nmon.file.NMONFileFilter;
+import com.ibm.nmon.interval.Interval;
+
+import com.ibm.nmon.data.DataSet;
 
 import com.ibm.nmon.parser.ChartDefinitionParser;
 import com.ibm.nmon.chart.definition.BaseChartDefinition;
-
-import com.ibm.nmon.data.DataSet;
 
 import com.ibm.nmon.gui.chart.ChartFactory;
 
 import com.ibm.nmon.util.FileHelper;
 import com.ibm.nmon.util.GranularityHelper;
-
-import com.ibm.nmon.util.ParserLog;
+import com.ibm.nmon.util.TimeHelper;
 
 public final class ReportGenerator extends NMONVisualizerApp {
     public static void main(String[] args) throws Exception {
+        if (args.length == 0) {
+            System.err.println("no path(s) to parse specified");
+            return;
+        }
+
+        // ensure the Swing GUI does not pop up or cause XWindows errors
         System.setProperty("java.awt.headless", "true");
 
-        if (args.length == 0) {
-            System.err.println("a file path must be specified");
+        // initialize logging from the classpath properties file
+        java.util.logging.LogManager.getLogManager().readConfiguration(
+                NMONVisualizerCmdLine.class.getResourceAsStream("/cmdline.logging.properties"));
+
+        List<String> paths = new java.util.ArrayList<String>();
+
+        List<String> customDataCharts = new java.util.ArrayList<String>();
+        List<String> customSummaryCharts = new java.util.ArrayList<String>();
+
+        boolean summaryCharts = true;
+        boolean dataSetCharts = true;
+
+        long startTime = Interval.DEFAULT.getStart();
+        long endTime = Interval.DEFAULT.getEnd();
+
+        for (int i = 0; i < args.length; i++) {
+            String arg = args[i];
+            char c = arg.charAt(0);
+
+            if (c == '-') {
+                nextarg: for (int j = 1; j < arg.length(); j++) {
+                    c = arg.charAt(j);
+
+                    switch (c) {
+                    case 's':
+                        try {
+                            startTime = parseTime(args, ++i, 's');
+                            break nextarg;
+
+                        }
+                        catch (IllegalArgumentException iae) {
+                            System.err.println(iae.getMessage());
+                            return;
+                        }
+                    case 'e':
+                        try {
+                            endTime = parseTime(args, ++i, 'e');
+                            break nextarg;
+                        }
+                        catch (IllegalArgumentException iae) {
+                            System.err.println(iae.getMessage());
+                            return;
+                        }
+                    case 'd': {
+                        ++i;
+
+                        if (i > args.length) {
+                            throw new IllegalArgumentException("file must be specified for " + '-' + 'd');
+                        }
+
+                        customDataCharts.add(args[i]);
+                        break nextarg;
+                    }
+                    case 'a': {
+                        ++i;
+
+                        if (i > args.length) {
+                            throw new IllegalArgumentException("file must be specified for " + '-' + 's');
+                        }
+
+                        customSummaryCharts.add(args[i]);
+                        break nextarg;
+
+                    }
+                    case '-': {
+                        if (j == 1) { // --param
+                            String param = arg.substring(2);
+
+                            if ("nodata".equals(param)) {
+                                dataSetCharts = false;
+                            }
+                            else if ("nosummary".equals(param)) {
+                                summaryCharts = false;
+                            }
+                            else {
+                                System.err.println("ignoring " + "unknown parameter " + '-' + '-' + param);
+                            }
+
+                            break nextarg;
+                        }
+                        else {
+                            System.err.println("ignoring " + "misplaced dash in " + arg);
+                            break;
+                        }
+                    }
+                    default:
+                        System.err.println("ignoring " + "unknown parameter " + '-' + c);
+                    }
+                }
+            }
+            else {
+                // arg does not start with '-', assume file / directory
+                paths.add(arg);
+            }
+        }
+
+        if (!summaryCharts && !dataSetCharts && customDataCharts.isEmpty() && customSummaryCharts.isEmpty()) {
+            System.err.println("--" + "nodata" + " and " + "--" + "nosummary"
+                    + " were specifed but no custom chart definitions (-d or -a) were given");
             return;
+        }
+
+        if (paths.isEmpty()) {
+            System.err.println("no path(s) to parse specified");
+            return;
+        }
+
+        List<String> filesToParse = new java.util.ArrayList<String>();
+
+        // find all NMON files
+        for (String path : paths) {
+            File pathToParse = new File(path);
+
+            FileHelper.recurseDirectories(java.util.Collections.singletonList(pathToParse), reportFileFilter,
+                    filesToParse);
+
+            if (filesToParse.isEmpty()) {
+                System.err.println('\'' + pathToParse.toString() + "' contains no parsable files");
+                return;
+            }
+        }
+
+        File pathToParse = null;
+
+        if (paths.size() == 1) {
+            // all subsequent output goes into the directory given by the user
+            pathToParse = new File(paths.get(0));
+        }
+        else {
+            // otherwise, use the current working directory
+            pathToParse = new File(System.getProperty("user.dir"));
         }
 
         ReportGenerator generator = new ReportGenerator();
-
-        // find all NMON files
-        File pathToParse = new File(args[args.length - 1]);
-        List<String> filesToParse = new java.util.ArrayList<String>();
-
-        FileHelper.recurseDirectories(java.util.Collections.singletonList(pathToParse), new NMONFileFilter(),
-                filesToParse);
-
-        if (filesToParse.isEmpty()) {
-            System.err.println('\'' + pathToParse.toString() + "' contains no parsable files");
-            return;
-        }
-
-        // all subsequent output goes into the directory given by the user
         generator.setBaseDirectory(pathToParse.isDirectory() ? pathToParse : pathToParse.getParentFile());
-
-        // parse the files
         generator.parse(filesToParse);
+        generator.setInterval(startTime, endTime);
 
         System.out.println();
+        System.out.println("Writing charts to " + generator.getChartDirectory());
+        System.out.println("Charting from "
+                + TimeHelper.TIMESTAMP_FORMAT_ISO.format(new java.util.Date(generator.getIntervalManager()
+                        .getCurrentInterval().getStart()))
+                + " to "
+                + TimeHelper.TIMESTAMP_FORMAT_ISO.format(new java.util.Date(generator.getIntervalManager()
+                        .getCurrentInterval().getEnd())));
 
-        // create summary charts in a 'charts' subdirectory
-        File summaryChartsDir = new File(generator.getBaseDirectory(), "charts");
-
-        summaryChartsDir.mkdir();
-
-        System.out.print("creating summary charts ");
-        System.out.flush();
-
-        List<BaseChartDefinition> summaryChartDefinitions = generator.parseChartDefinition(ReportGenerator.class
-                .getResourceAsStream("/com/ibm/nmon/gui/report/summary_single_interval.xml"));
-
-        generator.saveCharts(summaryChartDefinitions, generator.getDataSets(), summaryChartsDir);
-
-        System.out.println();
-
-        // for each dataset, create a subdirectory under 'charts' and output all the data set charts
-        // there
-        List<BaseChartDefinition> datasetChartDefinitions = generator.parseChartDefinition(ReportGenerator.class
-                .getResourceAsStream("/com/ibm/nmon/gui/report/dataset_report.xml"));
-
-        for (DataSet data : generator.getDataSets()) {
-            System.out.print("creating charts for " + data.getHostname() + ' ');
+        if (summaryCharts) {
+            System.out.print("\tCreating summary charts ");
             System.out.flush();
 
-            File datasetChartsDir = new File(summaryChartsDir, data.getHostname());
-            datasetChartsDir.mkdir();
+            generator.createChartsAcrossDataSets(ReportGenerator.class
+                    .getResourceAsStream("/com/ibm/nmon/gui/report/summary_single_interval.xml"));
+        }
 
-            generator.saveCharts(datasetChartDefinitions, java.util.Collections.singletonList(data), datasetChartsDir);
+        if (dataSetCharts) {
+            generator.createChartsForEachDataSet(ReportGenerator.class
+                    .getResourceAsStream("/com/ibm/nmon/gui/report/dataset_report.xml"));
+        }
+
+        for (String file : customSummaryCharts) {
+            System.out.print("\tCreating charts for " + file);
+            System.out.flush();
+
+            generator.createChartsAcrossDataSets(new FileInputStream(file));
+        }
+
+        for (String file : customDataCharts) {
+            System.out.print("\tCreating charts for " + file);
+            System.out.flush();
+
+            generator.createChartsForEachDataSet(new FileInputStream(file));
+        }
+
+        System.out.println("Charts complete!");
+    }
+
+    private static final FileFilter reportFileFilter = new FileFilter() {
+        private final FileFilter nmonFilter = new NMONFileFilter();
+        private final FileFilter hatjFilter = new HATJFileFilter();
+
+        public boolean accept(File pathname) {
+            return nmonFilter.accept(pathname) || hatjFilter.accept(pathname);
+        };
+    };
+
+    private static long parseTime(String[] args, int index, char param) {
+        if (index > args.length) {
+            throw new IllegalArgumentException("time must be specified for " + '-' + param);
+        }
+
+        try {
+            return TimeHelper.TIMESTAMP_FORMAT_ISO.parse(args[index]).getTime();
+        }
+        catch (ParseException pe) {
+            throw new IllegalArgumentException("time specified for " + '-' + param + " (" + args[index]
+                    + ") is not valid");
         }
     }
 
-    // TODO -s and -d options along with -c options for other reports
     private final ChartDefinitionParser parser = new ChartDefinitionParser();
     private final GranularityHelper granularityHelper;
     private final ChartFactory chartFactory;
 
     private File baseDirectory;
+    private File chartDirectory;
 
     private ReportGenerator() throws Exception {
         super();
-
-        // avoid logging parsing errors to console
-        // remove all existing handlers and add one that logs to the ParserLog
-        Logger root = Logger.getLogger("");
-
-        for (Handler handler : root.getHandlers()) {
-            root.removeHandler(handler);
-        }
-
-        root.addHandler(ParserLog.getInstance());
 
         granularityHelper = new GranularityHelper(this);
         chartFactory = new ChartFactory(this);
@@ -122,17 +271,50 @@ public final class ReportGenerator extends NMONVisualizerApp {
         return baseDirectory;
     }
 
-    public void setBaseDirectory(File baseDirectory) {
-        this.baseDirectory = baseDirectory;
+    public File getChartDirectory() {
+        return chartDirectory;
     }
 
-    private void parse(List<String> filesToParse) throws IOException {
+    public void setBaseDirectory(File baseDirectory) {
+        this.baseDirectory = baseDirectory;
+        this.chartDirectory = new File(baseDirectory, "charts");
+    }
+
+    public void setInterval(long startTime, long endTime) {
+        if (startTime == Interval.DEFAULT.getStart()) {
+            startTime = getMinSystemTime();
+        }
+
+        if (endTime == Interval.DEFAULT.getEnd()) {
+            endTime = getMaxSystemTime();
+        }
+
+        Interval toChart = null;
+
+        try {
+            toChart = new Interval(startTime, endTime);
+        }
+        catch (Exception e) {
+            System.err.println("invalid start and end times: " + e.getMessage());
+            System.err.println("The default interval will be used instead");
+            toChart = Interval.DEFAULT;
+        }
+
+        getIntervalManager().addInterval(toChart);
+        getIntervalManager().setCurrentInterval(toChart);
+    }
+
+    public void parse(List<String> filesToParse) throws IOException {
+        // avoid logging parsing errors to console
+        java.util.logging.Logger.getLogger(ParserLog.getInstance().getLogger().getName()).setUseParentHandlers(false);
+
         ParserLog log = ParserLog.getInstance();
         Map<String, String> errors = new java.util.LinkedHashMap<String, String>();
 
-        System.out.println("parsing NMON files...");
+        System.out.println("Parsing NMON files...");
+
         for (String fileToParse : filesToParse) {
-            System.out.print(fileToParse + "... ");
+            System.out.print("\t" + fileToParse + "... ");
             System.out.flush();
 
             log.setCurrentFilename(fileToParse);
@@ -141,15 +323,15 @@ public final class ReportGenerator extends NMONVisualizerApp {
                 parse(fileToParse, getDisplayTimeZone());
 
                 if (log.hasData()) {
-                    System.out.println("complete with errors!");
+                    System.out.println("Complete with errors!");
                 }
                 else {
-                    System.out.println("complete");
+                    System.out.println("Complete");
                 }
             }
             catch (Exception e) {
                 log.getLogger().error("could not parse " + fileToParse, e);
-                System.out.println("complete with errors!");
+                System.out.println("Complete with errors!");
                 // continue parsing other files
             }
 
@@ -157,6 +339,8 @@ public final class ReportGenerator extends NMONVisualizerApp {
                 errors.put(log.getCurrentFilename(), log.getMessages());
             }
         }
+
+        System.out.println("Parsing complete!");
 
         if (!errors.isEmpty()) {
             File errorFile = new File(baseDirectory, "ReportGenerator_"
@@ -170,14 +354,35 @@ public final class ReportGenerator extends NMONVisualizerApp {
             }
 
             out.close();
-            System.out.println("parsing complete!" + " Errors written to " + errorFile);
-        }
-        else {
-            System.out.println("parsing complete!");
+            System.out.println("Errors written to " + errorFile);
         }
 
-        granularityHelper.recalculate();
-        chartFactory.setGranularity(granularityHelper.getGranularity());
+        // reset specifically so errors in ChartDefinitionParser _will_ go to the console
+        java.util.logging.Logger.getLogger(ParserLog.getInstance().getLogger().getName()).setUseParentHandlers(true);
+
+    }
+
+    public void createChartsAcrossDataSets(InputStream chartDefinition) throws IOException {
+        chartDirectory.mkdir();
+        saveCharts(parseChartDefinition(chartDefinition), getDataSets(), chartDirectory);
+    }
+
+    public void createChartsForEachDataSet(InputStream chartDefinition) throws IOException {
+        // for each dataset, create a subdirectory under 'charts' and output all the data set charts
+        // there
+        List<BaseChartDefinition> datasetChartDefinitions = parseChartDefinition(chartDefinition);
+
+        chartDirectory.mkdir();
+
+        for (DataSet data : getDataSets()) {
+            System.out.print("\tCreating charts for " + data.getHostname() + ' ');
+            System.out.flush();
+
+            File datasetChartsDir = new File(chartDirectory, data.getHostname());
+            datasetChartsDir.mkdir();
+
+            saveCharts(datasetChartDefinitions, java.util.Collections.singletonList(data), datasetChartsDir);
+        }
     }
 
     private List<BaseChartDefinition> parseChartDefinition(InputStream toParse) {
@@ -194,6 +399,8 @@ public final class ReportGenerator extends NMONVisualizerApp {
 
     private void saveCharts(List<BaseChartDefinition> chartDefinitions, Iterable<? extends DataSet> data,
             File saveDirectory) throws IOException {
+        chartFactory.setInterval(getIntervalManager().getCurrentInterval());
+
         List<BaseChartDefinition> chartsToCreate = chartFactory.getChartsForData(chartDefinitions, data);
 
         for (BaseChartDefinition definition : chartsToCreate) {
@@ -212,14 +419,10 @@ public final class ReportGenerator extends NMONVisualizerApp {
     }
 
     @Override
-    protected String[] getDataForGCParse(String fileToParse) {
-        // TODO Auto-generated method stub
-        return super.getDataForGCParse(fileToParse);
-    }
+    public void currentIntervalChanged(Interval interval) {
+        super.currentIntervalChanged(interval);
 
-    @Override
-    protected Object[] getDataForIOStatParse(String fileToParse, String hostname) {
-        // TODO Auto-generated method stub
-        return super.getDataForIOStatParse(fileToParse, hostname);
+        granularityHelper.recalculate();
+        chartFactory.setGranularity(granularityHelper.getGranularity());
     }
 }
