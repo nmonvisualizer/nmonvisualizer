@@ -116,10 +116,9 @@ public final class ChartDefinitionParser extends BasicXMLParser {
                 Map<String, String> attributes = parseAttributes(unparsedAttributes);
 
                 if (attributes.get("asPercent") != null) {
-                    logger.warn(
-                            "ignoring " + "asPercent" + " attribute for " + "<yAxis2>" + " element for chart '"
-                                    + (currentChart == null ? currentChart : currentChart.getShortName())
-                                    + '\'' +  " at line {}" + "; secondary axes do not support percentages", getLineNumber());
+                    logger.warn("ignoring " + "asPercent" + " attribute for " + "<yAxis2>" + " element for chart '"
+                            + (currentChart == null ? currentChart : currentChart.getShortName()) + '\''
+                            + " at line {}" + "; secondary axes do not support percentages", getLineNumber());
                 }
 
                 if (currentChart instanceof BarChartDefinition && ((BarChartDefinition) currentChart).isStacked()) {
@@ -205,6 +204,13 @@ public final class ChartDefinitionParser extends BasicXMLParser {
         }
 
         String title = attributes.get("name");
+
+        if ((title == null) || "".equals(title)) {
+            logger.warn("ignoring " + "<linechart>" + " element with no name" + " at line {}", getLineNumber());
+            skip = true;
+            return;
+        }
+
         String shortName = attributes.get("shortName");
         boolean stacked = Boolean.valueOf(attributes.get("stacked"));
 
@@ -226,6 +232,13 @@ public final class ChartDefinitionParser extends BasicXMLParser {
         }
 
         String title = attributes.get("name");
+
+        if ((title == null) || "".equals(title)) {
+            logger.warn("ignoring " + "<intervalchart>" + " element with no name" + " at line {}", getLineNumber());
+            skip = true;
+            return;
+        }
+
         String shortName = attributes.get("shortName");
 
         currentChart = new IntervalChartDefinition(shortName == null ? title : shortName, title);
@@ -247,6 +260,13 @@ public final class ChartDefinitionParser extends BasicXMLParser {
         }
 
         String title = attributes.get("name");
+
+        if ((title == null) || "".equals(title)) {
+            logger.warn("ignoring " + "<barchart>" + " element with no name" + " at line {}", getLineNumber());
+            skip = true;
+            return;
+        }
+
         String shortName = attributes.get("shortName");
         boolean stacked = Boolean.valueOf(attributes.get("stacked"));
         boolean subtractionNeeded = Boolean.valueOf(attributes.get("subtractionNeeded"));
@@ -427,6 +447,12 @@ public final class ChartDefinitionParser extends BasicXMLParser {
     }
 
     private void endDataElement() {
+        if (typeMatcher == null) {
+            logger.warn("ignoring " + "<data>" + " element without a <type>" + "at line {}" + " <type> is required",
+                    getLineNumber());
+            return;
+        }
+
         // as a convenience to users, allow multiple <field> elements
         // but, as an optimization, roll up all the ExactFieldMatchers into a SetFieldMatcher since
         // there has to be a DataDefinition per matcher
@@ -443,6 +469,7 @@ public final class ChartDefinitionParser extends BasicXMLParser {
                 else if ("$PARTITIONS".equals(name)) {
                     consolidatedMatchers.add(PartitionMatcher.INSTANCE);
                 }
+                // else if ("$ALL".equals(name)) covered by having the names list be empty
                 else {
                     names.add(name);
                 }
@@ -472,6 +499,8 @@ public final class ChartDefinitionParser extends BasicXMLParser {
             }
 
             if (hostTransformer != null) {
+                // no <host> element => hostMatcher and hostTransformer will be null, no need for
+                // hostMatcher null check here
                 if (hostMatcher.getClass().equals(ExactHostMatcher.class)) {
                     definition.addHostnameTransformer(((ExactHostMatcher) hostMatcher).getHostname(), hostTransformer);
                 }
@@ -482,6 +511,8 @@ public final class ChartDefinitionParser extends BasicXMLParser {
             }
 
             if (typeTransformer != null) {
+                // no <type> element => typeMatcher and typeTransformer will be null, no need for
+                // typeMatcher null check here
                 if (typeMatcher.getClass().equals(ExactTypeMatcher.class)) {
                     definition.addTypeTransformer(((ExactTypeMatcher) typeMatcher).getType(), typeTransformer);
                 }
