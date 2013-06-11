@@ -449,7 +449,7 @@ public final class ReportGenerator extends NMONVisualizerApp {
         for (BaseChartDefinition definition : chartsToCreate) {
             JFreeChart chart = chartFactory.createChart(definition, data);
 
-            String filename = chart.getTitle().getText().replace('\n', ' ') + ".png";
+            String filename = definition.getShortName().replace('\n', ' ') + ".png";
             File chartFile = new File(saveDirectory, filename);
 
             try {
