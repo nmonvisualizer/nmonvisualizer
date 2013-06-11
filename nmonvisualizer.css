@@ -19,6 +19,17 @@ h2 {
   color: #444444;
 }
 
+h2.top {
+  color:grey;
+  text-align: center;
+}
+
+h3 {
+  margin: .25em;
+  font-size: 110%;
+  color: #333333;
+}
+
 .b {
   font-weight: bold;
   color: #444444;
@@ -54,7 +65,7 @@ a.img:hover {
 }
 
 p {
-  margin: .5em;
+  margin: .5em .5em .75em .5em;
 }
 
 ul {
@@ -68,7 +79,7 @@ ul ul {
 
 li {
   padding: 0;
-  margin-bottom: .5em;
+  margin-bottom: .25em;
 }
 
 img {

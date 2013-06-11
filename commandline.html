@@ -6,7 +6,7 @@
 </head>
 <body>
 <h1>NMON Visualizer</h1>
-<h2 style="text-align: center; color: gray;">command line</h2>
+<h2 class="top">command line</h2>
 
 <div id="nav">
   <a href="index.html">Home</a><br/>
@@ -14,6 +14,7 @@
   <a href="iostat.html">IOStat</a><br/>
   <a href="json.html">JSON</a><br/>
   <a class="b" href="commandline.html">Command Line</a><br/>
+  <a href="customreports.html">Custom Reports</a><br/>
   <a href="startup.html">Start nmon at Boot</a><br/>
   <hr/>
   <a href="https://github.com/nmonvisualizer/nmonvisualizer">Project on GitHub</a>
@@ -24,14 +25,32 @@
 <div id="content">
   <div class="section">
     <h2>Report Generator</h2>
-    <p>NMON Visualizer supports generating charts as PNG files from the command line. Currently, it will create the same charts that are avaiable in the GUI. Both the summary charts at the 'All Systems' level and charts for each host will be created in a <span class="c">charts</span> subdirectory. There will be another subdirectory for each host's set of charts.
+    <p>NMON Visualizer supports generating charts as PNG files from the command line. By default, it will create the same charts that are available in the GUI. Both the summary charts at the 'All Systems' level and charts for each host will be created in a <span class="c">charts</span> subdirectory. There will be another subdirectory for each host's set of charts. Generation of these reports, along with the ability to create custom reports is supported via switches.
+    </p>
+    <p>The charts produced by this utility default to displaying all the data that was parsed. Command line switches are also supported to specify the start and / or end datetimes for the charts as well as creating custom reports.
     </p>
   </div>
   <div class="section">
+    <h3>Running</h3>
     <p>To run the ReportGenerator, specify the class from the command line like the following:<br/>
-       <span class="c">java -jar NMONVisualizer_&lt;release_date&gt;.jar com.ibm.nmon.ReportGenerator &lt;file|directory to parse&gt;</span><br/>
-      Note that only NMON files are parsed. If a directory is given, then this directory will be searched <span class="i">recursively</span> so ensure that the JVM has enough memory allocated to it (via <span class="c">-Xmx</span>).
-    </p>
+       <span class="c">java -jar NMONVisualizer_&lt;release_date&gt;.jar com.ibm.nmon.ReportGenerator &lt;file|directory to parse&gt;</span></p>
+    <p>Note that only NMON files are parsed. If a directory is given, then this directory will be searched <span class="i">recursively</span>. so ensure that the JVM has enough memory allocated to it (via <span class="c">-Xmx</span>).</p>
+  </div>
+  <div class="section">
+    <h3>Options</h3>
+    <ul>
+      <li><span class="c">--nodata</span> - do not generate charts for each host / dataset</li>
+      <li><span class="c">--nosummary</span> - do not generate summary charts across all hosts / datasets</li>
+      <li><span class="c">-s</span> - start datetime of charts in ISO 8601 datetime format (<span class="c">yyyy-MM-ddTHH:mm:ssX</span>)</li>
+      <li><span class="c">-e</span> - end datetime of charts in ISO 8601 datetime format (<span class="c">yyyy-MM-ddTHH:mm:ssX</span>)</li>
+      <li><span class="c">-d &lt;filename&gt;</span> - use the given XML file to create a <a href="customreports.html">custom</a> set of charts <span class="i">for each</span> host / dataset</li>
+      <li><span class="c">-a &lt;filename&gt;</span> - use the given XML file to create a <a href="customreports.html">custom</a> set of charts <span class="i">across all</span> hosts / datasets</li>
+    </ul>
+    <p>Note that the <span class="c">-d</span> and <span class="c">-a</span> do not disable the default reports, hence the other switches to do this.</p>
+  </div>
+  <div class="section">
+    <h3>Errors</h3>
+    <p>Any errors generated during parsing will be logged to a <span class="c">ReportGenerator_yyyMMdd_HHmmss.log</span> log file.</p>
   </div>
 </div>
 </body>

@@ -1,0 +1,155 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd">
+<head>
+<title>NMON Visualizer - Custom Reports</title>
+<link rel="stylesheet"href="nmonvisualizer.css" type="text/css" />
+<link rel="icon" href="favicon.ico" type="image/png" />
+</head>
+<body>
+<h1>NMON Visualizer</h1>
+<h2 class="top">custom report format</h2>
+
+<div id="nav">
+  <a class="bold" href="index.html">Home</a><br/>
+  <a href="screenshots.html">Screenshots</a><br/>
+  <a href="iostat.html">IOStat</a><br/>
+  <a href="json.html">JSON</a><br/>
+  <a href="commandline.html">Command Line</a><br/>
+  <a class="b" href="customreports.html">Custom Reports</a><br/>
+  <a href="startup.html">Start nmon at Boot</a><br/>
+  <hr/>
+  <a href="https://github.com/nmonvisualizer/nmonvisualizer">Project on GitHub</a>
+  <a href="https://bintray.com/pkg/show/general/nmonvisualizer/NMONVisualizer/com.ibm.nmon">Releases</a>
+  <a href="https://github.com/nmonvisualizer/nmonvisualizer/issues/new">Submit a Bug</a>
+</div>
+
+<div id="content">
+  <div class="section">
+    <h2>Overview</h2>
+    <p>NMON Visualizer supports generating custom reports from the <a href="commandline.html"/>command line</a>. Custom reports are defined in an XML file format, detailed here.</p>
+  </div>
+
+  <div class="section">
+    <h2>Concepts</h2>
+    <p>Three chart types are supported: line charts, bar charts and interval charts. Line charts <span class="i">always</span> have a time-based X axis; only the values charted and the Y axis are defined. An interval chart is similar except that the X axis plots all the intervals that are currently defined. A bar chart plots at least one aggregate statistic; both the Y axis and the columns (bar) names can be specified.</p>
+    <p>To create lines or bars, one or more <span class="c">&lt;data&gt;</span> elements are specified for each chart. The data can either be all the data for a specific data type (<span class="c">&lt;type&gt;</span>) or one or more fields from the data type (<span class="c">&lt;field&gt;</span>). In either case, the type and / or field does not have to be exact; <a href="#matching">regular expression matching</a> and other specific substitutions are supported.</p>
+    <p>In general, naming of lines and bars on a particular chart is very important. If a type or field is defined more than once or if renaming causes duplicates, only a single instance will appear on the chart. This assist with this, support exists for <a href="#renaming">renaming data</a> on the resulting chart.</p>
+    <p>By default, a chart is created using data from all hosts (i.e. parsed data sets). An optional <span class="c">&lt;host&gt;</span> element can be used to restrict chart data to specific host names (exact or regex) or operating systems. Note that the program makes a distiction between (and processes differently) report XML files that should be run for a single host (i.e. a dataset report) and XML files that should be run across all hosts (i.e. a summary report, the 'All Systems' view). Therefore, it is best practice to have at least two report XML files defined: one to generate a set of charts for each host and another to generate charts that aggregate data for all hosts. Multiple, similar chart definitions differing only in their <span class="c">&lt;host&gt;</span> specifiction are usually not required. Instead, a common report will be applied to each host.</p>
+  </div>
+
+  <div class="section">
+    <h2>Charts</h2>
+    <p>The root element of the XML must be <span class="c">&lt;charts&gt;</span>. Within that, there can be any number of chart elements; each one will generate a separate graph. The three chart types each have their own element: <span class="c">&lt;linechart&gt;</span>, <span class="c">&lt;barchart&gt;</span> and <span class="c">&lt;intervalchart&gt;</span>. All elements support the following attributes:</p>
+    <ul>
+      <li><span class="c">name</span> - the name of the chart. This value is <span class="i"/>required</span>. This will be used as the title of the chart.</li>
+      <li><span class="c">shortName</span> - a more concise name for the chart. This will be used as the file name when the chart is output as well as the tab name in the GUI. If not specified the short name will default to the full name.</li>
+      <li><span class="c">stacked</span> - a a boolean value indicating that the lines or bars in the chart should be stacked rather than separate. On a line chart this causes the area between the lines to be filled in. This attribute is ignored for interval charts. The default value is <span class="c">false</span>.</li>
+    </ul>
+    <p>Bar chars also support a <span class="c">subtractionNeeded</span> attribute to specify that the bar value should be subtracted from the previous bar's value. This is useful for stacked charts where the underlying data for each field is a sum of other data.</p>
+
+    <h3>Naming &amp; Legends</h3>
+    <p>By default lines and bars, as displayed in a chart legend, are named by their field. On bar charts, the X axis displays a category which defaults to the type name. Optional attributes exist to change the defaults.</p>
+    <p>For line charts, the attribute is <span class="c">linesNamedBy</span>. This is most useful when charting multiple types, each with the same field name. For bar charts, there are two attributes: <span class="c">barsNamedBy</span> and <span class="c">categoriesNamedBy</span>. These should not be set to the same value.</p>
+    <p>For both line and bar charts, the following naming modes are supported:<p>
+    <ul>
+      <li><span class="c">HOST</span> - the hostname of the dataset</li>
+      <li><span class="c">TYPE</span> - the name of the datatype</li>
+      <li><span class="c">FIELD</span> - the name of the field</li>
+      <li><span class="c">STAT</span> - the name of a <a href="#stat">statistic</a></li>
+      <li><span class="c">HOST_TYPE</span> - the hostname plus the type</li>
+      <li><span class="c">HOST_FIELD</span> - the hostname plus the field</li>
+      <li><span class="c">HOST_STAT</span> - the hostname plus the stat</li>
+      <li><span class="c">TYPE_FIELD</span> - the type name plus the field</li>
+      <li><span class="c">TYPE_STAT</span> - the type name plus the stat</li>
+      <li><span class="c">FIELD_STAT</span> - the field name plus the stat</li>
+    </ul>
+    <p>Note that these values must be capitalized in the XML.</p>
+
+    <h3>Data</h3>
+    <p>Each chart must contain at least one <span class="c">&lt;data&gt;</span> element to define the data to be graphed. The data element can have zero or one <span class="c">&lt;type&gt;</span> elements and zero or more <span class="c">&lt;field&gt;</span> elements as children. Type elements are used to <a href="matching">match</a> data types; field elements are used to match data within the given type. If a type element is not specified, all matching fields in all types will be graphed. If not field element is specified, all fields for the matching types will be graphed. If neither is specified <span class="i">all</span> data will be included on a single chart; this probably is not desired.</p>
+
+    <h3>Y Axis</h3>
+    <p>Optional <span class="c">&lt;yAxis&gt;</span> and <span class="c">&lt;yAxis2&gt;</span> elements are supported for each chart. Both support a <span class="c">label</span> attribute which specifies the name of the axis. The primary Y axis can also be set to a percentage scale with the <span class="c">asPercent</span> attribute, which must be a boolean. Note that to actually use the secondary Y axis, subsequent <span class="c">&lt;data&gt;</span> elements <span class="i">must</span> specify the <span class="c">useYAxis2</span> attribute as a boolean.</p>
+  </div>
+
+  <div class="section">
+    <a id="stat"><h2>Statistics</h2></a>
+    <p>In addition to graphing data as-is, aggregate data can also be charted. This is done by specifing the <span class="c">stat</span> attribute in a <span class="c">data</span> element. The following statistics are supported:</p>
+    <ul>
+      <li><span class="c">AVERAGE</span></li>
+      <li><span class="c">MINIMUM</span></li>
+      <li><span class="c">MEDIAN</span></li>
+      <li><span class="c">MAX</span></li>
+      <li><span class="c">STD_DEV</span></li>
+      <li><span class="c">SUM</span></li>
+      <li><span class="c">COUNT</span></li>
+      <li><span class="c">GRANULARITY_MAX</span> - this statistic calculates a peak average using the current granularity as the time scale. The value reported is the <span class="i">maximum</span> peak average of all periods in the current interval.</li>
+    </ul>
+    <p>Note that these values must be capitalized in the XML. The default value is <span class="c">AVERAGE</span>.</p>
+    <p>Because the <span class="c">STAT</span> values collapse data into a single point, this attribute is ignored for line charts.</p>
+  </div>
+
+  <div class="section">
+    <a id="matching"><h2>Selecting Data</h2></a>
+    <p>Hosts, types and fields can all be selected by name or by regular expression. For matching a specific name, use the <span class="c">name</span> attribute. For regexes, use the <span class="c">regex</span> attribute. Both should not be specified in a single element. Note that the name must be capitalized <span class="i">exactly</span> how it is in the underlying data file; this usually means types are uppercase and fields are lowercase.</p>
+    <p>For the <span class="c">regex</span> attribute, any valid regular expression that can be parsed by Java's <span class="c">Pattern</span> class is valid. Note that when escaping values with backslash, only a single <span class="c">\</span> is needed.</p>
+    <p>For the <span class="c">name</span> attribute, there are several special values that can be used:</p>
+    <ul>
+      <li><span class="c">$ALL</span> - matches all values. This is the default but can be useful in combination with renaming.</li>
+      <li><span class="c">$PROCESSES</span> - matches all processes and returns only the aggregate process data if there are multiple processes with the same name.</li>
+      <li><span class="c">$DISKS</span> - matches all disks (e.g. <span class="c">/dev/sda</span> but not <span class="c">/dev/sda1</span>) for nmon <span class="c">DISK</span> data types.</li>
+      <li><span class="c">$PARTITIONS</span> - matches all partitions for nmon <span class="c">DISK</span> data types.</li>
+    </ul>
+    <p>For <span class="c">&lt;host&gt;</span> elements, an additional <span class="c">os</span> attribute can also be provided to specify that data should only be matched for a specific operating system. Accepted values for this attribute are <span class="c">linux</span>, <span class="c">aix</span>, <span class="c">vios</span> and <span class="c">esx</span>. These values <span class="i">are not</span> case sensitive.</p>
+  </div>
+
+  <div class="section">
+    <a id="renaming"><h2>Renaming Data</h2></a>
+    <p>Hosts, types and fields can all be renamed directly or with regular expressions. For explicit renaming, use the <span class="c">alias</span> attribute. For regexes, use the <span class="c">aliasRegex</span> attribute. Both should not be specified in a single element.</p>
+    <p>For the <span class="c">regexAlias</span> attribute, any valid regular expression that can be parsed by Java's <span class="c">Pattern</span> class is valid. Note that when escaping values with backslash, only a single <span class="c">\</span> is needed. Unlike regular expression matching, renaming with a regex <span class="i">requires</span> at least one matching group (i.e. parentheses). This matching group will be used as the new field name. By default the matching group is number 1, but this can be changed by specifying the <span class="c">aliasRegexGroupAttribute</span>.</p>
+    <p>Often it is not possible to craft a <span class="c">regexAlias</span> that can rename appropriately. However, a similar regex is still useful for matching data. To support this case, an optional <span class="c">&lt;fieldAlias&gt;</span> is also supported. This element requires both a <span class="c">name</span> and a <span class="c">value</span> attribute. The name matches the field exactly (rexes are not supported) and the value is the renamed alias.</p>
+    <p>Note that it is almost always wrong to use a renaming attribute when also using a <span class="c">regex</span> attribute to match. If the regular expression matches more than one item, <span class="i">all</span> the items will be remnamed. However, since names on a chart must be unique, only a single line or bar will appear on the chart.</p>
+  </div>
+
+  <div class="section">
+    <h2>Examples</h2>
+    <p>Graph CPU data in a stacked line chart for a single host. Graph with a percentage scale. Rename the fields to their full names without percent signs.
+    <span class="c">
+&lt;linechart name="CPU Utilization" shortName="CPU" stacked="true"&gt;
+  &lt;yAxis label="% CPU" asPercent="true" /&gt;
+  &lt;data&gt;
+    &lt;type name="CPU_ALL" /&gt;
+    &lt;field name="User%" alias="User" /&gt;
+    &lt;field name="Sys%" alias="System" /&gt;
+    &lt;field name="Wait%" alias="Wait" /&gt;
+  &lt;/data&gt;
+&lt;/linechart&gt;</span>
+    </p>
+
+    <p>Graph CPU data in a bar chart for all hosts. User, system and wait time bars (named by field) will be stacked. Each host will have a separate set of bars (categories).
+    <span class="c">
+&lt;barchart name="Average CPU Utilization" shortName="CPU" stacked="true" categoriesNamedBy="HOST" barsNamedBy="FIELD"&gt;
+  &lt;yAxis label="% CPU" asPercent="true" /&gt;
+  &lt;data&gt;
+    &lt;type name="CPU_ALL" /&gt;
+    &lt;field name="User%" alias="User" /&gt;
+    &lt;field name="Sys%" alias="System" /&gt;
+    &lt;field name="Wait%" alias="Wait" /&gt;
+  &lt;/data&gt;
+&lt;/barchart&gt;</span>
+    </p>
+
+    <p>Graph CPU data in an interval chart for all hosts. Create an average total CPU line for each host.
+    <span class="c">
+&lt;intervalchart name="Average CPU Utilization" shortName="CPU" linesNamedBy="HOST"&gt;
+  &lt;yAxis label="% CPU" asPercent="true" /&gt;
+  &lt;data&gt;
+    &lt;type name="CPU_ALL" /&gt;
+    &lt;field name="CPU%" /&gt;
+  &lt;/data&gt;
+&lt;/intervalchart&gt;</p>
+
+    <p>XML files used by NMONVisualizer internally are in the <a href="https://github.com/nmonvisualizer/nmonvisualizer/tree/master/src/com/ibm/nmon/gui/report"><span class="c">com.ibm.nmon.gui.report</span></a> package.</p>
+  </div>
+</div>
+</body>
+</html>
