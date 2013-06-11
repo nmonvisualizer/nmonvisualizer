@@ -61,7 +61,7 @@ public abstract class NMONVisualizerApp implements IntervalListener {
     private final Properties properties = new Properties();
     protected final PropertyChangeSupport propertyChangeSupport;
 
-    protected NMONVisualizerApp() throws Exception {
+    protected NMONVisualizerApp() {
         // ensure ParserLogHandler is instantiated before any parsers
         // since it creates the parent logger
         ParserLog.getInstance();

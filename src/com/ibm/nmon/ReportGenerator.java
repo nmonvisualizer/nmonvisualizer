@@ -41,7 +41,7 @@ import com.ibm.nmon.util.GranularityHelper;
 import com.ibm.nmon.util.TimeHelper;
 
 public final class ReportGenerator extends NMONVisualizerApp {
-    public static void main(String[] args) throws Exception {
+    public static void main(String[] args) {
         if (args.length == 0) {
             System.err.println("no path(s) to parse specified");
             return;
@@ -50,9 +50,15 @@ public final class ReportGenerator extends NMONVisualizerApp {
         // ensure the Swing GUI does not pop up or cause XWindows errors
         System.setProperty("java.awt.headless", "true");
 
-        // initialize logging from the classpath properties file
-        java.util.logging.LogManager.getLogManager().readConfiguration(
-                NMONVisualizerCmdLine.class.getResourceAsStream("/cmdline.logging.properties"));
+        try {
+            // initialize logging from the classpath properties file
+            java.util.logging.LogManager.getLogManager().readConfiguration(
+                    NMONVisualizerCmdLine.class.getResourceAsStream("/cmdline.logging.properties"));
+        }
+        catch (IOException ioe) {
+            System.err.println("cannot initialize logging, will output to System.out");
+            ioe.printStackTrace();
+        }
 
         List<String> paths = new java.util.ArrayList<String>();
 
@@ -97,7 +103,8 @@ public final class ReportGenerator extends NMONVisualizerApp {
                         ++i;
 
                         if (i > args.length) {
-                            throw new IllegalArgumentException("file must be specified for " + '-' + 'd');
+                            System.err.println("file must be specified for " + '-' + 'd');
+                            return;
                         }
 
                         customDataCharts.add(args[i]);
@@ -107,7 +114,8 @@ public final class ReportGenerator extends NMONVisualizerApp {
                         ++i;
 
                         if (i > args.length) {
-                            throw new IllegalArgumentException("file must be specified for " + '-' + 's');
+                            System.err.println("file must be specified for " + '-' + 's');
+                            return;
                         }
 
                         customSummaryCharts.add(args[i]);
@@ -214,14 +222,35 @@ public final class ReportGenerator extends NMONVisualizerApp {
             System.out.print("\tCreating charts for " + file);
             System.out.flush();
 
-            generator.createChartsAcrossDataSets(new FileInputStream(file));
+            InputStream in = null;
+
+            try {
+                in = new FileInputStream(file);
+            }
+            catch (IOException ioe) {
+                System.err.println("cannot load chart definition '" + file + "'");
+                ioe.printStackTrace();
+                continue;
+            }
+
+            generator.createChartsAcrossDataSets(in);
         }
 
         for (String file : customDataCharts) {
             System.out.print("\tCreating charts for " + file);
             System.out.flush();
 
-            generator.createChartsForEachDataSet(new FileInputStream(file));
+            InputStream in = null;
+            try {
+                in = new FileInputStream(file);
+            }
+            catch (IOException ioe) {
+                System.err.println("cannot load chart definition '" + file + "'");
+                ioe.printStackTrace();
+                continue;
+            }
+
+            generator.createChartsForEachDataSet(in);
         }
 
         System.out.println("Charts complete!");
@@ -257,7 +286,7 @@ public final class ReportGenerator extends NMONVisualizerApp {
     private File baseDirectory;
     private File chartDirectory;
 
-    private ReportGenerator() throws Exception {
+    private ReportGenerator() {
         super();
 
         granularityHelper = new GranularityHelper(this);
@@ -304,7 +333,7 @@ public final class ReportGenerator extends NMONVisualizerApp {
         getIntervalManager().setCurrentInterval(toChart);
     }
 
-    public void parse(List<String> filesToParse) throws IOException {
+    public void parse(List<String> filesToParse) {
         // avoid logging parsing errors to console
         java.util.logging.Logger.getLogger(ParserLog.getInstance().getLogger().getName()).setUseParentHandlers(false);
 
@@ -345,8 +374,16 @@ public final class ReportGenerator extends NMONVisualizerApp {
         if (!errors.isEmpty()) {
             File errorFile = new File(baseDirectory, "ReportGenerator_"
                     + new SimpleDateFormat("yyyyMMdd_HHmmss").format(System.currentTimeMillis()) + ".log");
-            PrintStream out = new PrintStream(new FileOutputStream(errorFile));
 
+            PrintStream out = null;
+            try {
+                out = new PrintStream(new FileOutputStream(errorFile));
+            }
+            catch (IOException io) {
+                System.err.println("could not create error log file '" + errorFile.getAbsolutePath()
+                        + "'; no output will be logged");
+                return;
+            }
             for (String filename : errors.keySet()) {
                 out.print(filename);
                 out.println(':');
@@ -362,26 +399,32 @@ public final class ReportGenerator extends NMONVisualizerApp {
 
     }
 
-    public void createChartsAcrossDataSets(InputStream chartDefinition) throws IOException {
-        chartDirectory.mkdir();
-        saveCharts(parseChartDefinition(chartDefinition), getDataSets(), chartDirectory);
+    public void createChartsAcrossDataSets(InputStream chartDefinition) {
+        List<BaseChartDefinition> chartDefinitions = parseChartDefinition(chartDefinition);
+
+        if (chartDefinitions != null) {
+            chartDirectory.mkdir();
+            saveCharts(chartDefinitions, getDataSets(), chartDirectory);
+        }
     }
 
-    public void createChartsForEachDataSet(InputStream chartDefinition) throws IOException {
+    public void createChartsForEachDataSet(InputStream chartDefinition) {
         // for each dataset, create a subdirectory under 'charts' and output all the data set charts
         // there
         List<BaseChartDefinition> datasetChartDefinitions = parseChartDefinition(chartDefinition);
 
-        chartDirectory.mkdir();
+        if (chartDefinition != null) {
+            chartDirectory.mkdir();
 
-        for (DataSet data : getDataSets()) {
-            System.out.print("\tCreating charts for " + data.getHostname() + ' ');
-            System.out.flush();
+            for (DataSet data : getDataSets()) {
+                System.out.print("\tCreating charts for '" + data.getHostname() + "' ");
+                System.out.flush();
 
-            File datasetChartsDir = new File(chartDirectory, data.getHostname());
-            datasetChartsDir.mkdir();
+                File datasetChartsDir = new File(chartDirectory, data.getHostname());
+                datasetChartsDir.mkdir();
 
-            saveCharts(datasetChartDefinitions, java.util.Collections.singletonList(data), datasetChartsDir);
+                saveCharts(datasetChartDefinitions, java.util.Collections.singletonList(data), datasetChartsDir);
+            }
         }
     }
 
@@ -389,16 +432,16 @@ public final class ReportGenerator extends NMONVisualizerApp {
         try {
             return parser.parseCharts(toParse);
         }
-        catch (Exception e) {
+        catch (IOException ioe) {
             System.err.println("cannot parse report definition xml");
-            e.printStackTrace();
+            ioe.printStackTrace();
 
             return null;
         }
     }
 
     private void saveCharts(List<BaseChartDefinition> chartDefinitions, Iterable<? extends DataSet> data,
-            File saveDirectory) throws IOException {
+            File saveDirectory) {
         chartFactory.setInterval(getIntervalManager().getCurrentInterval());
 
         List<BaseChartDefinition> chartsToCreate = chartFactory.getChartsForData(chartDefinitions, data);
@@ -409,7 +452,13 @@ public final class ReportGenerator extends NMONVisualizerApp {
             String filename = chart.getTitle().getText().replace('\n', ' ') + ".png";
             File chartFile = new File(saveDirectory, filename);
 
-            ChartUtilities.saveChartAsPNG(chartFile, chart, 1920 / 2, 1080 / 2);
+            try {
+                ChartUtilities.saveChartAsPNG(chartFile, chart, 1920 / 2, 1080 / 2);
+            }
+            catch (IOException ioe) {
+                System.err.println("cannot create chart '" + chartFile.getName() + "'");
+                continue;
+            }
 
             System.out.print('.');
             System.out.flush();
