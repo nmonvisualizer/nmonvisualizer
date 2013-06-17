@@ -1,17 +1,21 @@
 package com.ibm.nmon.interval;
 
-import java.text.ParseException;
-import java.util.Date;
+import org.slf4j.Logger;
+
 import java.util.List;
 import java.util.Set;
+import java.util.Date;
+
 import java.util.regex.Pattern;
+import java.text.ParseException;
 
 import java.io.File;
-import java.io.BufferedReader;
+import java.io.LineNumberReader;
 import java.io.FileWriter;
 import java.io.IOException;
 
 import com.ibm.nmon.util.DataHelper;
+
 import com.ibm.nmon.util.TimeFormatCache;
 import com.ibm.nmon.util.TimeHelper;
 
@@ -21,6 +25,8 @@ import com.ibm.nmon.util.TimeHelper;
  * {@link IntervalListener} events.
  */
 public final class IntervalManager {
+    private static final Logger LOGGER = org.slf4j.LoggerFactory.getLogger(IntervalManager.class);
+
     private final Set<Interval> intervals;
 
     private Interval currentInterval;
@@ -39,6 +45,7 @@ public final class IntervalManager {
     public void setCurrentInterval(Interval interval) {
         if (intervals.contains(interval)) {
             if (!currentInterval.equals(interval)) {
+                LOGGER.debug("setting current interval to {}", TimeFormatCache.formatInterval(interval));
                 currentInterval = interval;
 
                 for (IntervalListener listener : listeners) {
@@ -51,6 +58,7 @@ public final class IntervalManager {
             // this is needed in case data is added that redefines what the default interval time
             // span actually is
             // see com.ibm.nmon.NMONVisualizerApp.recalculateMinAndMaxSystemTime()
+            LOGGER.debug("setting current interval to {}", "DEFAULT");
             currentInterval = Interval.DEFAULT;
 
             for (IntervalListener listener : listeners) {
@@ -69,9 +77,11 @@ public final class IntervalManager {
 
     public boolean addInterval(Interval interval) {
         if (Interval.DEFAULT.equals(interval)) {
+            LOGGER.trace("not adding DEFAULT interval");
             return false;
         }
         else if (intervals.add(interval)) {
+            LOGGER.debug("added " + "interval {}", TimeFormatCache.formatInterval(interval));
             for (IntervalListener listener : listeners) {
                 listener.intervalAdded(interval);
             }
@@ -79,17 +89,21 @@ public final class IntervalManager {
             return true;
         }
         else {
+            LOGGER.trace("interval {}" + "already present", TimeFormatCache.formatInterval(interval));
             return false;
         }
     }
 
     public boolean removeInterval(Interval interval) {
         if (intervals.remove(interval)) {
+            LOGGER.debug("removed " + "interval {}", TimeFormatCache.formatInterval(interval));
+
             for (IntervalListener listener : listeners) {
                 listener.intervalRemoved(interval);
             }
 
             if (currentInterval.equals(interval)) {
+                LOGGER.trace("setting current interval to {}", "DEFAULT");
                 setCurrentInterval(Interval.DEFAULT);
             }
 
@@ -102,6 +116,7 @@ public final class IntervalManager {
 
     public void clearIntervals() {
         intervals.clear();
+        LOGGER.debug("intervals cleared");
 
         for (IntervalListener listener : listeners) {
             listener.intervalsCleared();
@@ -140,10 +155,10 @@ public final class IntervalManager {
     private static final Pattern DATA_SPLITTER = Pattern.compile("\"?,\"?");
 
     public void loadFromFile(File file, long offset) throws IOException {
-        BufferedReader reader = null;
+        LineNumberReader reader = null;
 
         try {
-            reader = new BufferedReader(new java.io.FileReader(file));
+            reader = new LineNumberReader(new java.io.FileReader(file));
 
             String line = null;
             Interval interval = null;
@@ -156,10 +171,14 @@ public final class IntervalManager {
                 String end = "";
 
                 switch (data.length) {
-                case 0:
+                case 0: {
+                    LOGGER.trace("skipping empty interval data at line {}", reader.getLineNumber());
                     continue;
-                case 1:
+                }
+                case 1: {
+                    LOGGER.trace("skipping empty interval data at line {}", reader.getLineNumber());
                     continue;
+                }
                 case 2: {
                     start = data[0];
                     end = data[1];
@@ -184,10 +203,16 @@ public final class IntervalManager {
                 catch (ParseException pe) {
                     try {
                         startTime = Long.parseLong(start) + offset;
+
                     }
                     catch (NumberFormatException nfe) {
+                        LOGGER.warn("cannot parse time {} at line {}", startTime, reader.getLineNumber());
                         continue;
                     }
+                }
+
+                if (LOGGER.isDebugEnabled()) {
+                    LOGGER.debug("line {}: {}={}", new Object[] { reader.getLineNumber(), startTime, start });
                 }
 
                 try {
@@ -198,8 +223,13 @@ public final class IntervalManager {
                         endTime = Long.parseLong(end) + offset;
                     }
                     catch (NumberFormatException nfe) {
+                        LOGGER.warn("cannot parse time {} at line {}", startTime, reader.getLineNumber());
                         continue;
                     }
+                }
+
+                if (LOGGER.isDebugEnabled()) {
+                    LOGGER.debug("line {}: {}={}", new Object[] { reader.getLineNumber(), endTime, end });
                 }
 
                 interval = new Interval(startTime, endTime);
@@ -235,16 +265,16 @@ public final class IntervalManager {
                 long end = interval.getEnd() - offset;
 
                 writer.write(interval.getName());
-                writer.write(':');
+                writer.write(',');
 
                 if (offset == 0) { // absolute time
                     writer.write(TimeHelper.TIMESTAMP_FORMAT_ISO.format(new Date(start)));
-                    writer.write(':');
+                    writer.write(',');
                     writer.write(TimeHelper.TIMESTAMP_FORMAT_ISO.format(new Date(end)));
                 }
                 else { // relative time
                     writer.write(Long.toString(start));
-                    writer.write(':');
+                    writer.write(',');
                     writer.write(Long.toString(end));
                 }
 
