@@ -1,5 +1,7 @@
 package com.ibm.nmon.gui.file;
 
+import org.slf4j.Logger;
+
 import javax.swing.BorderFactory;
 
 import javax.swing.JCheckBox;
@@ -7,21 +9,18 @@ import javax.swing.JFileChooser;
 import javax.swing.JOptionPane;
 
 import java.io.File;
-import java.io.FileWriter;
-import java.io.BufferedReader;
 
 import java.io.IOException;
 
 import com.ibm.nmon.gui.main.NMONVisualizerGui;
-import com.ibm.nmon.interval.Interval;
-import com.ibm.nmon.interval.IntervalManager;
-import com.ibm.nmon.util.DataHelper;
 
 /**
  * JFileChooser for selecting the location to save Interval files. Also responsible for parsing
  * interval files and adding them to the gui's {@link IntervalManager}.
  */
 public final class IntervalFileChooser extends GUIFileChooser {
+    protected final Logger logger = org.slf4j.LoggerFactory.getLogger(IntervalFileChooser.class);
+
     private JCheckBox useRelativeTime;
 
     public IntervalFileChooser(NMONVisualizerGui gui) {
@@ -50,41 +49,19 @@ public final class IntervalFileChooser extends GUIFileChooser {
                 }
             }
 
-            FileWriter writer = null;
-
             try {
-                writer = new FileWriter(intervalFile);
+                long offset = 0;
 
-                for (Interval interval : gui.getIntervalManager().getIntervals()) {
-                    long start = interval.getStart();
-                    long end = interval.getEnd();
-
-                    if (useRelativeTime.isSelected()) {
-                        start -= gui.getMinSystemTime();
-                        end -= gui.getMinSystemTime();
-                    }
-
-                    writer.write(interval.getName());
-                    writer.write(':');
-                    writer.write(Long.toString(start));
-                    writer.write(':');
-                    writer.write(Long.toString(end));
-                    writer.write('\n');
+                if (useRelativeTime.isSelected()) {
+                    offset = gui.getMinSystemTime();
                 }
+
+                gui.getIntervalManager().saveToFile(intervalFile, offset);
             }
             catch (IOException ioe) {
-                ioe.printStackTrace();
+                logger.error("could not load interval file '{}'", intervalFile.getAbsolutePath(), ioe);
             }
-            finally {
-                if (writer != null) {
-                    try {
-                        writer.close();
-                    }
-                    catch (IOException ioe2) {
-                        // ignore
-                    }
-                }
-            }
+
         }
     }
 
@@ -102,65 +79,17 @@ public final class IntervalFileChooser extends GUIFileChooser {
                 }
             }
 
-            BufferedReader reader = null;
-
             try {
-                reader = new BufferedReader(new java.io.FileReader(intervalFile));
+                long offset = 0;
 
-                String line = null;
-                Interval interval = null;
-
-                while ((line = reader.readLine()) != null) {
-                    int idx1 = line.indexOf(':');
-
-                    if (idx1 == -1) {
-                        continue;
-                    }
-
-                    int idx2 = line.indexOf(':', idx1 + 1);
-
-                    String name = null;
-                    long start = 0;
-                    long end = 0;
-
-                    // may or may not have a name
-                    if (idx2 == -1) {
-                        start = Long.parseLong(line.substring(0, idx1));
-                        end = Long.parseLong(line.substring(idx1 + 1));
-                    }
-                    else {
-                        name = DataHelper.newString(line.substring(0, idx1));
-                        start = Long.parseLong(line.substring(idx1 + 1, idx2));
-                        end = Long.parseLong(line.substring(idx2 + 1));
-                    }
-
-                    if (useRelativeTime.isSelected()) {
-                        start += gui.getMinSystemTime();
-                        end += gui.getMinSystemTime();
-                    }
-
-                    interval = new Interval(start, end);
-                    interval.setName(name);
-
-                    gui.getIntervalManager().addInterval(interval);
+                if (useRelativeTime.isSelected()) {
+                    offset = gui.getMinSystemTime();
                 }
 
-                if (interval != null) {
-                    gui.getIntervalManager().setCurrentInterval(interval);
-                }
+                gui.getIntervalManager().loadFromFile(intervalFile, offset);
             }
             catch (IOException ioe) {
-                ioe.printStackTrace();
-            }
-            finally {
-                if (reader != null) {
-                    try {
-                        reader.close();
-                    }
-                    catch (IOException ioe2) {
-                        // ignore
-                    }
-                }
+                logger.error("could not save interval file '{}'", intervalFile.getAbsolutePath(), ioe);
             }
         }
     }
