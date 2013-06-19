@@ -20,7 +20,7 @@ import com.ibm.nmon.gui.chart.BaseChartPanel;
  * @see ReportPanel
  */
 final class DataSetView extends ChartSplitPane {
-    protected final Logger LOGGER = org.slf4j.LoggerFactory.getLogger(DataSetView.class);
+    private static final Logger LOGGER = org.slf4j.LoggerFactory.getLogger(DataSetView.class);
 
     private final Map<String, ReportPanel> reportPanels;
 

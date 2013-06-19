@@ -58,7 +58,7 @@ public final class ChartFactory {
 
     /**
      * Filter a set of chart definitions based on a given data set. Charts that are not applicable
-     * to and host in the data set will not be included in the returned list.
+     * to a host in the data set will not be included in the returned list.
      * 
      * @param chartDefinitions the set of charts to filter
      * @param dataSets the DataSets to match

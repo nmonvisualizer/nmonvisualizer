@@ -50,7 +50,7 @@ import com.ibm.nmon.gui.report.ReportPanel;
  * @see ReportPanel
  */
 final class SummaryView extends ChartSplitPane implements IntervalListener {
-    protected final Logger LOGGER = org.slf4j.LoggerFactory.getLogger(SummaryView.class);
+    private static final Logger LOGGER = org.slf4j.LoggerFactory.getLogger(SummaryView.class);
 
     private final ReportPanel singleIntervalReport;
     private final ReportPanel allIntervalsReport;
