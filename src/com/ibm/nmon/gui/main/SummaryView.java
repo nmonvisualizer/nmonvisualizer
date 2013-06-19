@@ -68,7 +68,7 @@ final class SummaryView extends ChartSplitPane implements IntervalListener {
 
         try {
             reports = parser.parseCharts(ReportPanel.class
-                    .getResourceAsStream("/com/ibm/nmon/gui/report/summary_single_interval.xml"));
+                    .getResourceAsStream("/com/ibm/nmon/report/summary_single_interval.xml"));
         }
         catch (Exception e) {
             LOGGER.error("cannot parse report definition xml", e);
@@ -92,7 +92,7 @@ final class SummaryView extends ChartSplitPane implements IntervalListener {
 
         try {
             reports = parser.parseCharts(ReportPanel.class
-                    .getResourceAsStream("/com/ibm/nmon/gui/report/summary_all_intervals.xml"));
+                    .getResourceAsStream("/com/ibm/nmon/report/summary_all_intervals.xml"));
         }
         catch (Exception e) {
             LOGGER.error("cannot parse report definition xml", e);

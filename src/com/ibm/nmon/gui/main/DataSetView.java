@@ -40,7 +40,7 @@ final class DataSetView extends ChartSplitPane {
 
         try {
             reports = parser.parseCharts(ReportPanel.class
-                    .getResourceAsStream("/com/ibm/nmon/gui/report/dataset_report.xml"));
+                    .getResourceAsStream("/com/ibm/nmon/report/dataset_report.xml"));
         }
         catch (Exception e) {
             LOGGER.error("cannot parse report definition xml", e);
