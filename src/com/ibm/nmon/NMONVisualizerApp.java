@@ -206,7 +206,7 @@ public abstract class NMONVisualizerApp implements IntervalListener {
             data = jsonParser.parse(fileToParse);
         }
         else if (filter.getHATJFileFilter().accept(fileToParse)) {
-            data = hatJParser.parse(fileToParse, timeZone);
+            data = hatJParser.parse(fileToParse);
 
             String hostname = data.getHostname();
 
