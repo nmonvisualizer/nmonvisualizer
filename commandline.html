@@ -43,14 +43,21 @@
       <li><span class="c">--nosummary</span> - do not generate summary charts across all hosts / datasets</li>
       <li><span class="c">-s</span> - start datetime of charts in ISO 8601 datetime format (<span class="c">yyyy-MM-ddTHH:mm:ssX</span>)</li>
       <li><span class="c">-e</span> - end datetime of charts in ISO 8601 datetime format (<span class="c">yyyy-MM-ddTHH:mm:ssX</span>)</li>
+      <li><span class="c">-i</span> - use the given interval CSV file to create charts for a number of intervals.</li>
       <li><span class="c">-d &lt;filename&gt;</span> - use the given XML file to create a <a href="customreports.html">custom</a> set of charts <span class="i">for each</span> host / dataset</li>
       <li><span class="c">-a &lt;filename&gt;</span> - use the given XML file to create a <a href="customreports.html">custom</a> set of charts <span class="i">across all</span> hosts / datasets</li>
     </ul>
-    <p>Note that the <span class="c">-d</span> and <span class="c">-a</span> do not disable the default reports, hence the other switches to do this.</p>
+    <p>The <span class="c">-d</span> and <span class="c">-a</span> do not disable the default reports, hence the other switches to do this.</p>
+    <p>Neither of the <span class="c">-s</span> and <span class="c">-e</span> switches are required. Either one, both or none can be specified.</p>
+    <p>The intervals loaded when using <span class="c">-i</span> will be in addition to the interval specified with the <span class="c">-s</span> and / or <span class="c">-e</span> switches. If more than one interval is loaded, a separate output directory for each interval will be created. All charts specified via the other switches will be created for each interval.</p>
   </div>
   <div class="section">
     <h3>Errors</h3>
     <p>Any errors generated during parsing will be logged to a <span class="c">ReportGenerator_yyyMMdd_HHmmss.log</span> log file.</p>
+  </div>
+  <div class="section">
+    <h3>Intervals File</h3>
+    <p>The value given for the the <span class="c">-i</span> should be a valid CSV file that contains at least one interval. The format of this file is <span class="c">interval name, start, end</span>. The interval name is optional. Both the start and end must be a valid ISO 8601 datetime string.</p>
   </div>
 </div>
 </body>
