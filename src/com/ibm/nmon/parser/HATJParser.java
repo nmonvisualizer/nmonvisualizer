@@ -6,7 +6,6 @@ import java.io.File;
 import java.io.IOException;
 import java.io.LineNumberReader;
 
-import java.util.TimeZone;
 import java.util.regex.Pattern;
 
 import com.ibm.nmon.data.BasicDataSet;
@@ -61,8 +60,47 @@ public final class HATJParser {
             // data[0] = Duration; data[1] = Throughput; data[2] = Hits/sec; data[3] = # of Users
             String[] fields = new String[values.length - 4];
 
+            // transaction names are like package.name.Class (optional TX name)
+            // shorten the package name to just the first letter and remove spaces from the TX name
+            // so the legend will be a little smaller on charts
             for (int i = 0; i < fields.length; i++) {
-                fields[i] = DataHelper.newString(values[i + 4]);
+                String raw = values[i + 4];
+                idx = raw.indexOf('.');
+                int lastDot = -1;
+
+                StringBuilder txName = new StringBuilder(64);
+                txName.append(raw.charAt(0)).append('.');
+
+                while (idx != -1) {
+                    txName.append(raw.charAt(++idx)).append('.');
+
+                    lastDot = idx;
+                    idx = raw.indexOf('.', idx);
+                }
+
+                // remove extra .
+                txName.deleteCharAt(txName.length() - 1);
+
+                // find optional TX name
+                ++lastDot;
+                idx = raw.indexOf('(', lastDot);
+
+                if (idx == -1) { // just add the rest of the package name
+                    txName.append(raw.substring(lastDot));
+                }
+                else {
+                    // add the rest of the package name...
+                    txName.append(raw.substring(lastDot, idx));
+
+                    // remove spaces from TX name
+                    for (int j = idx; j < raw.length(); j++) {
+                        if (raw.charAt(j) != ' ') {
+                            txName.append(raw.charAt(j));
+                        }
+                    }
+                }
+
+                fields[i] = txName.toString();
             }
 
             DataType info = new DataType("INFO", "HATJ Test Information", "throughput", "hits", "users");
