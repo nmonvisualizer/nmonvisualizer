@@ -3,26 +3,24 @@ package com.ibm.nmon;
 import java.io.IOException;
 
 import java.io.File;
-
 import java.io.FileFilter;
 
 import com.ibm.nmon.file.HATJFileFilter;
 import com.ibm.nmon.file.NMONFileFilter;
 
 import java.io.InputStream;
-
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
-
 import java.io.PrintStream;
+
+import java.util.Date;
+import java.text.SimpleDateFormat;
+import java.text.ParseException;
 
 import java.util.List;
 import java.util.Map;
 
 import com.ibm.nmon.util.ParserLog;
-
-import java.text.SimpleDateFormat;
-import java.text.ParseException;
 
 import org.jfree.chart.JFreeChart;
 import org.jfree.chart.ChartUtilities;
@@ -38,9 +36,12 @@ import com.ibm.nmon.gui.chart.ChartFactory;
 
 import com.ibm.nmon.util.FileHelper;
 import com.ibm.nmon.util.GranularityHelper;
+import com.ibm.nmon.util.TimeFormatCache;
 import com.ibm.nmon.util.TimeHelper;
 
 public final class ReportGenerator extends NMONVisualizerApp {
+    private static final SimpleDateFormat FILE_TIME_FORMAT = new SimpleDateFormat("HHmmss");
+
     public static void main(String[] args) {
         if (args.length == 0) {
             System.err.println("no path(s) to parse specified");
@@ -64,6 +65,7 @@ public final class ReportGenerator extends NMONVisualizerApp {
 
         List<String> customDataCharts = new java.util.ArrayList<String>();
         List<String> customSummaryCharts = new java.util.ArrayList<String>();
+        String intervalsFile = "";
 
         boolean summaryCharts = true;
         boolean dataSetCharts = true;
@@ -121,6 +123,17 @@ public final class ReportGenerator extends NMONVisualizerApp {
                         customSummaryCharts.add(args[i]);
                         break nextarg;
 
+                    }
+                    case 'i': {
+                        ++i;
+
+                        if (i > args.length) {
+                            System.err.println("file must be specified for " + '-' + 's');
+                            return;
+                        }
+
+                        intervalsFile = args[i];
+                        break nextarg;
                     }
                     case '-': {
                         if (j == 1) { // --param
@@ -193,66 +206,87 @@ public final class ReportGenerator extends NMONVisualizerApp {
 
         ReportGenerator generator = new ReportGenerator();
         generator.setBaseDirectory(pathToParse.isDirectory() ? pathToParse : pathToParse.getParentFile());
+
+        // parse intervals
+        if (!"".equals(intervalsFile)) {
+            try {
+                generator.getIntervalManager().loadFromFile(new File(intervalsFile), 0);
+            }
+            catch (IOException ioe) {
+                System.err.println("cannot load intervals from '" + intervalsFile + "'");
+                ioe.printStackTrace();
+            }
+        }
+
+        // parse files
         generator.parse(filesToParse);
+
+        // set interval after parse so min and max system times are set
         generator.setInterval(startTime, endTime);
 
         System.out.println();
-        System.out.println("Writing charts to " + generator.getChartDirectory());
-        System.out.println("Charting from "
-                + TimeHelper.TIMESTAMP_FORMAT_ISO.format(new java.util.Date(generator.getIntervalManager()
-                        .getCurrentInterval().getStart()))
-                + " to "
-                + TimeHelper.TIMESTAMP_FORMAT_ISO.format(new java.util.Date(generator.getIntervalManager()
-                        .getCurrentInterval().getEnd())));
 
-        if (summaryCharts) {
-            System.out.print("\tCreating summary charts ");
-            System.out.flush();
-
-            generator.createChartsAcrossDataSets(ReportGenerator.class
-                    .getResourceAsStream("/com/ibm/nmon/gui/report/summary_single_interval.xml"));
-        }
-
-        if (dataSetCharts) {
-            generator.createChartsForEachDataSet(ReportGenerator.class
-                    .getResourceAsStream("/com/ibm/nmon/gui/report/dataset_report.xml"));
-        }
-
+        // load chart definitions
         for (String file : customSummaryCharts) {
-            System.out.print("\tCreating charts for " + file);
-            System.out.flush();
-
-            InputStream in = null;
-
-            try {
-                in = new FileInputStream(file);
-            }
-            catch (IOException ioe) {
-                System.err.println("cannot load chart definition '" + file + "'");
-                ioe.printStackTrace();
-                continue;
-            }
-
-            generator.createChartsAcrossDataSets(in);
+            generator.addChartDefinition(file);
         }
 
         for (String file : customDataCharts) {
-            System.out.print("\tCreating charts for " + file);
-            System.out.flush();
-
-            InputStream in = null;
-            try {
-                in = new FileInputStream(file);
-            }
-            catch (IOException ioe) {
-                System.err.println("cannot load chart definition '" + file + "'");
-                ioe.printStackTrace();
-                continue;
-            }
-
-            generator.createChartsForEachDataSet(in);
+            generator.addChartDefinition(file);
         }
 
+        // create charts for all intervals
+        for (Interval interval : generator.getIntervalManager().getIntervals()) {
+            System.out.println();
+
+            generator.getIntervalManager().setCurrentInterval(interval);
+
+            System.out.println("Charting interval " + TimeFormatCache.formatInterval(interval));
+
+            // put in base charts directory if only a single interval
+            if (generator.getIntervalManager().getIntervalCount() == 1) {
+                generator.setChartDirectory("charts");
+            }
+            else {
+                // use the interval name if possible
+                if ("".equals(interval.getName())) {
+                    generator.setChartDirectory("charts" + '/' + FILE_TIME_FORMAT.format(new Date(interval.getStart()))
+                            + '-' + FILE_TIME_FORMAT.format(new Date(interval.getEnd())));
+                }
+                else {
+                    generator.setChartDirectory("charts" + '/' + interval.getName());
+                }
+            }
+
+            System.out.println("Writing charts to " + generator.getChartDirectory());
+
+            if (summaryCharts) {
+                System.out.print("\tCreating summary charts ");
+                System.out.flush();
+
+                generator.createChartsAcrossDataSets("summary");
+            }
+
+            if (dataSetCharts) {
+                generator.createChartsForEachDataSet("dataset");
+            }
+
+            for (String file : customSummaryCharts) {
+                System.out.print("\tCreating charts for " + file);
+                System.out.flush();
+
+                generator.createChartsAcrossDataSets(file);
+            }
+
+            for (String file : customDataCharts) {
+                System.out.print("\tCreating charts for " + file);
+                System.out.flush();
+
+                generator.createChartsForEachDataSet(file);
+            }
+        }
+
+        System.out.println();
         System.out.println("Charts complete!");
     }
 
@@ -286,6 +320,8 @@ public final class ReportGenerator extends NMONVisualizerApp {
     private File baseDirectory;
     private File chartDirectory;
 
+    private Map<String, List<BaseChartDefinition>> chartDefinitionsCache = new java.util.HashMap<String, List<BaseChartDefinition>>();
+
     private ReportGenerator() {
         super();
 
@@ -294,19 +330,33 @@ public final class ReportGenerator extends NMONVisualizerApp {
 
         granularityHelper.setAutomatic(true);
         chartFactory.setGranularity(granularityHelper.getGranularity());
+
+        try {
+            chartDefinitionsCache.put("summary", parser.parseCharts(ReportGenerator.class
+                    .getResourceAsStream("/com/ibm/nmon/gui/report/summary_single_interval.xml")));
+            chartDefinitionsCache.put("dataset", parser.parseCharts(ReportGenerator.class
+                    .getResourceAsStream("/com/ibm/nmon/gui/report/dataset_report.xml")));
+        }
+        catch (IOException e) {
+            System.err.println("cannot load default chart definitions");
+            e.printStackTrace();
+        }
     }
 
     public File getBaseDirectory() {
         return baseDirectory;
     }
 
+    public void setBaseDirectory(File baseDirectory) {
+        this.baseDirectory = baseDirectory;
+    }
+
     public File getChartDirectory() {
         return chartDirectory;
     }
 
-    public void setBaseDirectory(File baseDirectory) {
-        this.baseDirectory = baseDirectory;
-        this.chartDirectory = new File(baseDirectory, "charts");
+    public void setChartDirectory(String chartDirectory) {
+        this.chartDirectory = new File(baseDirectory, chartDirectory);
     }
 
     public void setInterval(long startTime, long endTime) {
@@ -320,13 +370,18 @@ public final class ReportGenerator extends NMONVisualizerApp {
 
         Interval toChart = null;
 
-        try {
-            toChart = new Interval(startTime, endTime);
-        }
-        catch (Exception e) {
-            System.err.println("invalid start and end times: " + e.getMessage());
-            System.err.println("The default interval will be used instead");
+        if ((startTime == getMinSystemTime() && (endTime == getMaxSystemTime()))) {
             toChart = Interval.DEFAULT;
+        }
+        else {
+            try {
+                toChart = new Interval(startTime, endTime);
+            }
+            catch (Exception e) {
+                System.err.println("invalid start and end times: " + e.getMessage());
+                System.err.println("The default interval will be used instead");
+                toChart = Interval.DEFAULT;
+            }
         }
 
         getIntervalManager().addInterval(toChart);
@@ -391,6 +446,8 @@ public final class ReportGenerator extends NMONVisualizerApp {
             }
 
             out.close();
+
+            System.out.println();
             System.out.println("Errors written to " + errorFile);
         }
 
@@ -399,22 +456,22 @@ public final class ReportGenerator extends NMONVisualizerApp {
 
     }
 
-    public void createChartsAcrossDataSets(InputStream chartDefinition) {
-        List<BaseChartDefinition> chartDefinitions = parseChartDefinition(chartDefinition);
+    public void createChartsAcrossDataSets(String chartDefinitionKey) {
+        List<BaseChartDefinition> chartDefinitions = chartDefinitionsCache.get(chartDefinitionKey);
 
         if (chartDefinitions != null) {
-            chartDirectory.mkdir();
+            chartDirectory.mkdirs();
             saveCharts(chartDefinitions, getDataSets(), chartDirectory);
         }
     }
 
-    public void createChartsForEachDataSet(InputStream chartDefinition) {
+    public void createChartsForEachDataSet(String chartDefinitionKey) {
         // for each dataset, create a subdirectory under 'charts' and output all the data set charts
         // there
-        List<BaseChartDefinition> datasetChartDefinitions = parseChartDefinition(chartDefinition);
+        List<BaseChartDefinition> datasetChartDefinitions = chartDefinitionsCache.get(chartDefinitionKey);
 
-        if (chartDefinition != null) {
-            chartDirectory.mkdir();
+        if (datasetChartDefinitions != null) {
+            chartDirectory.mkdirs();
 
             for (DataSet data : getDataSets()) {
                 System.out.print("\tCreating charts for '" + data.getHostname() + "' ");
@@ -428,15 +485,14 @@ public final class ReportGenerator extends NMONVisualizerApp {
         }
     }
 
-    private List<BaseChartDefinition> parseChartDefinition(InputStream toParse) {
+    public void addChartDefinition(String file) {
         try {
-            return parser.parseCharts(toParse);
+            chartDefinitionsCache.put(file, parser.parseCharts(file));
+            System.out.println("Loaded chart definitions from " + file);
         }
         catch (IOException ioe) {
             System.err.println("cannot parse report definition xml");
             ioe.printStackTrace();
-
-            return null;
         }
     }
 
