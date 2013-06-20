@@ -172,10 +172,6 @@ public final class BarChartBuilder extends BaseChartBuilder {
             }
         }
 
-        if ((dataset.getRowCount() > 1) && (chart.getLegend() == null)) {
-            addLegend();
-        }
-
         // subtract the value for each category from the previous values
         if (barDefinition.isSubtractionNeeded() && (dataset.getRowCount() != 0)) {
             for (int i = 0; i < dataset.getColumnCount(); i++) {
@@ -193,6 +189,20 @@ public final class BarChartBuilder extends BaseChartBuilder {
                 }
             }
         }
+
+        if (chart.getLegend() == null) {
+            int rowCount = plot.getDataset(0).getRowCount();
+
+            if (hasSecondaryYAxis) {
+                rowCount += plot.getDataset(1).getRowCount();
+            }
+
+            if (rowCount > 1) {
+                addLegend();
+            }
+        }
+
+        plot.configureRangeAxes();
     }
 
     public void setPercentYAxis() {

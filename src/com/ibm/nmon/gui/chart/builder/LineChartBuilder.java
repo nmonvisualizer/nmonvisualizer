@@ -298,16 +298,13 @@ public class LineChartBuilder extends BaseChartBuilder {
             recalculateGapThreshold(1);
         }
 
-        chart.getXYPlot().getRangeAxis(0).configure();
+        chart.getXYPlot().configureRangeAxes();
 
         if (chart.getLegend() == null) {
             int seriesCount = chart.getXYPlot().getDataset(0).getSeriesCount();
 
             if (hasSecondaryYAxis) {
                 seriesCount += chart.getXYPlot().getDataset(1).getSeriesCount();
-
-                NumberAxis a = (NumberAxis) chart.getXYPlot().getRangeAxis(1);
-                a.configure();
             }
 
             if (seriesCount > 1) {

@@ -116,7 +116,7 @@ public final class IntervalChartBuilder extends BaseChartBuilder {
             plot.getRangeAxis(i).setTickLabelFont(AXIS_FONT);
         }
 
-        // position of fist lint start and last line end
+        // position of first line start and last line end
         // 1.5% of the chart area within the axis will be blank space on each end
         plot.getDomainAxis().setLowerMargin(.015);
         plot.getDomainAxis().setUpperMargin(.015);
@@ -206,8 +206,16 @@ public final class IntervalChartBuilder extends BaseChartBuilder {
             }
         }
 
-        if ((dataset.getRowCount() > 1) && (chart.getLegend() == null)) {
-            addLegend();
+        if (chart.getLegend() == null) {
+            int rowCount = chart.getCategoryPlot().getDataset(0).getRowCount();
+
+            if (hasSecondaryYAxis) {
+                rowCount += chart.getCategoryPlot().getDataset(1).getRowCount();
+            }
+
+            if (rowCount > 1) {
+                addLegend();
+            }
         }
     }
 
