@@ -1,0 +1,107 @@
+#!/bin/bash
+#
+#       /etc/init.d/nmon
+#
+# description: nmon init script
+#
+# Version: 1.0 (2013/06/17)
+# Author: Uwe Haller
+### END INIT INFO
+
+NMON=/usr/bin/nmon
+LOGDIR=/var/log/nmon
+PIDFILE=/var/run/nmon.pid
+
+if [ ! -d $LOGDIR/old ]; then
+  # old for logrotated
+  mkdir -p $LOGDIR/old
+  chown root:root $LOGDIR
+  chmod -R 755 $LOGDIR
+fi
+
+if [ ! -e $NMON ]; then
+  exit 5
+fi
+
+# collect NMON data every INTERVAL seconds
+INTERVAL=30
+
+# just use the plain hostname for the filename, logrotate will rename each day
+FILENAME=`hostname`.nmon
+
+
+. /etc/rc.status
+
+rc_reset
+
+start() {
+  if [ -f $PIDFILE ]; then
+   echo -e "Already running!" 
+   rc_status -v
+   return 0;
+  else
+    $NMON -F $FILENAME -T -s 30 -c 3000 -m $LOGDIR -p > $PIDFILE
+    # 30 seconds between samples, 3000 samples (~25 hours)
+    # just assume nmon started ok; exectue true so the output is correct
+    echo -e "Starting nmon: "
+    touch /var/lock/subsys/nmon
+    rc_status -v
+    return 0
+  fi
+}
+
+stop() {
+  if [ -f $PIDFILE ]; then
+    echo -e "Shutting down nmon: " ;
+    kill -s USR2 `cat /var/run/nmon.pid` 2> /dev/null
+  else
+    echo -e "Shutting down nmon: " 
+    killall -s USR2 $NMON 2> /dev/null
+  fi
+  
+  rm -f /var/lock/subsys/nmon
+  rm -f $PIDFILE
+  
+  rc_status -v
+  return 0
+}
+
+case "$1" in
+  start)
+    start
+    $0 status
+    ;;
+  stop)
+    stop
+    $0 status
+    ;;
+  restart)
+    stop
+    start
+    ;;
+  status)
+    echo -n "Checking for service nmon"
+        ## Check status with checkproc(8), if process is running
+        ## checkproc will return with exit status 0.
+
+        # Return value is slightly different for the status command:
+        # 0 - service up and running
+        # 1 - service dead, but /var/run/  pid  file exists
+        # 2 - service dead, but /var/lock/ lock file exists
+        # 3 - service not running (unused)
+        # 4 - service status unknown :-(
+        # 5--199 reserved (5--99 LSB, 100--149 distro, 150--199 appl.)
+
+        # NOTE: checkproc returns LSB compliant status values.
+        checkproc /usr/bin/nmon
+        # NOTE: rc_status knows that we called this init script with
+        # "status" option and adapts its messages accordingly.
+        rc_status -v
+    ;;
+  *)
+    echo "Usage: nmon {start|stop|restart|status}"
+    exit 1
+    ;;
+esac
+
+rc_exit

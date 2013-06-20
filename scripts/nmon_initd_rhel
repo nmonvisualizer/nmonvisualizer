@@ -1,0 +1,78 @@
+#!/bin/bash
+#
+#       /etc/init.d/nmon
+#
+# chkconfig: 345 70 55
+# description: nmon init script
+
+# Source function library.
+. /etc/init.d/functions
+
+NMON=/usr/bin/nmon
+LOGDIR=/var/log/nmon
+PIDFILE=/var/run/nmon.pid
+
+if [ ! -d $LOGDIR/old ]; then
+  # old for logrotated
+  mkdir -p $LOGDIR/old
+  chown root:root $LOGDIR
+  chmod -R 755 $LOGDIR
+fi
+
+if [ ! -e $NMON ]; then
+  exit 5
+fi
+
+# collect NMON data every INTERVAL seconds
+INTERVAL=30
+
+# just use the plain hostname for the filename, logrotate will rename each day
+FILENAME=`hostname`.nmon
+
+start() {
+  if [ -f $PIDFILE ]; then
+   action "Already running!" true
+   return 0;
+  else
+    $NMON -F $FILENAME -T -s 30 -m $LOGDIR -p > $PIDFILE
+    # just assume nmon started ok; exectue true so the output is correct
+    action $"Starting nmon: " true
+    touch /var/lock/subsys/nmon
+    return 0
+  fi
+}
+
+stop() {
+  if [ -f $PIDFILE ]; then
+    action "Shutting down nmon: " kill -s USR2 `cat /var/run/nmon.pid` 2> /dev/null
+  else
+    action "Shutting down nmon: " killall -s USR2 $NMON 2> /dev/null
+  fi
+  
+  rm -f /var/lock/subsys/nmon
+  rm -f $PIDFILE
+  
+  return 0
+}
+
+case "$1" in
+  start)
+    start
+    ;;
+  stop)
+    stop
+    ;;
+  restart)
+    stop
+    start
+    ;;
+  status)
+    status nmon
+    ;;
+  *)
+    echo "Usage: nmon {start|stop|restart|status}"
+    exit 1
+    ;;
+esac
+exit $?
+
