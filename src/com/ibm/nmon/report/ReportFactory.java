@@ -1,5 +1,7 @@
 package com.ibm.nmon.report;
 
+import org.slf4j.Logger;
+
 import java.io.IOException;
 import java.io.File;
 
@@ -8,7 +10,9 @@ import java.util.Map;
 
 import org.jfree.chart.ChartUtilities;
 import org.jfree.chart.JFreeChart;
-import org.slf4j.Logger;
+import org.jfree.chart.plot.Plot;
+import org.jfree.chart.plot.XYPlot;
+import org.jfree.chart.plot.CategoryPlot;
 
 import com.ibm.nmon.NMONVisualizerApp;
 
@@ -105,8 +109,16 @@ public class ReportFactory implements IntervalListener {
             }
 
             callback.beforeCreateCharts(chartDefinitionKey, list, chartDirectory.getAbsolutePath());
-            saveCharts(chartDefinitions, app.getDataSets(), chartDirectory, callback);
+            int chartsCreated = saveCharts(chartDefinitions, app.getDataSets(), chartDirectory, callback);
             callback.afterCreateCharts(chartDefinitionKey, list, chartDirectory.getAbsolutePath());
+
+            LOGGER.debug("created {} charts for '{}'", chartsCreated, chartDefinitionKey);
+
+            // remove the directory if no images were created
+            if (chartsCreated == 0) {
+                LOGGER.debug("removing unused directory '{}'", chartDirectory);
+                chartDirectory.delete();
+            }
         }
     }
 
@@ -116,48 +128,95 @@ public class ReportFactory implements IntervalListener {
      */
     public void createChartsForEachDataSet(String chartDefinitionKey, File chartDirectory,
             ReportFactoryCallback callback) {
-        // for each dataset, create a subdirectory under 'charts' and output all the data set charts
-        // there
         List<BaseChartDefinition> datasetChartDefinitions = chartDefinitionsCache.get(chartDefinitionKey);
 
         if (datasetChartDefinitions != null) {
             chartDirectory.mkdirs();
 
             for (DataSet data : app.getDataSets()) {
-                LOGGER.debug("creating charts for '{}' for {}", chartDefinitionKey, data.getHostname());
+                LOGGER.debug("creating charts for '{}' for dataset {}", chartDefinitionKey, data.getHostname());
 
+                // create a subdirectory for each dataset
                 File datasetChartsDir = new File(chartDirectory, data.getHostname());
                 datasetChartsDir.mkdir();
 
                 List<DataSet> list = java.util.Collections.singletonList(data);
                 callback.beforeCreateCharts(chartDefinitionKey, list, chartDirectory.getAbsolutePath());
-                saveCharts(datasetChartDefinitions, list, datasetChartsDir, callback);
+                int chartsCreated = saveCharts(datasetChartDefinitions, list, datasetChartsDir, callback);
                 callback.afterCreateCharts(chartDefinitionKey, list, chartDirectory.getAbsolutePath());
+
+                LOGGER.debug("created {} charts for '{}'", chartsCreated, chartDefinitionKey);
+
+                // remove the directory if no images were created
+                if (chartsCreated == 0) {
+                    LOGGER.debug("removing unused directory '{}'", chartDirectory);
+                    datasetChartsDir.delete();
+                }
             }
         }
     }
 
-    private void saveCharts(List<BaseChartDefinition> chartDefinitions, Iterable<? extends DataSet> data,
+    private int saveCharts(List<BaseChartDefinition> chartDefinitions, Iterable<? extends DataSet> data,
             File saveDirectory, ReportFactoryCallback callback) {
 
         List<BaseChartDefinition> chartsToCreate = chartFactory.getChartsForData(chartDefinitions, data);
+        int chartsCreated = 0;
 
         for (BaseChartDefinition definition : chartsToCreate) {
             JFreeChart chart = chartFactory.createChart(definition, data);
 
-            String filename = definition.getShortName().replace('\n', ' ') + ".png";
-            File chartFile = new File(saveDirectory, filename);
+            if (chartHasData(chart)) {
+                String filename = definition.getShortName().replace('\n', ' ') + ".png";
+                File chartFile = new File(saveDirectory, filename);
 
-            try {
-                ChartUtilities.saveChartAsPNG(chartFile, chart, 1920 / 2, 1080 / 2);
-            }
-            catch (IOException ioe) {
-                LOGGER.warn("cannot create chart '{}'", chartFile.getName());
-                continue;
-            }
+                try {
+                    ChartUtilities.saveChartAsPNG(chartFile, chart, 1920 / 2, 1080 / 2);
+                }
+                catch (IOException ioe) {
+                    LOGGER.warn("cannot create chart '{}'", chartFile.getName());
+                    continue;
+                }
 
-            callback.onCreateChart(definition, chartFile.getAbsolutePath());
+                callback.onCreateChart(definition, chartFile.getAbsolutePath());
+                ++chartsCreated;
+            }
         }
+
+        return chartsCreated;
+    }
+
+    private boolean chartHasData(JFreeChart chart) {
+        boolean hasData = false;
+
+        // determine if there will really be any data to display
+        // do not output a chart if there is no data
+        Plot plot = chart.getPlot();
+
+        if (plot instanceof CategoryPlot) {
+            CategoryPlot cPlot = (CategoryPlot) plot;
+
+            for (int i = 0; i < cPlot.getDatasetCount(); i++) {
+                if (cPlot.getDataset(i).getRowCount() > 0) {
+                    hasData = true;
+                    break;
+                }
+            }
+        }
+        else if (plot instanceof XYPlot) {
+            XYPlot xyPlot = (XYPlot) plot;
+
+            for (int i = 0; i < xyPlot.getDatasetCount(); i++) {
+                if (xyPlot.getDataset(i).getSeriesCount() > 0) {
+                    hasData = true;
+                    break;
+                }
+            }
+        }
+        else {
+            LOGGER.warn("unknown plot type {} for chart {}", plot.getClass(), chart.getTitle());
+        }
+
+        return hasData;
     }
 
     @Override
