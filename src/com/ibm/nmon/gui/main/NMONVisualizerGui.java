@@ -26,12 +26,15 @@ import com.ibm.nmon.data.DataSet;
 
 import com.ibm.nmon.gui.interval.IntervalPicker;
 import com.ibm.nmon.interval.Interval;
-import com.ibm.nmon.parser.IOStatParser;
+
 import com.ibm.nmon.util.GranularityHelper;
 import com.ibm.nmon.util.TimeFormatCache;
 
 import com.ibm.nmon.gui.tree.TreePanel;
 import com.ibm.nmon.gui.util.LogViewerDialog;
+
+import com.ibm.nmon.parser.HATJParser;
+import com.ibm.nmon.parser.IOStatParser;
 
 import com.ibm.nmon.gui.parse.HATJPostParser;
 import com.ibm.nmon.gui.parse.IOStatPostParser;
@@ -340,7 +343,7 @@ public final class NMONVisualizerGui extends NMONVisualizerApp {
             SwingUtilities.invokeAndWait(new Runnable() {
                 @Override
                 public void run() {
-                    if (!hostname.equals(IOStatParser.DEFAULT_HOSTNAME)) {
+                    if (!hostname.equals(HATJParser.DEFAULT_HOSTNAME)) {
                         hatJPostParser.setHostname(hostname);
                     }
 

@@ -27,10 +27,29 @@ public final class HATJParser {
     public BasicDataSet parse(String filename) throws IOException {
         long start = System.nanoTime();
 
-        // assume HATJ file is like graph<timeinmillis>.csv
-        int idx = filename.lastIndexOf("graph");
+        // assume HATJ file is like graph<timeinmillis>_<testname>.csv; testname is optional
+        int graphIdx = filename.indexOf("graph");
 
-        String temp = filename.substring(idx + "graph".length(), filename.length() - ".csv".length());
+        if (graphIdx == -1) {
+            LOGGER.error("HATJ file name '{}' does not start with 'graph'", filename);
+            return null;
+        }
+
+        int idx = filename.indexOf("_", graphIdx);
+        int end = filename.length() - ".csv".length();
+
+        String hostname = DEFAULT_HOSTNAME;
+
+        if (idx == -1) {
+            idx = end; // time is the rest of the string
+            // hostname stays default
+        }
+        else {
+            // time is up to the first _
+            hostname = filename.substring(idx + 1, end);
+        }
+
+        String temp = filename.substring(graphIdx + "graph".length(), idx);
         long startTime = 0;
 
         try {
@@ -52,7 +71,7 @@ public final class HATJParser {
             }
 
             BasicDataSet data = new BasicDataSet(filename);
-            data.setHostname(DEFAULT_HOSTNAME);
+            data.setHostname(hostname);
 
             // create DataTypes from header line
             String[] values = DATA_SPLITTER.split(line);
