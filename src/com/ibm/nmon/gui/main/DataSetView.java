@@ -130,7 +130,7 @@ final class DataSetView extends ChartSplitPane {
     }
 
     @Override
-    void saveCharts(String directory) {
+    protected void saveCharts(String directory) {
         if (currentReport != null) {
             currentReport.saveAllCharts(directory);
         }

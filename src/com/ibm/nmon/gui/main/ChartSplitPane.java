@@ -144,5 +144,5 @@ abstract class ChartSplitPane extends JSplitPane implements PropertyChangeListen
      */
     protected abstract BaseChartPanel getChartPanel();
 
-    abstract void saveCharts(String directory);
+    protected abstract void saveCharts(String directory);
 }

@@ -54,7 +54,7 @@ final class DataTypeView extends ChartSplitPane {
     }
 
     @Override
-    void saveCharts(String directory) {
+    protected void saveCharts(String directory) {
         chartPanel.saveChart(directory, null);
     }
 

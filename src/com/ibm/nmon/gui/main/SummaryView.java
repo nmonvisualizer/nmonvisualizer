@@ -188,7 +188,7 @@ final class SummaryView extends ChartSplitPane implements IntervalListener {
     }
 
     @Override
-    void saveCharts(String directory) {
+    protected void saveCharts(String directory) {
         if (allIntervalsReport.isEnabled()) {
             allIntervalsReport.saveAllCharts(directory);
         }
