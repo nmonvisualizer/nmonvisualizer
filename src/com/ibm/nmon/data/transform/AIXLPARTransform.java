@@ -8,7 +8,7 @@ import com.ibm.nmon.data.DataType;
 public final class AIXLPARTransform implements DataTransform {
     @Override
     public DataType buildDataType(String id, String name, String... fields) {
-        String[] newFields = new String[fields.length + 1];
+        String[] newFields = new String[fields.length + 2];
 
         for (int i = 0, j = 0; i < fields.length; i++, j++) {
             String field = fields[i];
@@ -27,6 +27,8 @@ public final class AIXLPARTransform implements DataTransform {
                 newFields[j] = field;
             }
         }
+
+        newFields[newFields.length - 1] = "OtherLPARs";
 
         return new DataType(id, name, newFields);
     }
@@ -55,6 +57,10 @@ public final class AIXLPARTransform implements DataTransform {
                 newData[j] = data[i];
             }
         }
+
+        // OtherLPARs = total pool CPUs - idle CPU - this LPAR's CPU
+        newData[newData.length - 1] = data[type.getFieldIndex("poolCPUs")] - data[type.getFieldIndex("PoolIdle")]
+                - data[type.getFieldIndex("PhysicalCPU")];
 
         return newData;
     }

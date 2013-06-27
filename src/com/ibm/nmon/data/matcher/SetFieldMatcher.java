@@ -1,7 +1,6 @@
 package com.ibm.nmon.data.matcher;
 
 import java.util.List;
-import java.util.Set;
 
 import com.ibm.nmon.data.DataType;
 
@@ -10,15 +9,15 @@ import com.ibm.nmon.data.DataType;
  * than using a set of {@link ExactFieldMatcher ExactFieldMatchers}.
  */
 public final class SetFieldMatcher implements FieldMatcher {
-    private final Set<String> fields;
+    private final List<String> fields;
 
     public SetFieldMatcher(String... fields) {
         if ((fields == null) || (fields.length == 0)) {
             throw new IllegalArgumentException("fields cannot be empty");
         }
 
-        Set<String> temp = new java.util.HashSet<String>(java.util.Arrays.asList(fields));
-        this.fields = java.util.Collections.unmodifiableSet(temp);
+        List<String> temp = new java.util.ArrayList<String>(java.util.Arrays.asList(fields));
+        this.fields = java.util.Collections.unmodifiableList(temp);
     }
 
     @Override
@@ -29,8 +28,8 @@ public final class SetFieldMatcher implements FieldMatcher {
         else {
             List<String> toReturn = new java.util.ArrayList<String>(type.getFieldCount());
 
-            for (String field : type.getFields()) {
-                if (fields.contains(field)) {
+            for (String field : fields) {
+                if (type.hasField(field)) {
                     toReturn.add(field);
                 }
             }

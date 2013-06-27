@@ -216,6 +216,18 @@
     </data>
   </linechart>
 
+  <linechart name="Shared Pool Utilization" shortName="Shared Pool" stacked="true">
+    <yAxis label="CPUs" />
+    <data>
+      <host os="AIX" />
+      <type name="LPAR" />
+
+      <field name="PhysicalCPU" alias="This LPAR" />
+      <field name="OtherLPARs" alias="Other LPARs" />
+      <field name="PoolIdle" alias="Idle" />
+    </data>
+  </linechart>
+
   <linechart name="CPU Utilization by Process" shortName="CPU by Process" linesNamedBy="TYPE">
     <yAxis label="% CPU" asPercent="true" />
     <data>
