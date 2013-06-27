@@ -145,33 +145,36 @@ public final class ReportPanel extends JTabbedPane implements PropertyChangeList
         if (enabled != isEnabled()) {
             super.setEnabled(enabled);
 
-            int idx = getSelectedIndex();
+            if (!chartsInUse.isEmpty()) {
+                int idx = getSelectedIndex();
 
-            if (enabled) {
-                if (idx != -1) {
-                    if (!updateChart()) {
-                        // still need to notify listeners that the chart is now showing
-                        firePropertyChange("chart", null, getChartPanel(idx).getDataset());
+                if (enabled) {
+                    if (idx != -1) {
+                        if (!updateChart()) {
+                            // still need to notify listeners that the chart is now showing
+                            firePropertyChange("chart", null, getChartPanel(idx).getDataset());
+                        }
                     }
                 }
-            }
-            else {
-                if (idx != -1) {
-                    // notify listeners that the chart is now showing
-                    getChartPanel().clearChart();
-                    // ensure chart is recreated when re-enabled
-                    chartNeedsUpdate.set(idx);
-                    firePropertyChange("chart", null, null);
+                else {
+                    if (idx != -1) {
+                        // notify listeners that the chart is now showing
+                        getChartPanel().clearChart();
+                        // ensure chart is recreated when re-enabled
+                        chartNeedsUpdate.set(idx);
+                        firePropertyChange("chart", null, null);
+                    }
                 }
-            }
 
-            if (idx != -1) {
-                getChartPanel(idx).setEnabled(enabled);
-                previousTab = idx;
-            }
+                if (idx != -1) {
+                    getChartPanel(idx).setEnabled(enabled);
+                    previousTab = idx;
+                }
 
-            // leave the listeners enabled
-            // the heavy work done in the listeners is in updateChart() which checks for enabled too
+                // leave the listeners enabled
+                // the heavy work done in the listeners is in updateChart() which checks for enabled
+                // too
+            }
         }
     }
 
@@ -208,7 +211,7 @@ public final class ReportPanel extends JTabbedPane implements PropertyChangeList
         if (isEnabled() && (getTabCount() != 0)) {
             int index = getSelectedIndex();
 
-            if (index >= 0) {
+            if ((index >= 0) && !chartsInUse.isEmpty()) {
                 BaseChartPanel chartPanel = getChartPanel(index);
 
                 if (chartNeedsUpdate.get(index)) {
@@ -341,13 +344,15 @@ public final class ReportPanel extends JTabbedPane implements PropertyChangeList
 
     @Override
     public void removeAll() {
-        for (int i = 0; i < getTabCount(); i++) {
-            // buildTabs() adds each chart as a listener, so remove it when the tabs change
-            BaseChartPanel chartPanel = getChartPanel(i);
+        if (!chartsInUse.isEmpty()) {
+            for (int i = 0; i < getTabCount(); i++) {
+                // buildTabs() adds each chart as a listener, so remove it when the tabs change
+                BaseChartPanel chartPanel = getChartPanel(i);
 
-            chartPanel.setEnabled(false);
-            chartPanel.clearChart();
-            chartPanel.removePropertyChangeListener(this);
+                chartPanel.setEnabled(false);
+                chartPanel.clearChart();
+                chartPanel.removePropertyChangeListener(this);
+            }
         }
 
         super.removeAll();
@@ -379,18 +384,12 @@ public final class ReportPanel extends JTabbedPane implements PropertyChangeList
 
     private void buildTabs(NMONVisualizerGui gui) {
         buildingTabs = true;
+        // note remove all needs to know is charts existed previously, order matters here
         removeAll();
         chartsInUse.clear();
 
         if (chartDefinitions.isEmpty()) {
-            JLabel label = new JLabel("No Charts Defined!");
-            label.setFont(Styles.LABEL_ERROR.deriveFont(Styles.LABEL_ERROR.getSize() * 1.5f));
-            label.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
-            label.setBackground(java.awt.Color.WHITE);
-            label.setForeground(Styles.ERROR_COLOR);
-            label.setOpaque(true);
-
-            addTab("No Reports", label);
+            addTab("No Charts", createNoReportsLabel("No Charts Defined!"));
         }
         else {
             if (dataSets.isEmpty()) {
@@ -403,27 +402,33 @@ public final class ReportPanel extends JTabbedPane implements PropertyChangeList
 
             chartsInUse = chartFactory.getChartsForData(chartDefinitions, dataSets);
 
-            for (BaseChartDefinition report : chartsInUse) {
-                BaseChartPanel chartPanel = null;
+            if (chartsInUse.isEmpty()) {
+                addTab("No Charts", createNoReportsLabel("No Charts for Currently Parsed Data!"));
+            }
+            else {
+                for (BaseChartDefinition report : chartsInUse) {
+                    BaseChartPanel chartPanel = null;
 
-                if (report.getClass() == LineChartDefinition.class) {
-                    chartPanel = new LineChartPanel(gui);
-                }
-                else if (report.getClass() == IntervalChartDefinition.class) {
-                    chartPanel = new IntervalChartPanel(gui);
-                }
-                else if (report.getClass() == BarChartDefinition.class) {
-                    chartPanel = new BarChartPanel(gui);
-                }
-                else {
-                    LOGGER.error("cannot create chart panel for {} ({})", report.getShortName(), report.getClass()
-                            .getSimpleName());
-                }
+                    if (report.getClass() == LineChartDefinition.class) {
+                        chartPanel = new LineChartPanel(gui);
+                    }
+                    else if (report.getClass() == IntervalChartDefinition.class) {
+                        chartPanel = new IntervalChartPanel(gui);
+                    }
+                    else if (report.getClass() == BarChartDefinition.class) {
+                        chartPanel = new BarChartPanel(gui);
+                    }
+                    else {
+                        LOGGER.error("cannot create chart panel for {} ({})", report.getShortName(), report.getClass()
+                                .getSimpleName());
+                    }
 
-                // this class will receive each chart's change events and forward them rather than
-                // expose each chart as a separate listener
-                chartPanel.addPropertyChangeListener(this);
-                addTab(report.getShortName(), chartPanel);
+                    // this class will receive each chart's change events and forward them rather
+                    // than
+                    // expose each chart as a separate listener
+                    chartPanel.addPropertyChangeListener(this);
+                    addTab(report.getShortName(), chartPanel);
+                }
             }
         }
 
@@ -526,5 +531,16 @@ public final class ReportPanel extends JTabbedPane implements PropertyChangeList
         });
 
         saver.start();
+    }
+
+    private JLabel createNoReportsLabel(String toDisplay) {
+        JLabel label = new JLabel(toDisplay);
+        label.setFont(Styles.LABEL_ERROR.deriveFont(Styles.LABEL_ERROR.getSize() * 1.5f));
+        label.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
+        label.setBackground(java.awt.Color.WHITE);
+        label.setForeground(Styles.ERROR_COLOR);
+        label.setOpaque(true);
+
+        return label;
     }
 }

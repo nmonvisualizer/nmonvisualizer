@@ -76,7 +76,7 @@ public final class ChartFactory {
                 if (chartDefinition instanceof LineChartDefinition) {
                     // also handles IntervalLineCharts
                     for (DataDefinition definition : ((LineChartDefinition) chartDefinition).getLines()) {
-                        if (definition.matchesHost(data)) {
+                        if (definition.matchesHost(data) && (definition.getMatchingTypes(data).size() > 0)) {
                             toReturn.add(chartDefinition);
                             break dataset;
                         }
@@ -84,7 +84,7 @@ public final class ChartFactory {
                 }
                 else {
                     for (DataDefinition definition : ((BarChartDefinition) chartDefinition).getCategories()) {
-                        if (definition.matchesHost(data)) {
+                        if (definition.matchesHost(data) && (definition.getMatchingTypes(data).size() > 0)) {
                             toReturn.add(chartDefinition);
                             break dataset;
                         }
