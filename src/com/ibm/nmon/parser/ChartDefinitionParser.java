@@ -97,7 +97,6 @@ public final class ChartDefinitionParser extends BasicXMLParser {
         else if ("barchart".equals(element)) {
             createBarChart(parseAttributes(unparsedAttributes));
         }
-        // TODO xAxis categoryAxis
         else if ("yAxis".equals(element)) {
             if (currentChart instanceof YAxisChartDefinition) {
                 Map<String, String> attributes = parseAttributes(unparsedAttributes);
@@ -134,6 +133,23 @@ public final class ChartDefinitionParser extends BasicXMLParser {
             else {
                 logger.warn("ignoring " + "<yAxis2>" + " element for chart "
                         + (currentChart == null ? currentChart : currentChart.getShortName()) + " without a Y axis"
+                        + " at line {}", getLineNumber());
+            }
+        }
+        else if ("xAxis".equals(element)) {
+            if (currentChart instanceof LineChartDefinition) {
+                Map<String, String> attributes = parseAttributes(unparsedAttributes);
+
+                ((LineChartDefinition) currentChart).setXAxisLabel(attributes.get("label"));
+            }
+            else if (currentChart instanceof BarChartDefinition) {
+                Map<String, String> attributes = parseAttributes(unparsedAttributes);
+
+                ((BarChartDefinition) currentChart).setCategoryAxisLabel(attributes.get("label"));
+            }
+            else {
+                logger.warn("ignoring " + "<xAxis>" + " element for chart "
+                        + (currentChart == null ? currentChart : currentChart.getShortName()) + " without an X axis"
                         + " at line {}", getLineNumber());
             }
         }
