@@ -19,6 +19,8 @@ import com.ibm.nmon.analysis.AnalysisRecord;
 
 import com.ibm.nmon.gui.main.NMONVisualizerGui;
 
+import static com.ibm.nmon.analysis.Statistic.*;
+
 /**
  * Table model for {@link ChartSummaryPanel}. This model holds a single {@link DataTupleDataset}
  * which is used to display various summary data about the chart. For bar charts, this model
@@ -30,14 +32,11 @@ public final class ChartSummaryTableModel extends ChoosableColumnTableModel {
     static final String VISIBLE = "\u2713";
 
     private static final String[] COLUMN_NAMES = new String[] { VISIBLE, "Hostname", "Data Type", "Metric",
-            "Series Name", "Minimum", "Average", "Maximum", "Std Dev", "Median", "Sum", "Count", "Graph Minimum",
-            "Graph Average", "Graph Maximum", "Graph Std Dev", "Graph Median", "Graph Sum", "Graph Count" };
-
-    private static final BitSet GRAPH_DATA_COLUMNS;
-    static {
-        GRAPH_DATA_COLUMNS = new BitSet(COLUMN_NAMES.length);
-        GRAPH_DATA_COLUMNS.set(12, COLUMN_NAMES.length);
-    }
+            "Series Name", MINIMUM.toString(), AVERAGE.toString(), MAXIMUM.toString(), STD_DEV.toString(),
+            MEDIAN.toString(), PERCENTILE_95.toString(), PERCENTILE_99.toString(), SUM.toString(), COUNT.toString(),
+            "Graph " + MINIMUM.toString(), "Graph " + AVERAGE.toString(), "Graph " + MAXIMUM.toString(),
+            "Graph " + STD_DEV.toString(), "Graph " + MEDIAN.toString(), "Graph " + PERCENTILE_95.toString(),
+            "Graph " + PERCENTILE_99.toString(), "Graph " + SUM.toString(), "Graph " + COUNT.toString() };
 
     private final NMONVisualizerGui gui;
 
@@ -147,11 +146,11 @@ public final class ChartSummaryTableModel extends ChoosableColumnTableModel {
         else if (columnIndex < 5) {
             return String.class;
         }
-        else if (columnIndex == 11) {
+        else if (columnIndex == 13) {
             // count
             return Integer.class;
         }
-        else if (columnIndex == 18) {
+        else if (columnIndex == 22) {
             // graph count
             return Integer.class;
         }
@@ -239,22 +238,32 @@ public final class ChartSummaryTableModel extends ChoosableColumnTableModel {
         case 9:
             return graphDataOnly ? dataset.getMedian(row) : analysis.getMedian(tuple.getDataType(), tuple.getField());
         case 10:
-            return graphDataOnly ? dataset.getSum(row) : analysis.getSum(tuple.getDataType(), tuple.getField());
+            return graphDataOnly ? dataset.get95thPercentile(row) : analysis.get95thPercentile(tuple.getDataType(),
+                    tuple.getField());
         case 11:
-            return graphDataOnly ? dataset.getCount(row) : analysis.getCount(tuple.getDataType(), tuple.getField());
+            return graphDataOnly ? dataset.get99thPercentile(row) : analysis.get99thPercentile(tuple.getDataType(),
+                    tuple.getField());
         case 12:
-            return dataset.getMinimum(row);
+            return graphDataOnly ? dataset.getSum(row) : analysis.getSum(tuple.getDataType(), tuple.getField());
         case 13:
-            return dataset.getAverage(row);
+            return graphDataOnly ? dataset.getCount(row) : analysis.getCount(tuple.getDataType(), tuple.getField());
         case 14:
-            return dataset.getMaximum(row);
+            return dataset.getMinimum(row);
         case 15:
-            return dataset.getStandardDeviation(row);
+            return dataset.getAverage(row);
         case 16:
-            return dataset.getMedian(row);
+            return dataset.getMaximum(row);
         case 17:
-            return dataset.getSum(row);
+            return dataset.getStandardDeviation(row);
         case 18:
+            return dataset.getMedian(row);
+        case 19:
+            return dataset.get95thPercentile(row);
+        case 20:
+            return dataset.get99thPercentile(row);
+        case 21:
+            return dataset.getSum(row);
+        case 22:
             return dataset.getCount(row);
         default:
             throw new ArrayIndexOutOfBoundsException(column);

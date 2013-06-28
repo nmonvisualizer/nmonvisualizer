@@ -19,6 +19,10 @@ public interface DataTupleDataset {
     public double getMaximum(int row);
 
     public double getMedian(int row);
+    
+    public double get95thPercentile(int row);
+    
+    public double get99thPercentile(int row);
 
     public double getStandardDeviation(int row);
 

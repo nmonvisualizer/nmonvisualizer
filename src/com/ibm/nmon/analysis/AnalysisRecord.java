@@ -40,7 +40,10 @@ public final class AnalysisRecord {
 
         double average = Double.NaN;
         double granularityMaximum = Double.MIN_VALUE;
+
         double median = Double.NaN;
+        double percentile95 = Double.NaN;
+        double percentile99 = Double.NaN;
 
         double minimum = Double.MAX_VALUE;
         double maximum = Double.MIN_VALUE;
@@ -108,6 +111,14 @@ public final class AnalysisRecord {
 
     public double getMedian(DataType type, String fieldName) {
         return analyzeIfNecessary(type, fieldName).median;
+    }
+
+    public double get95thPercentile(DataType type, String fieldName) {
+        return analyzeIfNecessary(type, fieldName).percentile95;
+    }
+
+    public double get99thPercentile(DataType type, String fieldName) {
+        return analyzeIfNecessary(type, fieldName).percentile99;
     }
 
     public double getStandardDeviation(DataType type, String fieldName) {
@@ -205,14 +216,9 @@ public final class AnalysisRecord {
 
                 java.util.Collections.sort(allValues);
 
-                int idx = allValues.size() / 2;
-
-                if ((holder.count % 2) == 0) {
-                    holder.median = (allValues.get(idx) + allValues.get(idx - 1)) / 2;
-                }
-                else {
-                    holder.median = allValues.get(idx);
-                }
+                holder.median = calculatePercentile(.5, allValues);
+                holder.percentile95 = calculatePercentile(.95, allValues);
+                holder.percentile99 = calculatePercentile(.99, allValues);
 
                 double sumSqDiffs = 0;
 
@@ -246,5 +252,17 @@ public final class AnalysisRecord {
         }
 
         return holder;
+    }
+
+    public static double calculatePercentile(double percentile, List<Double> allValues) {
+        double n = allValues.size() * percentile;
+        int idx = (int) n;
+
+        if ((n - idx) == 0) {
+            return (allValues.get(idx) + allValues.get(idx - 1)) / 2;
+        }
+        else {
+            return allValues.get(idx);
+        }
     }
 }

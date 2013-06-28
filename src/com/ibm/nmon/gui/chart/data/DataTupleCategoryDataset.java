@@ -5,6 +5,7 @@ import java.util.Map;
 
 import org.jfree.data.category.DefaultCategoryDataset;
 
+import com.ibm.nmon.analysis.AnalysisRecord;
 import com.ibm.nmon.data.DataTuple;
 
 public final class DataTupleCategoryDataset extends DefaultCategoryDataset implements DataTupleDataset {
@@ -88,6 +89,18 @@ public final class DataTupleCategoryDataset extends DefaultCategoryDataset imple
     public double getMedian(int row) {
         calculateGraphData();
         return graphData[row].median;
+    }
+
+    @Override
+    public double get95thPercentile(int row) {
+        calculateGraphData();
+        return graphData[row].median;
+    }
+
+    @Override
+    public double get99thPercentile(int row) {
+        calculateGraphData();
+        return graphData[row].percentile95;
     }
 
     @Override
@@ -185,14 +198,9 @@ public final class DataTupleCategoryDataset extends DefaultCategoryDataset imple
 
                 java.util.Collections.sort(allValues);
 
-                int idx = allValues.size() / 2;
-
-                if ((data.count % 2) == 0) {
-                    data.median = (allValues.get(idx) + allValues.get(idx - 1)) / 2;
-                }
-                else {
-                    data.median = allValues.get(idx);
-                }
+                data.median = AnalysisRecord.calculatePercentile(.5, allValues);
+                data.percentile95 = AnalysisRecord.calculatePercentile(.95, allValues);
+                data.percentile99 = AnalysisRecord.calculatePercentile(.99, allValues);
 
                 double sumSqDiffs = 0;
 

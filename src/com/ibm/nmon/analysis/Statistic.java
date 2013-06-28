@@ -60,6 +60,18 @@ public enum Statistic {
             return record.getMedian(type, fieldName);
         }
     },
+    PERCENTILE_95("95th Percentile") {
+        @Override
+        public double getValue(AnalysisRecord record, DataType type, String fieldName) {
+            return record.get95thPercentile(type, fieldName);
+        }
+    },
+    PERCENTILE_99("99th Percentile") {
+        @Override
+        public double getValue(AnalysisRecord record, DataType type, String fieldName) {
+            return record.get99thPercentile(type, fieldName);
+        }
+    },
     SUM("Sum") {
         @Override
         public double getValue(AnalysisRecord record, DataType type, String fieldName) {

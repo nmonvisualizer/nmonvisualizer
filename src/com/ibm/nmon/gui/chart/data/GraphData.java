@@ -5,7 +5,10 @@ final class GraphData {
     double sum = 0;
 
     double average = Double.NaN;
+    
     double median = Double.NaN;
+    double percentile95 = Double.NaN;
+    double percentile99 = Double.NaN;
 
     double minimum = Double.MAX_VALUE;
     double maximum = Double.MIN_VALUE;
