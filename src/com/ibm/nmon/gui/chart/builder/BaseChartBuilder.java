@@ -14,9 +14,9 @@ import org.jfree.chart.title.LegendTitle;
 import org.jfree.ui.RectangleEdge;
 import org.jfree.ui.RectangleInsets;
 
+import com.ibm.nmon.chart.definition.BaseChartDefinition;
 import com.ibm.nmon.interval.Interval;
 import com.ibm.nmon.util.GranularityHelper;
-
 
 /**
  * <p>
@@ -31,7 +31,7 @@ import com.ibm.nmon.util.GranularityHelper;
  * <code>initChart()</code> is called.
  * </p>
  */
-abstract class BaseChartBuilder {
+abstract class BaseChartBuilder<C extends BaseChartDefinition> {
     protected static final Font TITLE_FONT = new Font("null", Font.BOLD, 18);
     protected static final Font LABEL_FONT = new Font("null", Font.BOLD, 16);
     protected static final Font AXIS_FONT = new Font("null", Font.PLAIN, 14);
@@ -45,12 +45,10 @@ abstract class BaseChartBuilder {
     protected Interval interval;
     protected int granularity = GranularityHelper.DEFAULT_GRANULARITY;
 
-    protected JFreeChart chart;
-
     private List<ChartBuilderPlugin> plugins;
 
-    protected boolean stacked = false;
-    protected boolean hasSecondaryYAxis = false;
+    protected JFreeChart chart;
+    protected C definition;
 
     protected BaseChartBuilder() {
         interval = Interval.DEFAULT;
@@ -75,7 +73,8 @@ abstract class BaseChartBuilder {
     /**
      * Creates the chart, formats it and calls any {@link ChartBuilderPlugin plugins}.
      */
-    public final void initChart() {
+    public final void initChart(C definition) {
+        this.definition = definition;
         chart = createChart();
 
         formatChart();
@@ -102,6 +101,7 @@ abstract class BaseChartBuilder {
         }
         finally {
             chart = null;
+            definition = null;
         }
     }
 

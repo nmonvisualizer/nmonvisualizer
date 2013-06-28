@@ -28,41 +28,15 @@ import com.ibm.nmon.chart.definition.IntervalChartDefinition;
 import com.ibm.nmon.gui.chart.data.DataTupleCategoryDataset;
 import com.ibm.nmon.util.TimeFormatCache;
 
-public final class IntervalChartBuilder extends BaseChartBuilder {
+public final class IntervalChartBuilder extends BaseChartBuilder<IntervalChartDefinition> {
     public IntervalChartBuilder() {
         super();
     }
 
-    public void initChart(IntervalChartDefinition definition) {
-        // stacked is always false for IntervalCharts
-        hasSecondaryYAxis = definition.hasSecondaryYAxis();
-
-        initChart();
-
-        chart.setTitle(definition.getTitle());
-
-        CategoryPlot plot = (CategoryPlot) chart.getPlot();
-
-        plot.getRangeAxis().setLabel(definition.getYAxisLabel());
-
-        if (hasSecondaryYAxis) {
-            plot.getRangeAxis(1).setLabel(definition.getSecondaryYAxisLabel());
-        }
-
-        if ("".equals(definition.getXAxisLabel())) {
-            plot.getDomainAxis().setLabel("Interval");
-        }
-        else {
-            plot.getDomainAxis().setLabel(definition.getXAxisLabel());
-        }
-
-        if (definition.usePercentYAxis()) {
-            setPercentYAxis();
-        }
-    }
-
     @Override
     protected JFreeChart createChart() {
+        // stacked is always false for IntervalChart
+
         // note that IntervalChartDefinition is a line chart but this class creates a JFreeChart
         // category plot
         // interval charts use a non-numeric x-axis (1 value per interval) which requires a category
@@ -77,9 +51,9 @@ public final class IntervalChartBuilder extends BaseChartBuilder {
 
         CategoryPlot plot = new CategoryPlot(new DataTupleCategoryDataset(true), categoryAxis, valueAxis, renderer);
 
-        if (hasSecondaryYAxis) {
+        if (definition.hasSecondaryYAxis()) {
             // second Y axis uses a separate dataset and axis
-            plot.setDataset(1, new DataTupleCategoryDataset(stacked));
+            plot.setDataset(1, new DataTupleCategoryDataset(false));
 
             valueAxis = new NumberAxis();
             valueAxis.setAutoRangeIncludesZero(true);
@@ -101,7 +75,17 @@ public final class IntervalChartBuilder extends BaseChartBuilder {
     protected void formatChart() {
         super.formatChart();
 
+        chart.setTitle(definition.getTitle());
+
         CategoryPlot plot = (CategoryPlot) chart.getPlot();
+
+        plot.getDomainAxis().setLabel(definition.getXAxisLabel());
+
+        plot.getRangeAxis().setLabel(definition.getYAxisLabel());
+
+        if (definition.usePercentYAxis()) {
+            setPercentYAxis();
+        }
 
         for (int i = 0; i < plot.getRendererCount(); i++) {
             LineAndShapeRenderer renderer = (LineAndShapeRenderer) plot.getRenderer(i);
@@ -209,7 +193,7 @@ public final class IntervalChartBuilder extends BaseChartBuilder {
         if (chart.getLegend() == null) {
             int rowCount = chart.getCategoryPlot().getDataset(0).getRowCount();
 
-            if (hasSecondaryYAxis) {
+            if (definition.hasSecondaryYAxis()) {
                 rowCount += chart.getCategoryPlot().getDataset(1).getRowCount();
             }
 

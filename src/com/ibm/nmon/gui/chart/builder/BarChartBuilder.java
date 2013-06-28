@@ -29,33 +29,11 @@ import com.ibm.nmon.gui.chart.data.DataTupleCategoryDataset;
 
 import com.ibm.nmon.chart.definition.BarChartDefinition;
 
-public final class BarChartBuilder extends BaseChartBuilder {
+public final class BarChartBuilder extends BaseChartBuilder<BarChartDefinition> {
     private static final java.awt.Color OUTLINE_COLOR = new java.awt.Color(0xCCCCCC);
 
     public BarChartBuilder() {
         super();
-    }
-
-    public void initChart(BarChartDefinition definition) {
-        stacked = definition.isStacked();
-        hasSecondaryYAxis = definition.hasSecondaryYAxis();
-
-        initChart();
-
-        chart.setTitle(definition.getTitle());
-
-        CategoryPlot plot = (CategoryPlot) chart.getPlot();
-        plot.getRangeAxis().setLabel(definition.getYAxisLabel());
-
-        if (hasSecondaryYAxis) {
-            plot.getRangeAxis(1).setLabel(definition.getSecondaryYAxisLabel());
-        }
-
-        plot.getDomainAxis().setLabel(definition.getCategoryAxisLabel());
-
-        if (definition.usePercentYAxis()) {
-            setPercentYAxis();
-        }
     }
 
     protected JFreeChart createChart() {
@@ -64,7 +42,7 @@ public final class BarChartBuilder extends BaseChartBuilder {
 
         BarRenderer renderer = null;
 
-        if (stacked) {
+        if (definition.isStacked()) {
             renderer = new StackedBarRenderer();
         }
         else {
@@ -73,9 +51,9 @@ public final class BarChartBuilder extends BaseChartBuilder {
 
         CategoryPlot plot = new CategoryPlot(new DataTupleCategoryDataset(false), categoryAxis, valueAxis, renderer);
 
-        if (hasSecondaryYAxis) {
+        if (definition.hasSecondaryYAxis()) {
             // second Y axis uses a separate dataset and axis
-            plot.setDataset(1, new DataTupleCategoryDataset(stacked));
+            plot.setDataset(1, new DataTupleCategoryDataset(definition.isStacked()));
 
             valueAxis = new NumberAxis();
 
@@ -91,14 +69,27 @@ public final class BarChartBuilder extends BaseChartBuilder {
     protected void formatChart() {
         super.formatChart();
 
+        chart.setTitle(definition.getTitle());
+
         CategoryPlot plot = (CategoryPlot) chart.getPlot();
+
+        plot.getDomainAxis().setLabel(definition.getCategoryAxisLabel());
+        plot.getRangeAxis().setLabel(definition.getYAxisLabel());
+
+        if (definition.hasSecondaryYAxis()) {
+            plot.getRangeAxis(1).setLabel(definition.getSecondaryYAxisLabel());
+        }
+
+        if (definition.usePercentYAxis()) {
+            setPercentYAxis();
+        }
 
         for (int i = 0; i < plot.getRendererCount(); i++) {
             BarRenderer renderer = (BarRenderer) plot.getRenderer(i);
 
             renderer.setShadowVisible(false);
             renderer.setDrawBarOutline(false);
-            renderer.setBarPainter(new SimpleGradientBarPainter());
+            renderer.setBarPainter(new GradientPainters.GradientBarPainter());
 
             renderer.setBaseToolTipGenerator(new StandardCategoryToolTipGenerator("{1} {0} - {2} ({3})",
                     Styles.NUMBER_FORMAT));
@@ -126,12 +117,12 @@ public final class BarChartBuilder extends BaseChartBuilder {
         plot.setRangeGridlineStroke(GRID_LINES);
     }
 
-    public void addBar(BarChartDefinition barDefinition, AnalysisRecord record) {
+    public void addBar(AnalysisRecord record) {
         if (chart == null) {
             throw new IllegalStateException("initChart() must be called first");
         }
 
-        if (barDefinition == null) {
+        if (definition == null) {
             throw new IllegalArgumentException("BarChartDefintion cannot be null");
         }
 
@@ -143,20 +134,20 @@ public final class BarChartBuilder extends BaseChartBuilder {
 
         CategoryPlot plot = (CategoryPlot) chart.getPlot();
         DataTupleCategoryDataset dataset = (DataTupleCategoryDataset) plot
-                .getDataset(barDefinition.hasSecondaryYAxis() ? 1 : 0);
+                .getDataset(definition.hasSecondaryYAxis() ? 1 : 0);
         DataSet data = record.getDataSet();
         Statistic previousStat = null;
 
-        for (DataDefinition definition : barDefinition.getCategories()) {
-            if (definition.matchesHost(data)) {
-                for (DataType type : definition.getMatchingTypes(data)) {
-                    for (String field : definition.getMatchingFields(type)) {
-                        String barName = barDefinition.getBarNamingMode().getName(definition, data, type, field,
+        for (DataDefinition dataDefinition : definition.getCategories()) {
+            if (dataDefinition.matchesHost(data)) {
+                for (DataType type : dataDefinition.getMatchingTypes(data)) {
+                    for (String field : dataDefinition.getMatchingFields(type)) {
+                        String barName = definition.getBarNamingMode().getName(dataDefinition, data, type, field,
                                 granularity);
-                        String categoryName = barDefinition.getCategoryNamingMode().getName(definition, data, type,
+                        String categoryName = definition.getCategoryNamingMode().getName(dataDefinition, data, type,
                                 field, granularity);
 
-                        Statistic currentStat = definition.getStatistic();
+                        Statistic currentStat = dataDefinition.getStatistic();
                         double value = currentStat.getValue(record, type, field);
 
                         if ((previousStat != null) && (previousStat != currentStat)) {
@@ -173,7 +164,7 @@ public final class BarChartBuilder extends BaseChartBuilder {
         }
 
         // subtract the value for each category from the previous values
-        if (barDefinition.isSubtractionNeeded() && (dataset.getRowCount() != 0)) {
+        if (definition.isSubtractionNeeded() && (dataset.getRowCount() != 0)) {
             for (int i = 0; i < dataset.getColumnCount(); i++) {
                 // prime total with the first value in each bar
                 // the first value is not modified
@@ -193,7 +184,7 @@ public final class BarChartBuilder extends BaseChartBuilder {
         if (chart.getLegend() == null) {
             int rowCount = plot.getDataset(0).getRowCount();
 
-            if (hasSecondaryYAxis) {
+            if (definition.hasSecondaryYAxis()) {
                 rowCount += plot.getDataset(1).getRowCount();
             }
 

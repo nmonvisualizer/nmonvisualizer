@@ -19,7 +19,7 @@ public class LineChartDefinition extends YAxisChartDefinition {
     private final List<DataDefinition> lines;
 
     public LineChartDefinition(String shortName, String title) {
-        this(shortName, title, true);
+        this(shortName, title, false);
     }
 
     public LineChartDefinition(String shortName, String title, boolean stacked) {
@@ -34,7 +34,12 @@ public class LineChartDefinition extends YAxisChartDefinition {
     }
 
     public final void setXAxisLabel(String xAxisLabel) {
-        this.xAxisLabel = xAxisLabel;
+        if (xAxisLabel == null) {
+            this.xAxisLabel = "";
+        }
+        else {
+            this.xAxisLabel = xAxisLabel;
+        }
     }
 
     public final NamingMode getLineNamingMode() {

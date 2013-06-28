@@ -13,7 +13,7 @@ import com.ibm.nmon.data.definition.NamingMode;
 public final class BarChartDefinition extends YAxisChartDefinition {
     private final boolean subtractionNeeded;
 
-    private String categoryLabel = "";
+    private String categoryAxisLabel = "";
 
     private NamingMode categoryNamingMode;
     private NamingMode barNamingMode;
@@ -44,11 +44,16 @@ public final class BarChartDefinition extends YAxisChartDefinition {
     }
 
     public String getCategoryAxisLabel() {
-        return categoryLabel;
+        return categoryAxisLabel;
     }
 
-    public void setCategoryAxisLabel(String categoryLabel) {
-        this.categoryLabel = categoryLabel;
+    public void setCategoryAxisLabel(String categoryAxisLabel) {
+        if (categoryAxisLabel == null) {
+            this.categoryAxisLabel = "";
+        }
+        else {
+            this.categoryAxisLabel = categoryAxisLabel;
+        }
     }
 
     public NamingMode getBarNamingMode() {

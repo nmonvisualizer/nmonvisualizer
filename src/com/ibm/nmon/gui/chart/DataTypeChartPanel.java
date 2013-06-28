@@ -14,8 +14,11 @@ import com.ibm.nmon.gui.main.NMONVisualizerGui;
 
 import com.ibm.nmon.data.DataSet;
 import com.ibm.nmon.data.DataType;
+
 import com.ibm.nmon.data.definition.ExactDataDefinition;
 import com.ibm.nmon.data.definition.NamingMode;
+
+import com.ibm.nmon.chart.definition.LineChartDefinition;
 
 import com.ibm.nmon.interval.IntervalListener;
 import com.ibm.nmon.interval.Interval;
@@ -133,11 +136,6 @@ public final class DataTypeChartPanel extends LineChartPanel implements Interval
             DataType type = definition.getDataType();
             List<String> fields = definition.getMatchingFields(type);
 
-            chartBuilder.initChart();
-            chartBuilder.addLinesForData(definition, data, NamingMode.FIELD);
-
-            JFreeChart chart = chartBuilder.getChart();
-
             String fieldLabel = "";
             String axisLabel = "";
 
@@ -148,9 +146,6 @@ public final class DataTypeChartPanel extends LineChartPanel implements Interval
             else {
                 axisLabel = getAxisLabel(type);
             }
-
-            chart.setTitle(type + fieldLabel + '\n' + data.getHostname());
-            chart.getXYPlot().getRangeAxis().setLabel(axisLabel);
 
             boolean percent = true;
 
@@ -167,12 +162,18 @@ public final class DataTypeChartPanel extends LineChartPanel implements Interval
                 }
             }
 
-            if (percent) {
-                LineChartBuilder.setPercentYAxis(chart);
-            }
+            LineChartDefinition chartDefinition = new LineChartDefinition("", type + fieldLabel + '\n'
+                    + data.getHostname());
+            chartDefinition.setYAxisLabel(axisLabel);
+            chartDefinition.setUsePercentYAxis(percent);
 
-            if (logger.isTraceEnabled()) {
-                logger.trace("{}: {}-{} chart created in {}ms",
+            chartBuilder.initChart(chartDefinition);
+            chartBuilder.addLinesForData(definition, data, NamingMode.FIELD);
+
+            JFreeChart chart = chartBuilder.getChart();
+
+            if (logger.isDebugEnabled()) {
+                logger.debug("{}: {}-{} chart created in {}ms",
                         new Object[] { data.getHostname(), type.getId(),
                                 fields.size() == type.getFieldCount() ? '*' : fields,
                                 (System.nanoTime() - startT) / 1000000.0d });
@@ -337,7 +338,7 @@ public final class DataTypeChartPanel extends LineChartPanel implements Interval
         tempFields.put("flipped", "Objects");
         tempFields.put("tenured", "Objects");
         tempFields.put("moved", "Objects");
-        
+
         tempFields.put("throughput", "Tx / s");
         tempFields.put("hits", "Hits / s");
 

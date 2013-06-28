@@ -6,6 +6,7 @@ package com.ibm.nmon.chart.definition;
  */
 public final class IntervalChartDefinition extends LineChartDefinition {
     public IntervalChartDefinition(String shortName, String title) {
+        // stacked is always false for IntervalCharts
         super(shortName, title, false);
     }
 }

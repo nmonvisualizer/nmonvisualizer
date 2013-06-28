@@ -9,8 +9,19 @@ public abstract class BaseChartDefinition {
     private final String title;
 
     protected BaseChartDefinition(String shortName, String title) {
-        this.shortName = shortName;
-        this.title = title;
+        if (shortName == null) {
+            this.shortName = "";
+        }
+        else {
+            this.shortName = shortName;
+        }
+
+        if (title == null) {
+            this.title = "";
+        }
+        else {
+            this.title = title;
+        }
     }
 
     public final String getShortName() {

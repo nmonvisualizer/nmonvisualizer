@@ -66,5 +66,4 @@ public abstract class YAxisChartDefinition extends BaseChartDefinition {
     public final void setHasSecondaryYAxis(boolean secondaryYAxis) {
         this.hasSecondaryYAxis = secondaryYAxis;
     }
-
 }

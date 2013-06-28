@@ -32,37 +32,9 @@ import com.ibm.nmon.gui.chart.data.DataTupleXYDataset;
 
 import com.ibm.nmon.chart.definition.LineChartDefinition;
 
-public class LineChartBuilder extends BaseChartBuilder {
+public class LineChartBuilder extends BaseChartBuilder<LineChartDefinition> {
     public LineChartBuilder() {
         super();
-    }
-
-    public void initChart(LineChartDefinition definition) {
-        stacked = definition.isStacked();
-        hasSecondaryYAxis = definition.hasSecondaryYAxis();
-
-        initChart();
-
-        chart.setTitle(definition.getTitle());
-
-        XYPlot plot = chart.getXYPlot();
-
-        plot.getRangeAxis().setLabel(definition.getYAxisLabel());
-
-        if (hasSecondaryYAxis) {
-            plot.getRangeAxis(1).setLabel(definition.getSecondaryYAxisLabel());
-        }
-
-        if ("".equals(definition.getXAxisLabel())) {
-            plot.getDomainAxis().setLabel("Time");
-        }
-        else {
-            plot.getDomainAxis().setLabel(definition.getXAxisLabel());
-        }
-
-        if (definition.usePercentYAxis()) {
-            LineChartBuilder.setPercentYAxis(chart);
-        }
     }
 
     protected JFreeChart createChart() {
@@ -71,11 +43,11 @@ public class LineChartBuilder extends BaseChartBuilder {
         NumberAxis valueAxis = new NumberAxis();
         valueAxis.setAutoRangeIncludesZero(true);
 
-        DataTupleXYDataset dataset = new DataTupleXYDataset(stacked);
+        DataTupleXYDataset dataset = new DataTupleXYDataset(definition.isStacked());
 
         XYPlot plot = null;
 
-        if (stacked) {
+        if (definition.isStacked()) {
             StackedXYAreaRenderer2 renderer = new StackedXYAreaRenderer2();
             renderer.setBaseSeriesVisible(true, false);
 
@@ -88,9 +60,9 @@ public class LineChartBuilder extends BaseChartBuilder {
             plot = new XYPlot(dataset, timeAxis, valueAxis, renderer);
         }
 
-        if (hasSecondaryYAxis) {
+        if (definition.hasSecondaryYAxis()) {
             // second Y axis uses a separate dataset and axis
-            plot.setDataset(1, new DataTupleXYDataset(stacked));
+            plot.setDataset(1, new DataTupleXYDataset(definition.isStacked()));
 
             valueAxis = new NumberAxis();
             valueAxis.setAutoRangeIncludesZero(true);
@@ -113,9 +85,18 @@ public class LineChartBuilder extends BaseChartBuilder {
     protected void formatChart() {
         super.formatChart();
 
+        chart.setTitle(definition.getTitle());
+
         XYPlot plot = chart.getXYPlot();
 
-        if (stacked) {
+        plot.getDomainAxis().setLabel(definition.getXAxisLabel());
+        plot.getRangeAxis().setLabel(definition.getYAxisLabel());
+
+        if (definition.usePercentYAxis()) {
+            LineChartBuilder.setPercentYAxis(chart);
+        }
+
+        if (definition.isStacked()) {
             StackedXYAreaRenderer2 renderer = (StackedXYAreaRenderer2) plot.getRenderer();
             renderer.setLegendArea(new java.awt.Rectangle(10, 10));
 
@@ -137,7 +118,9 @@ public class LineChartBuilder extends BaseChartBuilder {
             renderer.setBaseToolTipGenerator(tooltipGenerator);
         }
 
-        if (hasSecondaryYAxis) {
+        if (definition.hasSecondaryYAxis()) {
+            plot.getRangeAxis(1).setLabel(definition.getSecondaryYAxisLabel());
+
             // show filled markers at each data point
             StandardXYItemRenderer renderer = (StandardXYItemRenderer) plot.getRenderer(1);
 
@@ -166,16 +149,16 @@ public class LineChartBuilder extends BaseChartBuilder {
         plot.setRangeGridlineStroke(GRID_LINES);
     }
 
-    public void addLine(LineChartDefinition lineDefinition, DataSet data) {
+    public void addLine(DataSet data) {
         if (chart == null) {
             throw new IllegalStateException("initChart() must be called first");
         }
 
-        for (DataDefinition definition : lineDefinition.getLines()) {
+        for (DataDefinition dataDefinition : definition.getLines()) {
             DataTupleXYDataset dataset = (DataTupleXYDataset) chart.getXYPlot().getDataset(
-                    definition.usesSecondaryYAxis() ? 1 : 0);
+                    dataDefinition.usesSecondaryYAxis() ? 1 : 0);
 
-            addMatchingData(dataset, definition, data, lineDefinition.getLineNamingMode());
+            addMatchingData(dataset, dataDefinition, data, definition.getLineNamingMode());
         }
 
         updateChart();
@@ -183,6 +166,10 @@ public class LineChartBuilder extends BaseChartBuilder {
     }
 
     public void addLinesForData(DataDefinition definition, DataSet data, NamingMode lineNamingMode) {
+        if (chart == null) {
+            throw new IllegalStateException("initChart() must be called first");
+        }
+
         DataTupleXYDataset dataset = (DataTupleXYDataset) chart.getXYPlot().getDataset(
                 definition.usesSecondaryYAxis() ? 1 : 0);
 
@@ -294,7 +281,7 @@ public class LineChartBuilder extends BaseChartBuilder {
     private void updateChart() {
         recalculateGapThreshold(0);
 
-        if (hasSecondaryYAxis) {
+        if (definition.hasSecondaryYAxis()) {
             recalculateGapThreshold(1);
         }
 
@@ -303,7 +290,7 @@ public class LineChartBuilder extends BaseChartBuilder {
         if (chart.getLegend() == null) {
             int seriesCount = chart.getXYPlot().getDataset(0).getSeriesCount();
 
-            if (hasSecondaryYAxis) {
+            if (definition.hasSecondaryYAxis()) {
                 seriesCount += chart.getXYPlot().getDataset(1).getSeriesCount();
             }
 
@@ -314,7 +301,7 @@ public class LineChartBuilder extends BaseChartBuilder {
     }
 
     private void recalculateGapThreshold(int datasetIndex) {
-        if (stacked && (datasetIndex == 0)) {
+        if (definition.isStacked() && (datasetIndex == 0)) {
             return;
         }
         else {

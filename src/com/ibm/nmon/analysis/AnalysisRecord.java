@@ -240,8 +240,8 @@ public final class AnalysisRecord {
             holder.granularityMaximum = Double.NaN;
         }
 
-        if (LOGGER.isTraceEnabled()) {
-            LOGGER.trace("{}: {}-{} analyzed for {} in {}ms ", new Object[] { data.getHostname(), type.getId(),
+        if (LOGGER.isDebugEnabled()) {
+            LOGGER.debug("{}: {}-{} analyzed for {} in {}ms ", new Object[] { data.getHostname(), type.getId(),
                     fieldName, TimeFormatCache.formatInterval(interval), (System.nanoTime() - startT) / 1000000.0d });
         }
 
