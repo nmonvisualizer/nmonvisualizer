@@ -5,6 +5,7 @@ import java.io.InputStream;
 
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import com.ibm.nmon.data.definition.*;
 import com.ibm.nmon.data.matcher.*;
@@ -34,6 +35,7 @@ public final class ChartDefinitionParser extends BasicXMLParser {
     private boolean inData;
 
     private Statistic currentStat;
+    private final Set<Statistic> markers = new java.util.HashSet<Statistic>(3);
 
     private boolean useSecondaryYAxis;
 
@@ -97,6 +99,9 @@ public final class ChartDefinitionParser extends BasicXMLParser {
         else if ("barchart".equals(element)) {
             createBarChart(parseAttributes(unparsedAttributes));
         }
+        else if ("histogram".equals(element)) {
+            createHistogram(parseAttributes(unparsedAttributes));
+        }
         else if ("yAxis".equals(element)) {
             if (currentChart instanceof YAxisChartDefinition) {
                 Map<String, String> attributes = parseAttributes(unparsedAttributes);
@@ -142,6 +147,11 @@ public final class ChartDefinitionParser extends BasicXMLParser {
 
                 ((LineChartDefinition) currentChart).setXAxisLabel(attributes.get("label"));
             }
+            else if (currentChart instanceof HistogramChartDefinition) {
+                Map<String, String> attributes = parseAttributes(unparsedAttributes);
+
+                ((HistogramChartDefinition) currentChart).setXAxisLabel(attributes.get("label"));
+            }
             else if (currentChart instanceof BarChartDefinition) {
                 Map<String, String> attributes = parseAttributes(unparsedAttributes);
 
@@ -168,7 +178,13 @@ public final class ChartDefinitionParser extends BasicXMLParser {
                 String stat = attributes.get("stat");
 
                 if (stat != null) {
-                    currentStat = Statistic.valueOf(stat);
+                    try {
+                        currentStat = Statistic.valueOf(stat);
+                    }
+                    catch (IllegalArgumentException iae) {
+                        logger.warn("ignoring " + "invalid " + "'stat'" + " attribute {} at line {}", stat,
+                                getLineNumber());
+                    }
                 }
 
                 useSecondaryYAxis = Boolean.parseBoolean(attributes.get("useYAxis2"));
@@ -186,6 +202,20 @@ public final class ChartDefinitionParser extends BasicXMLParser {
         else if ("fieldAlias".equals(element)) {
             parseFieldAlias(parseAttributes(unparsedAttributes));
         }
+        else if ("marker".equals(element)) {
+            Map<String, String> attributes = parseAttributes(unparsedAttributes);
+            String stat = attributes.get("stat");
+
+            if (stat != null) {
+                try {
+                    markers.add(Statistic.valueOf(stat));
+                }
+                catch (IllegalArgumentException iae) {
+                    logger.warn("ignoring " + "invalid " + "'marker'" + " attribute {} at line {}", stat,
+                            getLineNumber());
+                }
+            }
+        }
     }
 
     @Override
@@ -199,6 +229,10 @@ public final class ChartDefinitionParser extends BasicXMLParser {
             currentChart = null;
         }
         else if ("barchart".equals(element)) {
+            charts.add(currentChart);
+            currentChart = null;
+        }
+        else if ("histogram".equals(element)) {
             charts.add(currentChart);
             currentChart = null;
         }
@@ -300,6 +334,50 @@ public final class ChartDefinitionParser extends BasicXMLParser {
         }
 
         logger.debug("parsing bar chart {}", currentChart.getShortName());
+    }
+
+    private void createHistogram(Map<String, String> attributes) {
+        if (currentChart != null) {
+            logger.warn("ignoring " + "<histogram>" + " element inside another chart definition" + " at line {}",
+                    getLineNumber());
+            skip = true;
+            return;
+        }
+
+        String title = attributes.get("name");
+
+        if ((title == null) || "".equals(title)) {
+            logger.warn("ignoring " + "<histogram>" + " element with no name" + " at line {}", getLineNumber());
+            skip = true;
+            return;
+        }
+
+        String shortName = attributes.get("shortName");
+
+        currentChart = new HistogramChartDefinition(shortName == null ? title : shortName, title);
+
+        if (attributes.get("barsNamedBy") != null) {
+            NamingMode mode = NamingMode.valueOf(attributes.get("barsNamedBy"));
+            ((HistogramChartDefinition) currentChart).setHistogramNamingMode(mode);
+        }
+
+        String temp = attributes.get("bins");
+
+        if (temp != null) {
+            try {
+                ((HistogramChartDefinition) currentChart).setBins(Integer.parseInt(temp));
+            }
+            catch (NumberFormatException nfe) {
+                logger.warn("ignoring " + "<histogram>" + " attribute 'bins' with value {}" + " at line {}"
+                        + ", it is not a valid number", temp, getLineNumber());
+            }
+        }
+
+        if (!Boolean.valueOf(attributes.get("showMarkers"))) {
+            ((HistogramChartDefinition) currentChart).setMarkers(new Statistic[0]);
+        }
+
+        logger.debug("parsing histogram chart {}", currentChart.getShortName());
     }
 
     private void parseHost(Map<String, String> attributes) {
@@ -547,6 +625,16 @@ public final class ChartDefinitionParser extends BasicXMLParser {
             }
             else if (currentChart.getClass().equals(BarChartDefinition.class)) {
                 ((BarChartDefinition) currentChart).addCategory(definition);
+            }
+            else if (currentChart instanceof HistogramChartDefinition) {
+                HistogramChartDefinition histogramChart = ((HistogramChartDefinition) currentChart);
+
+                // count will be zero if 'showMarkers' is set to false
+                if (histogramChart.getMarkerCount() != 0) {
+                    histogramChart.setMarkers(markers.toArray(new Statistic[markers.size()]));
+                }
+
+                histogramChart.addHistogram(definition);
             }
 
             logger.debug("added {} to chart {}", definition, currentChart.getShortName());

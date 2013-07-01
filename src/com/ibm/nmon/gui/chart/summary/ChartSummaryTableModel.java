@@ -11,9 +11,7 @@ import java.util.Map;
 
 import com.ibm.nmon.data.DataTuple;
 
-import com.ibm.nmon.gui.chart.data.DataTupleDataset;
-import com.ibm.nmon.gui.chart.data.DataTupleCategoryDataset;
-import com.ibm.nmon.gui.chart.data.DataTupleXYDataset;
+import com.ibm.nmon.gui.chart.data.*;
 
 import com.ibm.nmon.analysis.AnalysisRecord;
 
@@ -112,8 +110,14 @@ public final class ChartSummaryTableModel extends ChoosableColumnTableModel {
                 return d.getRowCount() * d.getColumnCount();
             }
         }
-        else {
+        else if (dataset instanceof DataTupleXYDataset) {
             return ((DataTupleXYDataset) dataset).getSeriesCount();
+        }
+        else if (dataset instanceof DataTupleHistogramDataset) {
+            return ((DataTupleHistogramDataset) dataset).getSeriesCount();
+        }
+        else {
+            return 0;
         }
     }
 
@@ -201,8 +205,15 @@ public final class ChartSummaryTableModel extends ChoosableColumnTableModel {
 
             graphDataOnly = d.containsIntervals();
         }
-        else {
+        else if (dataset instanceof DataTupleXYDataset) {
             DataTupleXYDataset d = (DataTupleXYDataset) dataset;
+
+            tuple = d.getTuple(row, -1);
+
+            seriesName = d.getSeriesKey(row).toString();
+        }
+        else if (dataset instanceof DataTupleHistogramDataset) {
+            DataTupleHistogramDataset d = (DataTupleHistogramDataset) dataset;
 
             tuple = d.getTuple(row, -1);
 
@@ -390,7 +401,7 @@ public final class ChartSummaryTableModel extends ChoosableColumnTableModel {
                 setEnabled(VISIBLE, true);
             }
         }
-        else {
+        else if (dataset instanceof DataTupleXYDataset) {
             DataTupleXYDataset d = (DataTupleXYDataset) dataset;
 
             // cannot changed stacked charts
@@ -405,6 +416,17 @@ public final class ChartSummaryTableModel extends ChoosableColumnTableModel {
                 else {
                     setEnabled(VISIBLE, false);
                 }
+            }
+        }
+        else if (dataset instanceof DataTupleHistogramDataset) {
+            DataTupleHistogramDataset d = (DataTupleHistogramDataset) dataset;
+
+            // cannot change visibility if only 1 line
+            if (d.getSeriesCount() > 1) {
+                setEnabled(VISIBLE, true);
+            }
+            else {
+                setEnabled(VISIBLE, false);
             }
         }
 

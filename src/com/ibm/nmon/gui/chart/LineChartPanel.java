@@ -146,7 +146,10 @@ public class LineChartPanel extends BaseChartPanel implements ChartMouseListener
     private void setAxisTimeZone(TimeZone timeZone) {
         if (getChart() != null) {
             XYPlot plot = getChart().getXYPlot();
-            ((DateAxis) plot.getDomainAxis()).setTimeZone(timeZone);
+
+            if (plot.getDomainAxis() instanceof DateAxis) {
+                ((DateAxis) plot.getDomainAxis()).setTimeZone(timeZone);
+            }
         }
     }
 

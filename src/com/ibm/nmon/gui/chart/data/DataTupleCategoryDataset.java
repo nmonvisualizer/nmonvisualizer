@@ -1,11 +1,9 @@
 package com.ibm.nmon.gui.chart.data;
 
-import java.util.List;
 import java.util.Map;
 
 import org.jfree.data.category.DefaultCategoryDataset;
 
-import com.ibm.nmon.analysis.AnalysisRecord;
 import com.ibm.nmon.data.DataTuple;
 
 public final class DataTupleCategoryDataset extends DefaultCategoryDataset implements DataTupleDataset {
@@ -15,6 +13,23 @@ public final class DataTupleCategoryDataset extends DefaultCategoryDataset imple
     private boolean categoriesHaveDifferentStats;
 
     private GraphData[] graphData;
+
+    private DatasetCallback callback = new DatasetCallback() {
+        @Override
+        public int getDataCount() {
+            return DataTupleCategoryDataset.this.getRowCount();
+        }
+
+        @Override
+        public int getItemCount(int dataIdx) {
+            return DataTupleCategoryDataset.this.getColumnCount();
+        }
+
+        @Override
+        public double getValue(int dataIdx, int itemIdx) {
+            return (Double) DataTupleCategoryDataset.this.getValue(dataIdx, itemIdx);
+        }
+    };
 
     public DataTupleCategoryDataset(boolean containsIntervals) {
         super();
@@ -131,91 +146,37 @@ public final class DataTupleCategoryDataset extends DefaultCategoryDataset imple
         return false;
     }
 
+    public final DataTupleCategoryDataset merge(DataTupleCategoryDataset other) {
+        DataTupleCategoryDataset toReturn = new DataTupleCategoryDataset(this.categoriesHaveDifferentStats
+                | other.categoriesHaveDifferentStats);
+
+        toReturn.tuples.putAll(this.tuples);
+        toReturn.tuples.putAll(other.tuples);
+
+        return toReturn;
+    }
+
     private void calculateGraphData() {
         if (graphData != null) {
             return;
         }
+        else {
+            // bar charts do not have any graph data
+            if (!intervals) {
+                int size = getRowCount() * getColumnCount();
+                graphData = new GraphData[size];
 
-        // bar charts do not have any graph data
-        if (!intervals) {
-            int size = getRowCount() * getColumnCount();
-            graphData = new GraphData[size];
-
-            for (int i = 0; i < size; i++) {
-                graphData[i] = new GraphData();
-                graphData[i].minimum = Double.NaN;
-                graphData[i].maximum = Double.NaN;
-            }
-
-            return;
-        }
-
-        graphData = new GraphData[getRowCount()];
-
-        for (int i = 0; i < getRowCount(); i++) {
-            GraphData data = new GraphData();
-            graphData[i] = data;
-
-            List<Double> allValues = new java.util.ArrayList<Double>(getColumnCount());
-
-            for (int j = 0; j < getColumnCount(); j++) {
-                double value = 0;
-
-                if (intervals) {
-                    Object o = getValue(i, j);
-
-                    if (o == null) {
-                        value = Double.NaN;
-                    }
-                    else {
-                        value = (Double) o;
-                    }
+                for (int i = 0; i < size; i++) {
+                    graphData[i] = new GraphData();
+                    graphData[i].minimum = Double.NaN;
+                    graphData[i].maximum = Double.NaN;
                 }
-                else {
-                    value = (Double) getValue(j, i);
-                }
-
-                if (Double.isNaN(value)) {
-                    continue;
-                }
-
-                data.sum += value;
-
-                if (value > data.maximum) {
-                    data.maximum = value;
-                }
-
-                if (value < data.minimum) {
-                    data.minimum = value;
-                }
-
-                allValues.add(value);
-            }
-
-            if (allValues.size() > 0) {
-                data.count = allValues.size();
-                data.average = data.sum / data.count;
-
-                java.util.Collections.sort(allValues);
-
-                data.median = AnalysisRecord.calculatePercentile(.5, allValues);
-                data.percentile95 = AnalysisRecord.calculatePercentile(.95, allValues);
-                data.percentile99 = AnalysisRecord.calculatePercentile(.99, allValues);
-
-                double sumSqDiffs = 0;
-
-                for (double value : allValues) {
-                    sumSqDiffs += Math.pow(value - data.average, 2);
-                }
-
-                data.standardDeviation = Math.sqrt(sumSqDiffs / data.count);
             }
             else {
-                // set all values to NaN
-                data.maximum = Double.NaN;
-                data.minimum = Double.NaN;
+                graphData = GraphData.calculate(callback);
             }
         }
+
     }
 
     public boolean containsIntervals() {

@@ -7,19 +7,39 @@ import java.awt.Paint;
 import java.awt.Stroke;
 import java.awt.geom.RectangularShape;
 
+import org.jfree.chart.renderer.AbstractRenderer;
 import org.jfree.chart.renderer.category.BarRenderer;
+import org.jfree.chart.renderer.xy.XYBarRenderer;
+
 import org.jfree.chart.renderer.category.StandardBarPainter;
+import org.jfree.chart.renderer.xy.StandardXYBarPainter;
+
 import org.jfree.ui.RectangleEdge;
 
 /**
  * Draws bars with a simple gradient that gets 25% darker across the bar to provide a simple 3d
  * shade effect.
  */
-final class SimpleGradientBarPainter extends StandardBarPainter {
-    @Override
-    public void paintBar(Graphics2D g2, BarRenderer renderer, int row, int column, RectangularShape bar,
-            RectangleEdge base) {
+final class GradientPainters {
 
+    static final class GradientBarPainter extends StandardBarPainter {
+        @Override
+        public void paintBar(Graphics2D g2, BarRenderer renderer, int row, int column, RectangularShape bar,
+                RectangleEdge base) {
+            GradientPainters.paintBar(g2, renderer, row, column, bar, base, renderer.isDrawBarOutline());
+        }
+    }
+
+    static final class GradientXYBarPainter extends StandardXYBarPainter {
+        @Override
+        public void paintBar(Graphics2D g2, XYBarRenderer renderer, int row, int column, RectangularShape bar,
+                RectangleEdge base) {
+            GradientPainters.paintBar(g2, renderer, row, column, bar, base, renderer.isDrawBarOutline());
+        }
+    }
+
+    private static void paintBar(Graphics2D g2, AbstractRenderer renderer, int row, int column, RectangularShape bar,
+            RectangleEdge base, boolean drawBarOutline) {
         Paint itemPaint = renderer.getItemPaint(row, column);
 
         Color c0, c1;
@@ -27,8 +47,8 @@ final class SimpleGradientBarPainter extends StandardBarPainter {
         if (itemPaint instanceof Color) {
             c0 = (Color) itemPaint;
             // 1/4 darker
-            c1 = new Color(Math.max((int) (c0.getRed() * .75f), 0), Math.max((int) (c0.getGreen() * .75f), 0), Math
-                    .max((int) (c0.getBlue() * .75f), 0));
+            c1 = new Color(Math.max((int) (c0.getRed() * .75f), 0), Math.max((int) (c0.getGreen() * .75f), 0),
+                    Math.max((int) (c0.getBlue() * .75f), 0));
         }
         else if (itemPaint instanceof GradientPaint) {
             GradientPaint gp = (GradientPaint) itemPaint;
@@ -60,7 +80,7 @@ final class SimpleGradientBarPainter extends StandardBarPainter {
         g2.setPaint(gp);
         g2.fill(bar);
 
-        if (renderer.isDrawBarOutline()) {
+        if (drawBarOutline) {
             Stroke stroke = renderer.getItemOutlineStroke(row, column);
             Paint paint = renderer.getItemOutlinePaint(row, column);
 
@@ -71,4 +91,6 @@ final class SimpleGradientBarPainter extends StandardBarPainter {
             }
         }
     }
+
+    private GradientPainters() {}
 }

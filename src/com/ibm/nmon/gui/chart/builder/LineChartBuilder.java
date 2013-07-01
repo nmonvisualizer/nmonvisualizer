@@ -385,7 +385,9 @@ public class LineChartBuilder extends BaseChartBuilder<LineChartDefinition> {
         if (chart != null) {
             XYPlot plot = chart.getXYPlot();
 
-            ((DateAxis) plot.getDomainAxis()).setDateFormatOverride(null);
+            if (plot.getDomainAxis() instanceof DateAxis) {
+                ((DateAxis) plot.getDomainAxis()).setDateFormatOverride(null);
+            }
         }
     }
 

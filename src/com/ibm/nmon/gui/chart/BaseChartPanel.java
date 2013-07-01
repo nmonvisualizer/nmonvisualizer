@@ -36,8 +36,8 @@ import org.jfree.chart.plot.XYPlot;
 
 import org.jfree.ui.ExtensionFileFilter;
 
-import com.ibm.nmon.gui.chart.data.DataTupleDataset;
-import com.ibm.nmon.gui.chart.data.DataTupleXYDataset;
+import com.ibm.nmon.gui.chart.data.*;
+
 import com.ibm.nmon.gui.main.NMONVisualizerGui;
 
 import com.ibm.nmon.util.CSVWriter;
@@ -142,18 +142,36 @@ public class BaseChartPanel extends ChartPanel implements PropertyChangeListener
 
         if (plot instanceof XYPlot) {
             XYPlot xyPlot = getChart().getXYPlot();
+            DataTupleDataset dataset = (DataTupleDataset) xyPlot.getDataset(0);
 
             if (xyPlot.getDatasetCount() == 1) {
-                return (DataTupleDataset) xyPlot.getDataset();
+                return dataset;
             }
             else {
                 // assume only 2 datasets / 2 axes
-                return DataTupleXYDataset.merge((DataTupleXYDataset) xyPlot.getDataset(0),
-                        (DataTupleXYDataset) xyPlot.getDataset(1));
+                if (dataset instanceof DataTupleXYDataset) {
+                    return ((DataTupleXYDataset) dataset).merge((DataTupleXYDataset) xyPlot.getDataset(1));
+                }
+                else if (dataset instanceof DataTupleHistogramDataset) {
+                    return ((DataTupleHistogramDataset) dataset)
+                            .merge((DataTupleHistogramDataset) xyPlot.getDataset(1));
+                }
+                else {
+                    logger.warn("unknown DataTupleDataset class {}, returning null", dataset.getClass().getName());
+                    return null;
+                }
             }
         }
         else if (plot instanceof CategoryPlot) {
-            return (DataTupleDataset) ((CategoryPlot) plot).getDataset();
+            CategoryPlot categoryPlot = (CategoryPlot) plot;
+            DataTupleCategoryDataset dataset = (DataTupleCategoryDataset) categoryPlot.getDataset(0);
+
+            if (categoryPlot.getDatasetCount() == 1) {
+                return dataset;
+            }
+            else {
+                return dataset.merge((DataTupleCategoryDataset) categoryPlot.getDataset(1));
+            }
         }
         else {
             return null;

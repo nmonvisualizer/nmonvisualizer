@@ -19,21 +19,14 @@ import org.jfree.chart.JFreeChart;
 
 import com.ibm.nmon.analysis.Statistic;
 
-import com.ibm.nmon.chart.definition.BarChartDefinition;
-import com.ibm.nmon.chart.definition.BaseChartDefinition;
-import com.ibm.nmon.chart.definition.IntervalChartDefinition;
-import com.ibm.nmon.chart.definition.LineChartDefinition;
+import com.ibm.nmon.chart.definition.*;
 
 import com.ibm.nmon.data.DataSet;
 import com.ibm.nmon.data.definition.DataDefinition;
 
 import com.ibm.nmon.gui.Styles;
 
-import com.ibm.nmon.gui.chart.BaseChartPanel;
-import com.ibm.nmon.gui.chart.ChartFactory;
-import com.ibm.nmon.gui.chart.IntervalChartPanel;
-import com.ibm.nmon.gui.chart.LineChartPanel;
-import com.ibm.nmon.gui.chart.BarChartPanel;
+import com.ibm.nmon.gui.chart.*;
 
 import com.ibm.nmon.gui.chart.builder.ChartBuilderPlugin;
 
@@ -417,6 +410,9 @@ public final class ReportPanel extends JTabbedPane implements PropertyChangeList
                     }
                     else if (report.getClass() == BarChartDefinition.class) {
                         chartPanel = new BarChartPanel(gui);
+                    }
+                    else if (report.getClass() == HistogramChartDefinition.class) {
+                        chartPanel = new LineChartPanel(gui);
                     }
                     else {
                         LOGGER.error("cannot create chart panel for {} ({})", report.getShortName(), report.getClass()

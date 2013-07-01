@@ -6,13 +6,28 @@ import org.jfree.data.time.TimeTableXYDataset;
 
 import com.ibm.nmon.data.DataTuple;
 
-import com.ibm.nmon.analysis.AnalysisRecord;
-
 public final class DataTupleXYDataset extends TimeTableXYDataset implements DataTupleDataset {
     private final List<DataTuple> tuples;
 
     private final boolean stacked;
     private GraphData[] graphData;
+
+    private DatasetCallback callback = new DatasetCallback() {
+        @Override
+        public int getDataCount() {
+            return DataTupleXYDataset.this.getSeriesCount();
+        }
+
+        @Override
+        public int getItemCount(int dataIdx) {
+            return DataTupleXYDataset.this.getItemCount(dataIdx);
+        }
+
+        @Override
+        public double getValue(int dataIdx, int itemIdx) {
+            return DataTupleXYDataset.this.getYValue(dataIdx, itemIdx);
+        }
+    };
 
     public DataTupleXYDataset(boolean stacked) {
         super();
@@ -99,63 +114,21 @@ public final class DataTupleXYDataset extends TimeTableXYDataset implements Data
         return tuples.contains(tuple);
     }
 
+    public final DataTupleXYDataset merge(DataTupleXYDataset other) {
+        DataTupleXYDataset toReturn = new DataTupleXYDataset(this.stacked || other.stacked);
+
+        toReturn.tuples.addAll(this.tuples);
+        toReturn.tuples.addAll(other.tuples);
+
+        return toReturn;
+    }
+
     private void calculateGraphData() {
         if (graphData != null) {
             return;
         }
-
-        graphData = new GraphData[tuples.size()];
-
-        for (int i = 0; i < getSeriesCount(); i++) {
-            GraphData data = new GraphData();
-            graphData[i] = data;
-
-            List<Double> allValues = new java.util.ArrayList<Double>(getItemCount(i));
-
-            for (int j = 0; j < getItemCount(i); j++) {
-                double value = getYValue(i, j);
-
-                if (Double.isNaN(value)) {
-                    continue;
-                }
-
-                data.sum += value;
-
-                if (value > data.maximum) {
-                    data.maximum = value;
-                }
-
-                if (value < data.minimum) {
-                    data.minimum = value;
-                }
-
-                allValues.add(value);
-            }
-
-            if (allValues.size() > 0) {
-                data.count = allValues.size();
-                data.average = data.sum / data.count;
-
-                java.util.Collections.sort(allValues);
-
-                data.median = AnalysisRecord.calculatePercentile(.5, allValues);
-                data.percentile95 = AnalysisRecord.calculatePercentile(.95, allValues);
-                data.percentile99 = AnalysisRecord.calculatePercentile(.99, allValues);
-
-                double sumSqDiffs = 0;
-
-                for (double value : allValues) {
-                    sumSqDiffs += Math.pow(value - data.average, 2);
-                }
-
-                data.standardDeviation = Math.sqrt(sumSqDiffs / data.count);
-            }
-            else {
-                // file has data, but not for the given interval
-                // set all values to NaN
-                data.maximum = Double.NaN;
-                data.minimum = Double.NaN;
-            }
+        else {
+            graphData = GraphData.calculate(callback);
         }
     }
 
@@ -175,14 +148,5 @@ public final class DataTupleXYDataset extends TimeTableXYDataset implements Data
     @Override
     public int hashCode() {
         return tuples.hashCode();
-    }
-
-    public static final DataTupleXYDataset merge(DataTupleXYDataset d1, DataTupleXYDataset d2) {
-        DataTupleXYDataset toReturn = new DataTupleXYDataset(d1.stacked || d2.stacked);
-
-        toReturn.tuples.addAll(d1.tuples);
-        toReturn.tuples.addAll(d2.tuples);
-
-        return toReturn;
     }
 }

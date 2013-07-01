@@ -27,6 +27,7 @@ public final class ChartFactory {
     private final LineChartBuilder lineChartBuilder;
     private final BarChartBuilder barChartBuilder;
     private final IntervalChartBuilder intervalChartBuilder;
+    private final HistogramChartBuilder histogramChartBuilder;
 
     public ChartFactory(NMONVisualizerApp app) {
         this.app = app;
@@ -36,6 +37,7 @@ public final class ChartFactory {
 
         barChartBuilder = new BarChartBuilder();
         intervalChartBuilder = new IntervalChartBuilder();
+        histogramChartBuilder = new HistogramChartBuilder();
     }
 
     public void setGranularity(int granularity) {
@@ -76,6 +78,14 @@ public final class ChartFactory {
                 if (chartDefinition instanceof LineChartDefinition) {
                     // also handles IntervalLineCharts
                     for (DataDefinition definition : ((LineChartDefinition) chartDefinition).getLines()) {
+                        if (definition.matchesHost(data) && (definition.getMatchingTypes(data).size() > 0)) {
+                            toReturn.add(chartDefinition);
+                            break dataset;
+                        }
+                    }
+                }
+                else if (chartDefinition instanceof HistogramChartDefinition) {
+                    for (DataDefinition definition : ((HistogramChartDefinition) chartDefinition).getHistograms()) {
                         if (definition.matchesHost(data) && (definition.getMatchingTypes(data).size() > 0)) {
                             toReturn.add(chartDefinition);
                             break dataset;
@@ -167,6 +177,25 @@ public final class ChartFactory {
             }
 
             chart = barChartBuilder.getChart();
+        }
+        else if (definition.getClass().equals(HistogramChartDefinition.class)) {
+            HistogramChartDefinition histogramDefinition = (HistogramChartDefinition) definition;
+
+            histogramChartBuilder.initChart(histogramDefinition);
+
+            for (DataSet data : dataSets) {
+                AnalysisRecord record = app.getAnalysis(data);
+
+                // this check is really a hack for event interactions between the tree and the
+                // ReportPanel when removing data with selected charts
+                if (record != null) {
+                    histogramChartBuilder.addHistogram(record);
+                }
+
+                ++dataSetCount;
+            }
+
+            chart = histogramChartBuilder.getChart();
         }
 
         if (dataSetCount == 1) {
