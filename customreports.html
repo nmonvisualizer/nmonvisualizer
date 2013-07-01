@@ -30,25 +30,26 @@
 
   <div class="section">
     <h2>Concepts</h2>
-    <p>Three chart types are supported: line charts, bar charts and interval charts. Line charts <span class="i">always</span> have a time-based X axis; only the values charted and the Y axis are defined. An interval chart is similar except that the X axis plots all the intervals that are currently defined. A bar chart plots at least one aggregate statistic; both the Y axis and the columns (bar) names can be specified.</p>
+    <p>Four chart types are supported: line charts, bar charts, interval charts and histograms. Line charts <span class="i">always</span> have a time-based X axis; only the values charted and the Y axis are defined. Interval and histogram charts are similar except that the X axis plots all the intervals that are currently defined or the range of values in the histogram, respectively. A bar chart plots at least one aggregate statistic; both the Y axis and the columns (bar) names can be specified.</p>
     <p>To create lines or bars, one or more <span class="c">&lt;data&gt;</span> elements are specified for each chart. The data can either be all the data for a specific data type (<span class="c">&lt;type&gt;</span>) or one or more fields from the data type (<span class="c">&lt;field&gt;</span>). In either case, the type and / or field does not have to be exact; <a href="#matching">regular expression matching</a> and other specific substitutions are supported.</p>
-    <p>In general, naming of lines and bars on a particular chart is very important. If a type or field is defined more than once or if renaming causes duplicates, only a single instance will appear on the chart. This assist with this, support exists for <a href="#renaming">renaming data</a> on the resulting chart.</p>
+    <p>In general, naming of lines and bars on a particular chart is very important. If a type or field is defined more than once or if renaming causes duplicates, only a single instance will appear on the chart. To assist with this, support exists for <a href="#renaming">renaming data</a> on the resulting chart.</p>
     <p>By default, a chart is created using data from all hosts (i.e. parsed data sets). An optional <span class="c">&lt;host&gt;</span> element can be used to restrict chart data to specific host names (exact or regex) or operating systems. Note that the program makes a distiction between (and processes differently) report XML files that should be run for a single host (i.e. a dataset report) and XML files that should be run across all hosts (i.e. a summary report, the 'All Systems' view). Therefore, it is best practice to have at least two report XML files defined: one to generate a set of charts for each host and another to generate charts that aggregate data for all hosts. Multiple, similar chart definitions differing only in their <span class="c">&lt;host&gt;</span> specifiction are usually not required. Instead, a common report will be applied to each host.</p>
   </div>
 
   <div class="section">
     <h2>Charts</h2>
-    <p>The root element of the XML must be <span class="c">&lt;charts&gt;</span>. Within that, there can be any number of chart elements; each one will generate a separate graph. The three chart types each have their own element: <span class="c">&lt;linechart&gt;</span>, <span class="c">&lt;barchart&gt;</span> and <span class="c">&lt;intervalchart&gt;</span>. All elements support the following attributes:</p>
+    <p>The root element of the XML must be <span class="c">&lt;charts&gt;</span>. Within that, there can be any number of chart elements; each one will generate a separate graph. The four chart types each have their own element: <span class="c">&lt;linechart&gt;</span>, <span class="c">&lt;barchart&gt;</span>, <span class="c">&lt;intervalchart&gt;</span> and <span class="c">&lt;histogram&gt;</span>. All elements support the following attributes:</p>
     <ul>
       <li><span class="c">name</span> - the name of the chart. This value is <span class="i"/>required</span>. This will be used as the title of the chart.</li>
       <li><span class="c">shortName</span> - a more concise name for the chart. This will be used as the file name when the chart is output as well as the tab name in the GUI. If not specified the short name will default to the full name.</li>
       <li><span class="c">stacked</span> - a a boolean value indicating that the lines or bars in the chart should be stacked rather than separate. On a line chart this causes the area between the lines to be filled in. This attribute is ignored for interval charts. The default value is <span class="c">false</span>.</li>
     </ul>
-    <p>Bar chars also support a <span class="c">subtractionNeeded</span> attribute to specify that the bar value should be subtracted from the previous bar's value. This is useful for stacked charts where the underlying data for each field is a sum of other data.</p>
+    <p>Bar charts also support a <span class="c">subtractionNeeded</span> attribute to specify that the bar value should be subtracted from the previous bar's value. This is useful for stacked charts where the underlying data for each field is a sum of other data.</p>
+    <p>Histograms support a  <span class="c">bins</span> attribute to specify the number of bins to use in the chart. Each bin is displayed as a separate bar on the chart. This value defaults to <span class="c">10</span>. Histograms also support the ability to display annotation markers on a chart via the <span class="c">showMarkers</span> attribute and <span class="c">&lt;marker&gt;</span> sub-elements. Each <span class="c">&lt;marker&gt;</span> element requires a <span class="c">stat</span> attribute that corresponds to a valid <a href="#stat">statistic</a>. <span class="c">showMarkers</span> defaults to true and markers are displayed for <span class="c">AVERAGE</span>, <span class="c">MEDIAN</span> and <span class="c">PERCENTILE_95</span>.<p>
 
     <h3>Naming &amp; Legends</h3>
-    <p>By default lines and bars, as displayed in a chart legend, are named by their field. On bar charts, the X axis displays a category which defaults to the type name. Optional attributes exist to change the defaults.</p>
-    <p>For line charts, the attribute is <span class="c">linesNamedBy</span>. This is most useful when charting multiple types, each with the same field name. For bar charts, there are two attributes: <span class="c">barsNamedBy</span> and <span class="c">categoriesNamedBy</span>. These should not be set to the same value.</p>
+    <p>By default, lines and bars as displayed in a chart legend, are named by their field. On bar charts, the X axis displays a category which defaults to the type name. Optional attributes exist to change the defaults.</p>
+    <p>For line and interval charts, the attribute is <span class="c">linesNamedBy</span>. This is most useful when charting multiple types, each with the same field name. For bar charts, there are two attributes: <span class="c">barsNamedBy</span> and <span class="c">categoriesNamedBy</span>; these should not be set to the same value. Histograms support  <span class="c">barsNamedBy</span>.</p>
     <p>For both line and bar charts, the following naming modes are supported:<p>
     <ul>
       <li><span class="c">HOST</span> - the hostname of the dataset</li>
@@ -66,9 +67,13 @@
 
     <h3>Data</h3>
     <p>Each chart must contain at least one <span class="c">&lt;data&gt;</span> element to define the data to be graphed. The data element must have one <span class="c">&lt;type&gt;</span> element and zero or more <span class="c">&lt;field&gt;</span> elements as children. Type elements are used to <a href="matching">match</a> data types; field elements are used to match data within the given type. If no field element is specified, all fields for the matching types will be graphed.</p>
+    <p>The <span class="c">&lt;data&gt;</span> element can have an optional <span class="c"><a href="#stat">stat</a></span> attribute. The default value for bar and interval charts is <span class="c">AVERAGE</span>. For line charts, this attribute is ignored &ndash; the raw data is always plotted.</p>
 
     <h3>Y Axis</h3>
-    <p>Optional <span class="c">&lt;yAxis&gt;</span> and <span class="c">&lt;yAxis2&gt;</span> elements are supported for each chart. Both support a <span class="c">label</span> attribute which specifies the name of the axis. The primary Y axis can also be set to a percentage scale with the <span class="c">asPercent</span> attribute, which must be a boolean. Note that to actually use the secondary Y axis, subsequent <span class="c">&lt;data&gt;</span> elements <span class="i">must</span> specify the <span class="c">useYAxis2</span> attribute as a boolean.</p>
+    <p>Optional <span class="c">&lt;yAxis&gt;</span> and <span class="c">&lt;yAxis2&gt;</span> elements are supported for all chart types. Both support a <span class="c">label</span> attribute which specifies the name of the axis. The primary Y axis can also be set to a percentage scale with the <span class="c">asPercent</span> attribute, which must be a boolean. Note that to actually use the secondary Y axis, subsequent <span class="c">&lt;data&gt;</span> elements <span class="i">must</span> specify the <span class="c">useYAxis2</span> attribute as a boolean.</p>
+
+    <h3>X Axis</h3>
+    <p>An optional <span class="c">&lt;xAxis&gt;</span> element is supported for line, interval and bar charts. The <span class="c">label</span> attribute specifies the name of the axis. Percentages and secondary axes are not supported.
   </div>
 
   <div class="section">
@@ -78,6 +83,8 @@
       <li><span class="c">AVERAGE</span></li>
       <li><span class="c">MINIMUM</span></li>
       <li><span class="c">MEDIAN</span></li>
+      <li><span class="c">PERCENTILE_95</span></li>
+      <li><span class="c">PERCENTILE_99</span></li>
       <li><span class="c">MAX</span></li>
       <li><span class="c">STD_DEV</span></li>
       <li><span class="c">SUM</span></li>
@@ -148,7 +155,7 @@
   &lt;/data&gt;
 &lt;/intervalchart&gt;</p>
 
-    <p>XML files used by NMONVisualizer internally are in the <a href="https://github.com/nmonvisualizer/nmonvisualizer/tree/master/src/com/ibm/nmon/gui/report"><span class="c">com.ibm.nmon.gui.report</span></a> package.</p>
+    <p>XML files used by NMONVisualizer internally are in the <a href="https://github.com/nmonvisualizer/nmonvisualizer/tree/master/src/com/ibm/nmon/report"><span class="c">com.ibm.nmon.report</span></a> package.</p>
   </div>
 </div>
 </body>
