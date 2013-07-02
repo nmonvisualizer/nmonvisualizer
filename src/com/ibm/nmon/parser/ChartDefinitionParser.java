@@ -373,7 +373,10 @@ public final class ChartDefinitionParser extends BasicXMLParser {
             }
         }
 
-        if (!Boolean.valueOf(attributes.get("showMarkers"))) {
+        temp = attributes.get("showMarkers");
+
+        // null => default, which is to show markers
+        if ((temp != null) && !Boolean.valueOf(attributes.get("showMarkers"))) {
             ((HistogramChartDefinition) currentChart).setMarkers(new Statistic[0]);
         }
 
@@ -626,7 +629,8 @@ public final class ChartDefinitionParser extends BasicXMLParser {
                 HistogramChartDefinition histogramChart = ((HistogramChartDefinition) currentChart);
 
                 // count will be zero if 'showMarkers' is set to false
-                if (histogramChart.getMarkerCount() != 0) {
+                // ignore parsed markers if that is the case
+                if ((histogramChart.getMarkerCount() != 0) && (markers.size() > 0)) {
                     histogramChart.setMarkers(markers.toArray(new Statistic[markers.size()]));
                 }
             }
