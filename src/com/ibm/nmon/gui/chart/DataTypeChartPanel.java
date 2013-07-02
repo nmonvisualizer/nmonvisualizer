@@ -162,8 +162,7 @@ public final class DataTypeChartPanel extends LineChartPanel implements Interval
                 }
             }
 
-            LineChartDefinition chartDefinition = new LineChartDefinition("", type + fieldLabel + '\n'
-                    + data.getHostname());
+            LineChartDefinition chartDefinition = new LineChartDefinition("", type + fieldLabel);
             chartDefinition.setYAxisLabel(axisLabel);
             chartDefinition.setUsePercentYAxis(percent);
 

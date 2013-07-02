@@ -1,9 +1,10 @@
 package com.ibm.nmon.gui.chart;
 
+import org.slf4j.Logger;
+
 import java.util.List;
 
 import org.jfree.chart.JFreeChart;
-import org.slf4j.Logger;
 
 import com.ibm.nmon.NMONVisualizerApp;
 import com.ibm.nmon.data.DataSet;
@@ -101,7 +102,6 @@ public final class ChartFactory {
         long startT = System.nanoTime();
 
         JFreeChart chart = null;
-        int dataSetCount = 0;
 
         if (definition.getClass().equals(LineChartDefinition.class)) {
             LineChartDefinition lineDefinition = (LineChartDefinition) definition;
@@ -110,7 +110,6 @@ public final class ChartFactory {
 
             for (DataSet data : dataSets) {
                 lineChartBuilder.addLine(data);
-                ++dataSetCount;
             }
 
             chart = lineChartBuilder.getChart();
@@ -135,7 +134,6 @@ public final class ChartFactory {
                 }
 
                 intervalChartBuilder.addLine(lineDefinition, analysis);
-                ++dataSetCount;
             }
 
             chart = intervalChartBuilder.getChart();
@@ -153,8 +151,6 @@ public final class ChartFactory {
                 if (record != null) {
                     barChartBuilder.addBar(record);
                 }
-
-                ++dataSetCount;
             }
 
             chart = barChartBuilder.getChart();
@@ -172,15 +168,9 @@ public final class ChartFactory {
                 if (record != null) {
                     histogramChartBuilder.addHistogram(record);
                 }
-
-                ++dataSetCount;
             }
 
             chart = histogramChartBuilder.getChart();
-        }
-
-        if (dataSetCount == 1) {
-            chart.setTitle(chart.getTitle().getText() + '\n' + dataSets.iterator().next().getHostname());
         }
 
         if (LOGGER.isTraceEnabled()) {

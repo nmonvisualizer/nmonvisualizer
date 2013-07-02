@@ -158,6 +158,7 @@ public final class BarChartBuilder extends BaseChartBuilder<BarChartDefinition> 
 
                         dataset.addValue(value, barName, categoryName);
                         dataset.associateTuple(barName, categoryName, new DataTuple(data, type, field));
+                        addDataUsed(data);
                     }
                 }
             }

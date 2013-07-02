@@ -180,6 +180,7 @@ public final class HistogramChartBuilder extends BaseChartBuilder<HistogramChart
 
                         dataset.addSeries(fieldName, values, definition.getBins());
                         dataset.associateTuple(fieldName, null, new DataTuple(data, type, fieldName));
+                        addDataUsed(data);
                     }
                 }
 
@@ -199,8 +200,8 @@ public final class HistogramChartBuilder extends BaseChartBuilder<HistogramChart
                     double value = stat.getValue(analysis, tuple.getDataType(), tuple.getField());
 
                     ValueMarker marker = new ValueMarker(value);
-                    marker.setLabel((useFieldName ? dataset.getSeriesKey(i) + " " : "") + stat.getName(getGranularity())
-                            + ": " + Styles.NUMBER_FORMAT.format(value));
+                    marker.setLabel((useFieldName ? dataset.getSeriesKey(i) + " " : "")
+                            + stat.getName(getGranularity()) + ": " + Styles.NUMBER_FORMAT.format(value));
                     marker.setStroke(MARKER_LINE);
                     marker.setPaint(MARKER_COLOR);
                     marker.setLabelFont(MARKER_FONT);

@@ -5,16 +5,21 @@ import org.slf4j.Logger;
 import java.awt.BasicStroke;
 import java.awt.Color;
 import java.awt.Font;
+
 import java.util.List;
+import java.util.Set;
 
 import org.jfree.chart.JFreeChart;
 import org.jfree.chart.plot.Plot;
+
 import org.jfree.chart.title.LegendTitle;
+import org.jfree.chart.title.TextTitle;
 
 import org.jfree.ui.RectangleEdge;
 import org.jfree.ui.RectangleInsets;
 
 import com.ibm.nmon.chart.definition.BaseChartDefinition;
+import com.ibm.nmon.data.DataSet;
 import com.ibm.nmon.interval.Interval;
 import com.ibm.nmon.util.GranularityHelper;
 
@@ -33,6 +38,7 @@ import com.ibm.nmon.util.GranularityHelper;
  */
 abstract class BaseChartBuilder<C extends BaseChartDefinition> {
     protected static final Font TITLE_FONT = new Font("null", Font.BOLD, 18);
+    protected static final Font SUBTITLE_FONT = new Font("null", Font.PLAIN, 16);
     protected static final Font LABEL_FONT = new Font("null", Font.BOLD, 16);
     protected static final Font AXIS_FONT = new Font("null", Font.PLAIN, 14);
     protected static final Font LEGEND_FONT = new Font("null", Font.PLAIN, 14);
@@ -49,6 +55,8 @@ abstract class BaseChartBuilder<C extends BaseChartDefinition> {
 
     protected JFreeChart chart;
     protected C definition;
+
+    private final Set<DataSet> dataUsed = new java.util.HashSet<DataSet>();
 
     protected BaseChartBuilder() {
         interval = Interval.DEFAULT;
@@ -76,6 +84,7 @@ abstract class BaseChartBuilder<C extends BaseChartDefinition> {
     public final void initChart(C definition) {
         this.definition = definition;
         chart = createChart();
+        chart.setSubtitles(java.util.Collections.singletonList(new TextTitle()));
 
         formatChart();
 
@@ -97,11 +106,16 @@ abstract class BaseChartBuilder<C extends BaseChartDefinition> {
         }
 
         try {
+            if (dataUsed.size() == 1) {
+                ((TextTitle) chart.getSubtitle(0)).setText(dataUsed.iterator().next().getHostname());
+            }
+
             return chart;
         }
         finally {
             chart = null;
             definition = null;
+            dataUsed.clear();
         }
     }
 
@@ -134,6 +148,9 @@ abstract class BaseChartBuilder<C extends BaseChartDefinition> {
         }
 
         chart.getTitle().setFont(TITLE_FONT);
+        ((TextTitle) chart.getSubtitle(0)).setFont(SUBTITLE_FONT);
+        ((TextTitle) chart.getSubtitle(0)).setPadding(new RectangleInsets(0, 0, 0, 0));
+
         chart.setBackgroundPaint(Color.WHITE);
         chart.setPadding(new RectangleInsets(5, 5, 5, 5));
 
@@ -142,6 +159,10 @@ abstract class BaseChartBuilder<C extends BaseChartDefinition> {
         // chart has no outline on a white background
         plot.setOutlineStroke(null);
         plot.setBackgroundPaint(Color.WHITE);
+    }
+
+    protected final void addDataUsed(DataSet data) {
+        dataUsed.add(data);
     }
 
     protected final void addLegend() {

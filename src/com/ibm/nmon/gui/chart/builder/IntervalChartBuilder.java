@@ -184,6 +184,7 @@ public final class IntervalChartBuilder extends BaseChartBuilder<IntervalChartDe
 
                             dataset.addValue(value, name, intervalName);
                             dataset.associateTuple(name, intervalName, new DataTuple(record.getDataSet(), type, field));
+                            addDataUsed(data);
                         }
                     }
                 }
