@@ -26,6 +26,15 @@ public final class HistogramChartDefinition extends YAxisChartDefinition {
         markers.add(Statistic.PERCENTILE_95);
     }
 
+    public HistogramChartDefinition(HistogramChartDefinition copy, boolean copyData) {
+        super(copy, copyData);
+
+        this.bins = copy.bins;
+        this.xAxisLabel = copy.xAxisLabel;
+        this.histogramNamingMode = copy.histogramNamingMode;
+        this.markers = new java.util.ArrayList<Statistic>(copy.markers);
+    }
+
     public int getBins() {
         return bins;
     }

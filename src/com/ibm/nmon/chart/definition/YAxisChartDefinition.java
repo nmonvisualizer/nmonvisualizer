@@ -21,6 +21,18 @@ public abstract class YAxisChartDefinition extends BaseChartDefinition {
         this.stacked = stacked;
     }
 
+    public YAxisChartDefinition(YAxisChartDefinition copy, boolean copyData) {
+        super(copy, copyData);
+
+        this.stacked = copy.stacked;
+
+        this.yAxisLabel = copy.yAxisLabel;
+        this.secondaryYAxisLabel = copy.secondaryYAxisLabel;
+
+        this.percentYAxis = copy.percentYAxis;
+        this.hasSecondaryYAxis = copy.hasSecondaryYAxis;
+    }
+
     public final boolean isStacked() {
         return stacked;
     }

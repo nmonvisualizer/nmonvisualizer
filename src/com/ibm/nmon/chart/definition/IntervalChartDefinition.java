@@ -9,4 +9,8 @@ public final class IntervalChartDefinition extends LineChartDefinition {
         // stacked is always false for IntervalCharts
         super(shortName, title, false);
     }
+
+    public IntervalChartDefinition(IntervalChartDefinition copy, boolean copyData) {
+        super(copy, copyData);
+    }
 }

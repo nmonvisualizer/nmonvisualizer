@@ -24,6 +24,13 @@ public class LineChartDefinition extends YAxisChartDefinition {
         lineNamingMode = NamingMode.FIELD;
     }
 
+    public LineChartDefinition(LineChartDefinition copy, boolean copyData) {
+        super(copy, copyData);
+
+        this.xAxisLabel = copy.xAxisLabel;
+        this.lineNamingMode = copy.lineNamingMode;
+    }
+
     public final String getXAxisLabel() {
         return xAxisLabel;
     }

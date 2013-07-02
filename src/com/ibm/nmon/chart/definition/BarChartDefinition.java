@@ -33,6 +33,14 @@ public final class BarChartDefinition extends YAxisChartDefinition {
         barNamingMode = NamingMode.FIELD;
     }
 
+    public BarChartDefinition(BarChartDefinition copy, boolean copyData) {
+        super(copy, copyData);
+
+        this.subtractionNeeded = copy.subtractionNeeded;
+        this.categoryAxisLabel = copy.categoryAxisLabel;
+        this.categoryNamingMode = copy.categoryNamingMode;
+    }
+
     public boolean isSubtractionNeeded() {
         return subtractionNeeded;
     }
