@@ -75,29 +75,10 @@ public final class ChartFactory {
         // if any DataSet matches a defined host, show the report
         for (BaseChartDefinition chartDefinition : chartDefinitions) {
             dataset: for (DataSet data : dataSets) {
-                if (chartDefinition instanceof LineChartDefinition) {
-                    // also handles IntervalLineCharts
-                    for (DataDefinition definition : ((LineChartDefinition) chartDefinition).getLines()) {
-                        if (definition.matchesHost(data) && (definition.getMatchingTypes(data).size() > 0)) {
-                            toReturn.add(chartDefinition);
-                            break dataset;
-                        }
-                    }
-                }
-                else if (chartDefinition instanceof HistogramChartDefinition) {
-                    for (DataDefinition definition : ((HistogramChartDefinition) chartDefinition).getHistograms()) {
-                        if (definition.matchesHost(data) && (definition.getMatchingTypes(data).size() > 0)) {
-                            toReturn.add(chartDefinition);
-                            break dataset;
-                        }
-                    }
-                }
-                else {
-                    for (DataDefinition definition : ((BarChartDefinition) chartDefinition).getCategories()) {
-                        if (definition.matchesHost(data) && (definition.getMatchingTypes(data).size() > 0)) {
-                            toReturn.add(chartDefinition);
-                            break dataset;
-                        }
+                for (DataDefinition definition : chartDefinition.getData()) {
+                    if (definition.matchesHost(data) && (definition.getMatchingTypes(data).size() > 0)) {
+                        toReturn.add(chartDefinition);
+                        break dataset;
                     }
                 }
             }

@@ -142,7 +142,7 @@ public final class IntervalChartBuilder extends BaseChartBuilder<IntervalChartDe
 
         Map<String, Integer> usedIntervalNames = new java.util.HashMap<String, Integer>(records.size());
 
-        for (DataDefinition definition : lineDefinition.getLines()) {
+        for (DataDefinition definition : lineDefinition.getData()) {
             if (definition.matchesHost(data)) {
                 for (DataType type : definition.getMatchingTypes(data)) {
                     List<String> fields = definition.getMatchingFields(type);

@@ -260,16 +260,9 @@ public final class ReportPanel extends JTabbedPane implements PropertyChangeList
             for (int i = 0; i < chartsInUse.size(); i++) {
                 BaseChartDefinition chartDefinition = chartsInUse.get(i);
 
-                if (chartDefinition.getClass().equals(IntervalChartDefinition.class)) {
-                    for (DataDefinition definition : ((IntervalChartDefinition) chartsInUse.get(i)).getLines()) {
-                        if (definition.getStatistic() == Statistic.GRANULARITY_MAXIMUM) {
-                            chartNeedsUpdate.set(i);
-                            break;
-                        }
-                    }
-                }
-                else if (chartDefinition.getClass().equals(BarChartDefinition.class)) {
-                    for (DataDefinition definition : ((BarChartDefinition) chartsInUse.get(i)).getCategories()) {
+                if (chartDefinition.getClass().equals(IntervalChartDefinition.class)
+                        || chartDefinition.getClass().equals(BarChartDefinition.class)) {
+                    for (DataDefinition definition : chartsInUse.get(i).getData()) {
                         if (definition.getStatistic() == Statistic.GRANULARITY_MAXIMUM) {
                             chartNeedsUpdate.set(i);
                             break;

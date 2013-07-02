@@ -1,7 +1,5 @@
 package com.ibm.nmon.chart.definition;
 
-import java.util.List;
-
 import com.ibm.nmon.data.definition.DataDefinition;
 import com.ibm.nmon.data.definition.NamingMode;
 
@@ -18,8 +16,6 @@ public final class BarChartDefinition extends YAxisChartDefinition {
     private NamingMode categoryNamingMode;
     private NamingMode barNamingMode;
 
-    private final List<DataDefinition> categories;
-
     public BarChartDefinition(String shortName, String title) {
         this(shortName, title, true, false);
     }
@@ -35,8 +31,6 @@ public final class BarChartDefinition extends YAxisChartDefinition {
 
         categoryNamingMode = NamingMode.TYPE;
         barNamingMode = NamingMode.FIELD;
-
-        categories = new java.util.ArrayList<DataDefinition>(3);
     }
 
     public boolean isSubtractionNeeded() {
@@ -80,13 +74,5 @@ public final class BarChartDefinition extends YAxisChartDefinition {
         else {
             categoryNamingMode = mode;
         }
-    }
-
-    public void addCategory(DataDefinition category) {
-        categories.add(category);
-    }
-
-    public Iterable<DataDefinition> getCategories() {
-        return java.util.Collections.unmodifiableList(categories);
     }
 }

@@ -154,7 +154,7 @@ public class LineChartBuilder extends BaseChartBuilder<LineChartDefinition> {
             throw new IllegalStateException("initChart() must be called first");
         }
 
-        for (DataDefinition dataDefinition : definition.getLines()) {
+        for (DataDefinition dataDefinition : definition.getData()) {
             DataTupleXYDataset dataset = (DataTupleXYDataset) chart.getXYPlot().getDataset(
                     dataDefinition.usesSecondaryYAxis() ? 1 : 0);
 

@@ -620,21 +620,15 @@ public final class ChartDefinitionParser extends BasicXMLParser {
                         regexFieldRegexTransformer);
             }
 
-            if (currentChart instanceof LineChartDefinition) {
-                ((LineChartDefinition) currentChart).addLine(definition);
-            }
-            else if (currentChart.getClass().equals(BarChartDefinition.class)) {
-                ((BarChartDefinition) currentChart).addCategory(definition);
-            }
-            else if (currentChart instanceof HistogramChartDefinition) {
+            currentChart.addData(definition);
+
+            if (currentChart instanceof HistogramChartDefinition) {
                 HistogramChartDefinition histogramChart = ((HistogramChartDefinition) currentChart);
 
                 // count will be zero if 'showMarkers' is set to false
                 if (histogramChart.getMarkerCount() != 0) {
                     histogramChart.setMarkers(markers.toArray(new Statistic[markers.size()]));
                 }
-
-                histogramChart.addHistogram(definition);
             }
 
             logger.debug("added {} to chart {}", definition, currentChart.getShortName());

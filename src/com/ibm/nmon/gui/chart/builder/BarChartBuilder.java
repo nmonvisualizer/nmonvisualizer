@@ -138,7 +138,7 @@ public final class BarChartBuilder extends BaseChartBuilder<BarChartDefinition> 
         DataSet data = record.getDataSet();
         Statistic previousStat = null;
 
-        for (DataDefinition dataDefinition : definition.getCategories()) {
+        for (DataDefinition dataDefinition : definition.getData()) {
             if (dataDefinition.matchesHost(data)) {
                 for (DataType type : dataDefinition.getMatchingTypes(data)) {
                     for (String field : dataDefinition.getMatchingFields(type)) {

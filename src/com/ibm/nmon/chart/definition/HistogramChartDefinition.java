@@ -2,7 +2,6 @@ package com.ibm.nmon.chart.definition;
 
 import java.util.List;
 
-import com.ibm.nmon.data.definition.DataDefinition;
 import com.ibm.nmon.data.definition.NamingMode;
 
 import com.ibm.nmon.analysis.Statistic;
@@ -14,15 +13,12 @@ public final class HistogramChartDefinition extends YAxisChartDefinition {
 
     private NamingMode histogramNamingMode;
 
-    private final List<DataDefinition> histograms;
-
     private final List<Statistic> markers;
 
     public HistogramChartDefinition(String shortName, String title) {
         super(shortName, title, false);
 
         histogramNamingMode = NamingMode.FIELD;
-        histograms = new java.util.ArrayList<DataDefinition>(2);
 
         markers = new java.util.ArrayList<Statistic>(3);
         markers.add(Statistic.AVERAGE);
@@ -62,14 +58,6 @@ public final class HistogramChartDefinition extends YAxisChartDefinition {
         else {
             this.histogramNamingMode = histogramNamingMode;
         }
-    }
-
-    public void addHistogram(DataDefinition histogram) {
-        histograms.add(histogram);
-    }
-
-    public final Iterable<DataDefinition> getHistograms() {
-        return java.util.Collections.unmodifiableList(histograms);
     }
 
     public int getMarkerCount() {

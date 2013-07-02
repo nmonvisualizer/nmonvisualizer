@@ -1,7 +1,5 @@
 package com.ibm.nmon.chart.definition;
 
-import java.util.List;
-
 import com.ibm.nmon.data.definition.DataDefinition;
 import com.ibm.nmon.data.definition.NamingMode;
 
@@ -16,8 +14,6 @@ public class LineChartDefinition extends YAxisChartDefinition {
 
     private NamingMode lineNamingMode;
 
-    private final List<DataDefinition> lines;
-
     public LineChartDefinition(String shortName, String title) {
         this(shortName, title, false);
     }
@@ -26,7 +22,6 @@ public class LineChartDefinition extends YAxisChartDefinition {
         super(shortName, title, stacked);
 
         lineNamingMode = NamingMode.FIELD;
-        lines = new java.util.ArrayList<DataDefinition>(3);
     }
 
     public final String getXAxisLabel() {
@@ -53,13 +48,5 @@ public class LineChartDefinition extends YAxisChartDefinition {
         else {
             lineNamingMode = mode;
         }
-    }
-
-    public final void addLine(DataDefinition line) {
-        lines.add(line);
-    }
-
-    public final Iterable<DataDefinition> getLines() {
-        return java.util.Collections.unmodifiableList(lines);
     }
 }

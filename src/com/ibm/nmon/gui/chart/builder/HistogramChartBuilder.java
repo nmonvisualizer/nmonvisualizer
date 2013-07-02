@@ -163,7 +163,7 @@ public final class HistogramChartBuilder extends BaseChartBuilder<HistogramChart
                 .getDataset(definition.hasSecondaryYAxis() ? 1 : 0);
         DataSet data = analysis.getDataSet();
 
-        for (DataDefinition dataDefinition : definition.getHistograms()) {
+        for (DataDefinition dataDefinition : definition.getData()) {
             if (dataDefinition.matchesHost(data)) {
                 for (DataType type : dataDefinition.getMatchingTypes(data)) {
                     for (String field : dataDefinition.getMatchingFields(type)) {
