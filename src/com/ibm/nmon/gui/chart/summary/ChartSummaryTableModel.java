@@ -381,7 +381,15 @@ public final class ChartSummaryTableModel extends ChoosableColumnTableModel {
         }
 
         int rowCount = getRowCount();
-        int hashCode = dataset.hashCode();
+
+        // do not use DataTuple.hashCode() since we want the tuple's DataSet to be excluded
+        // charts with the same types and fields should 'remember' the same row visibility
+        int hashCode = 1;
+
+        for (DataTuple t : dataset.getAllTuples()) {
+            hashCode = (hashCode * 11) + (t.getDataType().hashCode() * 31) + (t.getField().hashCode() * 57);
+        }
+
         rowVisible = rowVisibleCache.get(hashCode);
 
         if (rowVisible == null) {
@@ -454,7 +462,7 @@ public final class ChartSummaryTableModel extends ChoosableColumnTableModel {
                     }
                 }
 
-                logger.debug("set data for category chart with {}", series);
+                logger.trace("set data for category chart with {}", series);
             }
         }
 

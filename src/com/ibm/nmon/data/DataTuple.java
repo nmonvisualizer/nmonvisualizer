@@ -36,9 +36,6 @@ public final class DataTuple {
         return field;
     }
 
-    // note that this is equals & hash code without the dataset factored in
-    // this is to allow ChartSummaryTable model (the only class that uses DataTupleDataset equals &
-    // hash code) to match similar graphs without regard to which dataset is being displayed
     @Override
     public boolean equals(Object obj) {
         if (obj == null) {
@@ -47,16 +44,16 @@ public final class DataTuple {
         else if (obj.getClass() == this.getClass()) {
             DataTuple t = (DataTuple) obj;
 
-            // if (dataSet.equals(t.getDataSet())) {
-            if (getDataType().equals(t.getDataType())) {
-                if (getField() == null) {
-                    return null == t.getField();
-                }
-                else {
-                    return getField().equals(t.getField());
+            if (dataSet.equals(t.getDataSet())) {
+                if (getDataType().equals(t.getDataType())) {
+                    if (getField() == null) {
+                        return null == t.getField();
+                    }
+                    else {
+                        return getField().equals(t.getField());
+                    }
                 }
             }
-            // }
         }
 
         return false;
@@ -64,11 +61,11 @@ public final class DataTuple {
 
     @Override
     public int hashCode() {
-        int code = 31; // getDataSet().hashCode();
+        int code = getDataSet().hashCode();
         code = code * 59 + getDataType().hashCode();
 
         if (getField() != null) {
-            code = code * 59 + getField().hashCode();
+            code = code * 73 + getField().hashCode();
         }
 
         return code;
