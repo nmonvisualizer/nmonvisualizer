@@ -3,6 +3,7 @@ package com.ibm.nmon.chart.definition;
 import java.util.List;
 
 import com.ibm.nmon.data.definition.DataDefinition;
+import com.ibm.nmon.data.definition.NamingMode;
 
 /**
  * Base class for chart definitions. A chart definition will have a short name and a title. The
@@ -14,6 +15,8 @@ public abstract class BaseChartDefinition implements Cloneable {
 
     private final List<DataDefinition> data;
 
+    private NamingMode subtitleNamingMode = NamingMode.HOST;
+
     protected BaseChartDefinition(String shortName, String title) {
         setShortName(shortName);
         setTitle(title);
@@ -24,6 +27,7 @@ public abstract class BaseChartDefinition implements Cloneable {
     protected BaseChartDefinition(BaseChartDefinition copy, boolean copyData) {
         this.shortName = copy.shortName;
         this.title = copy.title;
+        this.subtitleNamingMode = copy.subtitleNamingMode;
 
         if (copyData) {
             this.data = new java.util.ArrayList<DataDefinition>(copy.data);
@@ -56,6 +60,19 @@ public abstract class BaseChartDefinition implements Cloneable {
         }
         else {
             this.title = title;
+        }
+    }
+
+    public final NamingMode getSubtitleNamingMode() {
+        return subtitleNamingMode;
+    }
+
+    public final void setSubtitleNamingMode(NamingMode subtitleNamingMode) {
+        if (subtitleNamingMode == null) {
+            this.subtitleNamingMode = NamingMode.NONE;
+        }
+        else {
+            this.subtitleNamingMode = subtitleNamingMode;
         }
     }
 

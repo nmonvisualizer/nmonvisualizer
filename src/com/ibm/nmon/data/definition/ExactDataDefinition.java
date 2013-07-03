@@ -23,6 +23,14 @@ public final class ExactDataDefinition extends DataDefinition {
         this.fields = fields;
     }
 
+    public ExactDataDefinition(DataSet data, DataType type, String field) {
+        super();
+
+        this.dataSets = java.util.Collections.singletonList(data);
+        this.types = java.util.Collections.singletonList(type);
+        this.fields = java.util.Collections.singletonList(field);
+    }
+
     public DataSet getDataSet() {
         return dataSets.get(0);
     }
@@ -49,5 +57,28 @@ public final class ExactDataDefinition extends DataDefinition {
     @Override
     public List<String> getMatchingFields(DataType type) {
         return fields;
+    }
+
+    public String toString() {
+        StringBuilder builder = new StringBuilder(128);
+
+        builder.append('{');
+
+        builder.append("data: ");
+        builder.append(dataSets);
+
+        builder.append("; ");
+
+        builder.append("types: ");
+        builder.append(types);
+
+        builder.append("; ");
+
+        builder.append("fields: ");
+        builder.append(fields);
+
+        builder.append('}');
+
+        return builder.toString();
     }
 }

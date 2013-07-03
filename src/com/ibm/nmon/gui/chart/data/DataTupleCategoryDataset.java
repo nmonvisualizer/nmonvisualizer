@@ -1,6 +1,7 @@
 package com.ibm.nmon.gui.chart.data;
 
 import java.util.Map;
+import java.util.Set;
 
 import org.jfree.data.category.DefaultCategoryDataset;
 
@@ -80,6 +81,17 @@ public final class DataTupleCategoryDataset extends DefaultCategoryDataset imple
                 return columns.get(getColumnKey(column).toString());
             }
         }
+    }
+
+    @Override
+    public Iterable<DataTuple> getAllTuples() {
+        Set<DataTuple> allTuples = new java.util.HashSet<DataTuple>();
+
+        for (String key : tuples.keySet()) {
+            allTuples.addAll(tuples.get(key).values());
+        }
+
+        return java.util.Collections.unmodifiableSet(allTuples);
     }
 
     @Override

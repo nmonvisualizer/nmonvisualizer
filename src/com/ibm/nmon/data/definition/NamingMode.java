@@ -68,9 +68,15 @@ public enum NamingMode {
         public String getName(DataDefinition definition, DataSet data, DataType type, String field, int granularity) {
             return definition.getStatistic().getName(granularity);
         }
+    },
+    NONE() {
+        @Override
+        public String getName(DataDefinition definition, DataSet data, DataType type, String field, int granularity) {
+            return "";
+        }
     };
 
     public abstract String getName(DataDefinition definition, DataSet data, DataType type, String field, int granularity);
 
-    private static final String SEPARATOR = "-";
+    public static final String SEPARATOR = "-";
 }

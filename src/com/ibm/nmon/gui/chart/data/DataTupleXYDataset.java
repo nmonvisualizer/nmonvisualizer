@@ -52,6 +52,11 @@ public final class DataTupleXYDataset extends TimeTableXYDataset implements Data
         return tuples.get(row);
     }
 
+    @Override
+    public Iterable<DataTuple> getAllTuples() {
+        return java.util.Collections.unmodifiableList(tuples);
+    }
+
     public boolean isStacked() {
         return stacked;
     }

@@ -180,7 +180,6 @@ public final class HistogramChartBuilder extends BaseChartBuilder<HistogramChart
 
                         dataset.addSeries(fieldName, values, definition.getBins());
                         dataset.associateTuple(fieldName, null, new DataTuple(data, type, fieldName));
-                        addDataUsed(data);
                     }
                 }
 

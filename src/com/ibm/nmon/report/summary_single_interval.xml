@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <charts>
   <barchart name="Average CPU Utilization" shortName="CPU" stacked="true"
-    categoriesNamedBy="HOST" barsNamedBy="FIELD">
+    categoriesNamedBy="HOST" barsNamedBy="FIELD" subtitledBy="NONE">
     <yAxis label="% CPU" asPercent="true" />
     <data>
       <type name="CPU_ALL" />
@@ -12,7 +12,7 @@
   </barchart>
 
   <barchart name="Average Disk Activity" shortName="Disk Activity" stacked="true"
-    categoriesNamedBy="HOST" barsNamedBy="FIELD">
+    categoriesNamedBy="HOST" barsNamedBy="FIELD" subtitledBy="NONE">
     <yAxis label="KB / s" />
     <data>
       <type name="DISKREAD" />
@@ -25,7 +25,7 @@
   </barchart>
 
   <barchart name="Average Disk Transfers" shortName="Disk Transfers" stacked="true"
-    categoriesNamedBy="HOST" barsNamedBy="FIELD">
+    categoriesNamedBy="HOST" barsNamedBy="FIELD" subtitledBy="NONE">
     <yAxis label="Transfers / s" />
     <data>
       <type name="DISKXFER" />
@@ -34,7 +34,7 @@
   </barchart>
 
   <barchart name="Average Memory Usage" shortName="Memory" stacked="true"
-    categoriesNamedBy="HOST" barsNamedBy="FIELD">
+    categoriesNamedBy="HOST" barsNamedBy="FIELD" subtitledBy="NONE">
     <yAxis label="MB" />
     <data>
       <type name="MEM" />
@@ -49,7 +49,7 @@
   </barchart>
 
   <barchart name="Average Swap Usage" shortName="Swap" stacked="true" categoriesNamedBy="HOST"
-    barsNamedBy="FIELD">
+    barsNamedBy="FIELD" subtitledBy="NONE">
     <yAxis label="MB" />
     <data>
       <type name="MEM" />
@@ -63,7 +63,7 @@
   </barchart>
 
   <barchart name="Average Ethernet Traffic" shortName="Network Data" stacked="true"
-    categoriesNamedBy="HOST" barsNamedBy="FIELD">
+    categoriesNamedBy="HOST" barsNamedBy="FIELD" subtitledBy="NONE">
     <yAxis label="KB / s" />
     <data>
       <type name="NETETOTAL" />
@@ -76,7 +76,7 @@
   </barchart>
 
   <barchart name="Average Ethernet Packets" shortName="Network Packets" stacked="true"
-    categoriesNamedBy="HOST" barsNamedBy="FIELD">
+    categoriesNamedBy="HOST" barsNamedBy="FIELD" subtitledBy="NONE">
     <yAxis label="Packets / s" />
     <data>
       <type name="NETETOTAL" />
@@ -89,7 +89,7 @@
   </barchart>
 
   <barchart name="Average Shared Ethernet Traffic" shortName="Shared Network Data" stacked="true"
-    categoriesNamedBy="HOST" barsNamedBy="FIELD">
+    categoriesNamedBy="HOST" barsNamedBy="FIELD" subtitledBy="NONE">
     <yAxis label="KB / s" />
     <data>
       <host os="VIOS" />
@@ -104,7 +104,7 @@
   </barchart>
 
   <barchart name="Average Shared Ethernet Packets" shortName="Shared Network Packets" stacked="true"
-    categoriesNamedBy="HOST" barsNamedBy="FIELD">
+    categoriesNamedBy="HOST" barsNamedBy="FIELD" subtitledBy="NONE">
     <yAxis label="Packets / s" />
     <data>
       <host os="VIOS" />
@@ -119,7 +119,7 @@
   </barchart>
   
   <barchart name="Average Run Queue Length" shortName="Run Queue" stacked="true"
-    categoriesNamedBy="HOST" barsNamedBy="FIELD">
+    categoriesNamedBy="HOST" barsNamedBy="FIELD" subtitledBy="NONE">
     <yAxis label="Queue Length" />
     <data>
       <type name="PROC" />
@@ -128,7 +128,7 @@
   </barchart>
 
   <barchart name="Average Process Switches" shortName="Process Switches" stacked="true"
-    categoriesNamedBy="HOST" barsNamedBy="FIELD">
+    categoriesNamedBy="HOST" barsNamedBy="FIELD" subtitledBy="NONE">
     <yAxis label="Switches / s" />
     <data>
       <type name="PROC" />
@@ -137,7 +137,7 @@
     </data>
   </barchart>
 
-  <linechart name="CPU Utilization" shortName="CPU over Time" linesNamedBy="HOST">
+  <linechart name="CPU Utilization" shortName="CPU over Time" linesNamedBy="HOST" subtitledBy="NONE">
     <yAxis label="% CPU" asPercent="true" />
     <data>
       <type name="CPU_ALL" />
@@ -145,7 +145,7 @@
     </data>
   </linechart>
 
-  <linechart name="CPUs Used" shortName="CPUs Used" linesNamedBy="HOST">
+  <linechart name="CPUs Used" shortName="CPUs Used" linesNamedBy="HOST" subtitledBy="NONE">
     <yAxis label="CPUs" />
     <data>
       <host os="AIX" />
@@ -155,7 +155,7 @@
     </data>
   </linechart>
   
-  <linechart name="% Entitlement Used" shortName="CPU Entitlement" linesNamedBy="HOST">
+  <linechart name="% Entitlement Used" shortName="CPU Entitlement" linesNamedBy="HOST" subtitledBy="NONE">
     <yAxis label="% Entitlement Used" />
     <data>
       <host os="AIX" />

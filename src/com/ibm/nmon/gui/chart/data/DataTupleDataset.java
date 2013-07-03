@@ -12,6 +12,8 @@ public interface DataTupleDataset {
 
     public DataTuple getTuple(int row, int column);
 
+    public Iterable<DataTuple> getAllTuples();
+
     public double getAverage(int row);
 
     public double getMinimum(int row);
@@ -19,9 +21,9 @@ public interface DataTupleDataset {
     public double getMaximum(int row);
 
     public double getMedian(int row);
-    
+
     public double get95thPercentile(int row);
-    
+
     public double get99thPercentile(int row);
 
     public double getStandardDeviation(int row);

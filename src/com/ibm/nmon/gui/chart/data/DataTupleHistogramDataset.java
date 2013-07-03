@@ -65,6 +65,11 @@ public final class DataTupleHistogramDataset extends HistogramDataset implements
     }
 
     @Override
+    public Iterable<DataTuple> getAllTuples() {
+        return java.util.Collections.unmodifiableList(tuples);
+    }
+
+    @Override
     public double getAverage(int row) {
         calculateGraphData();
         return graphData[row].average;

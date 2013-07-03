@@ -274,7 +274,6 @@ public class LineChartBuilder extends BaseChartBuilder<LineChartDefinition> {
 
             if (idx != -1) {
                 dataset.associateTuple(fieldNames.get(idx), null, new DataTuple(data, type, fields.get(idx)));
-                addDataUsed(data);
             }
         }
     }

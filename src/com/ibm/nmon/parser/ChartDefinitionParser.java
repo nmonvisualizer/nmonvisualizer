@@ -266,6 +266,14 @@ public final class ChartDefinitionParser extends BasicXMLParser {
 
         currentChart = new LineChartDefinition(shortName == null ? title : shortName, title, stacked);
 
+        if (attributes.get("subtitledBy") != null) {
+            NamingMode mode = NamingMode.valueOf(attributes.get("subtitledBy"));
+
+            if (mode != null) {
+                currentChart.setSubtitleNamingMode(mode);
+            }
+        }
+
         if (attributes.get("linesNamedBy") != null) {
             NamingMode mode = NamingMode.valueOf(attributes.get("linesNamedBy"));
             ((LineChartDefinition) currentChart).setLineNamingMode(mode);
@@ -292,6 +300,14 @@ public final class ChartDefinitionParser extends BasicXMLParser {
         String shortName = attributes.get("shortName");
 
         currentChart = new IntervalChartDefinition(shortName == null ? title : shortName, title);
+
+        if (attributes.get("subtitledBy") != null) {
+            NamingMode mode = NamingMode.valueOf(attributes.get("subtitledBy"));
+
+            if (mode != null) {
+                currentChart.setSubtitleNamingMode(mode);
+            }
+        }
 
         if (attributes.get("linesNamedBy") != null) {
             NamingMode mode = NamingMode.valueOf(attributes.get("linesNamedBy"));
@@ -322,6 +338,14 @@ public final class ChartDefinitionParser extends BasicXMLParser {
         boolean subtractionNeeded = Boolean.valueOf(attributes.get("subtractionNeeded"));
 
         currentChart = new BarChartDefinition(shortName == null ? title : shortName, title, stacked, subtractionNeeded);
+
+        if (attributes.get("subtitledBy") != null) {
+            NamingMode mode = NamingMode.valueOf(attributes.get("subtitledBy"));
+
+            if (mode != null) {
+                currentChart.setSubtitleNamingMode(mode);
+            }
+        }
 
         if (attributes.get("barsNamedBy") != null) {
             NamingMode mode = NamingMode.valueOf(attributes.get("barsNamedBy"));
@@ -359,6 +383,14 @@ public final class ChartDefinitionParser extends BasicXMLParser {
         if (attributes.get("barsNamedBy") != null) {
             NamingMode mode = NamingMode.valueOf(attributes.get("barsNamedBy"));
             ((HistogramChartDefinition) currentChart).setHistogramNamingMode(mode);
+        }
+
+        if (attributes.get("subtitledBy") != null) {
+            NamingMode mode = NamingMode.valueOf(attributes.get("subtitledBy"));
+
+            if (mode != null) {
+                currentChart.setSubtitleNamingMode(mode);
+            }
         }
 
         String temp = attributes.get("bins");

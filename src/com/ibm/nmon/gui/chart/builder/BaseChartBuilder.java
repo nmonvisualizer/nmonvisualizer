@@ -10,7 +10,9 @@ import java.util.List;
 import java.util.Set;
 
 import org.jfree.chart.JFreeChart;
+import org.jfree.chart.plot.CategoryPlot;
 import org.jfree.chart.plot.Plot;
+import org.jfree.chart.plot.XYPlot;
 
 import org.jfree.chart.title.LegendTitle;
 import org.jfree.chart.title.TextTitle;
@@ -18,9 +20,24 @@ import org.jfree.chart.title.TextTitle;
 import org.jfree.ui.RectangleEdge;
 import org.jfree.ui.RectangleInsets;
 
-import com.ibm.nmon.chart.definition.BaseChartDefinition;
 import com.ibm.nmon.data.DataSet;
+import com.ibm.nmon.data.DataTuple;
+import com.ibm.nmon.data.DataType;
+
+import com.ibm.nmon.analysis.Statistic;
+
+import com.ibm.nmon.chart.definition.BaseChartDefinition;
+import com.ibm.nmon.chart.definition.YAxisChartDefinition;
+
+import com.ibm.nmon.data.definition.DataDefinition;
+
+import com.ibm.nmon.data.definition.NamingMode;
+import static com.ibm.nmon.data.definition.NamingMode.*;
+
+import com.ibm.nmon.gui.chart.data.DataTupleDataset;
+
 import com.ibm.nmon.interval.Interval;
+
 import com.ibm.nmon.util.GranularityHelper;
 
 /**
@@ -55,8 +72,6 @@ abstract class BaseChartBuilder<C extends BaseChartDefinition> {
 
     protected JFreeChart chart;
     protected C definition;
-
-    private final Set<DataSet> dataUsed = new java.util.HashSet<DataSet>();
 
     protected BaseChartBuilder() {
         interval = Interval.DEFAULT;
@@ -105,17 +120,14 @@ abstract class BaseChartBuilder<C extends BaseChartDefinition> {
             throw new IllegalStateException("initChart() must be called first");
         }
 
-        try {
-            if (dataUsed.size() == 1) {
-                ((TextTitle) chart.getSubtitle(0)).setText(dataUsed.iterator().next().getHostname());
-            }
+        updateSubtitle();
 
+        try {
             return chart;
         }
         finally {
             chart = null;
             definition = null;
-            dataUsed.clear();
         }
     }
 
@@ -161,10 +173,6 @@ abstract class BaseChartBuilder<C extends BaseChartDefinition> {
         plot.setBackgroundPaint(Color.WHITE);
     }
 
-    protected final void addDataUsed(DataSet data) {
-        dataUsed.add(data);
-    }
-
     protected final void addLegend() {
         if (chart == null) {
             throw new IllegalStateException("initChart() must be called first");
@@ -180,5 +188,231 @@ abstract class BaseChartBuilder<C extends BaseChartDefinition> {
         legend.setItemLabelPadding(padding);
 
         chart.addLegend(legend);
+    }
+
+    private final void updateSubtitle() {
+        TextTitle subtitle = (TextTitle) chart.getSubtitle(0);
+
+        if (definition.getSubtitleNamingMode() == NONE) {
+            subtitle.setText("");
+            return;
+        }
+
+        Set<Statistic> stats = new java.util.HashSet<Statistic>();
+
+        for (DataDefinition dataDefinition : definition.getData()) {
+            stats.add(dataDefinition.getStatistic());
+        }
+
+        if (definition.getSubtitleNamingMode() == STAT) {
+            if (stats.size() == 1) {
+                subtitle.setText(stats.iterator().next().toString());
+            }
+            else {
+                subtitle.setText("");
+            }
+
+            return;
+        }
+
+        // get the chart Datasets
+        Plot plot = chart.getPlot();
+        Iterable<DataTuple> allTuples = null;
+
+        DataTupleDataset data1 = null;
+        DataTupleDataset data2 = null;
+
+        boolean combineDataSets = false;
+
+        if (definition instanceof YAxisChartDefinition) {
+            combineDataSets = ((YAxisChartDefinition) definition).hasSecondaryYAxis();
+        }
+
+        if (plot instanceof XYPlot) {
+            data1 = ((DataTupleDataset) ((XYPlot) plot).getDataset(0));
+
+            if (combineDataSets) {
+                data2 = ((DataTupleDataset) ((XYPlot) plot).getDataset(1));
+            }
+        }
+        else {
+            // currently only XYPlot and CategoryPlot are used
+            data1 = ((DataTupleDataset) ((CategoryPlot) plot).getDataset(0));
+
+            if (combineDataSets) {
+                data2 = ((DataTupleDataset) ((CategoryPlot) plot).getDataset(1));
+            }
+        }
+
+        allTuples = data1.getAllTuples();
+
+        // combine the tuples if needed
+        if (combineDataSets) {
+            Set<DataTuple> combined = new java.util.HashSet<DataTuple>();
+
+            for (DataTuple tuple : allTuples) {
+                combined.add(tuple);
+            }
+
+            allTuples = data2.getAllTuples();
+
+            for (DataTuple tuple : allTuples) {
+                combined.add(tuple);
+            }
+
+            allTuples = combined;
+        }
+
+        // get the unique set of each DataSet, DataType and field
+        Set<DataSet> dataSets = new java.util.HashSet<DataSet>();
+        Set<DataType> dataTypes = new java.util.HashSet<DataType>();
+        Set<String> fields = new java.util.HashSet<String>();
+
+        for (DataTuple t : allTuples) {
+            dataSets.add(t.getDataSet());
+            dataTypes.add(t.getDataType());
+            fields.add(t.getField());
+        }
+
+        // now set the subtitle based on the NamingMode
+        NamingMode mode = definition.getSubtitleNamingMode();
+
+        // only set if there is a single data set, type of field
+        if (mode == HOST) {
+            if (dataSets.size() == 1) {
+                subtitle.setText(dataSets.iterator().next().getHostname());
+            }
+            else {
+                subtitle.setText("");
+            }
+        }
+        else if (mode == TYPE) {
+            if (dataTypes.size() == 1) {
+                subtitle.setText(dataTypes.iterator().next().toString());
+            }
+            else {
+                subtitle.setText("");
+            }
+        }
+        else if (mode == FIELD) {
+            if (fields.size() == 1) {
+                subtitle.setText(fields.iterator().next());
+            }
+            else {
+                subtitle.setText("");
+            }
+        }
+        // for compound modes, both must be unique; if one part is unique, use that instead
+        else if (mode == HOST_TYPE) {
+            if (dataTypes.size() == 1) {
+                if (dataSets.size() == 1) {
+                    subtitle.setText(dataSets.iterator().next().getHostname() + SEPARATOR
+                            + dataTypes.iterator().next().toString());
+                }
+                else {
+                    subtitle.setText(dataTypes.iterator().next().toString());
+                }
+            }
+            else {
+                if (dataSets.size() == 1) {
+                    subtitle.setText(dataSets.iterator().next().getHostname());
+                }
+                else {
+                    subtitle.setText("");
+                }
+            }
+        }
+        else if (mode == HOST_FIELD) {
+            if (fields.size() == 1) {
+                if (dataSets.size() == 1) {
+                    subtitle.setText(dataSets.iterator().next().getHostname() + SEPARATOR + fields.iterator().next());
+                }
+                else {
+                    subtitle.setText(fields.iterator().next());
+                }
+            }
+            else {
+                if (dataSets.size() == 1) {
+                    subtitle.setText(dataSets.iterator().next().getHostname());
+                }
+                else {
+                    subtitle.setText("");
+                }
+            }
+        }
+        else if (mode == HOST_STAT) {
+            if (stats.size() == 1) {
+                if (dataSets.size() == 1) {
+                    subtitle.setText(dataSets.iterator().next().getHostname() + SEPARATOR
+                            + stats.iterator().next().toString());
+                }
+                else {
+                    subtitle.setText(stats.iterator().next().toString());
+                }
+            }
+            else {
+                if (dataSets.size() == 1) {
+                    subtitle.setText(dataSets.iterator().next().getHostname());
+                }
+                else {
+                    subtitle.setText("");
+                }
+            }
+        }
+        else if (mode == TYPE_FIELD) {
+            if (fields.size() == 1) {
+                if (dataTypes.size() == 1) {
+                    subtitle.setText(dataTypes.iterator().next().toString() + SEPARATOR + fields.iterator().next());
+                }
+                else {
+                    subtitle.setText(fields.iterator().next());
+                }
+            }
+            else {
+                if (dataTypes.size() == 1) {
+                    subtitle.setText(dataTypes.iterator().next().toString());
+                }
+                else {
+                    subtitle.setText("");
+                }
+            }
+        }
+        else if (mode == TYPE_STAT) {
+            if (stats.size() == 1) {
+                if (dataTypes.size() == 1) {
+                    subtitle.setText(dataTypes.iterator().next().toString() + SEPARATOR
+                            + stats.iterator().next().toString());
+                }
+                else {
+                    subtitle.setText(stats.iterator().next().toString());
+                }
+            }
+            else {
+                if (dataTypes.size() == 1) {
+                    subtitle.setText(stats.iterator().next().toString());
+                }
+                else {
+                    subtitle.setText("");
+                }
+            }
+        }
+        else if (mode == FIELD_STAT) {
+            if (stats.size() == 1) {
+                if (fields.size() == 1) {
+                    subtitle.setText(fields.iterator().next() + SEPARATOR + stats.iterator().next().toString());
+                }
+                else {
+                    subtitle.setText(stats.iterator().next().toString());
+                }
+            }
+            else {
+                if (fields.size() == 1) {
+                    subtitle.setText(fields.iterator().next());
+                }
+                else {
+                    subtitle.setText("");
+                }
+            }
+        }
     }
 }
