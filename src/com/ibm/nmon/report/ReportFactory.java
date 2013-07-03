@@ -20,9 +20,14 @@ import com.ibm.nmon.interval.Interval;
 import com.ibm.nmon.interval.IntervalListener;
 
 import com.ibm.nmon.parser.ChartDefinitionParser;
-import com.ibm.nmon.chart.definition.BaseChartDefinition;
+import com.ibm.nmon.chart.definition.*;
 
 import com.ibm.nmon.data.DataSet;
+import com.ibm.nmon.data.DataType;
+
+import com.ibm.nmon.data.definition.DataDefinition;
+import com.ibm.nmon.data.definition.ExactDataDefinition;
+import com.ibm.nmon.data.definition.NamingMode;
 
 import com.ibm.nmon.gui.chart.ChartFactory;
 
@@ -156,6 +161,87 @@ public class ReportFactory implements IntervalListener {
         }
     }
 
+    /**
+     * <p>
+     * Creates multiple charts per field. Rather than creating a single chart with a line/bar for
+     * each field, this function creates a chart for <em>each</em> field that matches the given
+     * definition.
+     * </p>
+     * <p>
+     * This function is applied across all currently parsed DataSets. I also uses all charts in the
+     * given report. So it is possible for this function to create a large number of charts,
+     * especially if multiple DataTypes and/or fields are matched.
+     * </p>
+     */
+    public void multiplexChartsAcrossFields(String chartDefinitionKey, File chartDirectory,
+            ReportFactoryCallback callback) {
+        List<BaseChartDefinition> datasetChartDefinitions = chartDefinitionsCache.get(chartDefinitionKey);
+
+        if (datasetChartDefinitions != null) {
+            chartDirectory.mkdirs();
+
+            for (DataSet data : app.getDataSets()) {
+                LOGGER.debug("multiplexing charts for '{}' for dataset {} across fields", chartDefinitionKey,
+                        data.getHostname());
+
+                // create a subdirectory for each dataset
+                File datasetChartsDir = new File(chartDirectory, data.getHostname());
+                datasetChartsDir.mkdir();
+
+                List<BaseChartDefinition> multiplexedChartDefinitions = new java.util.ArrayList<BaseChartDefinition>(
+                        3 * datasetChartDefinitions.size());
+
+                for (BaseChartDefinition chartDefinition : datasetChartDefinitions) {
+                    for (DataDefinition dataDefinition : chartDefinition.getData()) {
+                        if (dataDefinition.matchesHost(data)) {
+                            for (DataType type : dataDefinition.getMatchingTypes(data)) {
+                                for (String field : dataDefinition.getMatchingFields(type)) {
+                                    BaseChartDefinition newChartDefinition = copyChart(chartDefinition);
+
+                                    // short name used as filename and/or tabname, so make sure it
+                                    // is unique
+                                    newChartDefinition.setShortName(chartDefinition.getShortName() + "_" + field);
+
+                                    newChartDefinition.setTitle(chartDefinition.getTitle());
+                                    newChartDefinition.setSubtitleNamingMode(NamingMode.FIELD);
+
+                                    DataDefinition newData = new ExactDataDefinition(data, type, field);
+                                    newData.setStatistic(dataDefinition.getStatistic());
+                                    newData.setUseSecondaryYAxis(dataDefinition.usesSecondaryYAxis());
+
+                                    newChartDefinition.addData(newData);
+
+                                    multiplexedChartDefinitions.add(newChartDefinition);
+                                }
+                            }
+
+                        }
+                    }
+                }
+
+                int chartsCreated = 0;
+
+                if (!multiplexedChartDefinitions.isEmpty()) {
+                    List<DataSet> list = java.util.Collections.singletonList(data);
+                    String newKey = chartDefinitionKey + " (" + data.getHostname() + ')';
+
+                    callback.beforeCreateCharts(newKey, list, chartDirectory.getAbsolutePath());
+                    chartsCreated = saveCharts(multiplexedChartDefinitions, list, datasetChartsDir, callback);
+                    callback.afterCreateCharts(newKey, list, chartDirectory.getAbsolutePath());
+
+                }
+
+                LOGGER.debug("multiplexed {} charts across fields for '{}'", chartsCreated, chartDefinitionKey);
+
+                // remove the directory if no images were created
+                if (chartsCreated == 0) {
+                    LOGGER.debug("removing unused directory '{}'", chartDirectory);
+                    datasetChartsDir.delete();
+                }
+            }
+        }
+    }
+
     private int saveCharts(List<BaseChartDefinition> chartDefinitions, Iterable<? extends DataSet> data,
             File saveDirectory, ReportFactoryCallback callback) {
 
@@ -217,6 +303,24 @@ public class ReportFactory implements IntervalListener {
         }
 
         return hasData;
+    }
+
+    private BaseChartDefinition copyChart(BaseChartDefinition copy) {
+        if (copy.getClass().equals(LineChartDefinition.class)) {
+            return new LineChartDefinition((LineChartDefinition) copy, false);
+        }
+        else if (copy.getClass().equals(BarChartDefinition.class)) {
+            return new BarChartDefinition((BarChartDefinition) copy, false);
+        }
+        else if (copy.getClass().equals(IntervalChartDefinition.class)) {
+            return new IntervalChartDefinition((IntervalChartDefinition) copy, false);
+        }
+        else if (copy.getClass().equals(HistogramChartDefinition.class)) {
+            return new HistogramChartDefinition((HistogramChartDefinition) copy, false);
+        }
+        else {
+            return null;
+        }
     }
 
     @Override
