@@ -62,7 +62,7 @@ public final class DataHelper {
         // disks do not have digits; paritions do
         boolean hdisk = diskName.startsWith("hdisk");
 
-        if ((diskName.startsWith("sd") || (diskName.startsWith("hd") && !hdisk))
+        if ((diskName.startsWith("sd") || (diskName.startsWith("hd") && !hdisk) || diskName.startsWith("vd"))
                 && !Character.isDigit(diskName.charAt(diskName.length() - 1))) {
             return true;
 
