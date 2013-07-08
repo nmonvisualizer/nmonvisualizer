@@ -57,7 +57,10 @@ public final class Interval implements Comparable<Interval> {
 
     @Override
     public boolean equals(Object obj) {
-        if (obj.getClass() == Interval.class) {
+        if (obj == this) {
+            return true;
+        }
+        else if (obj instanceof Interval) {
             Interval i = (Interval) obj;
 
             return (this.start == i.start) && (this.end == i.end);

@@ -41,4 +41,24 @@ public final class RegexTypeMatcher implements TypeMatcher {
     public String toString() {
         return matcher.pattern().pattern();
     }
+
+    @Override
+    public int hashCode() {
+        return matcher.pattern().pattern().hashCode();
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (obj == this) {
+            return true;
+        }
+        else if (obj instanceof RegexTypeMatcher) {
+            RegexTypeMatcher matcher = (RegexTypeMatcher) obj;
+
+            return this.matcher.pattern().pattern().equals(matcher.matcher.pattern().pattern());
+        }
+        else {
+            return false;
+        }
+    }
 }

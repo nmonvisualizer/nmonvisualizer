@@ -47,4 +47,24 @@ public final class ExactHostMatcher implements HostMatcher {
     public String toString() {
         return hostname;
     }
+
+    @Override
+    public int hashCode() {
+        return hostname.hashCode();
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (obj == this) {
+            return true;
+        }
+        else if (obj instanceof ExactHostMatcher) {
+            ExactHostMatcher matcher = (ExactHostMatcher) obj;
+
+            return this.hostname.equals(matcher.hostname);
+        }
+        else {
+            return false;
+        }
+    }
 }

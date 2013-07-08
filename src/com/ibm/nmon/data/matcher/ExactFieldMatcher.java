@@ -41,4 +41,24 @@ public final class ExactFieldMatcher implements FieldMatcher {
     public String toString() {
         return field;
     }
+
+    @Override
+    public int hashCode() {
+        return field.hashCode();
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (obj == this) {
+            return true;
+        }
+        else if (obj instanceof ExactFieldMatcher) {
+            ExactFieldMatcher matcher = (ExactFieldMatcher) obj;
+
+            return this.field.equals(matcher.field);
+        }
+        else {
+            return false;
+        }
+    }
 }

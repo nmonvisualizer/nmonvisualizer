@@ -95,7 +95,7 @@ public final class Process implements Comparable<Process> {
         if (obj == this) {
             return true;
         }
-        else if (obj.getClass().equals(Process.class)) {
+        else if (obj instanceof Process) {
             Process p = (Process) obj;
 
             if (id == -1) {
@@ -116,7 +116,7 @@ public final class Process implements Comparable<Process> {
             return name.hashCode();
         }
         else {
-            return ((id * 17) << 16) & ((int)(startTime ^ (startTime >>> 32)));
+            return ((id * 17) << 16) & ((int) (startTime ^ (startTime >>> 32)));
         }
     }
 

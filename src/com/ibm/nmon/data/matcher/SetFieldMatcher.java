@@ -42,4 +42,24 @@ public final class SetFieldMatcher implements FieldMatcher {
     public String toString() {
         return fields.toString();
     }
+
+    @Override
+    public int hashCode() {
+        return fields.hashCode();
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (obj == this) {
+            return true;
+        }
+        else if (obj instanceof SetFieldMatcher) {
+            SetFieldMatcher matcher = (SetFieldMatcher) obj;
+
+            return this.fields.equals(matcher.fields);
+        }
+        else {
+            return false;
+        }
+    }
 }

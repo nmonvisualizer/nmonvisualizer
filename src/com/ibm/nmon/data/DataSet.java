@@ -182,10 +182,10 @@ public abstract class DataSet implements Comparable<DataSet> {
 
     @Override
     public final boolean equals(Object obj) {
-        if (obj == null) {
-            return false;
+        if (obj == this) {
+            return true;
         }
-        else if (obj.getClass() == this.getClass()) {
+        else if (obj instanceof DataSet) {
             DataSet data = (DataSet) obj;
 
             return this.getHostname().equals(data.getHostname()) && (this.getStartTime() == data.getStartTime())

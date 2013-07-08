@@ -43,4 +43,24 @@ public final class ExactTypeMatcher implements TypeMatcher {
     public String toString() {
         return type;
     }
+
+    @Override
+    public int hashCode() {
+        return type.hashCode();
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (obj == this) {
+            return true;
+        }
+        else if (obj instanceof ExactTypeMatcher) {
+            ExactTypeMatcher matcher = (ExactTypeMatcher) obj;
+
+            return this.type.equals(matcher.type);
+        }
+        else {
+            return false;
+        }
+    }
 }

@@ -38,4 +38,24 @@ public final class RegexFieldMatcher implements FieldMatcher {
     public String toString() {
         return matcher.pattern().pattern();
     }
+
+    @Override
+    public int hashCode() {
+        return matcher.pattern().pattern().hashCode();
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (obj == this) {
+            return true;
+        }
+        else if (obj instanceof RegexFieldMatcher) {
+            RegexFieldMatcher matcher = (RegexFieldMatcher) obj;
+
+            return this.matcher.pattern().pattern().equals(matcher.matcher.pattern().pattern());
+        }
+        else {
+            return false;
+        }
+    }
 }

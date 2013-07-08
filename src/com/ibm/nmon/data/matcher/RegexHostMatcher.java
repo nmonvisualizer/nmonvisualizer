@@ -45,4 +45,24 @@ public final class RegexHostMatcher implements HostMatcher {
     public String toString() {
         return matcher.pattern().pattern();
     }
+
+    @Override
+    public int hashCode() {
+        return matcher.pattern().pattern().hashCode();
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (obj == this) {
+            return true;
+        }
+        else if (obj instanceof RegexHostMatcher) {
+            RegexHostMatcher matcher = (RegexHostMatcher) obj;
+
+            return this.matcher.pattern().pattern().equals(matcher.matcher.pattern().pattern());
+        }
+        else {
+            return false;
+        }
+    }
 }

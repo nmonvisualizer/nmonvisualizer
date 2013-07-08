@@ -67,6 +67,26 @@ public final class OSMatcher implements HostMatcher {
         return matcher.toString();
     }
 
+    @Override
+    public int hashCode() {
+        return matcher.hashCode();
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (obj == this) {
+            return true;
+        }
+        else if (obj instanceof OSMatcher) {
+            OSMatcher matcher = (OSMatcher) obj;
+
+            return this.matcher == matcher.matcher;
+        }
+        else {
+            return false;
+        }
+    }
+
     private static final String getMetadata(DataSet data, String key) {
         String value = null;
 
