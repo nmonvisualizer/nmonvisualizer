@@ -239,6 +239,9 @@ public final class DataTypeChartPanel extends LineChartPanel implements Interval
         else if (field.contains("count")) {
             return "Count";
         }
+        else if (field.endsWith("KB")) {
+            return "KB";
+        }
         else if (field.contains("MB")) {
             return "MB";
         }
@@ -315,11 +318,11 @@ public final class DataTypeChartPanel extends LineChartPanel implements Interval
         tempFields.put("pswpout", "Pages / s");
         tempFields.put("Paging", "Pages / s");
 
-        tempFields.put("Size", "MB");
-        tempFields.put("ResSet", "MB");
-        tempFields.put("ResText", "MB");
-        tempFields.put("ResData", "MB");
-        tempFields.put("ShdLib", "MB");
+        tempFields.put("Size", "KB");
+        tempFields.put("ResSet", "KB");
+        tempFields.put("ResText", "KB");
+        tempFields.put("ResData", "KB");
+        tempFields.put("ShdLib", "KB");
 
         tempFields.put("MajorFault", "Pages / s");
         tempFields.put("MinorFault", "Pages / s");
@@ -332,7 +335,7 @@ public final class DataTypeChartPanel extends LineChartPanel implements Interval
         tempFields.put("phantom", "Count");
         tempFields.put("tiltratio", "%");
 
-        tempFields.put("requested", "bytes");
+        tempFields.put("requested", "Bytes");
 
         tempFields.put("flipped", "Objects");
         tempFields.put("tenured", "Objects");

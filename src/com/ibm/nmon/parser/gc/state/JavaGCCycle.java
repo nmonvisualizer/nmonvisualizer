@@ -26,8 +26,8 @@ abstract class JavaGCCycle implements GCState {
             String totalAttribute) {
         String typeId = beforeGC ? "GCBEF" : "GCAFT";
 
-        double free = context.parseDouble(freeAttribute) / 1024;
-        double total = context.parseDouble(totalAttribute) / 1024;
+        double free = context.parseDouble(freeAttribute) / 1024.0 / 1024.0;
+        double total = context.parseDouble(totalAttribute) / 1024.0 / 1024.0;
         double used = total - free;
 
         context.setValue(typeId, "free_" + type, free);
@@ -90,7 +90,7 @@ abstract class JavaGCCycle implements GCState {
         double requested = 0;
 
         if (currentRecord.hasData(type)) {
-            requested = currentRecord.getData(type, "requested") / 1024;
+            requested = currentRecord.getData(type, "requested") / 1024.0 / 1024.0;
         }
 
         double nurseryFreed = freeNurseryAfter - freeNurseryBefore + requested;
