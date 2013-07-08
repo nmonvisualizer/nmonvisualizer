@@ -82,6 +82,18 @@ public final class DefaultDataDefinition extends DataDefinition {
         }
     }
 
+    public HostMatcher getHostMatcher() {
+        return hostMatcher;
+    }
+
+    public TypeMatcher getTypeMatcher() {
+        return typeMatcher;
+    }
+
+    public FieldMatcher getFieldMatcher() {
+        return fieldMatcher;
+    }
+
     @Override
     public boolean matchesHost(DataSet data) {
         return hostMatcher.matchesHost(data);
@@ -176,6 +188,51 @@ public final class DefaultDataDefinition extends DataDefinition {
         }
         else {
             return field;
+        }
+    }
+
+    public DefaultDataDefinition withNewHosts(HostMatcher matcher) {
+        if (matcher != null) {
+            if (hostMatcher.equals(matcher)) {
+                return this;
+            }
+            else {
+                return new DefaultDataDefinition(matcher, this.typeMatcher, this.fieldMatcher, this.getStatistic(),
+                        this.usesSecondaryYAxis());
+            }
+        }
+        else {
+            return this;
+        }
+    }
+
+    public DefaultDataDefinition withNewTypes(TypeMatcher matcher) {
+        if (matcher != null) {
+            if (typeMatcher.equals(matcher)) {
+                return this;
+            }
+            else {
+                return new DefaultDataDefinition(this.hostMatcher, matcher, this.fieldMatcher, this.getStatistic(),
+                        this.usesSecondaryYAxis());
+            }
+        }
+        else {
+            return this;
+        }
+    }
+
+    public DefaultDataDefinition withNewFields(FieldMatcher matcher) {
+        if (matcher != null) {
+            if (fieldMatcher.equals(matcher)) {
+                return this;
+            }
+            else {
+                return new DefaultDataDefinition(this.hostMatcher, this.typeMatcher, matcher, this.getStatistic(),
+                        this.usesSecondaryYAxis());
+            }
+        }
+        else {
+            return this;
         }
     }
 

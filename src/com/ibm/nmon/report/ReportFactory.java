@@ -26,8 +26,11 @@ import com.ibm.nmon.data.DataSet;
 import com.ibm.nmon.data.DataType;
 
 import com.ibm.nmon.data.definition.DataDefinition;
+import com.ibm.nmon.data.definition.DefaultDataDefinition;
 import com.ibm.nmon.data.definition.ExactDataDefinition;
 import com.ibm.nmon.data.definition.NamingMode;
+import com.ibm.nmon.data.matcher.ExactFieldMatcher;
+import com.ibm.nmon.data.matcher.ExactTypeMatcher;
 
 import com.ibm.nmon.gui.chart.ChartFactory;
 
@@ -168,7 +171,7 @@ public class ReportFactory implements IntervalListener {
      * definition.
      * </p>
      * <p>
-     * This function is applied across all currently parsed DataSets. I also uses all charts in the
+     * This function is applied across all currently parsed DataSets. It also uses all charts in the
      * given report. So it is possible for this function to create a large number of charts,
      * especially if multiple DataTypes and/or fields are matched.
      * </p>
@@ -177,67 +180,165 @@ public class ReportFactory implements IntervalListener {
             ReportFactoryCallback callback) {
         List<BaseChartDefinition> datasetChartDefinitions = chartDefinitionsCache.get(chartDefinitionKey);
 
-        if (datasetChartDefinitions != null) {
-            chartDirectory.mkdirs();
+        if (datasetChartDefinitions == null) {
+            return;
+        }
 
-            for (DataSet data : app.getDataSets()) {
-                LOGGER.debug("multiplexing charts for '{}' for dataset {} across fields", chartDefinitionKey,
-                        data.getHostname());
+        chartDirectory.mkdirs();
 
-                // create a subdirectory for each dataset
-                File datasetChartsDir = new File(chartDirectory, data.getHostname());
-                datasetChartsDir.mkdir();
+        for (DataSet data : app.getDataSets()) {
+            LOGGER.debug("multiplexing charts for '{}' for dataset {} across fields", chartDefinitionKey,
+                    data.getHostname());
 
-                List<BaseChartDefinition> multiplexedChartDefinitions = new java.util.ArrayList<BaseChartDefinition>(
-                        3 * datasetChartDefinitions.size());
+            // create a subdirectory for each dataset
+            File datasetChartsDir = new File(chartDirectory, data.getHostname());
+            datasetChartsDir.mkdir();
 
-                for (BaseChartDefinition chartDefinition : datasetChartDefinitions) {
-                    for (DataDefinition dataDefinition : chartDefinition.getData()) {
-                        if (dataDefinition.matchesHost(data)) {
-                            for (DataType type : dataDefinition.getMatchingTypes(data)) {
-                                for (String field : dataDefinition.getMatchingFields(type)) {
-                                    BaseChartDefinition newChartDefinition = copyChart(chartDefinition);
+            List<BaseChartDefinition> multiplexedChartDefinitions = new java.util.ArrayList<BaseChartDefinition>(
+                    3 * datasetChartDefinitions.size());
 
-                                    // short name used as filename and/or tabname, so make sure it
-                                    // is unique
-                                    newChartDefinition.setShortName(chartDefinition.getShortName() + "_" + field);
+            for (BaseChartDefinition chartDefinition : datasetChartDefinitions) {
+                for (DataDefinition dataDefinition : chartDefinition.getData()) {
+                    if (dataDefinition.matchesHost(data)) {
+                        for (DataType type : dataDefinition.getMatchingTypes(data)) {
+                            for (String field : dataDefinition.getMatchingFields(type)) {
+                                BaseChartDefinition newChartDefinition = copyChart(chartDefinition);
 
-                                    newChartDefinition.setTitle(chartDefinition.getTitle());
-                                    newChartDefinition.setSubtitleNamingMode(NamingMode.FIELD);
+                                // short name used as filename and/or tabname, so make sure it
+                                // is unique
+                                newChartDefinition.setShortName(chartDefinition.getShortName() + "_"
+                                        + dataDefinition.renameField(field));
 
-                                    DataDefinition newData = new ExactDataDefinition(data, type, field);
-                                    newData.setStatistic(dataDefinition.getStatistic());
-                                    newData.setUseSecondaryYAxis(dataDefinition.usesSecondaryYAxis());
+                                newChartDefinition.setTitle(chartDefinition.getTitle());
+                                newChartDefinition.setSubtitleNamingMode(NamingMode.FIELD);
 
-                                    newChartDefinition.addData(newData);
+                                DataDefinition newData = null;
 
-                                    multiplexedChartDefinitions.add(newChartDefinition);
+                                if (dataDefinition instanceof DefaultDataDefinition) {
+                                    DefaultDataDefinition old = (DefaultDataDefinition) dataDefinition;
+
+                                    newData = old.withNewFields(new ExactFieldMatcher(field));
                                 }
-                            }
+                                else {
+                                    newData = new ExactDataDefinition(data, type,
+                                            java.util.Collections.singletonList(field), dataDefinition.getStatistic(),
+                                            dataDefinition.usesSecondaryYAxis());
+                                }
 
+                                newChartDefinition.addData(newData);
+
+                                multiplexedChartDefinitions.add(newChartDefinition);
+                            }
                         }
                     }
                 }
+            }
 
-                int chartsCreated = 0;
+            int chartsCreated = 0;
 
-                if (!multiplexedChartDefinitions.isEmpty()) {
-                    List<DataSet> list = java.util.Collections.singletonList(data);
-                    String newKey = chartDefinitionKey + " (" + data.getHostname() + ')';
+            if (!multiplexedChartDefinitions.isEmpty()) {
+                List<DataSet> list = java.util.Collections.singletonList(data);
+                String newKey = chartDefinitionKey + " (" + data.getHostname() + ')';
 
-                    callback.beforeCreateCharts(newKey, list, chartDirectory.getAbsolutePath());
-                    chartsCreated = saveCharts(multiplexedChartDefinitions, list, datasetChartsDir, callback);
-                    callback.afterCreateCharts(newKey, list, chartDirectory.getAbsolutePath());
+                callback.beforeCreateCharts(newKey, list, chartDirectory.getAbsolutePath());
+                chartsCreated = saveCharts(multiplexedChartDefinitions, list, datasetChartsDir, callback);
+                callback.afterCreateCharts(newKey, list, chartDirectory.getAbsolutePath());
+            }
 
+            LOGGER.debug("multiplexed {} charts across fields for '{}'", chartsCreated, chartDefinitionKey);
+
+            // remove the directory if no images were created
+            if (chartsCreated == 0) {
+                LOGGER.debug("removing unused directory '{}'", chartDirectory);
+                datasetChartsDir.delete();
+            }
+        }
+    }
+
+    /**
+     * <p>
+     * Creates multiple charts per type. Rather than creating a single chart with a line/bar for
+     * each type, this function creates a chart for <em>each</em> type that matches the given
+     * definition.
+     * </p>
+     * <p>
+     * This function is applied across all currently parsed DataSets. It also uses all charts in the
+     * given report. So it is possible for this function to create a large number of charts,
+     * especially if multiple DataTypes are matched.
+     * </p>
+     */
+    public void multiplexChartsAcrossTypes(String chartDefinitionKey, File chartDirectory,
+            ReportFactoryCallback callback) {
+        List<BaseChartDefinition> datasetChartDefinitions = chartDefinitionsCache.get(chartDefinitionKey);
+
+        if (datasetChartDefinitions == null) {
+            return;
+        }
+
+        chartDirectory.mkdirs();
+
+        for (DataSet data : app.getDataSets()) {
+            LOGGER.debug("multiplexing charts for '{}' for dataset {} across fields", chartDefinitionKey,
+                    data.getHostname());
+
+            // create a subdirectory for each dataset
+            File datasetChartsDir = new File(chartDirectory, data.getHostname());
+            datasetChartsDir.mkdir();
+
+            List<BaseChartDefinition> multiplexedChartDefinitions = new java.util.ArrayList<BaseChartDefinition>(
+                    3 * datasetChartDefinitions.size());
+
+            for (BaseChartDefinition chartDefinition : datasetChartDefinitions) {
+                for (DataDefinition dataDefinition : chartDefinition.getData()) {
+                    if (dataDefinition.matchesHost(data)) {
+                        for (DataType type : dataDefinition.getMatchingTypes(data)) {
+                            BaseChartDefinition newChartDefinition = copyChart(chartDefinition);
+
+                            // short name used as filename and/or tabname, so make sure it
+                            // is unique
+                            newChartDefinition.setShortName(chartDefinition.getShortName() + "_"
+                                    + dataDefinition.renameType(type));
+
+                            newChartDefinition.setTitle(chartDefinition.getTitle());
+                            newChartDefinition.setSubtitleNamingMode(NamingMode.TYPE);
+
+                            DataDefinition newData = null;
+
+                            if (dataDefinition instanceof DefaultDataDefinition) {
+                                DefaultDataDefinition old = (DefaultDataDefinition) dataDefinition;
+
+                                newData = old.withNewTypes(new ExactTypeMatcher(type.toString()));
+                            }
+                            else {
+                                newData = new ExactDataDefinition(data, type, dataDefinition.getMatchingFields(type),
+                                        dataDefinition.getStatistic(), dataDefinition.usesSecondaryYAxis());
+                            }
+
+                            newChartDefinition.addData(newData);
+
+                            multiplexedChartDefinitions.add(newChartDefinition);
+                        }
+                    }
                 }
+            }
 
-                LOGGER.debug("multiplexed {} charts across fields for '{}'", chartsCreated, chartDefinitionKey);
+            int chartsCreated = 0;
 
-                // remove the directory if no images were created
-                if (chartsCreated == 0) {
-                    LOGGER.debug("removing unused directory '{}'", chartDirectory);
-                    datasetChartsDir.delete();
-                }
+            if (!multiplexedChartDefinitions.isEmpty()) {
+                List<DataSet> list = java.util.Collections.singletonList(data);
+                String newKey = chartDefinitionKey + " (" + data.getHostname() + ')';
+
+                callback.beforeCreateCharts(newKey, list, chartDirectory.getAbsolutePath());
+                chartsCreated = saveCharts(multiplexedChartDefinitions, list, datasetChartsDir, callback);
+                callback.afterCreateCharts(newKey, list, chartDirectory.getAbsolutePath());
+            }
+
+            LOGGER.debug("multiplexed {} charts across fields for '{}'", chartsCreated, chartDefinitionKey);
+
+            // remove the directory if no images were created
+            if (chartsCreated == 0) {
+                LOGGER.debug("removing unused directory '{}'", chartDirectory);
+                datasetChartsDir.delete();
             }
         }
     }

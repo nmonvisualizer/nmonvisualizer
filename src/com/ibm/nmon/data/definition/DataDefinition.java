@@ -16,9 +16,9 @@ import com.ibm.nmon.analysis.Statistic;
  * <code>AVERAGE</code>, can be specified for clients that need aggregated data.
  */
 public abstract class DataDefinition {
-    private Statistic stat;
+    private final Statistic stat;
 
-    private boolean useSecondaryYAxis;
+    private final boolean useSecondaryYAxis;
 
     protected DataDefinition() {
         this(null, false);
@@ -37,16 +37,8 @@ public abstract class DataDefinition {
         return stat;
     }
 
-    public void setStatistic(Statistic stat) {
-        this.stat = stat;
-    }
-
     public boolean usesSecondaryYAxis() {
         return useSecondaryYAxis;
-    }
-
-    public void setUseSecondaryYAxis(boolean useSecondaryYAxis) {
-        this.useSecondaryYAxis = useSecondaryYAxis;
     }
 
     /**

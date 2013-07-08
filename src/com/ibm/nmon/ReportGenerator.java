@@ -59,6 +59,8 @@ public final class ReportGenerator extends NMONVisualizerApp {
         List<String> customDataCharts = new java.util.ArrayList<String>();
         List<String> customSummaryCharts = new java.util.ArrayList<String>();
         List<String> multiplexedFieldCharts = new java.util.ArrayList<String>();
+        List<String> multiplexedTypeCharts = new java.util.ArrayList<String>();
+
         String intervalsFile = "";
 
         boolean summaryCharts = true;
@@ -148,6 +150,16 @@ public final class ReportGenerator extends NMONVisualizerApp {
                                 }
 
                                 multiplexedFieldCharts.add(args[i]);
+                            }
+                            else if ("mt".equals(param)) {
+                                ++i;
+
+                                if (i > args.length) {
+                                    System.err.println("file must be specified for " + '-' + '-' + "mt");
+                                    return;
+                                }
+
+                                multiplexedTypeCharts.add(args[i]);
                             }
                             else {
                                 System.err.println("ignoring " + "unknown parameter " + '-' + '-' + param);
@@ -244,16 +256,20 @@ public final class ReportGenerator extends NMONVisualizerApp {
             generator.parseChartDefinition(file);
         }
 
+        for (String file : multiplexedTypeCharts) {
+            generator.parseChartDefinition(file);
+        }
+
         if (generator.getIntervalManager().getIntervalCount() != 0) {
             // create charts for all intervals
             for (Interval interval : generator.getIntervalManager().getIntervals()) {
                 generator.createReport(interval, baseDirectory, summaryCharts, dataSetCharts, customSummaryCharts,
-                        customDataCharts, multiplexedFieldCharts);
+                        customDataCharts, multiplexedFieldCharts, multiplexedTypeCharts);
             }
         }
         else {
             generator.createReport(Interval.DEFAULT, baseDirectory, summaryCharts, dataSetCharts, customSummaryCharts,
-                    customDataCharts, multiplexedFieldCharts);
+                    customDataCharts, multiplexedFieldCharts, multiplexedTypeCharts);
         }
 
         System.out.println();
@@ -428,7 +444,8 @@ public final class ReportGenerator extends NMONVisualizerApp {
     }
 
     private void createReport(Interval interval, File baseDirectory, boolean summaryCharts, boolean dataSetCharts,
-            List<String> customSummaryCharts, List<String> customDataCharts, List<String> multiplexedFieldCharts) {
+            List<String> customSummaryCharts, List<String> customDataCharts, List<String> multiplexedFieldCharts,
+            List<String> multiplexedTypeCharts) {
         System.out.println();
 
         getIntervalManager().setCurrentInterval(interval);
@@ -473,6 +490,10 @@ public final class ReportGenerator extends NMONVisualizerApp {
 
         for (String file : multiplexedFieldCharts) {
             factory.multiplexChartsAcrossFields(file, chartDirectory, callback);
+        }
+
+        for (String file : multiplexedTypeCharts) {
+            factory.multiplexChartsAcrossTypes(file, chartDirectory, callback);
         }
     }
 }

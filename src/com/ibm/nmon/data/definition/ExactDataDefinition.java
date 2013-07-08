@@ -3,6 +3,7 @@ package com.ibm.nmon.data.definition;
 import java.util.Collection;
 import java.util.List;
 
+import com.ibm.nmon.analysis.Statistic;
 import com.ibm.nmon.data.DataSet;
 import com.ibm.nmon.data.DataType;
 
@@ -15,20 +16,21 @@ public final class ExactDataDefinition extends DataDefinition {
     private final List<DataType> types;
     private final List<String> fields;
 
-    public ExactDataDefinition(DataSet data, DataType type, List<String> fields) {
-        super();
+    public ExactDataDefinition(DataSet data, DataType type, List<String> fields, Statistic stat,
+            boolean useSecondaryYAxis) {
+        super(stat, useSecondaryYAxis);
 
         this.dataSets = java.util.Collections.singletonList(data);
         this.types = java.util.Collections.singletonList(type);
         this.fields = fields;
     }
 
-    public ExactDataDefinition(DataSet data, DataType type, String field) {
+    public ExactDataDefinition(DataSet data, DataType type, List<String> fields) {
         super();
 
         this.dataSets = java.util.Collections.singletonList(data);
         this.types = java.util.Collections.singletonList(type);
-        this.fields = java.util.Collections.singletonList(field);
+        this.fields = fields;
     }
 
     public DataSet getDataSet() {
