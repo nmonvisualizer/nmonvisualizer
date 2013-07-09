@@ -33,7 +33,7 @@ import com.ibm.nmon.util.FileHelper;
  * supports DataTypes and fields; entire DataSets cannot be dragged.
  */
 public final class TreeTransferHandler extends TransferHandler {
-    protected static final Logger logger = org.slf4j.LoggerFactory.getLogger(TreeTransferHandler.class);
+    private static final Logger LOGGER = org.slf4j.LoggerFactory.getLogger(TreeTransferHandler.class);
 
     private final TreeTransferPathParser pathParser;
     private final NMONVisualizerGui gui;
@@ -113,7 +113,7 @@ public final class TreeTransferHandler extends TransferHandler {
             return true;
         }
         catch (Exception e) {
-            logger.warn("cannot import data", e);
+            LOGGER.warn("cannot import data", e);
             return false;
         }
     }

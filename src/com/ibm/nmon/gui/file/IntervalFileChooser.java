@@ -19,7 +19,7 @@ import com.ibm.nmon.gui.main.NMONVisualizerGui;
  * interval files and adding them to the gui's {@link IntervalManager}.
  */
 public final class IntervalFileChooser extends GUIFileChooser {
-    protected final Logger logger = org.slf4j.LoggerFactory.getLogger(IntervalFileChooser.class);
+    private static final Logger LOGGER = org.slf4j.LoggerFactory.getLogger(IntervalFileChooser.class);
 
     private JCheckBox useRelativeTime;
 
@@ -59,7 +59,7 @@ public final class IntervalFileChooser extends GUIFileChooser {
                 gui.getIntervalManager().saveToFile(intervalFile, offset);
             }
             catch (IOException ioe) {
-                logger.error("could not load interval file '{}'", intervalFile.getAbsolutePath(), ioe);
+                LOGGER.error("could not load interval file '{}'", intervalFile.getAbsolutePath(), ioe);
             }
 
         }
@@ -89,7 +89,7 @@ public final class IntervalFileChooser extends GUIFileChooser {
                 gui.getIntervalManager().loadFromFile(intervalFile, offset);
             }
             catch (IOException ioe) {
-                logger.error("could not save interval file '{}'", intervalFile.getAbsolutePath(), ioe);
+                LOGGER.error("could not save interval file '{}'", intervalFile.getAbsolutePath(), ioe);
             }
         }
     }

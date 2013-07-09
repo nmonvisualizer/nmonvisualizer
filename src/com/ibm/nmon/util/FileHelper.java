@@ -16,7 +16,7 @@ public final class FileHelper {
             }
             else {
                 if (filter.accept(files[i])) {
-                    toParse.add(files[i].getPath());
+                    toParse.add(files[i].getAbsolutePath());
                 }
             }
         }
@@ -29,7 +29,7 @@ public final class FileHelper {
             }
             else {
                 if (filter.accept(file)) {
-                    filenames.add(file.getPath());
+                    filenames.add(file.getAbsolutePath());
                 }
             }
         }

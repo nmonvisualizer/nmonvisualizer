@@ -11,7 +11,7 @@ import org.slf4j.Logger;
  * version number can be read and displayed in the UI.
  */
 public final class VersionInfo {
-    private static final Logger logger = org.slf4j.LoggerFactory.getLogger(VersionInfo.class);
+    private static final Logger LOGGER = org.slf4j.LoggerFactory.getLogger(VersionInfo.class);
 
     private static final String version = loadVersion();
 
@@ -30,7 +30,7 @@ public final class VersionInfo {
                 return properties.getProperty("version");
             }
             catch (IOException ioe) {
-                logger.warn("Error loading " + "version.properties" + " file", ioe);
+                LOGGER.warn("Error loading " + "version.properties" + " file", ioe);
                 return "UNKNOWN";
             }
             finally {
@@ -38,12 +38,12 @@ public final class VersionInfo {
                     in.close();
                 }
                 catch (IOException ioe) {
-                    logger.warn("Cannot close " + "version.properties");
+                    LOGGER.warn("Cannot close " + "version.properties");
                 }
             }
         }
         else {
-            logger.debug("could not load " + "version.properties" + "; defaulting to '" + "development" + '\'');
+            LOGGER.debug("could not load " + "version.properties" + "; defaulting to '" + "development" + '\'');
 
             return "development";
         }
