@@ -21,15 +21,15 @@ import com.ibm.nmon.interval.IntervalManager;
  * This model maintains the intervals in sorted order.
  * </p>
  */
-final class IntervalComboBoxModel extends AbstractListModel implements ComboBoxModel, PropertyChangeListener,
-        IntervalListener {
+final class IntervalComboBoxModel extends AbstractListModel<Interval> implements ComboBoxModel<Interval>,
+        PropertyChangeListener, IntervalListener {
     private final IntervalManager manager;
 
     private final List<Interval> intervals = new java.util.LinkedList<Interval>();
     private Interval selected;
 
     public IntervalComboBoxModel(IntervalManager manager) {
-        this.manager =manager;
+        this.manager = manager;
 
         // potential race condition here in that intervals could be added between construction and
         // the time this model is added as a listener
@@ -47,7 +47,7 @@ final class IntervalComboBoxModel extends AbstractListModel implements ComboBoxM
     }
 
     @Override
-    public Object getElementAt(int index) {
+    public Interval getElementAt(int index) {
         if (index == 0) {
             return Interval.DEFAULT;
         }

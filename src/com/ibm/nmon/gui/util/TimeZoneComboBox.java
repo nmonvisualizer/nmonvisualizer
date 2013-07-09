@@ -18,13 +18,13 @@ import com.ibm.nmon.util.TimeZoneFactory;
 /**
  * Combo box that displays all timezones defined by {@link TimeZoneFactory}.
  */
-public final class TimeZoneComboBox extends JComboBox {
+public final class TimeZoneComboBox extends JComboBox<TimeZone> {
     // use a vector here as a small memory savings since DefaultComboBoxModel does not copy the
     // vector but it would create a new Vector internally if passed an array of Strings
     private static final Vector<TimeZone> TIMEZONES = new Vector<TimeZone>(TimeZoneFactory.TIMEZONES);
 
     public TimeZoneComboBox(TimeZone timeZone) {
-        super(new DefaultComboBoxModel(TIMEZONES));
+        super(new DefaultComboBoxModel<TimeZone>(TIMEZONES));
 
         setRenderer(timeZoneListRenderer);
         setSelectedItem(timeZone);
@@ -36,7 +36,7 @@ public final class TimeZoneComboBox extends JComboBox {
 
     private static final DefaultListCellRenderer timeZoneListRenderer = new DefaultListCellRenderer() {
         @Override
-        public Component getListCellRendererComponent(JList list, Object value, int index, boolean isSelected,
+        public Component getListCellRendererComponent(JList<?> list, Object value, int index, boolean isSelected,
                 boolean cellHasFocus) {
             Component c = super.getListCellRendererComponent(list, value, index, isSelected, cellHasFocus);
 

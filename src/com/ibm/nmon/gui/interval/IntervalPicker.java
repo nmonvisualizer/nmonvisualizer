@@ -29,7 +29,7 @@ import com.ibm.nmon.util.TimeFormatCache;
 public final class IntervalPicker extends JPanel implements DataSetListener {
     private final NMONVisualizerGui gui;
 
-    private final JComboBox intervals;
+    private final JComboBox<Interval> intervals;
 
     public IntervalPicker(NMONVisualizerGui gui) {
         assert gui != null;
@@ -42,10 +42,10 @@ public final class IntervalPicker extends JPanel implements DataSetListener {
 
         add(label);
 
-        intervals = new JComboBox(new IntervalComboBoxModel(gui.getIntervalManager()));
+        intervals = new JComboBox<Interval>(new IntervalComboBoxModel(gui.getIntervalManager()));
         intervals.setRenderer(new DefaultListCellRenderer() {
             @Override
-            public Component getListCellRendererComponent(JList list, Object value, int index, boolean isSelected,
+            public Component getListCellRendererComponent(JList<?> list, Object value, int index, boolean isSelected,
                     boolean cellHasFocus) {
                 Component c = super.getListCellRendererComponent(list, value, index, isSelected, cellHasFocus);
 

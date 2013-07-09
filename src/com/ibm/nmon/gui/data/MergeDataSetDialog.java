@@ -27,7 +27,7 @@ import com.ibm.nmon.gui.util.HostnameComboBoxModel;
  * @see SystemDataSet#addData(SystemDataSet)
  */
 public final class MergeDataSetDialog extends GUIDialog {
-    private JComboBox hostnames;
+    private JComboBox<String> hostnames;
     private JButton merge;
     private SystemDataSet toMerge;
 
@@ -47,7 +47,7 @@ public final class MergeDataSetDialog extends GUIDialog {
         JLabel mergeHostLabel = new JLabel("Merge Into:");
         mergeHostLabel.setFont(Styles.LABEL);
 
-        hostnames = new JComboBox(new HostnameComboBoxModel(gui));
+        hostnames = new JComboBox<String>(new HostnameComboBoxModel(gui));
         hostnames.setEditable(false);
 
         merge = new JButton("Merge");

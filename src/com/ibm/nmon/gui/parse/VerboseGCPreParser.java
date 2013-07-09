@@ -20,7 +20,7 @@ import com.ibm.nmon.gui.Styles;
  * @see com.ibm.nmon.gui.main.NMONVisualizerGui#getDataForGCParse(String)
  */
 public final class VerboseGCPreParser extends BaseParserDialog {
-    private JComboBox jvmNames;
+    private JComboBox<String> jvmNames;
 
     public VerboseGCPreParser(NMONVisualizerGui gui) {
         super(gui, "Missing GC Information");
@@ -29,7 +29,7 @@ public final class VerboseGCPreParser extends BaseParserDialog {
     @Override
     protected void addComponents(JPanel content, GridBagConstraints labelConstraints,
             GridBagConstraints fieldConstraints) {
-        jvmNames = new JComboBox();
+        jvmNames = new JComboBox<String>();
         jvmNames.setEditable(true);
 
         JLabel nameLabel = new JLabel("JVM Name:");
@@ -58,7 +58,7 @@ public final class VerboseGCPreParser extends BaseParserDialog {
     @Override
     protected void beforeDispose() {
         boolean existing = false;
-        DefaultComboBoxModel model = (DefaultComboBoxModel) jvmNames.getModel();
+        DefaultComboBoxModel<String> model = (DefaultComboBoxModel<String>) jvmNames.getModel();
 
         for (int i = 0; i < model.getSize(); i++) {
             if (model.getElementAt(i).equals(jvmNames.getSelectedItem())) {
@@ -68,7 +68,7 @@ public final class VerboseGCPreParser extends BaseParserDialog {
         }
 
         if (!existing) {
-            model.addElement(jvmNames.getSelectedItem());
+            model.addElement((String) jvmNames.getSelectedItem());
         }
     }
 

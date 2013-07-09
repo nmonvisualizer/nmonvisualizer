@@ -22,7 +22,8 @@ import com.ibm.nmon.gui.main.NMONVisualizerGui;
  * host in an existing dataset when it is changed.
  * </p>
  */
-public final class HostnameComboBoxModel extends AbstractListModel implements ComboBoxModel, DataSetListener {
+public final class HostnameComboBoxModel extends AbstractListModel<String> implements ComboBoxModel<String>,
+        DataSetListener {
     private final List<String> hosts = new java.util.LinkedList<String>();
 
     private String selected = null;
@@ -40,7 +41,7 @@ public final class HostnameComboBoxModel extends AbstractListModel implements Co
     }
 
     @Override
-    public Object getElementAt(int index) {
+    public String getElementAt(int index) {
         return hosts.get(index);
     }
 

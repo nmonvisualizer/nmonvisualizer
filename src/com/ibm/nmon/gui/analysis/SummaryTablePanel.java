@@ -47,7 +47,6 @@ import com.ibm.nmon.data.DataType;
 import com.ibm.nmon.gui.GUITable;
 import com.ibm.nmon.gui.Styles;
 
-
 import com.ibm.nmon.gui.dnd.TableTransferHandler;
 import com.ibm.nmon.gui.file.AnalysisSetFileChooser;
 import com.ibm.nmon.gui.main.NMONVisualizerGui;
@@ -249,7 +248,9 @@ public final class SummaryTablePanel extends JPanel implements IntervalListener,
 
             String newName = Statistic.GRANULARITY_MAXIMUM.getName(gui.getGranularity());
 
-            DefaultComboBoxModel model = (DefaultComboBoxModel) ((JComboBox) statsPanel.getComponent(1)).getModel();
+            @SuppressWarnings("unchecked")
+            DefaultComboBoxModel<String> model = (DefaultComboBoxModel<String>) ((JComboBox<String>) statsPanel
+                    .getComponent(1)).getModel();
 
             boolean reselect = false;
 
@@ -360,24 +361,25 @@ public final class SummaryTablePanel extends JPanel implements IntervalListener,
 
         statsPanel.add(label);
 
-        JComboBox statistic = new JComboBox();
+        JComboBox<String> statistic = new JComboBox<String>();
 
-        DefaultComboBoxModel model = (DefaultComboBoxModel) statistic.getModel();
-        model.addElement(Statistic.AVERAGE);
-        model.addElement(Statistic.MINIMUM);
-        model.addElement(Statistic.MAXIMUM);
+        DefaultComboBoxModel<String> model = (DefaultComboBoxModel<String>) statistic.getModel();
+        model.addElement(Statistic.AVERAGE.toString());
+        model.addElement(Statistic.MINIMUM.toString());
+        model.addElement(Statistic.MAXIMUM.toString());
         model.addElement(Statistic.GRANULARITY_MAXIMUM.getName(gui.getGranularity()));
-        model.addElement(Statistic.STD_DEV);
-        model.addElement(Statistic.MEDIAN);
-        model.addElement(Statistic.SUM);
-        model.addElement(Statistic.COUNT);
+        model.addElement(Statistic.STD_DEV.toString());
+        model.addElement(Statistic.MEDIAN.toString());
+        model.addElement(Statistic.SUM.toString());
+        model.addElement(Statistic.COUNT.toString());
 
         statistic.setSelectedItem(Statistic.AVERAGE);
 
         statistic.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                Object o = ((JComboBox) e.getSource()).getModel().getSelectedItem();
+                @SuppressWarnings("unchecked")
+                Object o = ((JComboBox<String>) e.getSource()).getModel().getSelectedItem();
 
                 if (o.getClass().equals(String.class)) {
                     ((ByDataSetTableModel) dataSetTable.getModel()).setStatistic(Statistic.GRANULARITY_MAXIMUM);

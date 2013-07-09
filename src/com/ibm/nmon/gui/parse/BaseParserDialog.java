@@ -27,7 +27,7 @@ import com.ibm.nmon.gui.util.HostnameComboBoxModel;
  */
 abstract class BaseParserDialog extends GUIDialog {
     private final JLabel parsedFileLabel;
-    private final JComboBox hostnames;
+    private final JComboBox<String> hostnames;
 
     private final JButton ok;
 
@@ -42,7 +42,7 @@ abstract class BaseParserDialog extends GUIDialog {
 
         HostnameComboBoxModel model = new HostnameComboBoxModel(gui);
 
-        hostnames = new JComboBox(model);
+        hostnames = new JComboBox<String>(model);
         hostnames.setEditable(true);
 
         ok = new JButton("OK");

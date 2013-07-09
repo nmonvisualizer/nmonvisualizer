@@ -12,11 +12,6 @@ import java.awt.event.KeyEvent;
 import java.awt.event.ItemListener;
 import java.awt.event.ItemEvent;
 
-import java.io.PrintWriter;
-import java.io.StringWriter;
-
-import java.text.SimpleDateFormat;
-
 import java.util.logging.Logger;
 import java.util.logging.LogRecord;
 import java.util.logging.Level;
@@ -48,7 +43,7 @@ import com.ibm.nmon.util.BasicFormatter;
 public final class LogViewerDialog extends GUIDialog {
     public static final ImageIcon LOG_ICON = Styles.buildIcon("page_error.png");
 
-    private final JComboBox levels;
+    private final JComboBox<Level> levels;
     private final JTextArea log;
 
     public LogViewerDialog(NMONVisualizerGui gui) {
@@ -74,7 +69,7 @@ public final class LogViewerDialog extends GUIDialog {
         logLevel.setFont(Styles.LABEL);
         // logLevel.setBorder(Styles.CONTENT_BORDER);
 
-        levels = new JComboBox(new Level[] { Level.SEVERE, Level.WARNING, Level.INFO, Level.FINE, Level.FINEST,
+        levels = new JComboBox<Level>(new Level[] { Level.SEVERE, Level.WARNING, Level.INFO, Level.FINE, Level.FINEST,
                 Level.OFF });
         levels.addItemListener(new ItemListener() {
             @Override
