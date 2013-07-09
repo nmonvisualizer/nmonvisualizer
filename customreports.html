@@ -45,15 +45,16 @@
       <li><span class="c">stacked</span> - a a boolean value indicating that the lines or bars in the chart should be stacked rather than separate. On a line chart this causes the area between the lines to be filled in. This attribute is ignored for interval charts. The default value is <span class="c">false</span>.</li>
     </ul>
     <p>Bar charts also support a <span class="c">subtractionNeeded</span> attribute to specify that the bar value should be subtracted from the previous bar's value. This is useful for stacked charts where the underlying data for each field is a sum of other data.</p>
-    <p>Histograms support a  <span class="c">bins</span> attribute to specify the number of bins to use in the chart. Each bin is displayed as a separate bar on the chart. This value defaults to <span class="c">10</span>. Histograms also support the ability to display annotation markers on a chart via the <span class="c">showMarkers</span> attribute and <span class="c">&lt;marker&gt;</span> sub-elements. Each <span class="c">&lt;marker&gt;</span> element requires a <span class="c">stat</span> attribute that corresponds to a valid <a href="#stat">statistic</a>. <span class="c">showMarkers</span> defaults to true and markers are displayed for <span class="c">AVERAGE</span>, <span class="c">MEDIAN</span> and <span class="c">PERCENTILE_95</span>.<p>
+    <p>Histograms support a  <span class="c">bins</span> attribute to specify the number of bins to use in the chart. Each bin is displayed as a separate bar on the chart. This value defaults to <span class="c">10</span>. Histograms also support the ability to display annotation markers on a chart via the <span class="c">showMarkers</span> attribute and <span class="c">&lt;marker&gt;</span> sub-elements. Each <span class="c">&lt;marker&gt;</span> element requires a <span class="c">stat</span> attribute that corresponds to a valid <a href="#stat">statistic</a>. By default, <span class="c">showMarkers</span> is <span class="c">true</span> and markers are displayed for <span class="c">AVERAGE</span>, <span class="c">MEDIAN</span> and <span class="c">PERCENTILE_95</span>.<p>
 
     <h3>Naming &amp; Legends</h3>
     <p>By default, lines and bars as displayed in a chart legend, are named by their field. On bar charts, the X axis displays a category which defaults to the type name. Optional attributes exist to change the defaults.</p>
     <p>For line and interval charts, the attribute is <span class="c">linesNamedBy</span>. This is most useful when charting multiple types, each with the same field name. For bar charts, there are two attributes: <span class="c">barsNamedBy</span> and <span class="c">categoriesNamedBy</span>; these should not be set to the same value. Histograms support  <span class="c">barsNamedBy</span>.</p>
-    <p>For both line and bar charts, the following naming modes are supported:<p>
+    <p>All charts also support a <span class="c">subtitledBy</span> attribute that adds a subtitle to the chart. By default, the subtitle naming mode is <span class="c">HOST</span>. Note that the naming mode is only applied if there is a single instance of the given value for the mode. For example, if the mode is <span class="c">HOST</span>, the hostname <span class="i">will not</span> be displayed if the chart only displays data from a single system. Similarly, for the compound naming modes, the actual subtitle may be shortened if one of the values is unique for the charted data.</p>
+    <p>The following naming modes are supported:<p>
     <ul>
       <li><span class="c">HOST</span> - the hostname of the dataset</li>
-      <li><span class="c">TYPE</span> - the name of the datatype</li>
+      <li><span class="c">TYPE</span> - the name of the data type</li>
       <li><span class="c">FIELD</span> - the name of the field</li>
       <li><span class="c">STAT</span> - the name of a <a href="#stat">statistic</a></li>
       <li><span class="c">HOST_TYPE</span> - the hostname plus the type</li>
@@ -66,7 +67,7 @@
     <p>Note that these values must be capitalized in the XML.</p>
 
     <h3>Data</h3>
-    <p>Each chart must contain at least one <span class="c">&lt;data&gt;</span> element to define the data to be graphed. The data element must have one <span class="c">&lt;type&gt;</span> element and zero or more <span class="c">&lt;field&gt;</span> elements as children. Type elements are used to <a href="matching">match</a> data types; field elements are used to match data within the given type. If no field element is specified, all fields for the matching types will be graphed.</p>
+    <p>Each chart must contain at least one <span class="c">&lt;data&gt;</span> element to define the data to be graphed. The data element must have one <span class="c">&lt;type&gt;</span> element and zero or more <span class="c">&lt;field&gt;</span> elements as children. Type elements are used to <a href="#matching">match</a> data types; field elements are used to match data within the given type. If no field element is specified, all fields for the matching types will be graphed.</p>
     <p>The <span class="c">&lt;data&gt;</span> element can have an optional <span class="c"><a href="#stat">stat</a></span> attribute. The default value for bar and interval charts is <span class="c">AVERAGE</span>. For line charts, this attribute is ignored &ndash; the raw data is always plotted.</p>
 
     <h3>Y Axis</h3>
@@ -114,7 +115,7 @@
     <p>Hosts, types and fields can all be renamed directly or with regular expressions. For explicit renaming, use the <span class="c">alias</span> attribute. For regexes, use the <span class="c">aliasRegex</span> attribute. Both should not be specified in a single element.</p>
     <p>For the <span class="c">regexAlias</span> attribute, any valid regular expression that can be parsed by Java's <span class="c">Pattern</span> class is valid. Note that when escaping values with backslash, only a single <span class="c">\</span> is needed. Unlike regular expression matching, renaming with a regex <span class="i">requires</span> at least one matching group (i.e. parentheses). This matching group will be used as the new field name. By default the matching group is number 1, but this can be changed by specifying the <span class="c">aliasRegexGroupAttribute</span>.</p>
     <p>Often it is not possible to craft a <span class="c">regexAlias</span> that can rename appropriately. However, a similar regex is still useful for matching data. To support this case, an optional <span class="c">&lt;fieldAlias&gt;</span> is also supported. This element requires both a <span class="c">name</span> and a <span class="c">value</span> attribute. The name matches the field exactly (rexes are not supported) and the value is the renamed alias.</p>
-    <p>Note that it is almost always wrong to use a renaming attribute when also using a <span class="c">regex</span> attribute to match. If the regular expression matches more than one item, <span class="i">all</span> the items will be remnamed. However, since names on a chart must be unique, only a single line or bar will appear on the chart.</p>
+    <p>Note that it is almost always wrong to use a renaming attribute when also using a <span class="c">regex</span> attribute to match. If the regular expression matches more than one item, <span class="i">all</span> the items will be renamed. However, since names on a chart must be unique, only a single line or bar will appear on the chart.</p>
   </div>
 
   <div class="section">
