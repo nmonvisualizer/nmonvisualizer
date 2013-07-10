@@ -56,8 +56,8 @@ public final class CSVFileChooser extends GUIFileChooser {
             File csvFile = getSelectedFile();
 
             if (csvFile.exists()) {
-                int result = JOptionPane.showConfirmDialog(gui.getMainFrame(), "File \"" + csvFile.getName()
-                        + "\" already exists.\nDo you want to overwrite it?", "Overwrite?",
+                int result = JOptionPane.showConfirmDialog(gui.getMainFrame(), "File '" + csvFile.getName()
+                        + "' already exists.\nDo you want to overwrite it?", "Overwrite?",
                         JOptionPane.OK_CANCEL_OPTION, JOptionPane.QUESTION_MESSAGE);
 
                 if (result != JOptionPane.OK_OPTION) {

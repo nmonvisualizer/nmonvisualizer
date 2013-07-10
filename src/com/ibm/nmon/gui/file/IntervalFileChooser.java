@@ -40,8 +40,8 @@ public final class IntervalFileChooser extends GUIFileChooser {
             File intervalFile = getSelectedFile();
 
             if (intervalFile.exists()) {
-                int result = JOptionPane.showConfirmDialog(gui.getMainFrame(), "File \"" + intervalFile.getName()
-                        + "\" already exists.\nDo you want to overwrite it?", "Overwrite?",
+                int result = JOptionPane.showConfirmDialog(gui.getMainFrame(), "File '" + intervalFile.getName()
+                        + "' already exists.\nDo you want to overwrite it?", "Overwrite?",
                         JOptionPane.OK_CANCEL_OPTION, JOptionPane.QUESTION_MESSAGE);
 
                 if (result != JOptionPane.OK_OPTION) {
@@ -61,7 +61,6 @@ public final class IntervalFileChooser extends GUIFileChooser {
             catch (IOException ioe) {
                 LOGGER.error("could not load interval file '{}'", intervalFile.getAbsolutePath(), ioe);
             }
-
         }
     }
 
@@ -70,8 +69,8 @@ public final class IntervalFileChooser extends GUIFileChooser {
             File intervalFile = getSelectedFile();
 
             if (!intervalFile.exists()) {
-                int result = JOptionPane.showConfirmDialog(gui.getMainFrame(), "File \"" + intervalFile.getName()
-                        + "\" is not a valid file", "Invalid File", JOptionPane.OK_CANCEL_OPTION,
+                int result = JOptionPane.showConfirmDialog(gui.getMainFrame(), "File '" + intervalFile.getName()
+                        + "' is not a valid file", "Invalid File", JOptionPane.OK_CANCEL_OPTION,
                         JOptionPane.ERROR_MESSAGE);
 
                 if (result != JOptionPane.OK_OPTION) {

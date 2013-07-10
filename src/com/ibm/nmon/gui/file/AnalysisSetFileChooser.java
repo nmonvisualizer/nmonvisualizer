@@ -38,8 +38,8 @@ public final class AnalysisSetFileChooser extends GUIFileChooser {
             File analysisFile = getSelectedFile();
 
             if (analysisFile.exists()) {
-                int result = JOptionPane.showConfirmDialog(gui.getMainFrame(), "File \"" + analysisFile.getName()
-                        + "\" already exists.\nDo you want to overwrite it?", "Overwrite?",
+                int result = JOptionPane.showConfirmDialog(gui.getMainFrame(), "File '" + analysisFile.getName()
+                        + "' already exists.\nDo you want to overwrite it?", "Overwrite?",
                         JOptionPane.OK_CANCEL_OPTION, JOptionPane.QUESTION_MESSAGE);
 
                 if (result != JOptionPane.OK_OPTION) {
@@ -88,8 +88,8 @@ public final class AnalysisSetFileChooser extends GUIFileChooser {
             File analysisFile = getSelectedFile();
 
             if (!analysisFile.exists()) {
-                int result = JOptionPane.showConfirmDialog(gui.getMainFrame(), "File \"" + analysisFile.getName()
-                        + "\" is not a valid file", "Invalid File", JOptionPane.OK_CANCEL_OPTION,
+                int result = JOptionPane.showConfirmDialog(gui.getMainFrame(), "File '" + analysisFile.getName()
+                        + "' is not a valid file", "Invalid File", JOptionPane.OK_CANCEL_OPTION,
                         JOptionPane.ERROR_MESSAGE);
 
                 if (result != JOptionPane.OK_OPTION) {
