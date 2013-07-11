@@ -59,18 +59,6 @@ public final class IntervalChartPanel extends BaseChartPanel implements ChartMou
     }
 
     @Override
-    protected String getSaveFileName() {
-        String title = getChart().getTitle().getText();
-
-        if ((title == null) || "".equals(title)) {
-            return "chart_" + this.hashCode() + " by Interval";
-        }
-        else {
-            return title + " by Interval";
-        }
-    }
-
-    @Override
     public final void chartMouseClicked(ChartMouseEvent event) {
         CategoryItemEntity entity = null;
         int series = -1;

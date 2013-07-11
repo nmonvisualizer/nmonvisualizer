@@ -115,6 +115,11 @@ public final class ReportCache {
                 }
             }
 
+            if (LOGGER.isDebugEnabled()) {
+                LOGGER.debug("reduced {} charts to {} for data {}: {}", new Object[] { report.size(), toReturn.size(),
+                        dataSets, toReturn });
+            }
+
             return toReturn;
         }
     }

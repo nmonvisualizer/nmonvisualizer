@@ -86,12 +86,12 @@ public final class DataTypeChartPanel extends LineChartPanel implements Interval
     }
 
     @Override
-    protected String getSaveFileName() {
+    protected String validateSaveFileName(String filename) {
         DataType type = definition.getDataType();
         List<String> fields = definition.getMatchingFields(type);
 
-        return definition.getDataSet().getHostname() + '_' + type.toString()
-                + (fields.size() == 1 ? '_' + fields.get(0) : "");
+        return super.validateSaveFileName(definition.getDataSet().getHostname() + '_' + type.toString()
+                + (fields.size() == 1 ? '_' + fields.get(0) : ""));
     }
 
     @Override

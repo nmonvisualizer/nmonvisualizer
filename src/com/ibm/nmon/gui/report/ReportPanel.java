@@ -94,6 +94,8 @@ public final class ReportPanel extends JTabbedPane implements PropertyChangeList
         this.dataSets = dataSets;
         this.reportCacheKey = reportCacheKey;
 
+        // use the full size of the reports here since that will be the maximum
+        // this assumes that the reports for the given key DO NOT CHANGE
         List<BaseChartDefinition> reports = gui.getReportCache().getChartDefinition(reportCacheKey);
 
         this.chartsInUse = new java.util.ArrayList<BaseChartDefinition>(reports.size());
@@ -465,13 +467,7 @@ public final class ReportPanel extends JTabbedPane implements PropertyChangeList
                 });
 
                 for (int i = 0; i < getTabCount(); i++) {
-                    String name = chartsInUse.get(i).getShortName();
-
-                    if (dataSets.size() == 1) {
-                        name += '-' + dataSets.get(0).getHostname();
-                    }
-
-                    final String finalName = name;
+                    final String finalName = chartsInUse.get(i).getShortName();
 
                     // invokeLater() ensures the name is set before the progress is updated
                     SwingUtilities.invokeLater(new Runnable() {

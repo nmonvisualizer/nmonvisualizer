@@ -159,9 +159,12 @@ public final class ViewManager extends JPanel implements PropertyChangeListener,
 
     public void saveCharts() {
         if (currentView != null) {
+            // note title here is consistent with BaseChartPanel.doSaveAs()
+            // this dialog however only allows selecting the directory to save and uses the default
+            // file names rather than allowing the user to specify a file name since a view may
+            // contain multiple charts (i.e. a ReportPanel)
             GUIFileChooser chooser = new GUIFileChooser(gui, "Select Save Location");
             chooser.setFileSelectionMode(GUIFileChooser.DIRECTORIES_ONLY);
-            chooser.setMultiSelectionEnabled(false);
 
             if (chooser.showDialog(gui.getMainFrame(), "Save") == JFileChooser.APPROVE_OPTION) {
                 String directory = chooser.getSelectedFile().getAbsolutePath();

@@ -610,8 +610,7 @@ public final class ReportGenerator extends NMONVisualizerApp {
         JFreeChart chart = factory.createChart(definition, dataSets);
 
         if (chartHasData(chart)) {
-            String filename = definition.getShortName().replace('\n', ' ') + ".png";
-            File chartFile = new File(saveDirectory, filename);
+            File chartFile = new File(saveDirectory, definition.getShortName() + ".png");
 
             try {
                 ChartUtilities.saveChartAsPNG(chartFile, chart, 1920 / 2, 1080 / 2);
@@ -640,11 +639,16 @@ public final class ReportGenerator extends NMONVisualizerApp {
         if (plot instanceof CategoryPlot) {
             CategoryPlot cPlot = (CategoryPlot) plot;
 
-            for (int i = 0; i < cPlot.getDatasetCount(); i++) {
-                if (cPlot.getDataset(i).getRowCount() > 0) {
-                    hasData = true;
-                    break;
+            outer: for (int i = 0; i < cPlot.getDatasetCount(); i++) {
+                for (int j = 0; j < cPlot.getDataset(i).getRowCount(); j++) {
+                    for (int k = 0; k < cPlot.getDataset(i).getColumnCount(); k++) {
+                        if (!Double.isNaN(cPlot.getDataset(0).getValue(j, k).doubleValue())) {
+                            hasData = true;
+                            break outer;
+                        }
+                    }
                 }
+
             }
         }
         else if (plot instanceof XYPlot) {

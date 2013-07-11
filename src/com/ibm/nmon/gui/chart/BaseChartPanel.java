@@ -20,6 +20,7 @@ import java.io.StringWriter;
 
 import javax.swing.JFileChooser;
 import javax.swing.JMenuItem;
+import javax.swing.JOptionPane;
 import javax.swing.JPopupMenu;
 
 import javax.swing.MenuElement;
@@ -39,6 +40,8 @@ import org.jfree.ui.ExtensionFileFilter;
 import com.ibm.nmon.gui.chart.data.*;
 
 import com.ibm.nmon.gui.main.NMONVisualizerGui;
+
+import com.ibm.nmon.gui.file.GUIFileChooser;
 
 import com.ibm.nmon.util.CSVWriter;
 
@@ -71,6 +74,7 @@ public class BaseChartPanel extends ChartPanel implements PropertyChangeListener
 
         setEnabled(false);
         clearChart();
+        setEnforceFileExtensions(true);
     }
 
     public final void setChart(JFreeChart chart) {
@@ -208,21 +212,31 @@ public class BaseChartPanel extends ChartPanel implements PropertyChangeListener
     @Override
     public final void doSaveAs() throws IOException {
         String directory = gui.getPreferences().get("lastSaveDirectory", "./");
-        String filename = getSaveFileName() + ".png";
+        String filename = validateSaveFileName(null);
         File chartFile = new File(directory, filename);
 
-        JFileChooser fileChooser = new JFileChooser();
+        GUIFileChooser fileChooser = new GUIFileChooser(gui, "Select Save Location");
         fileChooser.setSelectedFile(chartFile);
 
         ExtensionFileFilter filter = new ExtensionFileFilter(localizationResources.getString("PNG_Image_Files"), ".png");
         fileChooser.addChoosableFileFilter(filter);
 
-        if (fileChooser.showSaveDialog(this) == JFileChooser.APPROVE_OPTION) {
+        if (fileChooser.showDialog(this, "Save") == JFileChooser.APPROVE_OPTION) {
             chartFile = fileChooser.getSelectedFile();
 
             if (isEnforceFileExtensions()) {
                 if (!chartFile.getName().endsWith(".png")) {
                     chartFile = new File(chartFile.getAbsolutePath() + ".png");
+                }
+            }
+
+            if (chartFile.exists()) {
+                int result = JOptionPane.showConfirmDialog(gui.getMainFrame(), "File '" + chartFile.getName()
+                        + "' already exists.\nDo you want to overwrite it?", "Overwrite?",
+                        JOptionPane.OK_CANCEL_OPTION, JOptionPane.QUESTION_MESSAGE);
+
+                if (result != JOptionPane.OK_OPTION) {
+                    return;
                 }
             }
 
@@ -234,15 +248,7 @@ public class BaseChartPanel extends ChartPanel implements PropertyChangeListener
     }
 
     public final void saveChart(String directory, String filename) {
-        if ((filename == null) || "".equals(filename)) {
-            filename = getSaveFileName() + ".png";
-        }
-
-        if (isEnforceFileExtensions()) {
-            if (!filename.endsWith(".png")) {
-                filename += ".png";
-            }
-        }
+        filename = validateSaveFileName(filename);
 
         File chartFile = new File(directory, filename);
 
@@ -250,19 +256,29 @@ public class BaseChartPanel extends ChartPanel implements PropertyChangeListener
             ChartUtilities.saveChartAsPNG(chartFile, getChart(), 1920 / 2, 1080 / 2);
         }
         catch (IOException ioe) {
-            logger.error("could not save chart '" + getSaveFileName() + "' to directory '" + directory + "'", ioe);
+            logger.error("could not save chart '" + filename + "' to directory '" + directory + "'", ioe);
         }
     }
 
-    protected String getSaveFileName() {
-        String title = getChart().getTitle().getText().replace('\n', ' ');
+    protected String validateSaveFileName(String filename) {
+        if ((filename == null) || "".equals(filename)) {
+            String title = getChart().getTitle().getText();
 
-        if ((title == null) || "".equals(title)) {
-            return "chart_" + this.hashCode();
+            if ((title == null) || "".equals(title)) {
+                filename = "chart_" + this.hashCode();
+            }
+            else {
+                filename = title;
+            }
         }
-        else {
-            return title;
+
+        if (isEnforceFileExtensions() && !filename.endsWith(".png")) {
+            filename += ".png";
         }
+
+        filename.replace('\n', ' ');
+
+        return filename;
     }
 
     @Override
