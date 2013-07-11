@@ -7,6 +7,7 @@ import java.io.FileFilter;
 
 import com.ibm.nmon.file.HATJFileFilter;
 import com.ibm.nmon.file.NMONFileFilter;
+import com.ibm.nmon.gui.chart.ChartFactory;
 
 import java.io.FileOutputStream;
 import java.io.PrintStream;
@@ -18,17 +19,24 @@ import java.text.ParseException;
 import java.util.List;
 import java.util.Map;
 
+import org.jfree.chart.ChartUtilities;
+import org.jfree.chart.JFreeChart;
+import org.jfree.chart.plot.CategoryPlot;
+import org.jfree.chart.plot.Plot;
+import org.jfree.chart.plot.XYPlot;
+
 import com.ibm.nmon.util.ParserLog;
 
 import com.ibm.nmon.interval.Interval;
 
 import com.ibm.nmon.data.DataSet;
 
-import com.ibm.nmon.report.ReportFactory;
+import com.ibm.nmon.report.ReportCache;
 import com.ibm.nmon.chart.definition.BaseChartDefinition;
 
 import com.ibm.nmon.util.FileHelper;
 
+import com.ibm.nmon.util.GranularityHelper;
 import com.ibm.nmon.util.TimeFormatCache;
 import com.ibm.nmon.util.TimeHelper;
 
@@ -241,8 +249,6 @@ public final class ReportGenerator extends NMONVisualizerApp {
         // set interval after parse so min and max system times are set
         createIntervalIfNecessary(startTime, endTime, generator);
 
-        System.out.println();
-
         // load chart definitions
         for (String file : customSummaryCharts) {
             generator.parseChartDefinition(file);
@@ -272,7 +278,6 @@ public final class ReportGenerator extends NMONVisualizerApp {
                     customDataCharts, multiplexedFieldCharts, multiplexedTypeCharts);
         }
 
-        System.out.println();
         System.out.println("Charts complete!");
     }
 
@@ -327,48 +332,18 @@ public final class ReportGenerator extends NMONVisualizerApp {
         generator.getIntervalManager().addInterval(toChart);
     }
 
-    private final ReportFactory factory;
-    private final ReportFactory.ReportFactoryCallback callback;
+    private final GranularityHelper granularityHelper;
+
+    private final ChartFactory factory;
+    private final ReportCache cache;
 
     private ReportGenerator() {
-        factory = new ReportFactory(this);
+        factory = new ChartFactory(this);
+        cache = new ReportCache();
 
-        callback = new ReportFactory.ReportFactoryCallback() {
-            @Override
-            public void onChartDefinitionAdded(String key, String definitionPath) {
-                System.out.println("Loaded chart definitions from '" + definitionPath + '\'');
-            }
+        granularityHelper = new GranularityHelper(this);
+        granularityHelper.setAutomatic(true);
 
-            @Override
-            public void onChartDefinitionFailure(String key, String definitionPath, IOException ioe) {
-                System.err.println("Could not load chart definitions from '" + definitionPath + '\'');
-                ioe.printStackTrace();
-            }
-
-            @Override
-            public void beforeCreateCharts(String chartDefinitionKey, List<DataSet> data, String savePath) {
-                if (ReportFactory.DEFAULT_SUMMARY_CHARTS_KEY.equals(chartDefinitionKey)) {
-                    System.out.print("\tCreating summary charts ");
-                }
-                else if (ReportFactory.DEFAULT_DATASET_CHARTS_KEY.equals(chartDefinitionKey)) {
-                    System.out.print("\tCreating charts for " + data.get(0).getHostname() + " ");
-                }
-                else {
-                    System.out.print("\tCreating charts for " + chartDefinitionKey);
-                }
-            }
-
-            @Override
-            public void onCreateChart(BaseChartDefinition definition, String savePath) {
-                System.out.print('.');
-                System.out.flush();
-            }
-
-            @Override
-            public void afterCreateCharts(String chartDefinitionKey, List<DataSet> data, String savePath) {
-                System.out.println(" Complete");
-            }
-        };
     }
 
     private void parse(List<String> filesToParse, File baseDirectory) {
@@ -439,8 +414,14 @@ public final class ReportGenerator extends NMONVisualizerApp {
     }
 
     private void parseChartDefinition(String definitionFile) {
-        // use the file name as the key
-        factory.addChartDefinition(definitionFile, definitionFile, callback);
+        try {
+            // use the file name as the key
+            cache.addChartDefinition(definitionFile, definitionFile);
+        }
+        catch (IOException ioe) {
+            System.err.println("cannot parse chart definition " + definitionFile);
+            ioe.printStackTrace();
+        }
     }
 
     private void createReport(Interval interval, File baseDirectory, boolean summaryCharts, boolean dataSetCharts,
@@ -452,48 +433,244 @@ public final class ReportGenerator extends NMONVisualizerApp {
 
         System.out.println("Charting interval " + TimeFormatCache.formatInterval(interval));
 
-        File chartDirectory = null;
+        File chartsDirectory = null;
 
         // put in base charts directory if the default interval or there is only a single interval
         if (getIntervalManager().getIntervalCount() <= 1) {
-            chartDirectory = new File(baseDirectory, "charts");
+            chartsDirectory = new File(baseDirectory, "charts");
         }
         else {
             // use the interval name if possible
             if ("".equals(interval.getName())) {
-                chartDirectory = new File(baseDirectory, "charts" + '/'
+                chartsDirectory = new File(baseDirectory, "charts" + '/'
                         + FILE_TIME_FORMAT.format(new Date(interval.getStart())) + '-'
                         + FILE_TIME_FORMAT.format(new Date(interval.getEnd())));
             }
             else {
-                chartDirectory = new File(baseDirectory, "charts" + '/' + interval.getName());
+                chartsDirectory = new File(baseDirectory, "charts" + '/' + interval.getName());
             }
         }
 
-        System.out.println("Writing charts to " + chartDirectory);
+        int chartsCreated = 0;
+
+        chartsDirectory.mkdirs();
+
+        System.out.println("Writing charts to " + chartsDirectory);
 
         if (summaryCharts) {
-            factory.createChartsAcrossDataSets("summary", chartDirectory, callback);
+            chartsCreated += createSummaryCharts("Creating summary charts", ReportCache.DEFAULT_SUMMARY_CHARTS_KEY,
+                    chartsDirectory);
         }
 
         if (dataSetCharts) {
-            factory.createChartsForEachDataSet("dataset", chartDirectory, callback);
+            for (DataSet data : getDataSets()) {
+                chartsCreated += createDataSetCharts("Creating charts for " + data.getHostname(),
+                        ReportCache.DEFAULT_DATASET_CHARTS_KEY, chartsDirectory, data);
+            }
         }
 
         for (String file : customSummaryCharts) {
-            factory.createChartsAcrossDataSets(file, chartDirectory, callback);
+            chartsCreated += createSummaryCharts("Creating  charts for " + file, file, chartsDirectory);
         }
 
         for (String file : customDataCharts) {
-            factory.createChartsForEachDataSet(file, chartDirectory, callback);
+            for (DataSet data : getDataSets()) {
+                chartsCreated += createDataSetCharts("Creating charts for " + file + " (" + data.getHostname() + ")",
+                        file, chartsDirectory, data);
+            }
         }
 
         for (String file : multiplexedFieldCharts) {
-            factory.multiplexChartsAcrossFields(file, chartDirectory, callback);
+            for (DataSet data : getDataSets()) {
+                chartsCreated += multiplexChartsAcrossFields(
+                        "Multiplexing charts for " + file + " (" + data.getHostname() + ") across " + "fields", file,
+                        chartsDirectory, data);
+            }
         }
 
         for (String file : multiplexedTypeCharts) {
-            factory.multiplexChartsAcrossTypes(file, chartDirectory, callback);
+            for (DataSet data : getDataSets()) {
+                chartsCreated += multiplexChartsAcrossTypes(
+                        "Multiplexing charts for " + file + " (" + data.getHostname() + ") across " + "types", file,
+                        chartsDirectory, data);
+            }
         }
+
+        if (chartsCreated == 0) {
+            chartsDirectory.delete();
+        }
+    }
+
+    private int createSummaryCharts(String message, String key, File chartsDirectory) {
+        int chartsCreated = 0;
+
+        Iterable<? extends DataSet> dataSets = getDataSets();
+        List<BaseChartDefinition> report = cache.getChartDefinition(key, dataSets);
+
+        if (!report.isEmpty()) {
+            System.out.print("\t" + message + " ");
+
+            for (BaseChartDefinition definition : report) {
+                if (saveChart(definition, dataSets, chartsDirectory)) {
+                    ++chartsCreated;
+                }
+            }
+
+            System.out.println(" Complete");
+        }
+
+        return chartsCreated;
+    }
+
+    private int createDataSetCharts(String message, String key, File chartsDirectory, DataSet data) {
+        int chartsCreated = 0;
+
+        Iterable<? extends DataSet> dataSets = java.util.Collections.singletonList(data);
+        List<BaseChartDefinition> report = cache.getChartDefinition(key, dataSets);
+
+        if (!report.isEmpty()) {
+            System.out.print("\t" + message + " ");
+
+            File datasetDirectory = new File(chartsDirectory, data.getHostname());
+            datasetDirectory.mkdir();
+
+            for (BaseChartDefinition definition : report) {
+                if (saveChart(definition, dataSets, datasetDirectory)) {
+                    ++chartsCreated;
+                }
+            }
+
+            if (chartsCreated == 0) {
+                datasetDirectory.delete();
+            }
+
+            System.out.println(" Complete");
+        }
+
+        return chartsCreated;
+    }
+
+    private int multiplexChartsAcrossTypes(String message, String key, File chartsDirectory, DataSet data) {
+        int chartsCreated = 0;
+
+        List<BaseChartDefinition> report = cache.multiplexChartsAcrossTypes(key, data, true);
+
+        if (!report.isEmpty()) {
+            System.out.print("\t" + message + " ");
+
+            Iterable<? extends DataSet> dataSets = java.util.Collections.singletonList(data);
+            File datasetDirectory = new File(chartsDirectory, data.getHostname());
+            datasetDirectory.mkdir();
+
+            for (BaseChartDefinition definition : report) {
+                if (saveChart(definition, dataSets, datasetDirectory)) {
+                    ++chartsCreated;
+                }
+            }
+
+            if (chartsCreated == 0) {
+                datasetDirectory.delete();
+            }
+
+            System.out.println(" Complete");
+        }
+
+        return chartsCreated;
+    }
+
+    private int multiplexChartsAcrossFields(String message, String key, File chartsDirectory, DataSet data) {
+        int chartsCreated = 0;
+
+        List<BaseChartDefinition> report = cache.multiplexChartsAcrossFields(key, data, true);
+
+        if (!report.isEmpty()) {
+            System.out.print("\t" + message + " ");
+
+            Iterable<? extends DataSet> dataSets = java.util.Collections.singletonList(data);
+            File datasetDirectory = new File(chartsDirectory, data.getHostname());
+            datasetDirectory.mkdir();
+
+            for (BaseChartDefinition definition : report) {
+                if (saveChart(definition, dataSets, datasetDirectory)) {
+                    ++chartsCreated;
+                }
+            }
+
+            if (chartsCreated == 0) {
+                datasetDirectory.delete();
+            }
+
+            System.out.println(" Complete");
+        }
+
+        return chartsCreated;
+    }
+
+    private boolean saveChart(BaseChartDefinition definition, Iterable<? extends DataSet> dataSets, File saveDirectory) {
+        JFreeChart chart = factory.createChart(definition, dataSets);
+
+        if (chartHasData(chart)) {
+            String filename = definition.getShortName().replace('\n', ' ') + ".png";
+            File chartFile = new File(saveDirectory, filename);
+
+            try {
+                ChartUtilities.saveChartAsPNG(chartFile, chart, 1920 / 2, 1080 / 2);
+            }
+            catch (IOException ioe) {
+                System.err.println("cannot create chart " + chartFile.getName());
+            }
+
+            System.out.print('.');
+            System.out.flush();
+
+            return true;
+        }
+        else {
+            return false;
+        }
+    }
+
+    private boolean chartHasData(JFreeChart chart) {
+        boolean hasData = false;
+
+        // determine if there will really be any data to display
+        // do not output a chart if there is no data
+        Plot plot = chart.getPlot();
+
+        if (plot instanceof CategoryPlot) {
+            CategoryPlot cPlot = (CategoryPlot) plot;
+
+            for (int i = 0; i < cPlot.getDatasetCount(); i++) {
+                if (cPlot.getDataset(i).getRowCount() > 0) {
+                    hasData = true;
+                    break;
+                }
+            }
+        }
+        else if (plot instanceof XYPlot) {
+            XYPlot xyPlot = (XYPlot) plot;
+
+            for (int i = 0; i < xyPlot.getDatasetCount(); i++) {
+                if (xyPlot.getDataset(i).getSeriesCount() > 0) {
+                    hasData = true;
+                    break;
+                }
+            }
+        }
+        else {
+            System.err.println("unknown plot type " + plot.getClass() + " for chart " + chart.getTitle());
+        }
+
+        return hasData;
+    }
+
+    @Override
+    public void currentIntervalChanged(Interval interval) {
+        super.currentIntervalChanged(interval);
+
+        granularityHelper.recalculate();
+
+        factory.setInterval(interval);
+        factory.setGranularity(granularityHelper.getGranularity());
     }
 }

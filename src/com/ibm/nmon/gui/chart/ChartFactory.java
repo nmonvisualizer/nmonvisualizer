@@ -7,20 +7,21 @@ import java.util.List;
 import org.jfree.chart.JFreeChart;
 
 import com.ibm.nmon.NMONVisualizerApp;
-import com.ibm.nmon.data.DataSet;
-import com.ibm.nmon.data.definition.DataDefinition;
+
+import com.ibm.nmon.interval.Interval;
 
 import com.ibm.nmon.analysis.AnalysisRecord;
 import com.ibm.nmon.chart.definition.*;
-import com.ibm.nmon.gui.chart.builder.*;
 
-import com.ibm.nmon.interval.Interval;
+import com.ibm.nmon.data.DataSet;
+
+import com.ibm.nmon.gui.chart.builder.*;
 
 /**
  * Helper class for building {@link JFreeChart charts} from {@link BaseChartDefinition chart
  * definitions}.
  */
-public final class ChartFactory {
+public class ChartFactory {
     private static final Logger LOGGER = org.slf4j.LoggerFactory.getLogger(ChartFactory.class);
 
     private final NMONVisualizerApp app;
@@ -45,47 +46,21 @@ public final class ChartFactory {
         lineChartBuilder.setGranularity(granularity);
         barChartBuilder.setGranularity(granularity);
         intervalChartBuilder.setGranularity(granularity);
+        histogramChartBuilder.setGranularity(granularity);
     }
 
     public void setInterval(Interval interval) {
         lineChartBuilder.setInterval(interval);
         barChartBuilder.setInterval(interval);
         intervalChartBuilder.setInterval(interval);
+        histogramChartBuilder.setInterval(interval);
     }
 
     public void addPlugin(ChartBuilderPlugin plugin) {
         lineChartBuilder.addPlugin(plugin);
         barChartBuilder.addPlugin(plugin);
         intervalChartBuilder.addPlugin(plugin);
-    }
-
-    /**
-     * Filter a set of chart definitions based on a given data set. Charts that are not applicable
-     * to a host in the data set will not be included in the returned list.
-     * 
-     * @param chartDefinitions the set of charts to filter
-     * @param dataSets the DataSets to match
-     * @return the filtered set of charts
-     * @see DataDefinition#matchesHost(DataSet)
-     */
-    public List<BaseChartDefinition> getChartsForData(Iterable<BaseChartDefinition> chartDefinitions,
-            Iterable<? extends DataSet> dataSets) {
-        List<BaseChartDefinition> toReturn = new java.util.ArrayList<BaseChartDefinition>();
-
-        // the charts actually used depend on the host
-        // if any DataSet matches a defined host, show the report
-        for (BaseChartDefinition chartDefinition : chartDefinitions) {
-            dataset: for (DataSet data : dataSets) {
-                for (DataDefinition definition : chartDefinition.getData()) {
-                    if (definition.matchesHost(data) && (definition.getMatchingTypes(data).size() > 0)) {
-                        toReturn.add(chartDefinition);
-                        break dataset;
-                    }
-                }
-            }
-        }
-
-        return toReturn;
+        histogramChartBuilder.addPlugin(plugin);
     }
 
     /**
@@ -119,11 +94,9 @@ public final class ChartFactory {
 
             intervalChartBuilder.initChart(lineDefinition);
 
-            int intervalCount = app.getIntervalManager().getIntervalCount();
-
             for (DataSet data : dataSets) {
                 // TODO AnalysisRecord cache needed here?
-                List<AnalysisRecord> analysis = new java.util.ArrayList<AnalysisRecord>(intervalCount);
+                List<AnalysisRecord> analysis = new java.util.ArrayList<AnalysisRecord>();
 
                 for (Interval i : app.getIntervalManager().getIntervals()) {
                     AnalysisRecord record = new AnalysisRecord(data);

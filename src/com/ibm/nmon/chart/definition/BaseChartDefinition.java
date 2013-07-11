@@ -83,4 +83,19 @@ public abstract class BaseChartDefinition implements Cloneable {
     public final Iterable<DataDefinition> getData() {
         return java.util.Collections.unmodifiableList(data);
     }
+
+    @Override
+    public final String toString() {
+        if ("".equals(shortName)) {
+            if ("".equals(title)) {
+                return "<untitled chart>";
+            }
+            else {
+                return title;
+            }
+        }
+        else {
+            return shortName;
+        }
+    }
 }

@@ -1,9 +1,5 @@
 package com.ibm.nmon.gui.main;
 
-import org.slf4j.Logger;
-
-import java.util.List;
-
 import java.awt.BorderLayout;
 
 import java.awt.event.InputEvent;
@@ -32,10 +28,7 @@ import com.ibm.nmon.data.DataSet;
 
 import com.ibm.nmon.interval.Interval;
 import com.ibm.nmon.interval.IntervalListener;
-
-import com.ibm.nmon.parser.ChartDefinitionParser;
-
-import com.ibm.nmon.chart.definition.BaseChartDefinition;
+import com.ibm.nmon.report.ReportCache;
 
 import com.ibm.nmon.gui.Styles;
 import com.ibm.nmon.gui.chart.BaseChartPanel;
@@ -50,8 +43,6 @@ import com.ibm.nmon.gui.report.ReportPanel;
  * @see ReportPanel
  */
 final class SummaryView extends ChartSplitPane implements IntervalListener {
-    private static final Logger LOGGER = org.slf4j.LoggerFactory.getLogger(SummaryView.class);
-
     private final ReportPanel singleIntervalReport;
     private final ReportPanel allIntervalsReport;
 
@@ -62,20 +53,7 @@ final class SummaryView extends ChartSplitPane implements IntervalListener {
     public SummaryView(NMONVisualizerGui gui) {
         super(gui);
 
-        ChartDefinitionParser parser = new ChartDefinitionParser();
-
-        List<BaseChartDefinition> reports = null;
-
-        try {
-            reports = parser.parseCharts(ReportPanel.class
-                    .getResourceAsStream("/com/ibm/nmon/report/summary_single_interval.xml"));
-        }
-        catch (Exception e) {
-            LOGGER.error("cannot parse report definition xml", e);
-            reports = java.util.Collections.emptyList();
-        }
-
-        singleIntervalReport = new ReportPanel(gui, reports);
+        singleIntervalReport = new ReportPanel(gui, ReportCache.DEFAULT_SUMMARY_CHARTS_KEY);
         singleIntervalReport.setBorder(null); // make consistent with addBorderIfNecessary
 
         singleIntervalReport.addPlugin(new ChartBuilderPlugin() {
@@ -90,16 +68,7 @@ final class SummaryView extends ChartSplitPane implements IntervalListener {
             }
         });
 
-        try {
-            reports = parser.parseCharts(ReportPanel.class
-                    .getResourceAsStream("/com/ibm/nmon/report/summary_all_intervals.xml"));
-        }
-        catch (Exception e) {
-            LOGGER.error("cannot parse report definition xml", e);
-            reports = java.util.Collections.emptyList();
-        }
-
-        allIntervalsReport = new ReportPanel(gui, reports);
+        allIntervalsReport = new ReportPanel(gui, ReportCache.DEFAULT_INTERVAL_CHARTS_KEY);
         allIntervalsReport.setBorder(null); // make consistent with addBorderIfNecessary
 
         allIntervals = new JCheckBox("Graph All Intervals");

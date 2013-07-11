@@ -36,6 +36,8 @@ import com.ibm.nmon.gui.util.LogViewerDialog;
 import com.ibm.nmon.parser.HATJParser;
 import com.ibm.nmon.parser.IOStatParser;
 
+import com.ibm.nmon.report.ReportCache;
+
 import com.ibm.nmon.gui.parse.HATJPostParser;
 import com.ibm.nmon.gui.parse.IOStatPostParser;
 import com.ibm.nmon.gui.parse.VerboseGCPreParser;
@@ -74,11 +76,15 @@ public final class NMONVisualizerGui extends NMONVisualizerApp {
 
     private final GranularityHelper granularityHelper;
 
+    private final ReportCache reportCache;
+
     public NMONVisualizerGui() throws Exception {
         super();
 
         granularityHelper = new GranularityHelper(this);
         setGranularity(-1); // automatic
+
+        reportCache = new ReportCache();
 
         preferences = Preferences.userNodeForPackage(NMONVisualizerGui.class);
 
@@ -189,6 +195,10 @@ public final class NMONVisualizerGui extends NMONVisualizerApp {
         if (getGranularity() != oldGranularity) {
             setProperty("granularity", getGranularity());
         }
+    }
+
+    public ReportCache getReportCache() {
+        return reportCache;
     }
 
     @Override

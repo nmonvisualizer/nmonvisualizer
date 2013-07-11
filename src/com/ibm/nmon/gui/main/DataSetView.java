@@ -1,18 +1,13 @@
 package com.ibm.nmon.gui.main;
 
-import org.slf4j.Logger;
-
-import java.util.List;
 import java.util.Map;
 
 import com.ibm.nmon.gui.report.ReportPanel;
 
 import com.ibm.nmon.data.DataSet;
 
-import com.ibm.nmon.parser.ChartDefinitionParser;
-import com.ibm.nmon.chart.definition.BaseChartDefinition;
-
 import com.ibm.nmon.gui.chart.BaseChartPanel;
+import com.ibm.nmon.report.ReportCache;
 
 /**
  * View a set of summary charts for a specific {@link DataSet}.
@@ -20,13 +15,9 @@ import com.ibm.nmon.gui.chart.BaseChartPanel;
  * @see ReportPanel
  */
 final class DataSetView extends ChartSplitPane {
-    private static final Logger LOGGER = org.slf4j.LoggerFactory.getLogger(DataSetView.class);
-
     private final Map<String, ReportPanel> reportPanels;
 
     private ReportPanel currentReport;
-
-    private final List<BaseChartDefinition> reportDefinitions;
 
     private String lastCommonTabName;
 
@@ -34,20 +25,6 @@ final class DataSetView extends ChartSplitPane {
         super(gui);
 
         reportPanels = new java.util.HashMap<String, ReportPanel>();
-
-        ChartDefinitionParser parser = new ChartDefinitionParser();
-        List<BaseChartDefinition> reports = null;
-
-        try {
-            reports = parser.parseCharts(ReportPanel.class
-                    .getResourceAsStream("/com/ibm/nmon/report/dataset_report.xml"));
-        }
-        catch (Exception e) {
-            LOGGER.error("cannot parse report definition xml", e);
-            reports = java.util.Collections.emptyList();
-        }
-
-        reportDefinitions = reports;
 
         for (DataSet data : gui.getDataSets()) {
             dataAdded(data);
@@ -140,7 +117,7 @@ final class DataSetView extends ChartSplitPane {
     public void dataAdded(DataSet data) {
         if (!reportPanels.containsKey(data.getHostname())) {
             // create the report panel for the DataSet and make sure it sends events to the table
-            ReportPanel reportPanel = new ReportPanel(gui, reportDefinitions, data);
+            ReportPanel reportPanel = new ReportPanel(gui, ReportCache.DEFAULT_DATASET_CHARTS_KEY, data);
 
             reportPanel.addPropertyChangeListener("chart", summaryTable);
             reportPanel.addPropertyChangeListener("highlightedLine", this);

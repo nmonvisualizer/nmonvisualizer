@@ -10,10 +10,12 @@ import com.ibm.nmon.interval.Interval;
 /**
  * Plugin responsible for setting up the x-axis on a line chart.
  * <p/>
+ * <p>
  * This plugin <em>must</em> be attached to any {@link LineChartBuilder} for the chart to display
  * correctly. This is necessary because the chart builder does not have a reference to the
  * {@link NMONVisualizerApp} which is needed to correctly format the x-axis based on the current
  * times for the data sets that have been parsed.
+ * </p>
  */
 public final class LineChartBuilderPlugin implements ChartBuilderPlugin {
     private final NMONVisualizerApp app;

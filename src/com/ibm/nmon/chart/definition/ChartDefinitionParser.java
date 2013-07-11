@@ -1,4 +1,4 @@
-package com.ibm.nmon.parser;
+package com.ibm.nmon.chart.definition;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -10,8 +10,7 @@ import java.util.Set;
 import com.ibm.nmon.data.definition.*;
 import com.ibm.nmon.data.matcher.*;
 import com.ibm.nmon.data.transform.name.*;
-
-import com.ibm.nmon.chart.definition.*;
+import com.ibm.nmon.parser.BasicXMLParser;
 
 import com.ibm.nmon.analysis.Statistic;
 
@@ -55,7 +54,7 @@ public final class ChartDefinitionParser extends BasicXMLParser {
 
             if (charts.isEmpty()) {
                 throw new IOException("chart definition file '" + filename
-                        + "' does not appear to have any data records");
+                        + "' does not appear to have any charts defined");
             }
 
             return java.util.Collections.unmodifiableList(new java.util.ArrayList<BaseChartDefinition>(charts));
@@ -77,7 +76,8 @@ public final class ChartDefinitionParser extends BasicXMLParser {
         }
 
         if (charts.isEmpty()) {
-            throw new IOException("chart definition input stream '" + in + "' does not appear to have any data records");
+            throw new IOException("chart definition input stream '" + in
+                    + "' does not appear to have any charts defined");
         }
 
         try {
@@ -216,10 +216,26 @@ public final class ChartDefinitionParser extends BasicXMLParser {
                 }
             }
         }
+        else if ("charts".equals(element)) {
+            // do nothing but also do not log a spurious warning
+        }
+        else {
+            logger.warn("unknown element {} at line {}", element, getLineNumber());
+        }
     }
 
     @Override
     protected void endElement(String element) {
+        if (currentChart == null) {
+            if (!"charts".equals(element)) {
+                logger.warn("ignoring" + " element </{}> at line {}; current chart is not defined", element,
+                        getLineNumber());
+            }
+            // else no chart should be defined when ending the root </charts> element
+
+            return;
+        }
+
         if ("linechart".equals(element)) {
             charts.add(currentChart);
             currentChart = null;

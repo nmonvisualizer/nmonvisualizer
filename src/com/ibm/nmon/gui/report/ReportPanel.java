@@ -46,7 +46,7 @@ import com.ibm.nmon.interval.Interval;
  * <p>
  * This class listens for {@link IntervalListener interval} events as well as time zone and
  * granularity changes. New {@link DataSet data} can be added to or removed from reports at run time
- * (the given chart definitions should display values from more than one data set).
+ * (if the given chart definitions should display values from more than one data set).
  * </p>
  * 
  * <p>
@@ -62,10 +62,10 @@ public final class ReportPanel extends JTabbedPane implements PropertyChangeList
 
     private final List<DataSet> dataSets;
 
-    private final List<BaseChartDefinition> chartDefinitions;
+    private final String reportCacheKey;
     private List<BaseChartDefinition> chartsInUse;
 
-    private final ChartFactory chartFactory;
+    private final ChartFactory ChartFactory;
 
     private final BitSet chartNeedsUpdate;
 
@@ -74,30 +74,33 @@ public final class ReportPanel extends JTabbedPane implements PropertyChangeList
 
     private int previousTab = -1;
 
-    public ReportPanel(NMONVisualizerGui gui, List<BaseChartDefinition> reports, DataSet data) {
-        this(gui, reports, java.util.Collections.singletonList(data));
+    public ReportPanel(NMONVisualizerGui gui, String reportCacheKey, DataSet data) {
+        this(gui, reportCacheKey, java.util.Collections.singletonList(data));
     }
 
-    public ReportPanel(NMONVisualizerGui gui, List<BaseChartDefinition> reports) {
-        this(gui, reports, new java.util.ArrayList<DataSet>());
+    public ReportPanel(NMONVisualizerGui gui, String reportCacheKey) {
+        this(gui, reportCacheKey, new java.util.ArrayList<DataSet>());
     }
 
-    private ReportPanel(NMONVisualizerGui gui, List<BaseChartDefinition> reports, List<DataSet> dataSets) {
+    public ReportPanel(NMONVisualizerGui gui, String reportCacheKey, List<DataSet> dataSets) {
         super();
 
-        this.chartFactory = new ChartFactory(gui);
+        this.ChartFactory = new ChartFactory(gui);
 
         // will not have any effect unless setOpaque(true) - see build tabs
         setBackground(java.awt.Color.WHITE);
 
         this.gui = gui;
         this.dataSets = dataSets;
-        this.chartDefinitions = reports;
+        this.reportCacheKey = reportCacheKey;
+
+        List<BaseChartDefinition> reports = gui.getReportCache().getChartDefinition(reportCacheKey);
+
         this.chartsInUse = new java.util.ArrayList<BaseChartDefinition>(reports.size());
 
-        chartNeedsUpdate = new BitSet(reports.size());
+        this.chartNeedsUpdate = new BitSet(reports.size());
 
-        chartNeedsUpdate.set(0, chartNeedsUpdate.size(), true);
+        this.chartNeedsUpdate.set(0, chartNeedsUpdate.size(), true);
 
         buildTabs(gui);
 
@@ -244,7 +247,7 @@ public final class ReportPanel extends JTabbedPane implements PropertyChangeList
     }
 
     public void addPlugin(ChartBuilderPlugin plugin) {
-        chartFactory.addPlugin(plugin);
+        ChartFactory.addPlugin(plugin);
     }
 
     @Override
@@ -252,7 +255,7 @@ public final class ReportPanel extends JTabbedPane implements PropertyChangeList
         if ("granularity".equals(evt.getPropertyName())) {
             int newGranularity = (Integer) evt.getNewValue();
 
-            chartFactory.setGranularity(newGranularity);
+            ChartFactory.setGranularity(newGranularity);
 
             // always update line charts on granularity changes
             // bar charts and interval line charts do not need to be updated unless the stat is
@@ -311,7 +314,7 @@ public final class ReportPanel extends JTabbedPane implements PropertyChangeList
 
     @Override
     public void currentIntervalChanged(Interval interval) {
-        chartFactory.setInterval(interval);
+        ChartFactory.setInterval(interval);
 
         // update non-interval charts
         for (int i = 0; i < chartsInUse.size(); i++) {
@@ -370,23 +373,22 @@ public final class ReportPanel extends JTabbedPane implements PropertyChangeList
 
     private void buildTabs(NMONVisualizerGui gui) {
         buildingTabs = true;
-        // note remove all needs to know is charts existed previously, order matters here
+        // note remove all needs to know if charts existed previously, order matters here
         removeAll();
         chartsInUse.clear();
 
-        if (chartDefinitions.isEmpty()) {
+        if (gui.getReportCache().getChartDefinition(reportCacheKey).isEmpty()) {
             addTab("No Charts", createNoReportsLabel("No Charts Defined!"));
         }
         else {
             if (dataSets.isEmpty()) {
-                setOpaque(true);
+                addTab("No Charts", createNoReportsLabel("No Parsed Data!"));
+                buildingTabs = false;
+
                 return;
             }
-            else {
-                setOpaque(false);
-            }
 
-            chartsInUse = chartFactory.getChartsForData(chartDefinitions, dataSets);
+            chartsInUse = gui.getReportCache().getChartDefinition(reportCacheKey, dataSets);
 
             if (chartsInUse.isEmpty()) {
                 addTab("No Charts", createNoReportsLabel("No Charts for Currently Parsed Data!"));
@@ -427,7 +429,7 @@ public final class ReportPanel extends JTabbedPane implements PropertyChangeList
     private void createChart(int index) {
         BaseChartDefinition definition = chartsInUse.get(index);
 
-        JFreeChart chart = chartFactory.createChart(definition, dataSets);
+        JFreeChart chart = ChartFactory.createChart(definition, dataSets);
 
         // setChart will fire the event that updates the data table
         getChartPanel(index).setChart(chart);
@@ -435,6 +437,12 @@ public final class ReportPanel extends JTabbedPane implements PropertyChangeList
 
     public void saveAllCharts(final String directory) {
         final ItemProgressDialog progress = new ItemProgressDialog(gui, "Saving Charts...", getTabCount());
+
+        if (getTabCount() == 1) {
+            if (getComponentAt(0) instanceof JLabel) {
+                return;
+            }
+        }
 
         // This code is a mess of things running in and out of the Swing Event Thread mostly to
         // allow the progress dialog to be modal. If it was not modal, other issues would arise if
