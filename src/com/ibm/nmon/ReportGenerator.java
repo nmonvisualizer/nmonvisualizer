@@ -348,9 +348,9 @@ public final class ReportGenerator extends NMONVisualizerApp {
 
     private void parse(List<String> filesToParse, File baseDirectory) {
         // avoid logging parsing errors to console
-        java.util.logging.Logger.getLogger(ParserLog.getInstance().getLogger().getName()).setUseParentHandlers(false);
-
         ParserLog log = ParserLog.getInstance();
+        java.util.logging.Logger.getLogger(log.getLogger().getName()).setUseParentHandlers(false);
+
         Map<String, String> errors = new java.util.LinkedHashMap<String, String>();
 
         System.out.println("Parsing NMON files...");
@@ -416,7 +416,7 @@ public final class ReportGenerator extends NMONVisualizerApp {
     private void parseChartDefinition(String definitionFile) {
         try {
             // use the file name as the key
-            cache.addChartDefinition(definitionFile, definitionFile);
+            cache.addReport(definitionFile, definitionFile);
         }
         catch (IOException ioe) {
             System.err.println("cannot parse chart definition " + definitionFile);
@@ -496,6 +496,7 @@ public final class ReportGenerator extends NMONVisualizerApp {
             }
         }
 
+        // remove charts directory if nothing was output
         if (chartsCreated == 0) {
             chartsDirectory.delete();
         }
@@ -505,7 +506,7 @@ public final class ReportGenerator extends NMONVisualizerApp {
         int chartsCreated = 0;
 
         Iterable<? extends DataSet> dataSets = getDataSets();
-        List<BaseChartDefinition> report = cache.getChartDefinition(key, dataSets);
+        List<BaseChartDefinition> report = cache.getReport(key, dataSets);
 
         if (!report.isEmpty()) {
             System.out.print("\t" + message + " ");
@@ -516,7 +517,7 @@ public final class ReportGenerator extends NMONVisualizerApp {
                 }
             }
 
-            System.out.println(" Complete");
+            System.out.println(" Complete (" + chartsCreated + '/' + report.size() + ")");
         }
 
         return chartsCreated;
@@ -526,7 +527,7 @@ public final class ReportGenerator extends NMONVisualizerApp {
         int chartsCreated = 0;
 
         Iterable<? extends DataSet> dataSets = java.util.Collections.singletonList(data);
-        List<BaseChartDefinition> report = cache.getChartDefinition(key, dataSets);
+        List<BaseChartDefinition> report = cache.getReport(key, dataSets);
 
         if (!report.isEmpty()) {
             System.out.print("\t" + message + " ");
@@ -544,7 +545,7 @@ public final class ReportGenerator extends NMONVisualizerApp {
                 datasetDirectory.delete();
             }
 
-            System.out.println(" Complete");
+            System.out.println(" Complete (" + chartsCreated + '/' + report.size() + ")");
         }
 
         return chartsCreated;
@@ -572,7 +573,7 @@ public final class ReportGenerator extends NMONVisualizerApp {
                 datasetDirectory.delete();
             }
 
-            System.out.println(" Complete");
+            System.out.println(" Complete (" + chartsCreated + '/' + report.size() + ")");
         }
 
         return chartsCreated;
@@ -600,7 +601,7 @@ public final class ReportGenerator extends NMONVisualizerApp {
                 datasetDirectory.delete();
             }
 
-            System.out.println(" Complete");
+            System.out.println(" Complete (" + chartsCreated + '/' + report.size() + ")");
         }
 
         return chartsCreated;
@@ -642,7 +643,9 @@ public final class ReportGenerator extends NMONVisualizerApp {
             outer: for (int i = 0; i < cPlot.getDatasetCount(); i++) {
                 for (int j = 0; j < cPlot.getDataset(i).getRowCount(); j++) {
                     for (int k = 0; k < cPlot.getDataset(i).getColumnCount(); k++) {
-                        if (!Double.isNaN(cPlot.getDataset(0).getValue(j, k).doubleValue())) {
+                        Number value = cPlot.getDataset(0).getValue(j, k);
+
+                        if ((value != null) && !Double.isNaN(value.doubleValue())) {
                             hasData = true;
                             break outer;
                         }

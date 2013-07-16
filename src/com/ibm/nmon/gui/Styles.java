@@ -61,6 +61,9 @@ public final class Styles {
 
     public static final ImageIcon INTERVAL_ICON = buildIcon("clock.png");
 
+    public static final ImageIcon REPORT_ICON = buildIcon("report_picture.png");
+    public static final ImageIcon COMPUTER_ICON = buildIcon("computer.png");
+
     static {
         Font defaultFont = UIManager.getDefaults().getFont("TextField.font");
 

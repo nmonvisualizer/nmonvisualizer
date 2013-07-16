@@ -32,7 +32,7 @@ public final class ParserRunner implements Runnable {
         this.toParse = toParse;
         this.timeZone = timeZone;
 
-        progress = new ItemProgressDialog(gui, "Parsing Files...", toParse.size());
+        progress = new ItemProgressDialog(gui.getMainFrame(), "Parsing Files...", toParse.size());
 
         // used linked map so errors are presented in the order parsed
         errors = new java.util.LinkedHashMap<String, String>();
@@ -52,19 +52,19 @@ public final class ParserRunner implements Runnable {
         ParserLog log = ParserLog.getInstance();
 
         for (int i = 0; i < toParse.size(); i++) {
-            final String filename = toParse.get(i).replace('\\', '/' );
-            
+            final String filename = toParse.get(i).replace('\\', '/');
+
             log.setCurrentFilename(filename);
 
             SwingUtilities.invokeLater(new Runnable() {
                 public void run() {
                     String name = filename;
                     int idx = name.lastIndexOf('/');
-                    
+
                     if (idx != -1) {
-                        name = name.substring(idx + 1); 
+                        name = name.substring(idx + 1);
                     }
-                    
+
                     progress.setCurrentItem(name);
                 }
             });

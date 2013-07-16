@@ -456,10 +456,10 @@ public final class NMONVisualizerGui extends NMONVisualizerApp {
         @Override
         public void windowOpened(WindowEvent e) {
             // can only update the divider location when the window is visible
-            // tree gets 80%
-            JSplitPane lrSplit = ((JSplitPane) mainFrame.getContentPane());
+            // charts get 80%
+            JSplitPane lrSplitPane = ((JSplitPane) mainFrame.getContentPane());
 
-            lrSplit.setDividerLocation(0.2);
+            lrSplitPane.setDividerLocation(0.2);
         };
 
         @Override

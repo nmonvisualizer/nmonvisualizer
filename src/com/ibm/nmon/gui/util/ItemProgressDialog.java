@@ -1,6 +1,7 @@
 package com.ibm.nmon.gui.util;
 
 import javax.swing.JDialog;
+import javax.swing.JFrame;
 import javax.swing.JProgressBar;
 import javax.swing.JLabel;
 
@@ -8,10 +9,11 @@ import javax.swing.BorderFactory;
 
 import com.ibm.nmon.gui.Styles;
 
-import com.ibm.nmon.gui.main.NMONVisualizerGui;
-
+/**
+ * Modal progress dialog box that includes a name for the item and a progress bar.
+ */
 public final class ItemProgressDialog extends JDialog {
-    private final NMONVisualizerGui gui;
+    private final JFrame parent;
     private final JLabel itemName;
     private final JProgressBar progress;
 
@@ -23,13 +25,12 @@ public final class ItemProgressDialog extends JDialog {
     // updated
     private static final String DUMMY = new String(new byte[40]);
 
-    public ItemProgressDialog(NMONVisualizerGui gui, String title, int totalItems) {
-        // dialog with the name of the item being processed on top and progress bar below
-        super(gui.getMainFrame(), title, true);
+    public ItemProgressDialog(JFrame parent, String title, int totalItems) {
+        super(parent, title, true);
         setDefaultCloseOperation(JDialog.DO_NOTHING_ON_CLOSE);
         setResizable(false);
 
-        this.gui = gui;
+        this.parent = parent;
         this.totalItems = totalItems;
         itemCount = 0;
 
@@ -53,10 +54,10 @@ public final class ItemProgressDialog extends JDialog {
             pack();
 
             // centered in the X, a little bit higher in the Y
-            java.awt.Point location = gui.getMainFrame().getLocation();
+            java.awt.Point location = parent.getLocation();
 
-            setLocation(location.x + gui.getMainFrame().getWidth() / 2 - getWidth() / 2, location.y
-                    + gui.getMainFrame().getHeight() / 2 - (getHeight() * 2));
+            setLocation(location.x + parent.getWidth() / 2 - getWidth() / 2, location.y + parent.getHeight() / 2
+                    - (getHeight() * 2));
 
         }
 
@@ -65,7 +66,6 @@ public final class ItemProgressDialog extends JDialog {
 
     public void setCurrentItem(String name) {
         itemName.setText(name);
-        // pack();
     }
 
     public void updateProgress() {

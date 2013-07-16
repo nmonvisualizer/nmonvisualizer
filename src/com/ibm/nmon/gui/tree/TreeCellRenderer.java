@@ -14,8 +14,6 @@ import com.ibm.nmon.data.Process;
 import com.ibm.nmon.gui.Styles;
 
 final class TreeCellRenderer extends DefaultTreeCellRenderer {
-    private static final ImageIcon ROOT_ICON = Styles.buildIcon("report_picture.png");
-    private static final ImageIcon DATASET_ICON = Styles.buildIcon("computer.png");
     private static final ImageIcon DATATYPE_ICON = Styles.buildIcon("package.png");
     private static final ImageIcon DATASUBTYPE_ICON = Styles.buildIcon("package_green.png");
     private static final ImageIcon FIELD_ICON = Styles.buildIcon("page.png");
@@ -29,7 +27,7 @@ final class TreeCellRenderer extends DefaultTreeCellRenderer {
         Object o = ((DefaultMutableTreeNode) value).getUserObject();
 
         if (o instanceof DataSet) {
-            setIcon(DATASET_ICON);
+            setIcon(Styles.COMPUTER_ICON);
             setToolTipText(null);
         }
         else if (o instanceof DataType) {
@@ -53,7 +51,7 @@ final class TreeCellRenderer extends DefaultTreeCellRenderer {
             String s = (String) o;
 
             if (s.equals(TreePanel.ROOT_NAME)) {
-                setIcon(ROOT_ICON);
+                setIcon(Styles.REPORT_ICON);
                 setToolTipText(null);
             }
             else if (s.equals("TOP")) {

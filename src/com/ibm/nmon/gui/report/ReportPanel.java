@@ -8,6 +8,7 @@ import java.util.List;
 import java.beans.PropertyChangeListener;
 import java.beans.PropertyChangeEvent;
 
+import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JTabbedPane;
 import javax.swing.SwingUtilities;
@@ -58,11 +59,17 @@ import com.ibm.nmon.interval.Interval;
 public final class ReportPanel extends JTabbedPane implements PropertyChangeListener, IntervalListener {
     private static final Logger LOGGER = org.slf4j.LoggerFactory.getLogger(ReportPanel.class);
 
+    public static enum MultiplexMode {
+        NONE, BY_TYPE, BY_FIELD
+    };
+
     private final NMONVisualizerGui gui;
+    private final JFrame parent;
 
     private final List<DataSet> dataSets;
 
     private final String reportCacheKey;
+    private MultiplexMode multiplexMode;
     private List<BaseChartDefinition> chartsInUse;
 
     private final ChartFactory ChartFactory;
@@ -75,28 +82,28 @@ public final class ReportPanel extends JTabbedPane implements PropertyChangeList
     private int previousTab = -1;
 
     public ReportPanel(NMONVisualizerGui gui, String reportCacheKey, DataSet data) {
-        this(gui, reportCacheKey, java.util.Collections.singletonList(data));
+        this(gui, gui.getMainFrame(), reportCacheKey, java.util.Collections.singletonList(data), MultiplexMode.NONE);
     }
 
     public ReportPanel(NMONVisualizerGui gui, String reportCacheKey) {
-        this(gui, reportCacheKey, new java.util.ArrayList<DataSet>());
+        this(gui, gui.getMainFrame(), reportCacheKey, new java.util.ArrayList<DataSet>(), MultiplexMode.NONE);
     }
 
-    public ReportPanel(NMONVisualizerGui gui, String reportCacheKey, List<DataSet> dataSets) {
+    public ReportPanel(NMONVisualizerGui gui, JFrame parent, String reportCacheKey, List<DataSet> dataSets,
+            MultiplexMode multiplexMode) {
         super();
 
         this.ChartFactory = new ChartFactory(gui);
 
-        // will not have any effect unless setOpaque(true) - see build tabs
-        setBackground(java.awt.Color.WHITE);
-
         this.gui = gui;
+        this.parent = parent;
         this.dataSets = dataSets;
         this.reportCacheKey = reportCacheKey;
+        this.multiplexMode = multiplexMode;
 
         // use the full size of the reports here since that will be the maximum
         // this assumes that the reports for the given key DO NOT CHANGE
-        List<BaseChartDefinition> reports = gui.getReportCache().getChartDefinition(reportCacheKey);
+        List<BaseChartDefinition> reports = gui.getReportCache().getReport(reportCacheKey);
 
         this.chartsInUse = new java.util.ArrayList<BaseChartDefinition>(reports.size());
 
@@ -176,18 +183,50 @@ public final class ReportPanel extends JTabbedPane implements PropertyChangeList
         }
     }
 
-    public void addData(DataSet data) {
-        dataSets.add(data);
-        java.util.Collections.sort(dataSets);
+    public MultiplexMode getMultiplexMode() {
+        return multiplexMode;
+    }
+
+    public void setMultiplexMode(MultiplexMode multiplexMode) {
+        if (multiplexMode == null) {
+            multiplexMode = MultiplexMode.NONE;
+        }
+
+        if (this.multiplexMode != multiplexMode) {
+            this.multiplexMode = multiplexMode;
+
+            buildTabs(gui);
+            resetReport();
+        }
+    }
+
+    public void setData(Iterable<? extends DataSet> dataSets) {
+        this.dataSets.clear();
+
+        for (DataSet data : dataSets) {
+            this.dataSets.add(data);
+        }
+
+        java.util.Collections.sort(this.dataSets);
         buildTabs(gui);
         resetReport();
     }
 
+    public void addData(DataSet data) {
+        if (!dataSets.contains(data)) {
+            dataSets.add(data);
+            java.util.Collections.sort(dataSets);
+            buildTabs(gui);
+            resetReport();
+        }
+    }
+
     public void removeData(DataSet data) {
-        dataSets.remove(data);
-        java.util.Collections.sort(dataSets);
-        buildTabs(gui);
-        resetReport();
+        if (dataSets.remove(data)) {
+            java.util.Collections.sort(dataSets);
+            buildTabs(gui);
+            resetReport();
+        }
     }
 
     public void clearData() {
@@ -379,7 +418,7 @@ public final class ReportPanel extends JTabbedPane implements PropertyChangeList
         removeAll();
         chartsInUse.clear();
 
-        if (gui.getReportCache().getChartDefinition(reportCacheKey).isEmpty()) {
+        if (gui.getReportCache().getReport(reportCacheKey).isEmpty()) {
             addTab("No Charts", createNoReportsLabel("No Charts Defined!"));
         }
         else {
@@ -390,7 +429,23 @@ public final class ReportPanel extends JTabbedPane implements PropertyChangeList
                 return;
             }
 
-            chartsInUse = gui.getReportCache().getChartDefinition(reportCacheKey, dataSets);
+            if (multiplexMode == MultiplexMode.NONE) {
+                chartsInUse = gui.getReportCache().getReport(reportCacheKey, dataSets);
+            }
+            else {
+                if (dataSets.size() > 1) {
+                    LOGGER.warn("not multiplexing charts when there is more than one dataset");
+                    chartsInUse = gui.getReportCache().getReport(reportCacheKey, dataSets);
+                }
+                else if (multiplexMode == MultiplexMode.BY_TYPE) {
+                    chartsInUse = gui.getReportCache()
+                            .multiplexChartsAcrossTypes(reportCacheKey, dataSets.get(0), true);
+                }
+                else if (multiplexMode == MultiplexMode.BY_FIELD) {
+                    chartsInUse = gui.getReportCache().multiplexChartsAcrossFields(reportCacheKey, dataSets.get(0),
+                            true);
+                }
+            }
 
             if (chartsInUse.isEmpty()) {
                 addTab("No Charts", createNoReportsLabel("No Charts for Currently Parsed Data!"));
@@ -438,7 +493,7 @@ public final class ReportPanel extends JTabbedPane implements PropertyChangeList
     }
 
     public void saveAllCharts(final String directory) {
-        final ItemProgressDialog progress = new ItemProgressDialog(gui, "Saving Charts...", getTabCount());
+        final ItemProgressDialog progress = new ItemProgressDialog(parent, "Saving Charts...", getTabCount());
 
         if (getTabCount() == 1) {
             if (getComponentAt(0) instanceof JLabel) {

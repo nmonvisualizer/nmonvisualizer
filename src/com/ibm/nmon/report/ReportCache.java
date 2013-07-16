@@ -61,7 +61,7 @@ public final class ReportCache {
      * 
      * @param file a valid XML file for processing by {@link ChartDefinitionParser}
      */
-    public void addChartDefinition(String key, String file) throws IOException {
+    public void addReport(String key, String file) throws IOException {
         if (DEFAULT_SUMMARY_CHARTS_KEY.equals(key) || DEFAULT_INTERVAL_CHARTS_KEY.equals(key)
                 || DEFAULT_DATASET_CHARTS_KEY.equals(key)) {
             throw new IllegalArgumentException("cannot redefine default charts for key " + key);
@@ -76,7 +76,7 @@ public final class ReportCache {
      * 
      * @return a list of chart definitions; this list will be empty if the key is not found
      */
-    public List<BaseChartDefinition> getChartDefinition(String key) {
+    public List<BaseChartDefinition> getReport(String key) {
         List<BaseChartDefinition> toReturn = reports.get(key);
 
         if (toReturn == null) {
@@ -94,7 +94,7 @@ public final class ReportCache {
      * @return the filtered list of chart definitions
      * @see DataDefinition#matchesHost(DataSet)
      */
-    public List<BaseChartDefinition> getChartDefinition(String key, Iterable<? extends DataSet> dataSets) {
+    public List<BaseChartDefinition> getReport(String key, Iterable<? extends DataSet> dataSets) {
         List<BaseChartDefinition> report = reports.get(key);
 
         if (report == null) {
@@ -136,16 +136,16 @@ public final class ReportCache {
      * </p>
      * 
      * @param filterByData should the initial reports list be filtered by the given data? See
-     *            {@link #getChartDefinition(String, Iterable)}.
+     *            {@link #getReport(String, Iterable)}.
      */
     public List<BaseChartDefinition> multiplexChartsAcrossTypes(String key, DataSet data, boolean filterByData) {
         List<BaseChartDefinition> chartDefinitions = null;
 
         if (filterByData) {
-            chartDefinitions = getChartDefinition(key, java.util.Collections.singletonList(data));
+            chartDefinitions = getReport(key, java.util.Collections.singletonList(data));
         }
         else {
-            chartDefinitions = getChartDefinition(key);
+            chartDefinitions = getReport(key);
         }
 
         LOGGER.debug("multiplexing charts {} for dataset {} across types", chartDefinitions, data.getHostname());
@@ -207,16 +207,16 @@ public final class ReportCache {
      * </p>
      * 
      * @param filterByData should the initial reports list be filtered by the given data? See
-     *            {@link #getChartDefinition(String, Iterable)}.
+     *            {@link #getReport(String, Iterable)}.
      */
     public List<BaseChartDefinition> multiplexChartsAcrossFields(String key, DataSet data, boolean filterByData) {
         List<BaseChartDefinition> chartDefinitions = null;
 
         if (filterByData) {
-            chartDefinitions = getChartDefinition(key, java.util.Collections.singletonList(data));
+            chartDefinitions = getReport(key, java.util.Collections.singletonList(data));
         }
         else {
-            chartDefinitions = getChartDefinition(key);
+            chartDefinitions = getReport(key);
         }
 
         LOGGER.debug("multiplexing charts {} for dataset {} across fields", chartDefinitions, data.getHostname());

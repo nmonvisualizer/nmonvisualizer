@@ -24,6 +24,7 @@ import com.ibm.nmon.gui.interval.RemoveAllIntervalsAction;
 
 import com.ibm.nmon.gui.interval.IntervalManagerDialog;
 
+import com.ibm.nmon.gui.report.ReportFrame;
 import com.ibm.nmon.gui.util.LogViewerDialog;
 
 import com.ibm.nmon.interval.IntervalListener;
@@ -74,8 +75,6 @@ final class MainMenu extends JMenuBar implements IntervalListener, DataSetListen
         item.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_O, InputEvent.CTRL_DOWN_MASK));
         menu.add(item);
 
-        menu.addSeparator();
-
         item = new JMenuItem("Remove All");
         item.setMnemonic('a');
         item.setIcon(Styles.CLEAR_ICON);
@@ -86,7 +85,7 @@ final class MainMenu extends JMenuBar implements IntervalListener, DataSetListen
 
         menu.addSeparator();
 
-        JCheckBoxMenuItem checkItem = new JCheckBoxMenuItem("Use AIX Partition Name");
+        JCheckBoxMenuItem checkItem = new JCheckBoxMenuItem("Use AIX LPAR Name");
         checkItem.setSelected(gui.getBooleanProperty("usePartitionName"));
 
         checkItem.addActionListener(new ActionListener() {
@@ -290,6 +289,20 @@ final class MainMenu extends JMenuBar implements IntervalListener, DataSetListen
 
         menu.add(checkItem);
 
+        item = new JMenuItem("Custom Report...");
+        item.setMnemonic('r');
+        item.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_R, InputEvent.CTRL_DOWN_MASK));
+        item.setIcon(Styles.REPORT_ICON);
+        item.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                // TODO single ReportFrame per GUI
+                new ReportFrame(gui).setVisible(true);
+            }
+        });
+
+        menu.add(item);
+
         return menu;
     }
 
@@ -331,7 +344,7 @@ final class MainMenu extends JMenuBar implements IntervalListener, DataSetListen
 
         menu.addSeparator();
 
-        item = new JMenuItem("View Log");
+        item = new JMenuItem("View Log...");
         item.setMnemonic('l');
         item.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_L, InputEvent.CTRL_DOWN_MASK));
         item.setIcon(LogViewerDialog.LOG_ICON);
@@ -479,7 +492,7 @@ final class MainMenu extends JMenuBar implements IntervalListener, DataSetListen
 
     public void dataAdded(DataSet data) {
         // File -> Remove All
-        JMenuItem item = this.getMenu(0).getItem(2);
+        JMenuItem item = this.getMenu(0).getItem(1);
         item.setEnabled(true);
 
         changeDefaultIntervalName();
@@ -495,7 +508,7 @@ final class MainMenu extends JMenuBar implements IntervalListener, DataSetListen
 
     public void dataCleared() {
         // File -> Remove All
-        JMenuItem item = this.getMenu(0).getItem(2);
+        JMenuItem item = this.getMenu(0).getItem(1);
         item.setEnabled(false);
 
         changeDefaultIntervalName();
