@@ -255,6 +255,7 @@ public final class DataTypeChartPanel extends LineChartPanel implements Interval
         super.finalize();
 
         gui.removePropertyChangeListener("granularity", this);
+        gui.getIntervalManager().removeListener(this);
     }
 
     private static final Map<String, String> TYPE_AXIS_NAMES;

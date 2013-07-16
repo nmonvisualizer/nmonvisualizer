@@ -38,6 +38,8 @@ public final class BarChartDefinition extends YAxisChartDefinition {
 
         this.subtractionNeeded = copy.subtractionNeeded;
         this.categoryAxisLabel = copy.categoryAxisLabel;
+        
+        this.barNamingMode = copy.barNamingMode;
         this.categoryNamingMode = copy.categoryNamingMode;
     }
 
