@@ -25,6 +25,7 @@ import com.ibm.nmon.gui.interval.RemoveAllIntervalsAction;
 import com.ibm.nmon.gui.interval.IntervalManagerDialog;
 
 import com.ibm.nmon.gui.report.ReportFrame;
+import com.ibm.nmon.gui.util.GranularityDialog;
 import com.ibm.nmon.gui.util.LogViewerDialog;
 
 import com.ibm.nmon.interval.IntervalListener;
@@ -353,6 +354,11 @@ final class MainMenu extends JMenuBar implements IntervalListener, DataSetListen
                 if (!gui.getLogViewer().isVisible()) {
                     gui.getLogViewer().setVisible(true);
                 }
+                else {
+                    gui.getLogViewer().toFront();
+                }
+
+                gui.getLogViewer().setLocationRelativeTo(gui.getMainFrame());
             }
         });
 

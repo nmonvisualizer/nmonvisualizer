@@ -1,4 +1,4 @@
-package com.ibm.nmon.gui.main;
+package com.ibm.nmon.gui.util;
 
 import java.awt.event.ActionListener;
 import java.awt.event.ActionEvent;
@@ -25,13 +25,14 @@ import javax.swing.SwingConstants;
 
 import com.ibm.nmon.gui.GUIDialog;
 import com.ibm.nmon.gui.Styles;
+import com.ibm.nmon.gui.main.NMONVisualizerGui;
 
 /**
  * Modal JDialog to set the current granularity. Automatic granularity is also supported.
  * 
  * @see NMONVisualizerGui#setGranularity(int)
  */
-final class GranularityDialog extends GUIDialog {
+public final class GranularityDialog extends GUIDialog {
     private final JCheckBox automatic;
     private final JTextField granularity;
 

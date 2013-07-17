@@ -14,14 +14,21 @@ import javax.swing.KeyStroke;
 
 import javax.swing.JFileChooser;
 
+import com.ibm.nmon.gui.main.NMONVisualizerGui;
+
+import com.ibm.nmon.gui.util.GranularityDialog;
+import com.ibm.nmon.gui.util.LogViewerDialog;
+
 final class ReportMenu extends JMenuBar {
+    private final NMONVisualizerGui gui;
     private final ReportFrame parent;
 
     private final ReportFileChooser chooser;
 
-    ReportMenu(ReportFrame parent) {
+    ReportMenu(NMONVisualizerGui gui, ReportFrame parent) {
         super();
 
+        this.gui = gui;
         this.parent = parent;
         this.chooser = new ReportFileChooser(parent.getGui());
 
@@ -68,10 +75,45 @@ final class ReportMenu extends JMenuBar {
 
         add(file);
 
+        JMenu view = new JMenu("View");
+        view.setMnemonic('v');
+
+        item = new JMenuItem("Set Granularity...");
+        item.setMnemonic('g');
+        item.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_G, InputEvent.CTRL_DOWN_MASK));
+
+        item.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                new GranularityDialog(ReportMenu.this.gui, ReportMenu.this.parent).setVisible(true);
+            }
+        });
+
+        view.add(item);
+
+        add(view);
+
         JMenu help = new JMenu("Help");
         help.setMnemonic('h');
 
-        // help.add(item);
+        item = new JMenuItem("View Log...");
+        item.setMnemonic('l');
+        item.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_L, InputEvent.CTRL_DOWN_MASK));
+        item.setIcon(LogViewerDialog.LOG_ICON);
+        item.addActionListener(new ActionListener() {
+            public void actionPerformed(ActionEvent e) {
+                if (!ReportMenu.this.gui.getLogViewer().isVisible()) {
+                    ReportMenu.this.gui.getLogViewer().setVisible(true);
+                }
+                else {
+                    ReportMenu.this.gui.getLogViewer().toFront();
+                }
+
+                ReportMenu.this.gui.getLogViewer().setLocationRelativeTo(ReportMenu.this.parent);
+            }
+        });
+
+        help.add(item);
 
         add(help);
     }

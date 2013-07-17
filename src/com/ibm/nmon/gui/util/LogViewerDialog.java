@@ -24,6 +24,7 @@ import javax.swing.JPanel;
 import javax.swing.JLabel;
 import javax.swing.JButton;
 import javax.swing.JComboBox;
+import javax.swing.JRootPane;
 import javax.swing.JScrollPane;
 import javax.swing.JTextArea;
 import javax.swing.KeyStroke;
@@ -33,23 +34,20 @@ import javax.swing.ImageIcon;
 
 import javax.swing.SwingUtilities;
 
-import com.ibm.nmon.gui.GUIDialog;
-
 import com.ibm.nmon.gui.Styles;
 
 import com.ibm.nmon.gui.main.NMONVisualizerGui;
 
 import com.ibm.nmon.util.BasicFormatter;
 
-// TODO make this a JFrame
-public final class LogViewerDialog extends GUIDialog {
+public final class LogViewerDialog extends JFrame {
     public static final ImageIcon LOG_ICON = Styles.buildIcon("page_error.png");
 
     private final JComboBox<Level> levels;
     private final JTextArea log;
 
     public LogViewerDialog(NMONVisualizerGui gui) {
-        super(gui, gui.getMainFrame(), "Application Log");
+        super("Application Log");
 
         setResizable(true);
         setIconImage(LOG_ICON.getImage());
@@ -134,7 +132,25 @@ public final class LogViewerDialog extends GUIDialog {
         add(scroller, BorderLayout.CENTER);
         add(footer, BorderLayout.PAGE_END);
 
+        pack();
+
         configureLogging();
+    }
+
+    protected JRootPane createRootPane() {
+        JRootPane rootPane = super.createRootPane();
+
+        rootPane.getInputMap(JComponent.WHEN_IN_FOCUSED_WINDOW).put(KeyStroke.getKeyStroke(KeyEvent.VK_ESCAPE, 0),
+                "ESCAPE");
+
+        rootPane.getActionMap().put("ESCAPE", new AbstractAction() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                setVisible(false);
+            }
+        });
+
+        return rootPane;
     }
 
     private void configureLogging() {
