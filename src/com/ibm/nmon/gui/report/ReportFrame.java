@@ -19,15 +19,12 @@ import javax.swing.JFileChooser;
 import java.awt.BorderLayout;
 import java.awt.Component;
 import java.awt.Dimension;
-import java.awt.Point;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 
 import java.io.File;
-
-import java.util.List;
 
 import javax.swing.JPanel;
 import javax.swing.border.EmptyBorder;
@@ -48,8 +45,7 @@ public final class ReportFrame extends JFrame implements DataSetListener {
 
     private final NMONVisualizerGui gui;
 
-    private final JPanel blank;
-    private ReportPanel reportPanel;
+    private ReportSplitPane reportSplitPane;
 
     private final JList<DataSet> systems;
 
@@ -57,6 +53,7 @@ public final class ReportFrame extends JFrame implements DataSetListener {
         super("Custom Report");
 
         this.gui = gui;
+        this.reportSplitPane = new ReportSplitPane(gui, this);
 
         setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
         setResizable(true);
@@ -67,29 +64,15 @@ public final class ReportFrame extends JFrame implements DataSetListener {
         Dimension thisSize = new Dimension((int) (parentSize.getWidth() * 0.9), (int) (parentSize.getHeight() * 0.9));
         setSize(thisSize);
 
-        // (1 - .9) / 2 = .05
-        Point parentLocation = gui.getMainFrame().getLocation();
-        Point thisLocation = new Point((int) (parentLocation.getX() + (parentSize.getWidth() * 0.05)),
-                (int) (parentLocation.getY() + (parentSize.getHeight() * 0.05)));
-        setLocation(thisLocation);
+        setLocationRelativeTo(gui.getMainFrame());
 
-        // maximize if main fram is also maximized
+        // maximize if main frame is also maximized
         // size and location will still be set and remembered as above
         if ((gui.getMainFrame().getExtendedState() & JFrame.MAXIMIZED_BOTH) == JFrame.MAXIMIZED_BOTH) {
             setExtendedState(getExtendedState() | JFrame.MAXIMIZED_BOTH);
         }
 
-        setJMenuBar(new ReportMenu(this));
-
-        // tree of parsed files on the left, content on the left
-        JSplitPane lrSplitPane = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT);
-        // never resize list automatically
-        lrSplitPane.setResizeWeight(0);
-        lrSplitPane.setBorder(null);
-
-        blank = new JPanel();
-        blank.setBackground(java.awt.Color.WHITE);
-        blank.setBorder(Styles.createTopLineBorder(blank));
+        setJMenuBar(new ReportMenu(gui, this));
 
         ReportSystemsListModel model = new ReportSystemsListModel();
 
@@ -126,18 +109,13 @@ public final class ReportFrame extends JFrame implements DataSetListener {
                             systems.getSelectionModel().getMinSelectionIndex());
 
                     if (selected == null) {
-                        if (reportPanel != null) {
-                            reportPanel.setData(ReportFrame.this.gui.getDataSets());
-                        }
+                        reportSplitPane.setData(ReportFrame.this.gui.getDataSets());
 
                         enableMultiplexing(false);
                     }
                     else {
-                        if (reportPanel != null) {
-                            reportPanel.setData(java.util.Collections.singletonList(selected));
-                        }
+                        reportSplitPane.setData(java.util.Collections.singletonList(selected));
 
-                        // systems.setSelectedIndex(0);
                         enableMultiplexing(true);
                     }
                 }
@@ -167,9 +145,7 @@ public final class ReportFrame extends JFrame implements DataSetListener {
         ActionListener modeChanger = new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                if (reportPanel != null) {
-                    reportPanel.setMultiplexMode(ReportPanel.MultiplexMode.valueOf(e.getActionCommand()));
-                }
+                reportSplitPane.setMultiplexMode(ReportPanel.MultiplexMode.valueOf(e.getActionCommand()));
             }
         };
 
@@ -196,7 +172,13 @@ public final class ReportFrame extends JFrame implements DataSetListener {
         JPanel right = new JPanel(new BorderLayout());
 
         right.add(top, BorderLayout.PAGE_START);
-        right.add(blank, BorderLayout.CENTER);
+        right.add(reportSplitPane, BorderLayout.CENTER);
+
+        // tree of parsed files on the left, content on the left
+        JSplitPane lrSplitPane = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT);
+        // never resize list automatically
+        lrSplitPane.setResizeWeight(0);
+        lrSplitPane.setBorder(null);
 
         lrSplitPane.setLeftComponent(systems);
         lrSplitPane.setRightComponent(right);
@@ -211,9 +193,10 @@ public final class ReportFrame extends JFrame implements DataSetListener {
         addWindowListener(new WindowAdapter() {
             @Override
             public void windowOpened(WindowEvent e) {
-                // can only update the divider location when the window is visible
-                // charts get 80%
-                ((JSplitPane) getContentPane()).setDividerLocation(.2);
+                // can only update the divider locations when the window is visible
+                // list gets 15%; charts get 60%
+                ((JSplitPane) getContentPane()).setDividerLocation(.15);
+                reportSplitPane.setDividerLocation(.6);
             }
         });
     }
@@ -221,40 +204,21 @@ public final class ReportFrame extends JFrame implements DataSetListener {
     @Override
     public void dataAdded(DataSet data) {
         ((ReportSystemsListModel) systems.getModel()).addData(data);
-
-        if (reportPanel != null) {
-            // if All Systems selected add the data; otherwise do not update the chart
-            if (systems.getSelectedIndex() == 0) {
-                reportPanel.addData(data);
-            }
-        }
     }
 
     @Override
     public void dataRemoved(DataSet data) {
         ((ReportSystemsListModel) systems.getModel()).removeData(data);
-
-        if (reportPanel != null) {
-            reportPanel.removeData(data);
-        }
     }
 
     @Override
     public void dataChanged(DataSet data) {
         ((ReportSystemsListModel) systems.getModel()).dataChanged();
-
-        if (reportPanel != null) {
-            reportPanel.resetReport();
-        }
     }
 
     @Override
     public void dataCleared() {
         ((ReportSystemsListModel) systems.getModel()).clearData();
-
-        if (reportPanel != null) {
-            reportPanel.clearData();
-        }
     }
 
     private void enableMultiplexing(boolean enable) {
@@ -266,27 +230,9 @@ public final class ReportFrame extends JFrame implements DataSetListener {
         }
     }
 
-    private ReportPanel.MultiplexMode getMultiplexMode() {
-        JSplitPane lrSplitPane = (JSplitPane) getContentPane();
-        JPanel top = (JPanel) ((JPanel) lrSplitPane.getRightComponent()).getComponent(0);
-
-        for (int i = 1; i < 4; i++) {
-            JRadioButton button = (JRadioButton) top.getComponent(i);
-            if (button.isSelected()) {
-                return ReportPanel.MultiplexMode.valueOf(button.getActionCommand());
-            }
-        }
-
-        // should not happen
-        return null;
-    }
-
     @Override
     public void dispose() {
-        if (reportPanel != null) {
-            reportPanel.dispose();
-            reportPanel = null;
-        }
+        reportSplitPane.dispose();
 
         gui.removeDataSetListener(this);
 
@@ -298,10 +244,6 @@ public final class ReportFrame extends JFrame implements DataSetListener {
     }
 
     void loadReportDefinition(File reportFile) {
-        if (reportPanel != null) {
-            reportPanel.dispose();
-        }
-
         if (!reportFile.exists()) {
             int result = JOptionPane.showConfirmDialog(this, "File '" + reportFile.getName() + "' is not a valid file",
                     "Invalid File", JOptionPane.OK_CANCEL_OPTION, JOptionPane.ERROR_MESSAGE);
@@ -311,33 +253,27 @@ public final class ReportFrame extends JFrame implements DataSetListener {
             }
         }
 
-        JSplitPane lrSplitPane = (JSplitPane) getContentPane();
-        ((JPanel) lrSplitPane.getRightComponent()).remove(1);
-
         try {
-            gui.getReportCache().addReport("custom", reportFile.getAbsolutePath());
+            reportSplitPane.loadReport(reportFile);
 
-            List<DataSet> datasets = new java.util.ArrayList<DataSet>(gui.getDataSetCount());
+            // set the report's data
+            DataSet selected = systems.getModel().getElementAt(systems.getSelectionModel().getMinSelectionIndex());
 
-            for (DataSet data : ReportFrame.this.gui.getDataSets()) {
-                datasets.add(data);
+            if (selected == null) {
+                reportSplitPane.setData(ReportFrame.this.gui.getDataSets());
+            }
+            else {
+                reportSplitPane.setData(java.util.Collections.singletonList(selected));
             }
 
-            reportPanel = new ReportPanel(ReportFrame.this.gui, ReportFrame.this, "custom", datasets,
-                    getMultiplexMode());
-            ((JPanel) lrSplitPane.getRightComponent()).add(reportPanel);
-
-            reportPanel.setEnabled(true);
-            validate();
-
             setTitle("Custom Report" + " - " + reportFile.getName());
+
+            // enable Save Charts
+               getJMenuBar().getMenu(0).getItem(1).setEnabled(true);
         }
         catch (Exception e) {
-            ((JPanel) lrSplitPane.getRightComponent()).add(blank);
-            validate();
-            reportPanel = null;
-
             setTitle("Custom Report");
+            getJMenuBar().getMenu(0).getItem(1).setEnabled(false);
 
             LOGGER.error("could not parse report file '{}'", reportFile.getAbsolutePath(), e);
             JOptionPane.showMessageDialog(ReportFrame.this,
@@ -347,16 +283,14 @@ public final class ReportFrame extends JFrame implements DataSetListener {
     }
 
     void saveAllCharts() {
-        if (reportPanel != null) {
-            GUIFileChooser chooser = new GUIFileChooser(ReportFrame.this.gui, "Select Save Location");
-            chooser.setFileSelectionMode(GUIFileChooser.DIRECTORIES_ONLY);
-            chooser.setMultiSelectionEnabled(false);
+        GUIFileChooser chooser = new GUIFileChooser(ReportFrame.this.gui, "Select Save Location");
+        chooser.setFileSelectionMode(GUIFileChooser.DIRECTORIES_ONLY);
+        chooser.setMultiSelectionEnabled(false);
 
-            if (chooser.showDialog(this, "Save") == JFileChooser.APPROVE_OPTION) {
-                String directory = chooser.getSelectedFile().getAbsolutePath();
+        if (chooser.showDialog(this, "Save") == JFileChooser.APPROVE_OPTION) {
+            String directory = chooser.getSelectedFile().getAbsolutePath();
 
-                reportPanel.saveAllCharts(directory);
-            }
+            reportSplitPane.saveCharts(directory);
         }
     }
 }

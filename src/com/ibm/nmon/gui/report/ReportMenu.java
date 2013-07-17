@@ -58,12 +58,16 @@ final class ReportMenu extends JMenuBar {
                 ReportMenu.this.parent.saveAllCharts();
             }
         });
+        // no report initially loaded
+        item.setEnabled(false);
 
         file.add(item);
         file.addSeparator();
 
         item = new JMenuItem("Close");
         item.setMnemonic('c');
+        item.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_F4, InputEvent.CTRL_DOWN_MASK));
+
         item.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {

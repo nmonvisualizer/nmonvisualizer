@@ -133,7 +133,6 @@ public final class ReportPanel extends JTabbedPane implements PropertyChangeList
                         getChartPanel(idx).setEnabled(true);
                         previousTab = idx;
                     }
-
                 }
             }
         });
@@ -478,6 +477,10 @@ public final class ReportPanel extends JTabbedPane implements PropertyChangeList
                     addTab(report.getShortName(), chartPanel);
                 }
             }
+        }
+
+        if (previousTab > getTabCount()) {
+            previousTab = -1;
         }
 
         buildingTabs = false;
