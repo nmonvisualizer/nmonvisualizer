@@ -7,6 +7,7 @@ import java.awt.event.KeyEvent;
 import javax.swing.KeyStroke;
 
 import javax.swing.JComponent;
+import javax.swing.JFrame;
 import javax.swing.JDialog;
 import javax.swing.JRootPane;
 
@@ -19,8 +20,8 @@ import com.ibm.nmon.gui.main.NMONVisualizerGui;
 public abstract class GUIDialog extends JDialog {
     protected final NMONVisualizerGui gui;
 
-    public GUIDialog(NMONVisualizerGui gui, String title) {
-        super(gui.getMainFrame(), title);
+    public GUIDialog(NMONVisualizerGui gui, JFrame parent, String title) {
+        super(parent, title);
 
         this.gui = gui;
 
@@ -29,7 +30,7 @@ public abstract class GUIDialog extends JDialog {
     }
 
     public GUIDialog(NMONVisualizerGui gui) {
-        this(gui, "");
+        this(gui, gui.getMainFrame(), "");
     }
 
     @Override

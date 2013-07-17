@@ -32,7 +32,7 @@ public final class MergeDataSetDialog extends GUIDialog {
     private SystemDataSet toMerge;
 
     public MergeDataSetDialog(NMONVisualizerGui gui, SystemDataSet toMerge) {
-        super(gui, "Merge With?");
+        super(gui, gui.getMainFrame(), "Merge With?");
 
         setResizable(false);
         setModal(true);

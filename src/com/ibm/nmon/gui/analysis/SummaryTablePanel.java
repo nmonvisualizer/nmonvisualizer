@@ -22,6 +22,7 @@ import javax.swing.DefaultComboBoxModel;
 
 import javax.swing.Icon;
 
+import javax.swing.JFrame;
 import javax.swing.JComboBox;
 import javax.swing.JLabel;
 import javax.swing.JMenu;
@@ -72,6 +73,7 @@ public final class SummaryTablePanel extends JPanel implements IntervalListener,
     private static final Icon TRANSPOSE_ICON = Styles.buildIcon("arrow_rotate_clockwise.png");
 
     private final NMONVisualizerGui gui;
+    private final JFrame parent;
 
     private final GUITable dataSetTable;
     private final GUITable statisticsTable;
@@ -86,14 +88,15 @@ public final class SummaryTablePanel extends JPanel implements IntervalListener,
     private final AnalysisSetFileChooser fileChooser;
 
     @SuppressWarnings("unchecked")
-    public SummaryTablePanel(NMONVisualizerGui gui) {
+    public SummaryTablePanel(NMONVisualizerGui gui, JFrame parent) {
         super();
 
         this.gui = gui;
+        this.parent = parent;
 
         fileChooser = new AnalysisSetFileChooser(gui, analysisSet);
         menu = new JMenu("Table");
-        setupMenu();
+        setupMenu(parent);
 
         setLayout(new BorderLayout());
 
@@ -115,8 +118,8 @@ public final class SummaryTablePanel extends JPanel implements IntervalListener,
         dataSetTable.setModel(dataSetTableModel);
         statisticsTable.setModel(statTableModel);
 
-        setupTable(dataSetTable);
-        setupTable(statisticsTable);
+        setupTable(dataSetTable, parent);
+        setupTable(statisticsTable, parent);
 
         scrollPane = new JScrollPane(statisticsTable);
         scrollPane.getViewport().setBackground(java.awt.Color.WHITE);
@@ -273,7 +276,7 @@ public final class SummaryTablePanel extends JPanel implements IntervalListener,
         gui.getMainFrame().getJMenuBar().getMenu(3).getItem(1).setEnabled(enabled);
     }
 
-    private void setupTable(final JTable table) {
+    private void setupTable(final JTable table, JFrame parent) {
         table.setDragEnabled(true);
         table.setTransferHandler(new TableTransferHandler(table, analysisSet));
 
@@ -340,7 +343,7 @@ public final class SummaryTablePanel extends JPanel implements IntervalListener,
                             JTable table = statsPanel.isVisible() ? dataSetTable : statisticsTable;
                             ChoosableColumnTableModel model = (ChoosableColumnTableModel) table.getModel();
 
-                            new TableColumnChooser(gui, model);
+                            new TableColumnChooser(gui, SummaryTablePanel.this.parent, model);
                         }
                     });
 
@@ -423,7 +426,7 @@ public final class SummaryTablePanel extends JPanel implements IntervalListener,
         top.add(buttonPanel, BorderLayout.LINE_END);
     }
 
-    private void setupMenu() {
+    private void setupMenu(JFrame parent) {
         menu.setMnemonic('t');
 
         JMenuItem item = new JMenuItem("Load Definition...");
@@ -469,7 +472,7 @@ public final class SummaryTablePanel extends JPanel implements IntervalListener,
             public void actionPerformed(ActionEvent e) {
                 JTable table = statsPanel.isVisible() ? dataSetTable : statisticsTable;
 
-                new TableColumnChooser(gui, ((AnalysisSetTableModel) table.getModel()));
+                new TableColumnChooser(gui, SummaryTablePanel.this.parent, ((AnalysisSetTableModel) table.getModel()));
             }
         });
         menu.add(item);

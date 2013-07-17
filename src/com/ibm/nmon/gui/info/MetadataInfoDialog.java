@@ -38,7 +38,7 @@ public final class MetadataInfoDialog extends GUIDialog implements PropertyChang
     private final JTabbedPane tabs;
 
     public MetadataInfoDialog(NMONVisualizerGui gui, SystemDataSet data) {
-        super(gui, "Parsed File Info - " + data.getHostname());
+        super(gui, gui.getMainFrame(), "Parsed File Info - " + data.getHostname());
 
         setIconImage(Styles.buildIcon("page.png").getImage());
 

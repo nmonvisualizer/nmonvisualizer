@@ -17,7 +17,7 @@ final class DataTypeView extends ChartSplitPane {
     private final DataTypeChartPanel chartPanel;
 
     DataTypeView(NMONVisualizerGui gui) {
-        super(gui);
+        super(gui, gui.getMainFrame());
 
         chartPanel = new DataTypeChartPanel(gui);
         chartPanel.setBorder(Styles.createTopLineBorder(this));

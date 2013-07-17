@@ -10,6 +10,7 @@ import javax.swing.event.ListSelectionListener;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 
+import javax.swing.JFrame;
 import javax.swing.JCheckBox;
 import javax.swing.JLabel;
 import javax.swing.JScrollPane;
@@ -37,14 +38,16 @@ import com.ibm.nmon.gui.util.ScrollingTableFix;
  */
 public final class ChartSummaryPanel extends JScrollPane implements PropertyChangeListener {
     private final NMONVisualizerGui gui;
+    private final JFrame parent;
 
     private final GUITable summaryTable;
     private final ChartSummaryTableModel tableModel;
 
-    public ChartSummaryPanel(NMONVisualizerGui gui, String[] defaultColumns) {
+    public ChartSummaryPanel(NMONVisualizerGui gui, JFrame parent, String[] defaultColumns) {
         super();
 
         this.gui = gui;
+        this.parent = parent;
 
         tableModel = new ChartSummaryTableModel(gui, defaultColumns);
         tableModel.addPropertyChangeListener(this);
@@ -165,7 +168,7 @@ public final class ChartSummaryPanel extends JScrollPane implements PropertyChan
     }
 
     public void displayTableColumnChooser() {
-        new TableColumnChooser(gui, tableModel);
+        new TableColumnChooser(gui, parent, tableModel);
     }
 
     GUITable getSummaryTable() {

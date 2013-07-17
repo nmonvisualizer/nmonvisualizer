@@ -48,7 +48,7 @@ final class ParserErrorDialog extends GUIDialog {
     private final JButton ok;
 
     public ParserErrorDialog(NMONVisualizerGui gui, Map<String, String> fileErrors) {
-        super(gui, "Parsing Errors");
+        super(gui, gui.getMainFrame(), "Parsing Errors");
         setModal(true);
 
         setIconImage(LogViewerDialog.LOG_ICON.getImage());

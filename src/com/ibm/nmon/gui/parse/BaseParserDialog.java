@@ -34,7 +34,7 @@ abstract class BaseParserDialog extends GUIDialog {
     private boolean skip = true;
 
     protected BaseParserDialog(NMONVisualizerGui gui, String title) {
-        super(gui, title);
+        super(gui, gui.getMainFrame(), title);
 
         setModal(true);
         setResizable(false);

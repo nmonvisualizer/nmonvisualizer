@@ -63,7 +63,7 @@ public final class ViewManager extends JPanel implements PropertyChangeListener,
         blank.setBackground(java.awt.Color.WHITE);
         blank.setBorder(Styles.createTopLineBorder(this));
 
-        tablePanel = new SummaryTablePanel(gui);
+        tablePanel = new SummaryTablePanel(gui, gui.getMainFrame());
         tablePanel.setEnabled(false);
 
         gui.addPropertyChangeListener("chartsDisplayed", this);

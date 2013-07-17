@@ -19,6 +19,7 @@ import java.util.logging.Handler;
 
 import javax.swing.JComponent;
 import javax.swing.JDialog;
+import javax.swing.JFrame;
 import javax.swing.JPanel;
 import javax.swing.JLabel;
 import javax.swing.JButton;
@@ -40,6 +41,7 @@ import com.ibm.nmon.gui.main.NMONVisualizerGui;
 
 import com.ibm.nmon.util.BasicFormatter;
 
+// TODO make this a JFrame
 public final class LogViewerDialog extends GUIDialog {
     public static final ImageIcon LOG_ICON = Styles.buildIcon("page_error.png");
 
@@ -47,7 +49,7 @@ public final class LogViewerDialog extends GUIDialog {
     private final JTextArea log;
 
     public LogViewerDialog(NMONVisualizerGui gui) {
-        super(gui, "Application Log");
+        super(gui, gui.getMainFrame(), "Application Log");
 
         setResizable(true);
         setIconImage(LOG_ICON.getImage());

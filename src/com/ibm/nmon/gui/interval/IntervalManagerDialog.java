@@ -69,7 +69,7 @@ public final class IntervalManagerDialog extends GUIDialog implements IntervalLi
     private IntervalFileChooser fileChooser;
 
     public IntervalManagerDialog(NMONVisualizerGui gui) {
-        super(gui, "Manage Intervals");
+        super(gui, gui.getMainFrame(), "Manage Intervals");
         setLayout(new BoxLayout(getContentPane(), BoxLayout.PAGE_AXIS));
         setIconImage(Styles.INTERVAL_ICON.getImage());
 

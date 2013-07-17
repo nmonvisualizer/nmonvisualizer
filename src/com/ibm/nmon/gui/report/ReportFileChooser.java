@@ -5,7 +5,7 @@ import com.ibm.nmon.gui.main.NMONVisualizerGui;
 
 final class ReportFileChooser extends GUIFileChooser {
 
-    public ReportFileChooser(NMONVisualizerGui gui) {
+    ReportFileChooser(NMONVisualizerGui gui) {
         super(gui, "Parse Report XML");
     }
 }

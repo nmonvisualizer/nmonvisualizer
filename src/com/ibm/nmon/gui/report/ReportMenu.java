@@ -19,7 +19,7 @@ final class ReportMenu extends JMenuBar {
 
     private final ReportFileChooser chooser;
 
-    public ReportMenu(ReportFrame parent) {
+    ReportMenu(ReportFrame parent) {
         super();
 
         this.parent = parent;
@@ -71,7 +71,7 @@ final class ReportMenu extends JMenuBar {
         JMenu help = new JMenu("Help");
         help.setMnemonic('h');
 
-      //  help.add(item);
+        // help.add(item);
 
         add(help);
     }

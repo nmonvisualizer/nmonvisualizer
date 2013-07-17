@@ -13,11 +13,12 @@ import javax.swing.ActionMap;
 import javax.swing.InputMap;
 import javax.swing.AbstractAction;
 
+import javax.swing.JComponent;
+import javax.swing.JFrame;
+import javax.swing.JPanel;
 import javax.swing.JButton;
 import javax.swing.JCheckBox;
-import javax.swing.JComponent;
 import javax.swing.JLabel;
-import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTable;
 import javax.swing.SwingConstants;
@@ -46,8 +47,8 @@ import com.ibm.nmon.gui.main.NMONVisualizerGui;
 public final class TableColumnChooser extends GUIDialog {
     private final ChoosableColumnTableModel tableModel;
 
-    public TableColumnChooser(NMONVisualizerGui gui, ChoosableColumnTableModel choosableTableModel) {
-        super(gui, "Select Columns");
+    public TableColumnChooser(NMONVisualizerGui gui, JFrame parent, ChoosableColumnTableModel choosableTableModel) {
+        super(gui, parent, "Select Columns");
 
         setModal(true);
         setIconImage(Styles.buildIcon("table.png").getImage());

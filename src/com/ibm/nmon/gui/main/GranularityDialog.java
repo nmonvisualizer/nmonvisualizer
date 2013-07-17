@@ -11,6 +11,7 @@ import java.awt.Insets;
 import javax.swing.BorderFactory;
 
 import javax.swing.Icon;
+import javax.swing.JFrame;
 import javax.swing.JPanel;
 import javax.swing.JOptionPane;
 import javax.swing.JLabel;
@@ -36,8 +37,8 @@ final class GranularityDialog extends GUIDialog {
 
     private final JButton ok;
 
-    public GranularityDialog(NMONVisualizerGui gui) {
-        super(gui, " Granularity?");
+    public GranularityDialog(NMONVisualizerGui gui, JFrame parent) {
+        super(gui, parent, " Granularity?");
 
         setLayout(new BorderLayout());
         setModal(true);

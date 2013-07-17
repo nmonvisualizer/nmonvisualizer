@@ -3,6 +3,7 @@ package com.ibm.nmon.gui.main;
 import java.beans.PropertyChangeListener;
 import java.beans.PropertyChangeEvent;
 
+import javax.swing.JFrame;
 import javax.swing.JSplitPane;
 
 import com.ibm.nmon.data.DataSetListener;
@@ -26,14 +27,14 @@ import com.ibm.nmon.gui.chart.summary.ChartSummaryPanel;
  * @see ChartSummaryPanel
  * @see BaseChartPanel#highlightElement(int, int)
  */
-abstract class ChartSplitPane extends JSplitPane implements PropertyChangeListener, DataSetListener {
+public abstract class ChartSplitPane extends JSplitPane implements PropertyChangeListener, DataSetListener {
     protected final NMONVisualizerGui gui;
 
     protected final ChartSummaryPanel summaryTable;
 
     private boolean changeInProgress;
 
-    protected ChartSplitPane(NMONVisualizerGui gui) {
+    protected ChartSplitPane(NMONVisualizerGui gui, JFrame parent) {
         super(JSplitPane.VERTICAL_SPLIT);
 
         // summary panel gets a little of the extra space
@@ -42,7 +43,7 @@ abstract class ChartSplitPane extends JSplitPane implements PropertyChangeListen
         setBorder(null);
 
         this.gui = gui;
-        summaryTable = new ChartSummaryPanel(gui, getDefaultColumns());
+        summaryTable = new ChartSummaryPanel(gui, parent, getDefaultColumns());
         changeInProgress = false;
 
         setBottomComponent(summaryTable);

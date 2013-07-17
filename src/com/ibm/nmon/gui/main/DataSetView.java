@@ -22,7 +22,7 @@ final class DataSetView extends ChartSplitPane {
     private String lastCommonTabName;
 
     DataSetView(NMONVisualizerGui gui) {
-        super(gui);
+        super(gui, gui.getMainFrame());
 
         reportPanels = new java.util.HashMap<String, ReportPanel>();
 

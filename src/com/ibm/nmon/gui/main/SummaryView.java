@@ -51,7 +51,7 @@ final class SummaryView extends ChartSplitPane implements IntervalListener {
     private String lastCommonTabName;
 
     public SummaryView(NMONVisualizerGui gui) {
-        super(gui);
+        super(gui, gui.getMainFrame());
 
         singleIntervalReport = new ReportPanel(gui, ReportCache.DEFAULT_SUMMARY_CHARTS_KEY);
         singleIntervalReport.setBorder(null); // make consistent with addBorderIfNecessary

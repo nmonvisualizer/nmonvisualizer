@@ -232,7 +232,7 @@ final class MainMenu extends JMenuBar implements IntervalListener, DataSetListen
         item.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                new GranularityDialog(gui).setVisible(true);
+                new GranularityDialog(gui, gui.getMainFrame()).setVisible(true);
             }
         });
 

@@ -33,7 +33,7 @@ public final class SystemInfoDialog extends GUIDialog implements PropertyChangeL
     private final JTabbedPane tabs;
 
     public SystemInfoDialog(NMONVisualizerGui gui, SystemDataSet data) {
-        super(gui, "System Info - " + data.getHostname());
+        super(gui, gui.getMainFrame(), "System Info - " + data.getHostname());
 
         setIconImage(Styles.buildIcon("computer.png").getImage());
 
