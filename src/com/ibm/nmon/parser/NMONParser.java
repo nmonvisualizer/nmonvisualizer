@@ -149,7 +149,7 @@ public final class NMONParser {
             if (line.startsWith("AAA")) {
                 String[] values = DATA_SPLITTER.split(line);
 
-                if (!values[1].startsWith("note")) {
+                if (!values[1].startsWith("note") && (values.length > 2)) {
                     // Linux NMON OS string has extra kernel and architecture info
                     if ("OS".equals(values[1])) {
                         data.setMetadata("OS", DataHelper.newString(values[2] + ' ' + values[3]));
