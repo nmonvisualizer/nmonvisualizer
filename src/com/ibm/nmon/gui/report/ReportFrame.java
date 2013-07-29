@@ -194,9 +194,9 @@ public final class ReportFrame extends JFrame implements DataSetListener {
             @Override
             public void windowOpened(WindowEvent e) {
                 // can only update the divider locations when the window is visible
-                // list gets 15%; charts get 60%
+                // list gets 15%; charts get 70%
                 ((JSplitPane) getContentPane()).setDividerLocation(.15);
-                reportSplitPane.setDividerLocation(.6);
+                reportSplitPane.setDividerLocation(.7);
             }
         });
     }
@@ -269,7 +269,7 @@ public final class ReportFrame extends JFrame implements DataSetListener {
             setTitle("Custom Report" + " - " + reportFile.getName());
 
             // enable Save Charts
-               getJMenuBar().getMenu(0).getItem(1).setEnabled(true);
+            getJMenuBar().getMenu(0).getItem(1).setEnabled(true);
         }
         catch (Exception e) {
             setTitle("Custom Report");

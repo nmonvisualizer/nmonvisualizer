@@ -256,6 +256,14 @@ public final class NMONVisualizerGui extends NMONVisualizerApp {
                 getPreferences().putInt("WindowSizeY", (int) mainFrame.getSize().getHeight());
             }
 
+            // close any open custom report windows
+            for (java.awt.Frame frame : java.awt.Frame.getFrames()) {
+                if (frame.getClass() == com.ibm.nmon.gui.report.ReportFrame.class) {
+                    ((com.ibm.nmon.gui.report.ReportFrame) frame).setVisible(false);
+                    ((com.ibm.nmon.gui.report.ReportFrame) frame).dispose();
+                }
+            }
+
             logViewer.dispose();
             mainFrame.dispose();
 
