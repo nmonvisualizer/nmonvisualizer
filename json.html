@@ -25,7 +25,7 @@
 <div id="content">
   <div class="section">
     <h2>Overview</h2>
-    <p>NMON Visualizer can process JSON files, but they must be in the correct format. This format consists of 3 main object: the metadata, the data type definitions and the actual data. These objects are defined as fields of the main JSON object, so they can be placed in the file <span class="i">in any order</span>.</p>
+    <p>NMON Visualizer can process JSON files, but they must be in the correct format. This format consists of 3 main objects: the metadata, the data type definitions and the actual data. These objects are defined as fields of the main JSON object, so they can be placed in the file <span class="i">in any order</span>.</p>
   </div>
 
   <div class="section">
@@ -38,7 +38,7 @@
     <p>Two other fields are optional:</p>
     <ul>
     <li><span class="c">timezone</span><br/>Either a string or a number. As a string, the value must return a valid value when used in a call to <span class="c">TimeZone.getTimeZone()</span> in Java. As a number, the value will be interpreted as the number of hours offset from UTC (either positive or negative).</li>
-    <li><span class="c">metadata</span><br/>An object containing key value pairs of string. These will be placed directly into the parsed data as metadata. These values can be viewed in the GUI by right clicking on the dataset and selecting <span class="c">Parsed File Info</span>.</li>
+    <li><span class="c">metadata</span><br/>An object containing key value pairs as strings. These will be placed directly into the parsed data as metadata. These values can be viewed in the GUI by right clicking on the dataset and selecting <span class="c">Parsed File Info</span>.</li>
     </ul>
     <p>Note that <span class="c">whenPattern</span> may include a time zone. If it does not <span class="i">and</span> no <span class="c">timezone</span> is specified, then the file will be parsed using the current timezone.</p> 
   </div>
@@ -50,7 +50,7 @@
      <li><span class="c">name</span><br/>A string used to descriptively name the type. This is the string that will be displayed in the GUI.</li>
      <li><span class="c">fields</span><br/>An array of strings denoting the fields, or values, defined by this type.
     </ul>
-    <p>Optionally, a <span class="c">subtypes</span> array can be specified to indicate that the data type has subbordinate types. This allows similar data to be grouped together in the GUI. For example, all disks will have the same fields, but each disk should be named and displayed separately. <span class="c">subtypes</span> should be an array of strings.</p>
+    <p>Optionally, a <span class="c">subtypes</span> array can be specified to indicate that the data type has subbordinate types. This allows similar data to be grouped together in the GUI. For example, all disks will have the same fields, but each disk could be named and displayed separately. <span class="c">subtypes</span> should be an array of strings.</p>
   </div>
   <div class="section">
     <h2>Data</h2>
