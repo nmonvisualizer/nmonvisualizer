@@ -380,7 +380,7 @@ final class MainMenu extends JMenuBar implements IntervalListener, DataSetListen
                                 + Styles.NUMBER_FORMAT.format(Runtime.getRuntime().totalMemory() / 1024.0 / 1024.0)
                                 + " MB" + " (of "
                                 + Styles.NUMBER_FORMAT.format(Runtime.getRuntime().maxMemory() / 1024.0 / 1024.0)
-                                + " MB" + " total)", "Java Info", JOptionPane.INFORMATION_MESSAGE);
+                                + " MB" + " max)", "Java Info", JOptionPane.INFORMATION_MESSAGE);
             }
         });
 
@@ -400,14 +400,14 @@ final class MainMenu extends JMenuBar implements IntervalListener, DataSetListen
         item.setMnemonic('g');
         item.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
-                double before = Runtime.getRuntime().totalMemory() / 1024.0 / 1024.0;
+                double before = Runtime.getRuntime().freeMemory() / 1024.0 / 1024.0;
                 System.gc();
                 System.gc();
                 Thread.yield();
-                double after = Runtime.getRuntime().totalMemory() / 1024.0 / 1024.0;
+                double after = Runtime.getRuntime().freeMemory() / 1024.0 / 1024.0;
                 JOptionPane.showMessageDialog(gui.getMainFrame(),
-                        "Heap Used Before GC: " + Styles.NUMBER_FORMAT.format(before) + " MB" + '\n'
-                                + "Heap Used After GC: " + Styles.NUMBER_FORMAT.format(after) + " MB",
+                        "Heap Free Before GC: " + Styles.NUMBER_FORMAT.format(before) + " MB" + '\n'
+                                + "Heap Free After GC: " + Styles.NUMBER_FORMAT.format(after) + " MB",
                         "Garbage Collection", JOptionPane.INFORMATION_MESSAGE);
             }
         });
