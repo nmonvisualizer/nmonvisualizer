@@ -26,6 +26,8 @@ final class DataTypeView extends ChartSplitPane {
         chartPanel.addPropertyChangeListener("chart", summaryTable);
         chartPanel.addPropertyChangeListener("highlightedLine", this);
 
+        gui.addDataSetListener(this);
+
         setTopComponent(chartPanel);
 
         setEnabled(false);

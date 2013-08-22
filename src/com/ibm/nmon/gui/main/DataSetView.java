@@ -160,6 +160,7 @@ final class DataSetView extends ChartSplitPane {
 
         reportPanels.clear();
         currentReport = null;
+        setTopComponent(null);
     }
 
     @Override
