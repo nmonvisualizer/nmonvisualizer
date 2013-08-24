@@ -114,12 +114,11 @@ public final class DataHelper {
         // this is inefficient because the array is double copied, but that's better
         // than leaving the entire string in memory
         if (IS_IBM_JVM) {
-            return new String(original.trim().toCharArray());
+            return new String(original.trim().toCharArray()).intern();
         }
         else {
-            // Sun JVM's copy constructor creates a correct sized array
-            // without an extra array copy
-            return new String(original.trim());
+            // Oracle JVM's String implementation is always the correct size
+            return original.trim().intern();
         }
     }
 
