@@ -41,12 +41,18 @@ import java.awt.event.KeyEvent;
 import java.beans.PropertyChangeListener;
 import java.beans.PropertyChangeEvent;
 
+import java.lang.management.ManagementFactory;
+import java.lang.management.MemoryPoolMXBean;
+
 /**
  * Main menu bar for the application. Listens for interval changes and some property changes so the
  * menu items stay in sync with the rest of the UI.
  */
 final class MainMenu extends JMenuBar implements IntervalListener, DataSetListener, PropertyChangeListener {
     private final NMONVisualizerGui gui;
+
+    // 1-based index -- see createHelpMenu()
+    private int oracleJVMHeapDumpCount = 1;
 
     MainMenu(NMONVisualizerGui gui) {
         super();
@@ -370,17 +376,62 @@ final class MainMenu extends JMenuBar implements IntervalListener, DataSetListen
         item.setMnemonic('j');
         item.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
-                JOptionPane.showMessageDialog(
-                        gui.getMainFrame(),
-                        System.getProperty("java.runtime.name") + '\n' + "Version: "
-                                + System.getProperty("java.runtime.version") + '\n' + "Java Home: "
-                                + System.getProperty("java.home") + '\n' + '\n' + "Classpath" + '\n'
-                                + System.getProperty("java.class.path").replace(';', '\n') + '\n' + '\n'
-                                + "Current Heap Usage: "
-                                + Styles.NUMBER_FORMAT.format(Runtime.getRuntime().totalMemory() / 1024.0 / 1024.0)
-                                + " MB" + " (of "
-                                + Styles.NUMBER_FORMAT.format(Runtime.getRuntime().maxMemory() / 1024.0 / 1024.0)
-                                + " MB" + " max)", "Java Info", JOptionPane.INFORMATION_MESSAGE);
+                long totalHeapUsage = 0;
+                long maxHeapUsage = 0;
+
+                StringBuilder builder = new StringBuilder(1024);
+
+                builder.append(System.getProperty("java.runtime.name"));
+                builder.append('\n');
+                builder.append("Version ");
+                builder.append(": ");
+                builder.append(System.getProperty("java.runtime.version"));
+                builder.append('\n');
+                builder.append("Java Home");
+                builder.append(": ");
+                builder.append(System.getProperty("java.home"));
+                builder.append('\n');
+                builder.append('\n');
+
+                builder.append("Classpath");
+                builder.append('\n');
+                builder.append(System.getProperty("java.class.path").replace(';', '\n'));
+                builder.append('\n');
+                builder.append('\n');
+
+                builder.append("Memory Pools");
+                builder.append('\n');
+
+                for (MemoryPoolMXBean pool : ManagementFactory.getMemoryPoolMXBeans()) {
+                    long used = pool.getUsage().getUsed();
+                    long max = pool.getUsage().getMax();
+
+                    max = max == -1 ? pool.getUsage().getCommitted() : max;
+
+                    builder.append(pool.getName());
+                    builder.append(": ");
+                    builder.append(Styles.NUMBER_FORMAT.format(used / 1024.0 / 1024.0));
+                    builder.append(" MB");
+                    builder.append(" (of ");
+                    builder.append(Styles.NUMBER_FORMAT.format(max / 1024.0 / 1024.0));
+                    builder.append(" max)");
+                    builder.append('\n');
+
+                    totalHeapUsage += used;
+                    maxHeapUsage += max;
+                }
+                builder.append('\n');
+
+                builder.append("Total Heap Usage");
+                builder.append('\n');
+                builder.append(Styles.NUMBER_FORMAT.format(totalHeapUsage / 1024.0 / 1024.0));
+                builder.append(" MB");
+                builder.append(" (of ");
+                builder.append(Styles.NUMBER_FORMAT.format(maxHeapUsage / 1024.0 / 1024.0));
+                builder.append(" max)");
+
+                JOptionPane.showMessageDialog(gui.getMainFrame(), builder.toString(), "Java Info",
+                        JOptionPane.INFORMATION_MESSAGE);
             }
         });
 
@@ -390,7 +441,36 @@ final class MainMenu extends JMenuBar implements IntervalListener, DataSetListen
         item.setMnemonic('d');
         item.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
-                com.ibm.jvm.Dump.HeapDump();
+                try {
+                    Class.forName("com.ibm.jvm.Dump");
+                    com.ibm.jvm.Dump.HeapDump();
+                }
+                catch (ClassNotFoundException cnfe) {
+                    // assume Oracle JVM
+                    // assume runtime name is processid@hostname
+                    String pid = java.lang.management.ManagementFactory.getRuntimeMXBean().getName();
+                    pid = pid.substring(0, pid.indexOf('@'));
+
+                    java.util.Date now = new java.util.Date();
+                    java.text.SimpleDateFormat dateFormat = new java.text.SimpleDateFormat("yyyyMMdd.HHmmss.");
+                    java.text.DecimalFormat numberFormat = new java.text.DecimalFormat("0000");
+
+                    // format filename like IBM heap dump
+                    String filename = "./heapdump." + dateFormat.format(now) + pid + '.'
+                            + numberFormat.format(oracleJVMHeapDumpCount++) + ".hprof";
+
+                    try {
+                        sun.tools.attach.HotSpotVirtualMachine vm = (sun.tools.attach.HotSpotVirtualMachine) com.sun.tools.attach.VirtualMachine
+                                .attach(pid);
+                        vm.dumpHeap(filename, "-all");
+                        vm.detach();
+                    }
+                    catch (Exception ex) {
+                        JOptionPane.showMessageDialog(gui.getMainFrame(),
+                                "Could not complete heap dump\n" + ex.getMessage(), "Heap Dump Error",
+                                JOptionPane.ERROR_MESSAGE);
+                    }
+                }
             }
         });
 
@@ -400,11 +480,26 @@ final class MainMenu extends JMenuBar implements IntervalListener, DataSetListen
         item.setMnemonic('g');
         item.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
-                double before = Runtime.getRuntime().freeMemory() / 1024.0 / 1024.0;
+                long total = 0;
+
+                for (MemoryPoolMXBean pool : ManagementFactory.getMemoryPoolMXBeans()) {
+                    total += pool.getUsage().getUsed();
+                }
+
+                double before = total / 1024.0 / 1024.0;
+
                 System.gc();
                 System.gc();
                 Thread.yield();
-                double after = Runtime.getRuntime().freeMemory() / 1024.0 / 1024.0;
+
+                total = 0;
+
+                for (MemoryPoolMXBean pool : ManagementFactory.getMemoryPoolMXBeans()) {
+                    total += pool.getUsage().getUsed();
+                }
+
+                double after = total / 1024.0 / 1024.0;
+
                 JOptionPane.showMessageDialog(gui.getMainFrame(),
                         "Heap Free Before GC: " + Styles.NUMBER_FORMAT.format(before) + " MB" + '\n'
                                 + "Heap Free After GC: " + Styles.NUMBER_FORMAT.format(after) + " MB",
@@ -424,12 +519,11 @@ final class MainMenu extends JMenuBar implements IntervalListener, DataSetListen
                         gui.getMainFrame(),
                         "Copyright \u00A9 2011-2013\n"
                                 + "IBM Software Group, Collaboration Services.\nAll Rights Reserved.\n\n"
-                                + "This program is for IBM internal use only.\n"
                                 + "Support is on an 'as-is', 'best-effort' basis only.\n\n" + "Version "
                                 + VersionInfo.getVersion() + "\n\n" + "Icons from "
                                 + "http://www.famfamfam.com/lab/icons/silk/" + "\n"
-                                + "Creative Commons Attribution 3.0" + " License\n("
-                                + "http://creativecommons.org/licenses/by/3.0/" + ")", "NMON Visualizer",
+                                + "Creative Commons Attribution 2.5" + " License\n("
+                                + "http://creativecommons.org/licenses/by/2.5/legalcode" + ")", "NMON Visualizer",
                         JOptionPane.INFORMATION_MESSAGE);
             }
         });
