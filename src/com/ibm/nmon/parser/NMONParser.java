@@ -155,6 +155,13 @@ public final class NMONParser {
                         data.setMetadata("OS", DataHelper.newString(values[2] + ' ' + values[3]));
                         data.setMetadata("ARCH", DataHelper.newString(values[5]));
                     }
+                    else if ("MachineType".equals(values[1])) {
+                        data.setMetadata("MachineType", DataHelper.newString(values[2] + ' ' + values[3]));
+                    }
+                    else if ("LPARNumberName".equals(values[1])) {
+                        data.setMetadata("LPARNumber", DataHelper.newString(values[2]));
+                        data.setMetadata("LPARName", DataHelper.newString(values[3]));
+                    }
                     else {
                         data.setMetadata(DataHelper.newString(values[1]), DataHelper.newString(values[2]));
                     }

@@ -90,6 +90,12 @@ public final class NMONVisualizerGui extends NMONVisualizerApp {
 
         setProperty("chartsDisplayed", true);
 
+        String systemsNamedBy = preferences.get("systemsNamedBy", null);
+
+        if (systemsNamedBy != null) {
+            setProperty("systemsNamedBy", systemsNamedBy);
+        }
+
         mainFrame = new JFrame(DEFAULT_WINDOW_TITLE);
         mainFrame.setDefaultCloseOperation(JFrame.DO_NOTHING_ON_CLOSE);
         mainFrame.addWindowListener(windowManager);
@@ -263,6 +269,8 @@ public final class NMONVisualizerGui extends NMONVisualizerApp {
                     ((com.ibm.nmon.gui.report.ReportFrame) frame).dispose();
                 }
             }
+
+            getPreferences().put("systemsNamedBy", getProperty("systemsNamedBy"));
 
             logViewer.dispose();
             mainFrame.dispose();

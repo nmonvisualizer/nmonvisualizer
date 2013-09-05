@@ -95,6 +95,8 @@ public abstract class NMONVisualizerApp implements IntervalListener {
         propertyChangeSupport = new PropertyChangeSupport(this);
 
         intervalManager.addListener(this);
+
+        setProperty("systemsNamedBy", "host");
     }
 
     /**
@@ -127,8 +129,9 @@ public abstract class NMONVisualizerApp implements IntervalListener {
 
         if (filter.getNMONFileFilter().accept(fileToParse)) {
             data = nmonParser.parse(fileToParse, timeZone);
+            String systemsNamedBy = getProperty("systemsNamedBy");
 
-            if (getBooleanProperty("usePartitionName")) {
+            if ("lpar".equals(systemsNamedBy)) {
                 NMONDataSet nmonData = (NMONDataSet) data;
 
                 if (nmonData.getMetadata("AIX") != null) {
@@ -148,6 +151,14 @@ public abstract class NMONVisualizerApp implements IntervalListener {
                             nmonData.setMetadata("host", partitionName);
                         }
                     }
+                }
+            }
+            else if ("run".equals(systemsNamedBy)) {
+                NMONDataSet nmonData = (NMONDataSet) data;
+                String runname = nmonData.getMetadata("runname");
+
+                if (runname != null) {
+                    nmonData.setMetadata("host", runname);
                 }
             }
         }

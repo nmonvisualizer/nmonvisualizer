@@ -92,18 +92,50 @@ final class MainMenu extends JMenuBar implements IntervalListener, DataSetListen
 
         menu.addSeparator();
 
-        JCheckBoxMenuItem checkItem = new JCheckBoxMenuItem("Use AIX LPAR Name");
-        checkItem.setSelected(gui.getBooleanProperty("usePartitionName"));
+        JMenu namingSubMenu = new JMenu("Name Systems");
+        ButtonGroup group = new ButtonGroup();
+        String systemsNamedBy = gui.getProperty("systemsNamedBy");
+
+        JCheckBoxMenuItem checkItem = new JCheckBoxMenuItem("By Hostname");
+        checkItem.setSelected("host".equals(systemsNamedBy));
 
         checkItem.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                gui.setProperty("usePartitionName", ((JCheckBoxMenuItem) e.getSource()).isSelected());
+                gui.setProperty("systemsNamedBy", "host");
             }
         });
 
-        menu.add(checkItem);
+        namingSubMenu.add(checkItem);
+        group.add(checkItem);
 
+        checkItem = new JCheckBoxMenuItem("By LPAR Name");
+        checkItem.setSelected("lpar".equals(systemsNamedBy));
+
+        checkItem.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                gui.setProperty("systemsNamedBy", "lpar");
+            }
+        });
+
+        namingSubMenu.add(checkItem);
+        group.add(checkItem);
+
+        checkItem = new JCheckBoxMenuItem("By NMON Run Name");
+        checkItem.setSelected("run".equals(systemsNamedBy));
+
+        checkItem.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                gui.setProperty("systemsNamedBy", "run");
+            }
+        });
+
+        namingSubMenu.add(checkItem);
+        group.add(checkItem);
+
+        menu.add(namingSubMenu);
         menu.addSeparator();
 
         item = new JMenuItem("Exit");
