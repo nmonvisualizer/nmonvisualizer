@@ -11,6 +11,8 @@ import java.util.Map;
 
 import com.ibm.nmon.data.DataTuple;
 
+import com.ibm.nmon.data.ProcessDataType;
+
 import com.ibm.nmon.gui.chart.data.*;
 
 import com.ibm.nmon.analysis.AnalysisRecord;
@@ -387,7 +389,20 @@ public final class ChartSummaryTableModel extends ChoosableColumnTableModel {
         int hashCode = 1;
 
         for (DataTuple t : dataset.getAllTuples()) {
-            hashCode = (hashCode * 11) + (t.getDataType().hashCode() * 31) + (t.getField().hashCode() * 57);
+            int typeHash = t.getDataType().hashCode();
+
+            if (t.getDataType().getClass() == ProcessDataType.class) {
+                // default process hash code uses process id
+                com.ibm.nmon.data.Process process = ((ProcessDataType) t.getDataType()).getProcess();
+
+                // all processes of the same name should display the same rows
+                // but let the aggregated process be separate
+                if (process.getId() != -1) {
+                    typeHash = process.getName().hashCode();
+                }
+            }
+
+            hashCode = (hashCode * 11) + (typeHash * 31) + (t.getField().hashCode() * 57);
         }
 
         rowVisible = rowVisibleCache.get(hashCode);
