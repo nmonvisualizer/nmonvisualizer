@@ -23,6 +23,7 @@ import javax.swing.SwingUtilities;
 import com.ibm.nmon.NMONVisualizerApp;
 
 import com.ibm.nmon.data.DataSet;
+import com.ibm.nmon.data.transform.name.HostRenamer;
 
 import com.ibm.nmon.gui.interval.IntervalPicker;
 import com.ibm.nmon.interval.Interval;
@@ -93,6 +94,20 @@ public final class NMONVisualizerGui extends NMONVisualizerApp {
         String systemsNamedBy = preferences.get("systemsNamedBy", null);
 
         if (systemsNamedBy != null) {
+            if ("host".equals(systemsNamedBy)) {
+                setHostRenamer(HostRenamer.BY_HOST);
+            }
+            else if ("lpar".equals(systemsNamedBy)) {
+                setHostRenamer(HostRenamer.BY_LPAR);
+            }
+            else if ("run".equals(systemsNamedBy)) {
+                setHostRenamer(HostRenamer.BY_RUN);
+            }
+            else if ("custom".equals(systemsNamedBy)) {
+                // reset back to host if custom since the JSON file to load is not known
+                systemsNamedBy = "host";
+            }
+
             setProperty("systemsNamedBy", systemsNamedBy);
         }
 

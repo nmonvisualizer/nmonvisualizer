@@ -13,8 +13,9 @@ import org.slf4j.Logger;
 
 import com.ibm.nmon.data.DataSetListener;
 import com.ibm.nmon.data.DataSet;
-import com.ibm.nmon.data.NMONDataSet;
 import com.ibm.nmon.data.SystemDataSet;
+
+import com.ibm.nmon.data.transform.name.HostRenamer;
 
 import com.ibm.nmon.parser.*;
 import com.ibm.nmon.parser.gc.VerboseGCParser;
@@ -45,6 +46,8 @@ public abstract class NMONVisualizerApp implements IntervalListener {
     private final JSONParser jsonParser;
     private final HATJParser hatJParser;
     private final ESXTopParser esxTopParser;
+
+    private HostRenamer hostRenamer;
 
     // assume event order does not matter
     private final Set<DataSetListener> listeners;
@@ -97,6 +100,7 @@ public abstract class NMONVisualizerApp implements IntervalListener {
         intervalManager.addListener(this);
 
         setProperty("systemsNamedBy", "host");
+        hostRenamer = HostRenamer.BY_HOST;
     }
 
     /**
@@ -129,38 +133,6 @@ public abstract class NMONVisualizerApp implements IntervalListener {
 
         if (filter.getNMONFileFilter().accept(fileToParse)) {
             data = nmonParser.parse(fileToParse, timeZone);
-            String systemsNamedBy = getProperty("systemsNamedBy");
-
-            if ("lpar".equals(systemsNamedBy)) {
-                NMONDataSet nmonData = (NMONDataSet) data;
-
-                if (nmonData.getMetadata("AIX") != null) {
-                    String lparstat = nmonData.getSystemInfo("lparstat -i");
-
-                    if (lparstat != null) {
-                        int idx = lparstat.indexOf("Partition Name");
-
-                        if (idx != -1) {
-                            // some number of spaces before the colon
-                            idx = lparstat.indexOf(": ", idx);
-
-                            int end = lparstat.indexOf("\n", idx);
-
-                            String partitionName = lparstat.substring(idx + 2, end);
-
-                            nmonData.setMetadata("host", partitionName);
-                        }
-                    }
-                }
-            }
-            else if ("run".equals(systemsNamedBy)) {
-                NMONDataSet nmonData = (NMONDataSet) data;
-                String runname = nmonData.getMetadata("runname");
-
-                if (runname != null) {
-                    nmonData.setMetadata("host", runname);
-                }
-            }
         }
         else if (filter.getGCFileFilter().accept(fileToParse)) {
             // GC data does not have a hostname or JVM name so get it before parsing
@@ -244,6 +216,9 @@ public abstract class NMONVisualizerApp implements IntervalListener {
             throw new IllegalArgumentException(fileToParse + " does not appear to contain any data");
         }
 
+        // rename the host
+        hostRenamer.rename(data);
+
         // find an existing data set for the host
         SystemDataSet systemData = null;
 
@@ -301,11 +276,21 @@ public abstract class NMONVisualizerApp implements IntervalListener {
         }
     }
 
+    public void setHostRenamer(HostRenamer hostRenamer) {
+        if (hostRenamer != null) {
+            this.hostRenamer = hostRenamer;
+        }
+    }
+
     public final TimeZone getDisplayTimeZone() {
         return displayTimeZone;
     }
 
     public final void setDisplayTimeZone(TimeZone displayTimeZone) {
+        if (displayTimeZone == null) {
+            return;
+        }
+
         if (!this.displayTimeZone.equals(displayTimeZone)) {
             TimeZone old = this.displayTimeZone;
 

@@ -43,6 +43,7 @@ public final class ProcessInfoDialog extends GUIDialog {
 
     public ProcessInfoDialog(NMONVisualizerGui gui) {
         super(gui);
+        setResizable(true);
 
         setLayout(new BorderLayout());
         setIconImage(PROCESS_ICON.getImage());

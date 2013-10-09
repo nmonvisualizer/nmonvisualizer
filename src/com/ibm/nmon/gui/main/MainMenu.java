@@ -8,6 +8,7 @@ import javax.swing.KeyStroke;
 
 import javax.swing.JCheckBoxMenuItem;
 import javax.swing.JComponent;
+import javax.swing.JFileChooser;
 import javax.swing.JMenuBar;
 import javax.swing.JMenu;
 import javax.swing.JMenuItem;
@@ -16,8 +17,12 @@ import javax.swing.JOptionPane;
 import com.ibm.nmon.data.DataSet;
 import com.ibm.nmon.data.DataSetListener;
 
+import com.ibm.nmon.data.transform.name.HostRenamerFactory;
+import com.ibm.nmon.data.transform.name.HostRenamer;
+
 import com.ibm.nmon.gui.Styles;
 import com.ibm.nmon.gui.file.FileLoadAction;
+import com.ibm.nmon.gui.file.GUIFileChooser;
 
 import com.ibm.nmon.gui.data.RemoveAllDataSetsAction;
 import com.ibm.nmon.gui.interval.RemoveAllIntervalsAction;
@@ -98,11 +103,11 @@ final class MainMenu extends JMenuBar implements IntervalListener, DataSetListen
 
         JCheckBoxMenuItem checkItem = new JCheckBoxMenuItem("By Hostname");
         checkItem.setSelected("host".equals(systemsNamedBy));
-
         checkItem.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
                 gui.setProperty("systemsNamedBy", "host");
+                gui.setHostRenamer(HostRenamer.BY_HOST);
             }
         });
 
@@ -111,11 +116,11 @@ final class MainMenu extends JMenuBar implements IntervalListener, DataSetListen
 
         checkItem = new JCheckBoxMenuItem("By LPAR Name");
         checkItem.setSelected("lpar".equals(systemsNamedBy));
-
         checkItem.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
                 gui.setProperty("systemsNamedBy", "lpar");
+                gui.setHostRenamer(HostRenamer.BY_LPAR);
             }
         });
 
@@ -124,11 +129,42 @@ final class MainMenu extends JMenuBar implements IntervalListener, DataSetListen
 
         checkItem = new JCheckBoxMenuItem("By NMON Run Name");
         checkItem.setSelected("run".equals(systemsNamedBy));
-
         checkItem.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
                 gui.setProperty("systemsNamedBy", "run");
+                gui.setHostRenamer(HostRenamer.BY_RUN);
+            }
+        });
+
+        namingSubMenu.add(checkItem);
+        group.add(checkItem);
+
+        checkItem = new JCheckBoxMenuItem("By Custom File...");
+        checkItem.setSelected("custom".equals(systemsNamedBy));
+        checkItem.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                GUIFileChooser chooser = new GUIFileChooser(gui, "Select Hostname Definitions", "hostnames.json");
+
+                if (chooser.showDialog(gui.getMainFrame(), "Load") == JFileChooser.APPROVE_OPTION) {
+                    try {
+                        HostRenamer renamer = HostRenamerFactory.loadFromFile(chooser.getSelectedFile());
+                        gui.setProperty("systemsNamedBy", "custom");
+                        gui.setHostRenamer(renamer);
+                    }
+                    catch (Exception ex) {
+                        JOptionPane.showMessageDialog(gui.getMainFrame(), "Error parsing file '"
+                                + chooser.getSelectedFile().getName() + "'.\n" + ex.getMessage(), "Parse Error",
+                                JOptionPane.ERROR_MESSAGE);
+
+                        // reset to 'host'
+                        ButtonGroup group = ((javax.swing.DefaultButtonModel) ((JCheckBoxMenuItem) e.getSource())
+                                .getModel()).getGroup();
+                        group.getElements().nextElement().doClick();
+                        System.err.println();
+                    }
+                }
             }
         });
 
