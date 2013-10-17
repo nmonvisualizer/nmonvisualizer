@@ -49,7 +49,7 @@ public final class DataTypeChartPanel extends LineChartPanel implements Interval
     }
 
     public DataSet getData() {
-        return definition.getDataSet();
+        return definition == null ? null : definition.getDataSet();
     }
 
     @Override

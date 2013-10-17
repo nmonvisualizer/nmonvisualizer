@@ -66,9 +66,12 @@ final class DataTypeView extends ChartSplitPane {
 
     @Override
     public void dataRemoved(DataSet data) {
-        if (chartPanel.getData().equals(data)) {
+        DataSet current = chartPanel.getData();
+
+        if ((current != null) && current.equals(data)) {
             chartPanel.clearChart();
         }
+        // current == null => chart already clear
     }
 
     @Override
