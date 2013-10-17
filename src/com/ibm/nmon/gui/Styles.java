@@ -42,7 +42,7 @@ public final class Styles {
     public static final Font TITLE;
 
     public static final Border CONTENT_BORDER = BorderFactory.createEmptyBorder(0, 5, 2, 2);
-    public static final Border TITLE_BORDER = BorderFactory.createEmptyBorder(5, 0, 5, 0);
+    public static final Border TITLE_BORDER = BorderFactory.createEmptyBorder(5, 2, 5, 2);
     public static final Border LOWER_LINE_BORDER = BorderFactory.createMatteBorder(0, 0, 1, 0,
             java.awt.Color.LIGHT_GRAY);
     public static final Border DOUBLE_LINE_BORDER = BorderFactory.createMatteBorder(1, 0, 1, 0,

@@ -1,11 +1,15 @@
 package com.ibm.nmon.data.transform.name;
 
+import org.slf4j.Logger;
+
 import java.util.List;
 
 import com.ibm.nmon.data.DataSet;
 import com.ibm.nmon.data.matcher.HostMatcher;
 
 public final class HostRenamer {
+    private static final Logger LOGGER = org.slf4j.LoggerFactory.getLogger(HostRenamer.class);
+
     private final List<HostMatcher> matchers;
     private final List<NameTransformer> transformers;
 
@@ -31,7 +35,6 @@ public final class HostRenamer {
 
         for (HostMatcher matcher : matchers) {
             if (matcher.matchesHost(data)) {
-                String original = data.getHostname();
                 NameTransformer transformer = transformers.get(n);
 
                 if (LPARNameTransformer.class.equals(transformer.getClass())) {
@@ -41,10 +44,19 @@ public final class HostRenamer {
                     transformer = new NMONRunNameTransformer(data);
                 }
 
-                data.setHostname(transformer.transform(data.getHostname()));
-                System.out.println(original + "\t" + data.getHostname());
+                String newHostname = transformer.transform(data.getHostname());
+
+                if (LOGGER.isDebugEnabled()) {
+                    LOGGER.debug("renaming '{}' to '{}' with '{}'", new Object[] { data.getHostname(), newHostname,
+                            transformer });
+                }
+
+                data.setHostname(newHostname);
 
                 break;
+            }
+            else {
+                LOGGER.trace("'{}' does not match '{}'", matcher, data);
             }
 
             ++n;
@@ -58,5 +70,9 @@ public final class HostRenamer {
         public String transform(String original) {
             return original;
         }
+
+        public String toString() {
+            return "hostname";
+        };
     });
 }

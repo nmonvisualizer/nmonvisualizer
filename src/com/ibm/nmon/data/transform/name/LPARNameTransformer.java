@@ -54,4 +54,9 @@ public final class LPARNameTransformer implements NameTransformer {
             return original;
         }
     }
+
+    @Override
+    public String toString() {
+        return "LPAR name";
+    }
 }

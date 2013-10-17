@@ -486,7 +486,7 @@ public final class NMONParser {
         // add 1 for calculated Wait% utilization
         String[] topFields = new String[values.length - (isAIX ? 5 : 4) + 1];
 
-        // 3 => skipTOP, pid & timestamp
+        // 3 => skip TOP, pid & timestamp
         for (int i = 0, n = 3; i < topFields.length; i++) {
             if (i == 3) {
                 topFields[i] = "%Wait";
@@ -507,7 +507,7 @@ public final class NMONParser {
         int n = 1;
 
         int pid = -1;
-        // either the last value of 2nd to last for AIX (last is WLMclass)
+        // either the last value or 2nd to last for AIX (last is WLMclass)
         String name = values[values.length - (isAIX ? 2 : 1)];
 
         // note try is outside the for loop since we want to skip the entire data record if any part

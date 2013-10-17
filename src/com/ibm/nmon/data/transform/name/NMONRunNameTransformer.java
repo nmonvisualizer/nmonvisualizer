@@ -32,4 +32,9 @@ public final class NMONRunNameTransformer implements NameTransformer {
             }
         }
     }
+
+    @Override
+    public String toString() {
+        return "NMON run name";
+    }
 }

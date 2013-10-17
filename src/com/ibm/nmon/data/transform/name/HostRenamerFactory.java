@@ -81,7 +81,7 @@ public final class HostRenamerFactory {
                 }
             }
 
-            LOGGER.info("renaming '{}' to '{}'", matcher, transformer);
+            LOGGER.debug("will rename '{}' to '{}'", matcher, transformer);
 
             renamer.addRenamer(matcher, transformer);
         }

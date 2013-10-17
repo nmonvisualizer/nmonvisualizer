@@ -66,7 +66,6 @@ public final class IOStatParser {
     // private String[] disk_metrics;
 
     public BasicDataSet parse(File file, TimeZone timeZone) throws IOException, ParseException {
-
         return parse(file.getAbsolutePath(), timeZone);
     }
 
