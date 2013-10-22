@@ -276,7 +276,7 @@
     </data>
   </barchart>
 
-  <barchart name="Percent Disk Spaced Used by File System" shortName="Disk Space" categoriesNamedBy="FIELD" barsNamedBy="STAT" stacked="true" subtractionNeeded="true">
+  <barchart name="Percent Disk Space Used by File System" shortName="Disk Space" categoriesNamedBy="FIELD" barsNamedBy="STAT" stacked="true" subtractionNeeded="true">
     <yAxis label="% Used" asPercent="true" />
     <data stat="MINIMUM">
       <type name="JFSFILE" />
