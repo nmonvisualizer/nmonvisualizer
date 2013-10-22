@@ -61,8 +61,6 @@ public final class IOStatParser {
     private Map<String, List<String>> subDataTypesByType = new java.util.HashMap<String, List<String>>();
     private Map<String, Set<Integer>> fieldsToIgnoreByType = new java.util.HashMap<String, Set<Integer>>();
 
-    private String lastTypeInRecord = null;
-
     // private String[] disk_metrics;
 
     public BasicDataSet parse(File file, TimeZone timeZone) throws IOException, ParseException {
@@ -107,12 +105,22 @@ public final class IOStatParser {
             // line should now contain a header row or a time stamp (Linux)
             // read until file is complete
             while (line != null) {
-                if (!isAIX && (currentRecord == null)) {
-                    createCurrentRecord(line);
-                    line = in.readLine();
-                    continue;
+                if (isAIX) {
+                    if (line.startsWith("System configuration")) {
+                        // skip repeated System configuration and subsequent blank line
+                        in.readLine();
+                        line = in.readLine();
+                        continue;
+                    }
                 }
-                // else AIX will create record during TTY parsing
+                else {
+                    if (currentRecord == null) {
+                        createCurrentRecord(line);
+                        line = in.readLine();
+                        continue;
+                    }
+                }
+                // AIX will create record during TTY parsing
 
                 String[] temp = DATA_SPLITTER.split(line);
                 String type = temp[0];
@@ -125,9 +133,6 @@ public final class IOStatParser {
                 }
                 else {
                     parseData(type);
-                }
-
-                if (type.equals(lastTypeInRecord)) {
                     data.addRecord(currentRecord);
                     currentRecord = null;
                 }
@@ -165,8 +170,6 @@ public final class IOStatParser {
 
                 subDataTypesByType.clear();
                 fieldsToIgnoreByType.clear();
-
-                lastTypeInRecord = null;
             }
         }
     }
@@ -340,7 +343,8 @@ public final class IOStatParser {
 
     private String parseDataTypes(String line) throws IOException {
         // The first set of data is summary data. Use it to build the DataTypes.
-        // Each row is a field; each column is a new DataType.
+        // Each row is a field; each column is a new DataType. This results in a sub-datatype for
+        // each metric with a field for each disk.
 
         if ("".equals(line)) {
             line = in.readLine();
@@ -363,6 +367,9 @@ public final class IOStatParser {
                 }
             }
             else {
+                List<String> fields = new java.util.ArrayList<String>();
+                boolean hasTotal = false;
+
                 if (isAIX) {
                     // extended disk stats require special handling
                     if ("Disks".equals(type) && "xfers".equals(temp[1])) {
@@ -378,6 +385,17 @@ public final class IOStatParser {
                         // AIX System (-s) has the hostname in the first line
                         // headers are on the next line
                         data.setHostname(DataHelper.newString(temp[1]));
+
+                        line = in.readLine().trim();
+
+                        // next line is Physical (i.e. total disk stats)
+                        if (line.startsWith("Kbps")) {
+                            fields.add("Total");
+                            hasTotal = true;
+                            in.readLine();
+                            in.readLine();
+                        }
+
                         temp = DATA_SPLITTER.split(in.readLine());
                     }
                 }
@@ -392,7 +410,6 @@ public final class IOStatParser {
                     }
                 }
 
-                lastTypeInRecord = temp[0];
                 subDataTypes = new java.util.ArrayList<String>(temp.length - 1);
 
                 for (int i = 1; i < temp.length; i++) {
@@ -411,8 +428,6 @@ public final class IOStatParser {
 
                 line = in.readLine(); // first field row
 
-                List<String> fields = new java.util.ArrayList<String>();
-
                 // read fields until a blank is encountered
                 while (!line.equals("")) {
                     temp = DATA_SPLITTER.split(line.trim());
@@ -428,6 +443,14 @@ public final class IOStatParser {
                     for (String subType : subDataTypes) {
                         String name = type + ' ' + subType;
                         String[] fieldsArray = fields.toArray(new String[fields.size()]);
+
+                        // skip Total for active time
+                        if (hasTotal && "%tm_act".equals(subType)) {
+                            String[] a = new String[fields.size() - 1];
+                            System.arraycopy(fieldsArray, 1, a, 0, fields.size() - 1);
+                            fieldsArray = a;
+                        }
+
                         data.addType(new SubDataType("IOStat " + type, subType, name, false, fieldsArray));
                     }
 
@@ -523,7 +546,7 @@ public final class IOStatParser {
         if ("System".equals(type)) {
             // AIX System data (-s) has and additional header row
             in.readLine();
-            // first data row starts with spaces; trim to ensure field is temp[0]
+            // data rows may have spaces; trim to ensure field is temp[0]
             line = in.readLine().trim();
         }
         else {
@@ -539,6 +562,12 @@ public final class IOStatParser {
             String[] temp = DATA_SPLITTER.split(line);
 
             String field = temp[0];
+            boolean isTotal = false;
+
+            if ("Physical".equals(field)) {
+                field = "Total";
+                isTotal = true;
+            }
 
             // ignore AIX time data for each disk
             int dataLength = temp.length - (isAIX ? 2 : 1);
@@ -550,21 +579,22 @@ public final class IOStatParser {
             }
 
             if (dataLength > subTypeCount) {
-                LOGGER.warn("{} '{}' at line {} has {} extra columns; they will be ignored", new Object[] { type,
-                        field, in.getLineNumber(), dataLength - subTypeCount });
+                LOGGER.warn("'{}' at line {} has {} extra columns; they will be ignored",
+                        new Object[] { field, in.getLineNumber(), dataLength - subTypeCount });
                 dataLength = subTypeCount;
             }
-            else if (dataLength < subTypeCount) {
-                LOGGER.warn("{} '{}' at line {} has too few columns; zero will be assumed for missing data",
-                        new Object[] { type, field, in.getLineNumber() });
+            else if ((isTotal ? (dataLength + 1) : dataLength) < subTypeCount) {
+                LOGGER.warn("'{}' at line {} has too few columns; zero will be assumed for missing data", new Object[] {
+                        isTotal ? "Physical" : field, in.getLineNumber() });
             }
 
-            for (int i = 1, n = 0; i <= dataLength; i++) {
-                if (fieldsToIgnore.contains(i)) {
+            for (int i = 0; i < subTypes.size(); i++) {
+                String subType = subTypes.get(i);
+
+                if (isTotal && "%tm_act".equals(subType)) {
                     continue;
                 }
 
-                String subType = subTypes.get(n++);
                 DataType dataType = data.getType(SubDataType.buildId("IOStat " + type, subType));
                 double[] subTypeData = dataToAdd.get(dataType);
 
@@ -574,10 +604,16 @@ public final class IOStatParser {
                 }
 
                 // for each field (column in the file), look up the field index ...
+                // and add the current data to the type
                 int subTypeIdx = dataType.getFieldIndex(field);
+                int dataIdx = i + (isTotal ? 0 : 1);
 
-                // and add the current data to the type typeData[diskIdx] =
-                subTypeData[subTypeIdx] = Double.parseDouble(temp[i]);
+                subTypeData[subTypeIdx] = Double.parseDouble(temp[dataIdx]);
+            }
+
+            if (isTotal) {
+                in.readLine(); // blank
+                in.readLine(); // Disks header
             }
 
             line = in.readLine(); // read next data row, if any
