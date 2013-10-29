@@ -353,6 +353,26 @@ public final class NMONParser {
         else {
             try {
                 time = NMON_FORMAT.parse(values[2] + ' ' + values[3]).getTime();
+                long previous = data.getEndTime();
+
+                if (time < previous) {
+                    String temp = data.getMetadata("interval");
+
+                    if (temp == null) {
+                        LOGGER.error("time {} is less than previous {} at line {}"
+                                + "; no interval defined in AAA records",
+                                new Object[] { time, previous, in.getLineNumber() });
+                        throw new IllegalArgumentException("time is less than previous in ZZZZ " + values[1]);
+                    }
+                    else {
+                        int interval = Integer.parseInt(temp);
+                        time = previous + (interval * 1000); // interval is in seconds
+
+                        LOGGER.warn("time {} is less than previous {} at line {}"
+                                + ", guessing at next time by using an interval of {}s", new Object[] { time, previous,
+                                in.getLineNumber(), interval });
+                    }
+                }
 
                 DataRecord record = new DataRecord(time, DataHelper.newString(values[1]));
                 return record;

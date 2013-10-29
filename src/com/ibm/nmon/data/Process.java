@@ -69,7 +69,7 @@ public final class Process implements Comparable<Process> {
 
     public void setEndTime(long endTime) {
         if (startTime > endTime) {
-            throw new IllegalArgumentException("end time must be less than start time");
+            throw new IllegalArgumentException("end time must be greater than start time");
         }
 
         this.endTime = endTime;

@@ -147,7 +147,7 @@ public abstract class DataSet implements Comparable<DataSet> {
     }
 
     public final long getEndTime() {
-        return data.lastKey();
+        return data.size() == 0 ? Long.MIN_VALUE : data.lastKey();
     }
 
     public final void adjustTimes(long adjustmentMillis) {
