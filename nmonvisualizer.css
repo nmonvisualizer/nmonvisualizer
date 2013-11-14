@@ -4,6 +4,7 @@ html {
 
 body {
   background-color: #FCFCFF;
+  max-width: 75em;
 }
 
 h1 {
@@ -100,7 +101,7 @@ div.section {
 
 div#nav {
   float: left;
-  width: 12em;
+  width: 13em;
 }
 
 div#nav a {
@@ -113,7 +114,6 @@ div#nav a {
 
 div#content {
   overflow: hidden;
-  min-height: 250px;
-  width: 75%;
+  min-height: 25em;
   border-left: thin solid gray;
 }
