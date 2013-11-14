@@ -286,6 +286,11 @@ public final class SummaryTablePanel extends JPanel implements IntervalListener,
 
         table.addMouseListener(new MouseAdapter() {
             @Override
+            public void mousePressed(MouseEvent e) {
+                mouseReleased(e);
+            }
+
+            @Override
             public void mouseReleased(MouseEvent e) {
                 // right click only if any rows are selected
                 if (e.isPopupTrigger()) {

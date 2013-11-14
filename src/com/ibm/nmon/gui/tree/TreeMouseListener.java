@@ -260,7 +260,9 @@ final class TreeMouseListener extends TreePathParser implements MouseListener {
     public final void mouseClicked(MouseEvent e) {}
 
     @Override
-    public final void mousePressed(MouseEvent e) {}
+    public final void mousePressed(MouseEvent e) {
+        mouseReleased(e);
+    }
 
     @Override
     public final void mouseEntered(MouseEvent e) {}

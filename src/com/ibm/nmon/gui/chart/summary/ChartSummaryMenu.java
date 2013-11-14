@@ -127,6 +127,11 @@ final class ChartSummaryMenu extends MouseAdapter {
     }
 
     @Override
+    public void mousePressed(MouseEvent e) {
+        mouseReleased(e);
+    }
+
+    @Override
     public void mouseReleased(final MouseEvent e) {
         // popup menu on right click
         if (e.isPopupTrigger()) {

@@ -265,6 +265,10 @@ public final class IntervalManagerDialog extends GUIDialog implements IntervalLi
     // display a menu on the system times table that allows the user to set the current interval or
     // start and end times
     private final MouseAdapter intervalsMenu = new MouseAdapter() {
+        public void mousePressed(MouseEvent e) {
+            mouseReleased(e);
+        }
+
         @Override
         public void mouseReleased(MouseEvent e) {
             int row = intervals.getTable().rowAtPoint(e.getPoint());
@@ -350,6 +354,10 @@ public final class IntervalManagerDialog extends GUIDialog implements IntervalLi
     // display a menu on the system times table that allows the user to set intervals or start and
     // end times
     private final MouseAdapter systemTimesMenu = new MouseAdapter() {
+        public void mousePressed(MouseEvent e) {
+            mouseReleased(e);
+        }
+
         @Override
         public void mouseReleased(MouseEvent e) {
             int row = systemTimes.getTable().rowAtPoint(e.getPoint());
