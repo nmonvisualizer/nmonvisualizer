@@ -1,0 +1,81 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd">
+<head>
+<title>NMON Visualizer - Host Renaming</title>
+<link rel="stylesheet"href="nmonvisualizer.css" type="text/css" />
+<link rel="icon" href="favicon.ico" type="image/png" />
+</head>
+<body>
+<h1>NMON Visualizer</h1>
+<h2 class="top">host renaming</h2>
+
+<div id="nav">
+  <a class="bold" href="index.html">Home</a><br/>
+  <a href="screenshots.html">Screenshots</a><br/>
+  <a href="iostat.html">IOStat</a><br/>
+  <a href="json.html">JSON</a><br/>
+  <a href="commandline.html">Command Line</a><br/>
+  <a href="customreports.html">Custom Reports</a><br/>
+  <a class="b" href="renaming.html">Renaming Hosts</a><br/>
+  <a href="startup.html">Start nmon at Boot</a><br/>
+  <hr/>
+  <a href="https://github.com/nmonvisualizer/nmonvisualizer">Project on GitHub</a><br/>
+  <a href="https://bintray.com/pkg/show/general/nmonvisualizer/NMONVisualizer/com.ibm.nmon">Releases</a><br/>
+  <a href="https://github.com/nmonvisualizer/nmonvisualizer/issues/new">Submit a Bug</a><br/>
+</div>
+
+<div id="content">
+  <div class="section">
+    <h2>Overview</h2>
+    <p>By default, NMON Visualizer names datasets by hostname. In many cases, this hostname may not be meaningful for reports or data analysis. To support friendly names for datasets, NMON Visualizer suports renaming by several methods. These can be accessed in the GUI via the <span class="c">Name Systems</span> submenu under the <span class="c">File</span> menu.</p>
+    <p>Three additional methods of renaming are supported:
+      <ul>
+      <li>By LPAR name - using the <span class="c">Partition Name</span> from the <span class="c">lparstat -i</span> output embedded in NMON files.</li>
+      <li>By NMON run name - using the <span class='c'>runname</span> attribute in the NMON <span class="c">AAA</span> records. This can be specified by using the <span class="c">-r</span> parameter when starting NMON.</li>
+      <li>Using a custom JSON file to rename hosts directly, by regex or by the above two methods.</li>
+      </ul>
+      Note that if an NMON file does not have a runname or an LPAR name, the dataset will continue to be named using the default hostname.
+    </p>
+  </div>
+
+  <div class="section">
+    <h2>JSON Format</h2>
+    <p>To rename datasets using more complicated rules, a JSON file must be provided. The format is simply an array of rule objects. Each rule takes two values: a name to match and an alias to rename to. Renaming rules are processed in the order specified in the file. The first rule to match stops any further rules from being evaluated.</p>
+    <p>The name attribute can either be <span class="c">name</span> to indicate an exact hostname match or <span class="c">regex</span> to indicate hostname matching by regular expression. If a name attribute is not specified, then the alias will match <span class="i">all</span> hosts. This is useful for making the last element in the array a catch-all for hosts that to not match any previous names or regexes.</p>
+    <p>The alias attribute can either be <span class="c">alias</span> (direct substition) or <span class="c">aliasRegex</span>. Two special aliases are supported: <span class="c">$RUN</span> and <span class="c">$LPAR</span>. These are used to indicate the run name and LPAR name, respectively. Alias regular expressions <span class="i">must</span> contain at least one matching group. This group will be used for substitution when renaming matching hosts. By deafult the matching group is group <span class="c">1</span> An additional <span class="c">aliasRegexGroup</span> attribute is supported to allow a different group to be selected.</p>
+
+    <h3>Example</h3>
+    <p>
+      Here, names and aliases are used to directly rename datasets to user friendly names. If a host does not match, the LPAR namee is used instead.
+    <pre>
+[
+    { "name": "v1018h01",
+      "alias": "loadbalancer"
+    },
+    { "name": "v1018h02",
+      "alias": "web1"
+    },
+    { "name": "v1018h03",
+      "alias": "web2"
+    },
+    { "name": "v1018h04",
+      "alias": "app01"
+    },
+    { "name": "v1018h05",
+      "alias": "app02"
+    },
+    { "name": "v1018h06",
+      "alias": "app03"
+    },
+    { "name": "v1018h16",
+      "alias": "database"
+    },
+    {
+      "alias": "$LPAR"
+    }
+]
+    </pre>
+    </p>
+  </div>
+</div>
+</body>
+</html>
