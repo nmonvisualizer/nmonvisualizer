@@ -36,11 +36,10 @@ public final class IOStatParser {
     private static final SimpleDateFormat TIMESTAMP_FORMAT_AIX = new SimpleDateFormat("HH:mm:ss");
     private static final SimpleDateFormat DATE_FORMAT_US = new SimpleDateFormat("MM/dd/yyyy");
 
-    private static final Pattern ISO_PATTERN = Pattern
-            .compile("\\d{4}\\-\\d{2}\\-\\d{2}T\\d{2}:\\d{2}:\\d{2}([\\-+](\\d{4}?|\\d{2}:\\d{2}|\\d{2})|Z)");
-
-    private static final Pattern INFO = Pattern
-            .compile("(.+)\\s(.+)\\s\\((.+)\\)\\s+(\\d{2,4}[\\/-]\\d{2}[\\/-]\\d{2,4})(\\s+_(.+)_)?(\\s+\\((.+)\\sCPU\\))?");
+    private static final Matcher ISO_PATTERN = Pattern
+            .compile("\\d{4}\\-\\d{2}\\-\\d{2}T\\d{2}:\\d{2}:\\d{2}([\\-+](\\d{4}?|\\d{2}:\\d{2}|\\d{2})|Z)").matcher("");
+    private static final Matcher INFO = Pattern
+            .compile("(.+)\\s(.+)\\s\\((.+)\\)\\s+(\\d{2,4}[\\/-]\\d{2}[\\/-]\\d{2,4})(\\s+_(.+)_)?(\\s+\\((.+)\\sCPU\\))?").matcher("");
     private static final Pattern DATA_SPLITTER = Pattern.compile(":?\\s+");
 
     public static final String DEFAULT_HOSTNAME = "iostat";
@@ -122,7 +121,7 @@ public final class IOStatParser {
                     }
                 }
                 else {
-                    if (line.startsWith("Time:") || ISO_PATTERN.matcher(line).matches()) {
+                    if (line.startsWith("Time:") || ISO_PATTERN.reset(line).matches()) {
                         createCurrentRecord(line);
                         line = in.readLine();
                         continue;
@@ -216,7 +215,7 @@ public final class IOStatParser {
             dateOffset = getDefaultDate();
         }
         else { // Linux
-            Matcher matcher = INFO.matcher(line);
+            Matcher matcher = INFO.reset(line);
 
             if (matcher.matches()) {
                 data.setHostname(DataHelper.newString(matcher.group(3)));
@@ -360,7 +359,7 @@ public final class IOStatParser {
         // The first set of data is summary data. Use it to build the DataTypes.
 
         while (line != null) {
-            if (!isAIX && (line.startsWith("Time:") || ISO_PATTERN.matcher(line).matches())) {
+            if (!isAIX && (line.startsWith("Time:") || ISO_PATTERN.reset(line).matches())) {
                 // on Linux, headers are complete with the next timestamp
                 return line;
             }

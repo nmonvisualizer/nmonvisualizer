@@ -567,7 +567,7 @@ public final class ChartDefinitionParser extends BasicXMLParser {
 
     private void parseFieldAlias(Map<String, String> attributes) {
         if (!inData) {
-            logger.warn("ignoring " + "<fieldAlias>" + " element outside of <data>" + "at line {}"
+            logger.warn("ignoring " + "<fieldAlias>" + " element outside of <data>" + " at line {}"
                     + "; <data> will be skipped", getLineNumber());
             skip = true;
             return;
@@ -697,38 +697,51 @@ public final class ChartDefinitionParser extends BasicXMLParser {
             }
             else {
                 logger.warn("ignoring invalid 'alias' attribute" + " at line {}", getLineNumber());
-                return null;
+                return existing;
             }
         }
         else {
             String regex = attributes.get("aliasRegex");
 
+            if (regex == null) {
+                // try to reuse existing regex
+                regex = attributes.get("regex");
+            }
+
             if (regex != null) {
                 if (existing != null) {
-                    logger.warn("an existing aliasRegex has already been defined, ignoring 'aliasRegex'"
-                            + " at line {}", getLineNumber());
-                    return null;
+                    logger.warn(
+                            "an existing regex substitution has already been defined, ignoring additional substitutions"
+                                    + " at line {}", getLineNumber());
+                    return existing;
                 }
                 else {
-                    String temp = attributes.get("aliasRegexGroup");
+                    String group = attributes.get("aliasByGroup");
 
-                    if (temp == null) {
-                        return new RegexNameTransformer(regex);
+                    if (group == null) {
+                        String replacement = attributes.get("aliasByReplacement");
+
+                        if ((replacement != null) && !"".equals(replacement)) {
+                            return new RegexNameTransformer(regex, replacement);
+                        }
+                        else {
+                            return new RegexNameTransformer(regex);
+                        }
                     }
                     else {
                         try {
-                            return new RegexNameTransformer(regex, Integer.parseInt(temp));
+                            return new RegexNameTransformer(regex, Integer.parseInt(group));
                         }
                         catch (NumberFormatException nfe) {
-                            logger.warn("'aliasRegexGroup' must be a number" + " at line {}", getLineNumber());
+                            logger.warn("'aliasByGroup' must be a number" + " at line {}", getLineNumber());
                         }
 
-                        return null;
+                        return existing;
                     }
                 }
             }
             else {
-                return null;
+                return existing;
             }
         }
     }

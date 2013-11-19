@@ -104,7 +104,7 @@
     <yAxis label="KB / s" />
     <data>
       <type name="NET" />
-      <field regex="((eth|en|lo).*)-read-KB/s" aliasRegex="((eth|en|lo).*)-read-KB/s" />
+      <field regex="((eth|en|lo).*)-read-KB/s" />
     </data>
   </linechart>
 
@@ -112,7 +112,7 @@
     <yAxis label="KB / s" />
     <data>
       <type name="NET" />
-      <field regex="((eth|en|lo).*)-write-KB/s" aliasRegex="((eth|en|lo).*)-write-KB/s" />
+      <field regex="((eth|en|lo).*)-write-KB/s" />
     </data>
   </linechart>
 
@@ -121,7 +121,7 @@
     <data>
       <host os="VIOS" />
       <type name="SEA" />
-      <field regex="((eth|en|lo).*)-read-KB/s" aliasRegex="((eth|en|lo).*)-read-KB/s" />
+      <field regex="((eth|en|lo).*)-read-KB/s" />
     </data>
   </linechart>
 
@@ -130,7 +130,7 @@
     <data>
       <host os="VIOS" />
       <type name="SEA" />
-      <field regex="((eth|en|lo).*)-write-KB/s" aliasRegex="((eth|en|lo).*)-write-KB/s" />
+      <field regex="((eth|en|lo).*)-write-KB/s" />
     </data>
   </linechart>
   
@@ -240,7 +240,7 @@
     <yAxis label="% CPU" asPercent="true" />
     <data>
       <host os="Linux" />
-      <type regex="CPU\d*" aliasRegex="CPU(\d*)" />
+      <type regex="CPU(\d*)" />
       <field name="CPU%" alias="% CPU" />
     </data>
   </linechart>
@@ -249,7 +249,7 @@
     <yAxis label="% CPU" asPercent="true" />
     <data>
       <host os="AIX" />
-      <type regex="CPU\d*" aliasRegex="CPU(\d*)" />
+      <type regex="CPU(\d*)" />
       <field name="CPU%" alias="% CPU" />
     </data>
   </linechart>
@@ -258,7 +258,7 @@
     <yAxis label="% CPU" asPercent="true" />
     <data>
       <host os="Linux" />
-      <type regex="CPU\d*" aliasRegex="CPU(\d*)" />
+      <type regex="CPU(\d*)" />
       <field name="User%" alias="User" />
       <field name="Sys%" alias="System" />
       <field name="Wait%" alias="Wait" />
@@ -269,7 +269,7 @@
     <yAxis label="% CPU" asPercent="true" />
     <data>
       <host os="AIX" />
-      <type regex="CPU\d*" aliasRegex="CPU(\d*)" />
+      <type regex="CPU(\d*)" />
       <field name="User%" alias="User" />
       <field name="Sys%" alias="System" />
       <field name="Wait%" alias="Wait" />

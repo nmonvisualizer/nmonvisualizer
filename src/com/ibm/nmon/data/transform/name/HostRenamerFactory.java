@@ -42,26 +42,38 @@ public final class HostRenamerFactory {
                 }
             }
             else {
-                alias = map.get("aliasRegex");
+                String regex = map.get("aliasRegex");
 
-                if (alias != null) {
-                    String group = map.get("aliasRegexGroup");
+                if (regex == null) {
+                    // try to reuse existing regex
+                    regex = map.get("regex");
+                }
+
+                if (regex != null) {
+                    String group = map.get("aliasByGroup");
 
                     if (group == null) {
-                        transformer = new RegexNameTransformer(alias);
+                        String replacement = map.get("aliasByReplacement");
+
+                        if ((replacement != null) && !"".equals(replacement)) {
+                            transformer = new RegexNameTransformer(regex, replacement);
+                        }
+                        else {
+                            transformer = new RegexNameTransformer(regex);
+                        }
                     }
                     else {
                         try {
-                            transformer = new RegexNameTransformer(alias, Integer.parseInt(group));
+                            transformer = new RegexNameTransformer(regex, Integer.parseInt(group));
                         }
                         catch (NumberFormatException nfe) {
-                            LOGGER.warn("'aliasRegexGroup' must be a number");
-                            transformer = new RegexNameTransformer(alias);
+                            LOGGER.warn("'aliasByGroup' must be a number");
+                            transformer = new RegexNameTransformer(regex);
                         }
                     }
                 }
                 else {
-                    LOGGER.warn("either 'alias' or 'aliasRegex'" + " must be defined for " + "each host");
+                    LOGGER.warn("either 'alias', 'aliasRegex' or 'regex'" + " must be defined for " + "each host");
                 }
             }
 
