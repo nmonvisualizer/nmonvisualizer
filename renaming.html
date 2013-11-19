@@ -40,22 +40,25 @@
   <div class="section">
     <h2>JSON Format</h2>
     <p>To rename datasets using more complicated rules, a JSON file must be provided. The format is simply an array of rule objects. Each rule takes two values: a name to match and an alias to rename to. Renaming rules are processed in the order specified in the file. The first rule to match stops any further rules from being evaluated.</p>
+
+    <h3>Names</h3>
     <p>The name attribute can either be <span class="c">name</span> to indicate an exact hostname match or <span class="c">regex</span> to indicate hostname matching by regular expression. If a name attribute is not specified, then the alias will match <span class="i">all</span> hosts. This is useful for making the last element in the array a catch-all for hosts that to not match any previous names or regexes.</p>
-    <p>The alias attribute can either be <span class="c">alias</span> (direct substition) or <span class="c">aliasRegex</span>. Two special aliases are supported: <span class="c">$RUN</span> and <span class="c">$LPAR</span>. These are used to indicate the run name and LPAR name, respectively. Alias regular expressions <span class="i">must</span> contain at least one matching group. This group will be used for substitution when renaming matching hosts. By deafult the matching group is group <span class="c">1</span> An additional <span class="c">aliasRegexGroup</span> attribute is supported to allow a different group to be selected.</p>
+
+    <h3>Aliases</h3>
+    <p>The alias attribute can either be <span class="c">alias</span> (direct substition) or <span class="c">aliasRegex</span>. <span class="c">aliasRegex</span> is optional, the previous <span class="c">regex</span> can be reused.</p>
+    <p>Two special aliases are supported: <span class="c">$RUN</span> and <span class="c">$LPAR</span>. These are used to indicate the run name and LPAR name, respectively.</p>
+    <p>By default, renaming with a regex uses the first matching group (i.e. parentheses). This matching group will be used as the new hostname. The matching group can be changed by specifying the <span class="c">aliasByGroup</span> attribute. Full string replacement is also possible by specifying the <span class="c">aliasByReplacement</span> attribute.</p>
 
     <h3>Example</h3>
     <p>
-      Here, names and aliases are used to directly rename datasets to user friendly names. If a host does not match, the LPAR namee is used instead.
+      Here, names and aliases are used to directly rename datasets to user friendly names. If a host does not match, the LPAR name is used instead. Note the use of <span class="c">aliasByReplacement</span> to rename the web servers using the regex <span class="c">v1018h(0[2-3])</span>; <span class="c">web</span> is appended to each host number. Since brackets are special characters in JSON, they must be unicode escaped.
     <pre>
 [
     { "name": "v1018h01",
       "alias": "loadbalancer"
     },
-    { "name": "v1018h02",
-      "alias": "web1"
-    },
-    { "name": "v1018h03",
-      "alias": "web2"
+    { "name": "v1018h(0\u005b2-3\u005d)",
+      "aliasByReplacement": "web$1"
     },
     { "name": "v1018h04",
       "alias": "app01"
