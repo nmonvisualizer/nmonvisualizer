@@ -36,10 +36,12 @@ public final class IOStatParser {
     private static final SimpleDateFormat TIMESTAMP_FORMAT_AIX = new SimpleDateFormat("HH:mm:ss");
     private static final SimpleDateFormat DATE_FORMAT_US = new SimpleDateFormat("MM/dd/yyyy");
 
-    private static final Matcher ISO_PATTERN = Pattern
-            .compile("\\d{4}\\-\\d{2}\\-\\d{2}T\\d{2}:\\d{2}:\\d{2}([\\-+](\\d{4}?|\\d{2}:\\d{2}|\\d{2})|Z)").matcher("");
-    private static final Matcher INFO = Pattern
-            .compile("(.+)\\s(.+)\\s\\((.+)\\)\\s+(\\d{2,4}[\\/-]\\d{2}[\\/-]\\d{2,4})(\\s+_(.+)_)?(\\s+\\((.+)\\sCPU\\))?").matcher("");
+    private static final Matcher ISO_PATTERN = Pattern.compile(
+            "(Time: )?\\d{4}\\-\\d{2}\\-\\d{2}T\\d{2}:\\d{2}:\\d{2}([\\-+](\\d{4}?|\\d{2}:\\d{2}|\\d{2})|Z)").matcher(
+            "");
+    private static final Matcher INFO = Pattern.compile(
+            "(.+)\\s(.+)\\s\\((.+)\\)\\s+(\\d{2,4}[\\/-]\\d{2}[\\/-]\\d{2,4})(\\s+_(.+)_)?(\\s+\\((.+)\\sCPU\\))?")
+            .matcher("");
     private static final Pattern DATA_SPLITTER = Pattern.compile(":?\\s+");
 
     public static final String DEFAULT_HOSTNAME = "iostat";
@@ -269,8 +271,15 @@ public final class IOStatParser {
             String line = in.readLine(); // first timestamp line
 
             if (line.startsWith("Time: ")) {
-                format = TIMESTAMP_FORMAT_OLD;
-                format.setTimeZone(timeZone);
+                if (ISO_PATTERN.reset(line).matches()) {
+                    // some versions of IOStat output Time: _and_ an ISO datetime
+                    // create a new format here rather than parsing out Time: manually
+                    format = new SimpleDateFormat('\'' + "Time: " + '\'' + TIMESTAMP_FORMAT_ISO.toPattern());
+                }
+                else {
+                    format = TIMESTAMP_FORMAT_OLD;
+                    format.setTimeZone(timeZone);
+                }
             }
             else {
                 try {
@@ -477,7 +486,6 @@ public final class IOStatParser {
     }
 
     private void parseLinuxCPU() throws IOException {
-        // TODO check null 1st element
         String[] temp = DATA_SPLITTER.split(in.readLine());
         // DATA_SPLITTER adds a null first element to temp; ignore it
         // also ignore %idle, the last column
