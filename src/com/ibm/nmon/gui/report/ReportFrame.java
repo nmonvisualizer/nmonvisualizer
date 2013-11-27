@@ -40,6 +40,10 @@ import com.ibm.nmon.gui.file.GUIFileChooser;
 
 import com.ibm.nmon.gui.Styles;
 
+/**
+ * Window for displaying a custom set of charts. Includes a list of process datasets (systems) on
+ * the left and a chart on the right.
+ */
 public final class ReportFrame extends JFrame implements DataSetListener {
     private static final Logger LOGGER = org.slf4j.LoggerFactory.getLogger(ReportFrame.class);
 
@@ -271,13 +275,13 @@ public final class ReportFrame extends JFrame implements DataSetListener {
             // enable Save Charts
             getJMenuBar().getMenu(0).getItem(1).setEnabled(true);
         }
-        catch (Exception e) {
+        catch (java.io.IOException ioe) {
             setTitle("Custom Report");
             getJMenuBar().getMenu(0).getItem(1).setEnabled(false);
 
-            LOGGER.error("could not parse report file '{}'", reportFile.getAbsolutePath(), e);
+            LOGGER.error("could not parse report file '{}'", reportFile.getAbsolutePath(), ioe);
             JOptionPane.showMessageDialog(ReportFrame.this,
-                    "Error parsing '" + reportFile.getName() + "'\n" + e.getMessage(), "Parse Error",
+                    "Error parsing '" + reportFile.getName() + "'\n" + ioe.getMessage(), "Parse Error",
                     JOptionPane.ERROR_MESSAGE);
         }
     }

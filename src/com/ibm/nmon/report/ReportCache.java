@@ -68,7 +68,7 @@ public final class ReportCache {
         }
 
         reports.put(key, parser.parseCharts(file));
-        LOGGER.debug("loaded chart definitions from '{}'", file);
+        LOGGER.debug("caching chart definitions from '{}' to key '{}'", file, key);
     }
 
     /**

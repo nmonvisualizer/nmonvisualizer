@@ -371,7 +371,6 @@ final class MainMenu extends JMenuBar implements IntervalListener, DataSetListen
         item.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                // TODO single ReportFrame per GUI
                 new ReportFrame(gui).setVisible(true);
             }
         });

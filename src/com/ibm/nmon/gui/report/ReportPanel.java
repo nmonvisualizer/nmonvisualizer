@@ -126,7 +126,7 @@ public final class ReportPanel extends JTabbedPane implements PropertyChangeList
                             firePropertyChange("chart", null, getChartPanel(idx).getDataset());
                         }
 
-                        if (previousTab != -1) {
+                        if ((previousTab != -1) && (previousTab < getTabCount())) {
                             getChartPanel(previousTab).setEnabled(false);
                         }
 

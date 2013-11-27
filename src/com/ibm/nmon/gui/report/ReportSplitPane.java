@@ -3,6 +3,7 @@ package com.ibm.nmon.gui.report;
 import com.ibm.nmon.gui.main.ChartSplitPane;
 
 import java.io.File;
+import java.io.IOException;
 
 import javax.swing.JFrame;
 import javax.swing.JPanel;
@@ -15,6 +16,11 @@ import com.ibm.nmon.gui.chart.BaseChartPanel;
 
 import com.ibm.nmon.gui.main.NMONVisualizerGui;
 
+/**
+ * Display a custom report.
+ * 
+ * @see ReportFrame
+ */
 final class ReportSplitPane extends ChartSplitPane {
     private final JFrame parent;
 
@@ -36,7 +42,7 @@ final class ReportSplitPane extends ChartSplitPane {
         setTopComponent(blank);
     }
 
-    void loadReport(File reportFile) throws Exception {
+    void loadReport(File reportFile) throws IOException {
         int location = getDividerLocation();
         setTopComponent(null);
         dispose();
@@ -55,11 +61,12 @@ final class ReportSplitPane extends ChartSplitPane {
             reportPanel.setEnabled(true);
             setDividerLocation(location);
         }
-        catch (Exception e) {
-            // TODO need logger dialog
+        catch (IOException ioe) {
             setTopComponent(blank);
             validate();
             reportPanel = null;
+
+            throw ioe;
         }
     }
 
