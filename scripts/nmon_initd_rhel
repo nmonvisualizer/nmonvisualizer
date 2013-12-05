@@ -26,7 +26,10 @@ fi
 # collect NMON data every INTERVAL seconds
 INTERVAL=30
 
-# just use the plain hostname for the filename, logrotate will rename each day
+# assume /etc/logrotate.d/nmon will restart nmon once a day
+# run for 1 day + 1 hour since anacron randomizes when logrotate runs
+
+COUNT=$(( (86400 + 3600) / $INTERVAL ))
 FILENAME=`hostname`.nmon
 
 start() {
