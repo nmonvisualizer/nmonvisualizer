@@ -34,7 +34,7 @@ start() {
    action "Already running!" true
    return 0;
   else
-    $NMON -F $FILENAME -T -s 30 -m $LOGDIR -p > $PIDFILE
+    $NMON -F $FILENAME -T -s 30 -c $COUNT -m $LOGDIR -p > $PIDFILE
     # just assume nmon started ok; exectue true so the output is correct
     action $"Starting nmon: " true
     touch /var/lock/subsys/nmon
