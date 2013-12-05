@@ -38,6 +38,7 @@ public final class NMONParser {
     private NMONDataSet data = null;
 
     private String[] topFields = null;
+    private int topCommandIndex = -1;
 
     private int fileCPUs = 1;
     private boolean seenFirstDataType = false;
@@ -131,6 +132,7 @@ public final class NMONParser {
             data = null;
             currentRecord = null;
             topFields = null;
+            topCommandIndex = -1;
             fileCPUs = 1;
             seenFirstDataType = false;
             isAIX = false;
@@ -499,20 +501,32 @@ public final class NMONParser {
     }
 
     private String[] parseTopFields(String[] values) {
-        // assume TOP record is like TOP,pid,TXXX,...,command
+        // assume TOP record is like TOP,pid,TXXX,...,command,...
         // so remove TOP, pid, TXXX, and command
-        // command line is last field in Linux; 2nd to last in AIX
         // last field in AIX is WLMclass; skip that too
         // add 1 for calculated Wait% utilization
         String[] topFields = new String[values.length - (isAIX ? 5 : 4) + 1];
 
         // 3 => skip TOP, pid & timestamp
-        for (int i = 0, n = 3; i < topFields.length; i++) {
-            if (i == 3) {
-                topFields[i] = "%Wait";
+        int valuesIdx = 3;
+        int fieldsIdx = 0;
+
+        while (valuesIdx < values.length) {
+            if ("Command".equals(values[valuesIdx])) {
+                // command line is 2nd to last in AIX
+                // in Linux there may be other data after the command
+                topCommandIndex = valuesIdx++;
+            }
+            else if ("WLMclass".equals(values[valuesIdx])) {
+                ++valuesIdx;
             }
             else {
-                topFields[i] = DataHelper.newString(values[n++]);
+                if (fieldsIdx == 3) {
+                    topFields[fieldsIdx++] = "%Wait";
+                }
+                else {
+                    topFields[fieldsIdx++] = DataHelper.newString(values[valuesIdx++]);
+                }
             }
         }
 
@@ -522,13 +536,12 @@ public final class NMONParser {
     private void parseTopData(String[] values) {
         // assume TOP record is like TOP,pid,TXXX,...,command
         // add 1 back in for generated Wait%
-        double[] recordData = new double[values.length - (isAIX ? 5 : 4) + 1];
+        double[] recordData = new double[topFields.length];
 
         int n = 1;
 
         int pid = -1;
-        // either the last value or 2nd to last for AIX (last is WLMclass)
-        String name = values[values.length - (isAIX ? 2 : 1)];
+        String name = values[topCommandIndex];
 
         // note try is outside the for loop since we want to skip the entire data record if any part
         // of is it bad
@@ -538,8 +551,11 @@ public final class NMONParser {
             // skip timestamp
             ++n;
 
-            // length - 1 to skip process name; assume it is the last field
             for (int i = 0; i < recordData.length; i++) {
+                if (n == topCommandIndex) {
+                    ++n;
+                }
+
                 if (i == 3) {
                     recordData[i] = recordData[0] - recordData[1] - recordData[2];
 
