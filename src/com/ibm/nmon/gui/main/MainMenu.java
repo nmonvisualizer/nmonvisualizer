@@ -49,6 +49,8 @@ import java.beans.PropertyChangeEvent;
 import java.lang.management.ManagementFactory;
 import java.lang.management.MemoryPoolMXBean;
 
+import java.lang.reflect.Method;
+
 /**
  * Main menu bar for the application. Listens for interval changes and some property changes so the
  * menu items stay in sync with the rest of the UI.
@@ -509,10 +511,12 @@ final class MainMenu extends JMenuBar implements IntervalListener, DataSetListen
         item.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
                 try {
-                    Class.forName("com.ibm.jvm.Dump");
-                    com.ibm.jvm.Dump.HeapDump();
+                    Class<?> ibmDump = Class.forName("com.ibm.jvm.Dump");
+                    Method ibmHeapDump = ibmDump.getMethod("HeapDump");
+                    ibmHeapDump.invoke(null);
                 }
-                catch (ClassNotFoundException cnfe) {
+                catch (Throwable t1) {
+                    t1.printStackTrace();
                     // assume Oracle JVM
                     // assume runtime name is processid@hostname
                     String pid = java.lang.management.ManagementFactory.getRuntimeMXBean().getName();
@@ -527,14 +531,19 @@ final class MainMenu extends JMenuBar implements IntervalListener, DataSetListen
                             + numberFormat.format(oracleJVMHeapDumpCount++) + ".hprof";
 
                     try {
-                        sun.tools.attach.HotSpotVirtualMachine vm = (sun.tools.attach.HotSpotVirtualMachine) com.sun.tools.attach.VirtualMachine
-                                .attach(pid);
-                        vm.dumpHeap(filename, "-all");
-                        vm.detach();
+                        Class<?> sunVM = Class.forName("com.sun.tools.attach.VirtualMachine");
+                        Method sunAttach = sunVM.getMethod("attach", String.class);
+                        Object attachResult = sunAttach.invoke(null, pid);
+                        Class<?> attachResultClass = attachResult.getClass();
+                        Method sunDumpHeap = attachResultClass.getMethod("dumpHeap", String.class, String.class);
+                        sunDumpHeap.invoke(attachResult, filename, "-all");
+                        Method sunDetach = attachResultClass.getMethod("detach");
+                        sunDetach.invoke(attachResult);
                     }
-                    catch (Exception ex) {
+                    catch (Throwable t2) {
+                        t2.printStackTrace();
                         JOptionPane.showMessageDialog(gui.getMainFrame(),
-                                "Could not complete heap dump\n" + ex.getMessage(), "Heap Dump Error",
+                                "Could not complete heap dump using either IBM or Oracle APIs:\n" + t1.getMessage() + "\n" + t2.getMessage(), "Heap Dump Error",
                                 JOptionPane.ERROR_MESSAGE);
                     }
                 }
