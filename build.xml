@@ -3,7 +3,6 @@
   <property name="dir.build" value="${basedir}/build" />
   <property name="dir.src" value="${basedir}/src" />
   <property name="dir.lib" value="${basedir}/lib" />
-  <property name="tools.jar" value="C:/Program Files/Java/jdk1.7.0_13/lib/tools.jar" />
 
   <target name="jar" depends="clean-jar,compile,-get-version">
     <manifest file="${basedir}/MANIFEST.MF">
@@ -39,9 +38,6 @@
         <fileset dir="${dir.lib}">
           <include name="**/*.jar" />
         </fileset>
-      	<filelist>
-      	  <file name="${tools.jar}" />
-      	</filelist>
       </classpath>
     </javac>
 
