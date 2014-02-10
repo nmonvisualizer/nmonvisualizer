@@ -509,15 +509,22 @@ final class MainMenu extends JMenuBar implements IntervalListener, DataSetListen
         item = new JMenuItem("Heap Dump");
         item.setMnemonic('d');
         item.addActionListener(new ActionListener() {
-            public void actionPerformed(ActionEvent e) {
-                try {
-                    Class<?> ibmDump = Class.forName("com.ibm.jvm.Dump");
-                    Method ibmHeapDump = ibmDump.getMethod("HeapDump");
-                    ibmHeapDump.invoke(null);
+            public void actionPerformed(ActionEvent evt) {
+                String vmVendor = System.getProperty("java.vm.vendor");
+
+                if (vmVendor.contains("IBM")) {
+                    try {
+                        Class<?> ibmDump = Class.forName("com.ibm.jvm.Dump");
+                        Method ibmHeapDump = ibmDump.getMethod("HeapDump");
+                        ibmHeapDump.invoke(null);
+                    }
+                    catch (Exception e) {
+                        JOptionPane.showMessageDialog(gui.getMainFrame(), "Could not complete heap dump on " + "IBM"
+                                + " JVM\n\n" + e.getClass().getName() + ": " + e.getMessage(), "Heap Dump Error",
+                                JOptionPane.ERROR_MESSAGE);
+                    }
                 }
-                catch (Throwable t1) {
-                    t1.printStackTrace();
-                    // assume Oracle JVM
+                else if (vmVendor.contains("Oracle")) {
                     // assume runtime name is processid@hostname
                     String pid = java.lang.management.ManagementFactory.getRuntimeMXBean().getName();
                     pid = pid.substring(0, pid.indexOf('@'));
@@ -531,21 +538,27 @@ final class MainMenu extends JMenuBar implements IntervalListener, DataSetListen
                             + numberFormat.format(oracleJVMHeapDumpCount++) + ".hprof";
 
                     try {
-                        Class<?> sunVM = Class.forName("com.sun.tools.attach.VirtualMachine");
-                        Method sunAttach = sunVM.getMethod("attach", String.class);
-                        Object attachResult = sunAttach.invoke(null, pid);
-                        Class<?> attachResultClass = attachResult.getClass();
-                        Method sunDumpHeap = attachResultClass.getMethod("dumpHeap", String.class, String.class);
-                        sunDumpHeap.invoke(attachResult, filename, "-all");
-                        Method sunDetach = attachResultClass.getMethod("detach");
-                        sunDetach.invoke(attachResult);
+                        Class<?> sunVM = Class.forName("sun.tools.attach.HotSpotVirtualMachine");
+                        Method sunVMAttach = sunVM.getMethod("attach", String.class);
+                        Object attachedVM = sunVMAttach.invoke(null, pid);
+
+                        Class<?> actualVMClass = attachedVM.getClass();
+                        Method dumpHeap = actualVMClass.getMethod("dumpHeap", Object[].class);
+                        dumpHeap.invoke(attachedVM, new Object[] { new Object[] { filename, "-all" } });
+
+                        Method detach = actualVMClass.getMethod("detach");
+                        detach.invoke(attachedVM);
                     }
-                    catch (Throwable t2) {
-                        t2.printStackTrace();
-                        JOptionPane.showMessageDialog(gui.getMainFrame(),
-                                "Could not complete heap dump using either IBM or Oracle APIs:\n" + t1.getMessage() + "\n" + t2.getMessage(), "Heap Dump Error",
+                    catch (Exception e) {
+                        JOptionPane.showMessageDialog(gui.getMainFrame(), "Could not complete heap dump on " + "Oracle"
+                                + " JVM\n\n" + e.getClass().getName() + ": " + e.getMessage()
+                                + "\n\nAre you running a JDK?\nIs tools.jar in the classpath?", "Heap Dump Error",
                                 JOptionPane.ERROR_MESSAGE);
                     }
+                }
+                else {
+                    JOptionPane.showMessageDialog(gui.getMainFrame(), "Could not complete heap dump on " + vmVendor
+                            + " JVM\n\n", "Heap Dump Error", JOptionPane.ERROR_MESSAGE);
                 }
             }
         });
@@ -593,7 +606,7 @@ final class MainMenu extends JMenuBar implements IntervalListener, DataSetListen
             public void actionPerformed(ActionEvent e) {
                 JOptionPane.showMessageDialog(
                         gui.getMainFrame(),
-                        "Copyright \u00A9 2011-2013\n"
+                        "Copyright \u00A9 2011-2014\n"
                                 + "IBM Software Group, Collaboration Services.\nAll Rights Reserved.\n\n"
                                 + "Support is on an 'as-is', 'best-effort' basis only.\n\n" + "Version "
                                 + VersionInfo.getVersion() + "\n\n" + "Icons from "
