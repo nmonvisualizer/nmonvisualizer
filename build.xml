@@ -8,7 +8,7 @@
     <manifest file="${basedir}/MANIFEST.MF">
       <attribute name="Main-Class" value="org.eclipse.jdt.internal.jarinjarloader.JarRsrcLoader" />
       <attribute name="Class-Path" value="." />
-      <attribute name="Rsrc-Class-Path" value="./ jcommon-1.0.17.jar jfreechart-1.0.14.jar slf4j-api-1.7.2.jar slf4j-jdk14-1.7.2.jar jackson-annotations-2.1.2.jar jackson-core-2.1.2.jar jackson-databind-2.1.2.jar" />
+      <attribute name="Rsrc-Class-Path" value="./ jcommon-1.0.21.jar jfreechart-1.0.17.jar slf4j-api-1.7.6.jar slf4j-jdk14-1.7.6.jar jackson-annotations-2.3.1.jar jackson-core-2.3.1.jar jackson-databind-2.3.1.jar" />
       <attribute name="Rsrc-Main-Class" value="com.ibm.nmon.DelegatingMain" />
     </manifest>
 
@@ -30,6 +30,17 @@
     </jar>
   </target>
 
+  <target name="apijar" depends="compile,-get-version">
+    <property name="file.api.jar" value="${basedir}/NMONVisualizerAPI_${version}.jar" />
+
+    <jar destfile="${file.api.jar}" basedir="${dir.build}" excludes="com/ibm/nmon/gui/**/*">
+      <fileset dir="${basedir}">
+        <include name="LICENSE" />
+        <include name="NOTICE" />
+      </fileset>
+    </jar>
+  </target>
+	
   <target name="compile" depends="-get-version">
     <mkdir dir="${dir.build}" />
 

@@ -1,4 +1,5 @@
 /bin
 /build
 /NMONVisualizer_*.jar
+/NMONVisualizerAPI_*.jar
 /MANIFEST.MF
