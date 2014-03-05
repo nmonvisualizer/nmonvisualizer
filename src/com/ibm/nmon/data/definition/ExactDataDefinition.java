@@ -8,8 +8,8 @@ import com.ibm.nmon.data.DataSet;
 import com.ibm.nmon.data.DataType;
 
 /**
- * A {@link DataDefinition} that matches a pre-defined set of data. This class supports matches on a
- * single {@link DataSet}, a single {@link DataType} and a set of fields.
+ * A {@link DataDefinition} that matches a pre-defined set of data. This class matches on a single
+ * {@link DataSet}, a single {@link DataType} and a set of fields.
  */
 public final class ExactDataDefinition extends DataDefinition {
     private final List<DataSet> dataSets;

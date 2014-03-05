@@ -20,6 +20,8 @@ public abstract class DataDefinition {
 
     private final boolean useSecondaryYAxis;
 
+    public static DataDefinition ALL_DATA = new DefaultDataDefinition(null, null, null, null, false);
+
     protected DataDefinition() {
         this(null, false);
     }
