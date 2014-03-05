@@ -33,7 +33,29 @@
   <target name="apijar" depends="compile,-get-version">
     <property name="file.api.jar" value="${basedir}/NMONVisualizerAPI_${version}.jar" />
 
-    <jar destfile="${file.api.jar}" basedir="${dir.build}" excludes="com/ibm/nmon/gui/**/*">
+    <jar destfile="${file.api.jar}" >
+      <!-- exclude most gui classes -->
+      <fileset  dir="${dir.build}">
+        <exclude name="com/ibm/nmon/gui/*" />
+        <exclude name="com/ibm/nmon/gui/analysis/*" />
+        <exclude name="com/ibm/nmon/gui/chart/summary/*" />
+        <exclude name="com/ibm/nmon/gui/data/*" />
+        <exclude name="com/ibm/nmon/gui/dnd/*" />
+        <exclude name="com/ibm/nmon/gui/file/*" />
+        <exclude name="com/ibm/nmon/gui/info/*" />
+        <exclude name="com/ibm/nmon/gui/interval/*" />
+        <exclude name="com/ibm/nmon/gui/main/*" />
+        <exclude name="com/ibm/nmon/gui/parse/*" />
+        <exclude name="com/ibm/nmon/gui/report/*" />
+        <exclude name="com/ibm/nmon/gui/table/*" />
+        <exclude name="com/ibm/nmon/gui/time/*" />
+        <exclude name="com/ibm/nmon/gui/tree/*" />
+        <exclude name="com/ibm/nmon/gui/util/*" />
+      </fileset>
+
+      <!-- include Styles -->
+      <fileset  dir="${dir.build}" includes="com/ibm/nmon/gui/Styles*" />
+
       <fileset dir="${basedir}">
         <include name="LICENSE" />
         <include name="NOTICE" />
