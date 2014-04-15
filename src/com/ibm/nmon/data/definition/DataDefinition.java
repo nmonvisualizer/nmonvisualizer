@@ -5,7 +5,10 @@ import java.util.List;
 
 import com.ibm.nmon.data.DataSet;
 import com.ibm.nmon.data.DataType;
+
 import com.ibm.nmon.data.matcher.HostMatcher;
+import com.ibm.nmon.data.matcher.TypeMatcher;
+import com.ibm.nmon.data.matcher.FieldMatcher;
 
 import com.ibm.nmon.analysis.Statistic;
 
@@ -20,7 +23,19 @@ public abstract class DataDefinition {
 
     private final boolean useSecondaryYAxis;
 
-    public static DataDefinition ALL_DATA = new DefaultDataDefinition(null, null, null, null, false);
+    public static DataDefinition ALL_DATA = new DataDefinition() {
+        public List<DataSet> getMatchingHosts(Collection<DataSet> toMatch) {
+            return HostMatcher.ALL.getMatchingHosts(toMatch);
+        };
+
+        public List<DataType> getMatchingTypes(DataSet data) {
+            return TypeMatcher.ALL.getMatchingTypes(data);
+        };
+
+        public List<String> getMatchingFields(DataType type) {
+            return FieldMatcher.ALL.getMatchingFields(type);
+        }
+    };
 
     protected DataDefinition() {
         this(null, false);
