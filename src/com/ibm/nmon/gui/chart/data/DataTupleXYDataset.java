@@ -7,6 +7,8 @@ import org.jfree.data.time.TimeTableXYDataset;
 import com.ibm.nmon.data.DataTuple;
 
 public final class DataTupleXYDataset extends TimeTableXYDataset implements DataTupleDataset {
+    private static final long serialVersionUID = 9065578614822952026L;
+
     private final List<DataTuple> tuples;
 
     private final boolean stacked;

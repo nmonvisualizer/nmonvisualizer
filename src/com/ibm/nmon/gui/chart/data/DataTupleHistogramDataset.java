@@ -8,6 +8,8 @@ import org.jfree.data.statistics.HistogramType;
 import com.ibm.nmon.data.DataTuple;
 
 public final class DataTupleHistogramDataset extends HistogramDataset implements DataTupleDataset {
+    private static final long serialVersionUID = -5932939796158641508L;
+
     private final List<DataTuple> tuples;
 
     private GraphData[] graphData;

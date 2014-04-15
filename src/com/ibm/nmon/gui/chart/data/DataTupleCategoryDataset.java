@@ -8,6 +8,8 @@ import org.jfree.data.category.DefaultCategoryDataset;
 import com.ibm.nmon.data.DataTuple;
 
 public final class DataTupleCategoryDataset extends DefaultCategoryDataset implements DataTupleDataset {
+    private static final long serialVersionUID = -3658914756373575628L;
+
     private final Map<String, Map<String, DataTuple>> tuples;
 
     private final boolean intervals;

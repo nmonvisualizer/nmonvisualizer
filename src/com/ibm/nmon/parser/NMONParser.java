@@ -88,8 +88,7 @@ public final class NMONParser {
 
             do {
                 parseLine(line);
-            }
-            while ((line = in.readLine()) != null);
+            } while ((line = in.readLine()) != null);
 
             // save file's system info
             for (String name : systemInfo.keySet()) {
@@ -164,6 +163,10 @@ public final class NMONParser {
                         data.setMetadata("LPARNumber", DataHelper.newString(values[2]));
                         data.setMetadata("LPARName", DataHelper.newString(values[3]));
                     }
+                    else if ("cpus".equals(values[1])) {
+                        // use the current CPU count, not the max
+                        data.setMetadata(DataHelper.newString(values[1]), DataHelper.newString(values[3]));
+                    }
                     else {
                         data.setMetadata(DataHelper.newString(values[1]), DataHelper.newString(values[2]));
                     }
@@ -175,7 +178,7 @@ public final class NMONParser {
             else if (line.startsWith("TOP")) {
                 String[] values = DATA_SPLITTER.split(line);
 
-                // TOP data has a bogus extra header line of "TOP,%CPU Utilisation"
+                // TOP data has a bogus extra header line of "TOP,%CPU Utilization"
                 // look for 'TOP,+PID,Time,...' instead
                 if ("+PID".equals(values[1])) {
                     topFields = parseTopFields(values);
@@ -391,11 +394,12 @@ public final class NMONParser {
     private void parseBBBP(String[] values) {
         // ignore header lines that only have BBBP, line number, info id
         if (values.length == 4) {
-            StringBuilder builder = systemInfo.get(values[2]);
+            String command = DataHelper.newString(values[2]);
+            StringBuilder builder = systemInfo.get(command);
 
             if (builder == null) {
                 builder = new StringBuilder(256);
-                systemInfo.put(DataHelper.newString(values[2]), builder);
+                systemInfo.put(command, builder);
             }
             else {
                 builder.append('\n');
@@ -741,14 +745,23 @@ public final class NMONParser {
 
     // process CPU can be > 100, so normalize based on the number of CPUs
     private double[] scaleProcessDataByCPUs(ProcessDataType processType, double[] values) {
-        // use the cpu count from the file if no data is available at a given time for CPU_ALL
-        DataType cpuAll = data.getType("CPU_ALL");
-
+        // use the cpu count from the file if no data is available at a given time
         int CPUs = fileCPUs;
 
-        // hasData should also cover cpuAll == null
-        if (currentRecord.hasData(cpuAll)) {
-            CPUs = (int) currentRecord.getData(cpuAll, "CPUs");
+        if (isAIX) {
+            DataType cpuAll = data.getType("PCPU_ALL");
+
+            // hasData should also cover cpuAll == null
+            if (currentRecord.hasData(cpuAll)) {
+                CPUs = (int) currentRecord.getData(cpuAll, "Entitled Capacity");
+            }
+        }
+        else {
+            DataType cpuAll = data.getType("CPU_ALL");
+
+            if (currentRecord.hasData(cpuAll)) {
+                CPUs = (int) currentRecord.getData(cpuAll, "CPUs");
+            }
         }
 
         for (String field : processType.getFields()) {
