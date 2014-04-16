@@ -35,7 +35,7 @@ public final class ESXTopParser {
         TIMESTAMP_FORMAT.setTimeZone(TimeZone.getTimeZone("UCT"));
     }
 
-    private static final Pattern DATA_SPLITTER = Pattern.compile("\"?,\"");
+    private static final Pattern DATA_SPLITTER = Pattern.compile("\"?,\"?");
     private static final Pattern SUBCATEGORY_SPLITTER = Pattern.compile(":");
     // "\\hostname\category (optional subcategory)\metric"
     // note storing a matcher vs a pattern is _NOT_ thread safe
@@ -186,7 +186,7 @@ public final class ESXTopParser {
                     continue;
                 }
                 else if (typeId.equals(lastTypeId)) {
-                    values[n++] = Double.parseDouble(rawData[i]);
+                    values[n++] = parseDouble(rawData[i]);
                 }
                 else {
                     if (lastTypeId != null) {
@@ -195,9 +195,9 @@ public final class ESXTopParser {
                     }
 
                     DataType type = data.getType(typeId);
-
                     values = new double[type.getFieldCount()];
-                    values[0] = Double.parseDouble(rawData[i]);
+
+                    values[0] = parseDouble(rawData[i]);
 
                     n = 1;
                 }
@@ -242,6 +242,16 @@ public final class ESXTopParser {
         }
         else {
             return toParse;
+        }
+    }
+
+    private double parseDouble(String value) {
+        // assume start with space, whole string is space (i.e. empty)
+        if (value.charAt(0) == ' ') {
+            return Double.NaN;
+        }
+        else {
+            return Double.parseDouble(value);
         }
     }
 
@@ -308,6 +318,7 @@ public final class ESXTopParser {
     static {
         Map<String, String> temp = new java.util.HashMap<String, String>();
 
+        // VMWare
         temp.put("Group Cpu", "GROUPCPU");
         temp.put("Group Memory", "GROUPMEM");
 
@@ -330,6 +341,14 @@ public final class ESXTopParser {
         temp.put("Physical Disk SCSI Device", "DISKSCSI");
 
         temp.put("Power", "POWER");
+
+        // Windows
+        temp.put("Processor", "PROC");
+        temp.put("Server", "SERVER");
+        temp.put("PhysicalDisk", "PDISK");
+        temp.put("Network Interface", "NET");
+        temp.put("Process", "PROCESS");
+        temp.put("System", "SYS");
 
         TYPE_IDS = java.util.Collections.unmodifiableMap(temp);
     }
