@@ -164,8 +164,14 @@ public final class NMONParser {
                         data.setMetadata("LPARName", DataHelper.newString(values[3]));
                     }
                     else if ("cpus".equals(values[1])) {
-                        // use the current CPU count, not the max
-                        data.setMetadata(DataHelper.newString(values[1]), DataHelper.newString(values[3]));
+                        // use the current CPU count, not the max if available
+                        if (values.length == 4) {
+
+                            data.setMetadata(DataHelper.newString(values[1]), DataHelper.newString(values[3]));
+                        }
+                        else {
+                            data.setMetadata(DataHelper.newString(values[1]), DataHelper.newString(values[2]));
+                        }
                     }
                     else {
                         data.setMetadata(DataHelper.newString(values[1]), DataHelper.newString(values[2]));
