@@ -13,8 +13,6 @@ import java.awt.GraphicsConfiguration;
 import java.awt.GraphicsDevice;
 import java.awt.GraphicsEnvironment;
 
-import java.awt.Toolkit;
-
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 
@@ -190,8 +188,9 @@ public final class NMONVisualizerGui extends NMONVisualizerApp {
      * This method causes either a <code>automaticGranularity</code> or <code>granularity</code>
      * property change event to be fired.
      * 
-     * @param granularity the new granularity, in seconds. A zero or negative value implies that
-     *            granularity will be automatically calculated based on the current interval.
+     * @param granularity
+     *            the new granularity, in seconds. A zero or negative value implies that granularity
+     *            will be automatically calculated based on the current interval.
      */
     public void setGranularity(int granularity) {
         int oldGranularity = getGranularity();
@@ -432,21 +431,23 @@ public final class NMONVisualizerGui extends NMONVisualizerApp {
             }
         }
 
+        // if not visible put the window in the middle of the primary monitor
         if (!willBeVisible) {
-            java.awt.Dimension currentScreenSize = Toolkit.getDefaultToolkit().getScreenSize();
+            java.awt.Rectangle defaultScreen = GraphicsEnvironment.getLocalGraphicsEnvironment()
+                    .getDefaultScreenDevice().getDefaultConfiguration().getBounds();
 
             // resize if too big
-            if (xSize > currentScreenSize.width) {
+            if (xSize > defaultScreen.width) {
                 xSize = 800;
             }
 
-            if (ySize > currentScreenSize.height) {
+            if (ySize > defaultScreen.height) {
                 ySize = 600;
             }
 
             // center the window on the screen
-            x = (currentScreenSize.width / 2) - (xSize / 2);
-            y = (currentScreenSize.height / 2) - (ySize / 2);
+            x = defaultScreen.x + (defaultScreen.width / 2) - (xSize / 2);
+            y = defaultScreen.y + (defaultScreen.height / 2) - (ySize / 2);
         }
 
         mainFrame.setLocation(new java.awt.Point(x, y));
