@@ -37,6 +37,8 @@ import com.ibm.nmon.gui.util.ScrollingTableFix;
  * Holder JPanel for the summary table displayed under charts.
  */
 public final class ChartSummaryPanel extends JScrollPane implements PropertyChangeListener {
+    private static final long serialVersionUID = -7959432908033304478L;
+
     private final NMONVisualizerGui gui;
     private final JFrame parent;
 
@@ -82,9 +84,13 @@ public final class ChartSummaryPanel extends JScrollPane implements PropertyChan
 
     private GUITable createTable() {
         GUITable table = new GUITable(gui, tableModel) {
+            private static final long serialVersionUID = 2380417479703405189L;
+
             @Override
             protected JTableHeader createDefaultTableHeader() {
                 return new JTableHeader(getColumnModel()) {
+                    private static final long serialVersionUID = -4028332367434358857L;
+
                     @Override
                     public String getToolTipText(MouseEvent event) {
                         super.getToolTipText(event);
@@ -180,6 +186,8 @@ public final class ChartSummaryPanel extends JScrollPane implements PropertyChan
     }
 
     private final class CheckBoxCellRenderer extends JCheckBox implements TableCellRenderer {
+        private static final long serialVersionUID = 8963589765399665908L;
+
         @Override
         public Component getTableCellRendererComponent(JTable table, Object value, boolean isSelected,
                 boolean hasFocus, int row, int column) {

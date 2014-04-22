@@ -19,6 +19,8 @@ import com.ibm.nmon.gui.main.NMONVisualizerGui;
  * interval files and adding them to the gui's {@link IntervalManager}.
  */
 public final class IntervalFileChooser extends GUIFileChooser {
+    private static final long serialVersionUID = -7932619182874416212L;
+
     private static final Logger LOGGER = org.slf4j.LoggerFactory.getLogger(IntervalFileChooser.class);
 
     private JCheckBox useRelativeTime;

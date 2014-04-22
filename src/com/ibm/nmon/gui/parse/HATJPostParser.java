@@ -8,6 +8,8 @@ import com.ibm.nmon.gui.main.NMONVisualizerGui;
  * @see com.ibm.nmon.gui.main.NMONVisualizerGui#getDataForHATJParse(String)
  */
 public final class HATJPostParser extends BaseParserDialog {
+    private static final long serialVersionUID = -1327608292470726493L;
+
     public HATJPostParser(NMONVisualizerGui gui) {
         super(gui, "Missing HATJ Information");
     }

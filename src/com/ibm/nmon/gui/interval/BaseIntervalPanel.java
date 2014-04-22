@@ -53,6 +53,8 @@ import com.ibm.nmon.interval.Interval;
  * </p>
  */
 abstract class BaseIntervalPanel extends JPanel implements DataSetListener, PropertyChangeListener {
+    private static final long serialVersionUID = 5417848225227158133L;
+
     protected final NMONVisualizerGui gui;
 
     protected final JTextField name;
@@ -85,6 +87,8 @@ abstract class BaseIntervalPanel extends JPanel implements DataSetListener, Prop
         });
 
         AbstractAction endToStartAction = new AbstractAction() {
+            private static final long serialVersionUID = -5385099678909892027L;
+
             @Override
             public void actionPerformed(ActionEvent e) {
                 setStartToEnd();
@@ -211,7 +215,7 @@ abstract class BaseIntervalPanel extends JPanel implements DataSetListener, Prop
         catch (java.text.ParseException pe) {
             // ignore - value should be valid since formatter checked when focus was previously lost
         }
-        
+
         SwingUtilities.invokeLater(new Runnable() {
             @Override
             public void run() {

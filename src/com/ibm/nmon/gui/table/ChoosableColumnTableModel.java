@@ -30,6 +30,8 @@ import org.slf4j.Logger;
  * </p>
  */
 public abstract class ChoosableColumnTableModel extends AbstractTableModel {
+    private static final long serialVersionUID = 9081831820888671224L;
+
     protected final Logger logger = org.slf4j.LoggerFactory.getLogger(getClass());
 
     /**

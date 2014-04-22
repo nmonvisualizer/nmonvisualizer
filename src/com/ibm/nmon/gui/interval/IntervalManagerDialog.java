@@ -55,6 +55,8 @@ import com.ibm.nmon.data.DataSet;
  * Dialog to allow adding and removing of Intervals.
  */
 public final class IntervalManagerDialog extends GUIDialog implements IntervalListener {
+    private static final long serialVersionUID = 4964215301504994528L;
+
     private final IntervalList intervals;
     private final SystemTimeList systemTimes;
 
@@ -92,6 +94,8 @@ public final class IntervalManagerDialog extends GUIDialog implements IntervalLi
         timePanel.add(timeZones);
 
         AbstractAction loadAction = new AbstractAction() {
+            private static final long serialVersionUID = -8590641369327623520L;
+
             @Override
             public void actionPerformed(ActionEvent e) {
                 if (fileChooser == null) {
@@ -106,6 +110,8 @@ public final class IntervalManagerDialog extends GUIDialog implements IntervalLi
         load.addActionListener(loadAction);
 
         AbstractAction saveAction = new AbstractAction() {
+            private static final long serialVersionUID = 8726615183618542317L;
+
             @Override
             public void actionPerformed(ActionEvent e) {
                 if (fileChooser == null) {
@@ -117,6 +123,8 @@ public final class IntervalManagerDialog extends GUIDialog implements IntervalLi
         };
 
         save = new JButton("Save") {
+            private static final long serialVersionUID = 4862470165493725505L;
+
             public void setEnabled(boolean b) {
                 // only associate keyboard shortcut when save is enabled
                 super.setEnabled(b);

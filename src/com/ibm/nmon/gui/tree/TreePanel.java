@@ -29,6 +29,7 @@ import com.ibm.nmon.gui.main.NMONVisualizerGui;
 import com.ibm.nmon.util.DataHelper;
 
 public final class TreePanel extends JScrollPane implements DataSetListener {
+    private static final long serialVersionUID = 8763622839346467286L;
 
     static final String ROOT_NAME = "All Systems";
 
@@ -377,6 +378,8 @@ public final class TreePanel extends JScrollPane implements DataSetListener {
     }
 
     private final class TypeTreeNode extends DefaultMutableTreeNode {
+        private static final long serialVersionUID = -3704741016840510282L;
+
         private final String toDisplay;
 
         TypeTreeNode(DataType type) {

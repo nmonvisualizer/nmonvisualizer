@@ -30,6 +30,8 @@ import com.ibm.nmon.gui.Styles;
  * or {@link DataTypeView} depending on the current tree path selected.
  */
 public final class ViewManager extends JPanel implements PropertyChangeListener, TreeSelectionListener {
+    private static final long serialVersionUID = 1411425971480047253L;
+
     private final NMONVisualizerGui gui;
 
     private final SummaryView summaryView;

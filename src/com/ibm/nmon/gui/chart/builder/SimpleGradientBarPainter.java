@@ -23,6 +23,8 @@ import org.jfree.ui.RectangleEdge;
 final class GradientPainters {
 
     static final class GradientBarPainter extends StandardBarPainter {
+        private static final long serialVersionUID = -5663235468496023390L;
+
         @Override
         public void paintBar(Graphics2D g2, BarRenderer renderer, int row, int column, RectangularShape bar,
                 RectangleEdge base) {
@@ -31,6 +33,8 @@ final class GradientPainters {
     }
 
     static final class GradientXYBarPainter extends StandardXYBarPainter {
+        private static final long serialVersionUID = 7910681188097939458L;
+
         @Override
         public void paintBar(Graphics2D g2, XYBarRenderer renderer, int row, int column, RectangularShape bar,
                 RectangleEdge base) {

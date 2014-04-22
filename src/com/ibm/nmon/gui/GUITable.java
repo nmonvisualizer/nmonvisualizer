@@ -11,6 +11,8 @@ import com.ibm.nmon.gui.main.NMONVisualizerGui;
  * Defines an {@link NMONVisualizerGui gui} aware table with a common look and feel.
  */
 public class GUITable extends JTable {
+    private static final long serialVersionUID = -3370225200164013169L;
+
     protected final NMONVisualizerGui gui;
 
     public GUITable(NMONVisualizerGui gui) {

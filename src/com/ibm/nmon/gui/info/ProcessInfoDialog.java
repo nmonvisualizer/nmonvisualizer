@@ -32,6 +32,8 @@ import com.ibm.nmon.data.ProcessDataType;
 import com.ibm.nmon.data.Process;
 
 public final class ProcessInfoDialog extends GUIDialog {
+    private static final long serialVersionUID = -2090520968050107345L;
+
     private static final ImageIcon PROCESS_ICON = Styles.buildIcon("cog.png");
 
     private final JLabel processName;

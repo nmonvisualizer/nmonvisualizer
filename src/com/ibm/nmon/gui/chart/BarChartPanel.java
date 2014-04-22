@@ -10,6 +10,8 @@ import com.ibm.nmon.gui.chart.data.DataTupleCategoryDataset;
 import com.ibm.nmon.gui.main.NMONVisualizerGui;
 
 public final class BarChartPanel extends BaseChartPanel implements ChartMouseListener {
+    private static final long serialVersionUID = -5854445408091165201L;
+
     public BarChartPanel(NMONVisualizerGui gui) {
         super(gui);
 
@@ -25,7 +27,7 @@ public final class BarChartPanel extends BaseChartPanel implements ChartMouseLis
             // find the CategoryItemEntity that matches the given row and column
             // assume there are not that many entities in the chart and this will be relatively fast
             @SuppressWarnings("rawtypes")
-			java.util.Iterator i = getChartRenderingInfo().getEntityCollection().iterator();
+            java.util.Iterator i = getChartRenderingInfo().getEntityCollection().iterator();
 
             while (i.hasNext()) {
                 ChartEntity entity = (ChartEntity) i.next();

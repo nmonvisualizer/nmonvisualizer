@@ -22,6 +22,8 @@ import com.ibm.nmon.gui.main.NMONVisualizerGui;
  * @see ReportFrame
  */
 final class ReportSplitPane extends ChartSplitPane {
+    private static final long serialVersionUID = -8401367823499645439L;
+
     private final JFrame parent;
 
     private final JPanel blank;

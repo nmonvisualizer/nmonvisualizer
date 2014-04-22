@@ -46,6 +46,8 @@ import com.ibm.nmon.gui.file.GUIFileChooser;
 import com.ibm.nmon.util.CSVWriter;
 
 public class BaseChartPanel extends ChartPanel implements PropertyChangeListener {
+    private static final long serialVersionUID = -1342720624336005568L;
+
     protected final Logger logger = org.slf4j.LoggerFactory.getLogger(getClass());
 
     protected final NMONVisualizerGui gui;
@@ -121,8 +123,10 @@ public class BaseChartPanel extends ChartPanel implements PropertyChangeListener
      * an unhighlighted state.
      * </p>
      * 
-     * @param row the chart's dataset row
-     * @param column the chart's dataset column
+     * @param row
+     *            the chart's dataset row
+     * @param column
+     *            the chart's dataset column
      */
     public void highlightElement(int row, int column) {}
 

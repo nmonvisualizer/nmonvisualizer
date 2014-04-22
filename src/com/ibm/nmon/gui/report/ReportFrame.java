@@ -45,6 +45,8 @@ import com.ibm.nmon.gui.Styles;
  * the left and a chart on the right.
  */
 public final class ReportFrame extends JFrame implements DataSetListener {
+    private static final long serialVersionUID = -2870624156130798498L;
+
     private static final Logger LOGGER = org.slf4j.LoggerFactory.getLogger(ReportFrame.class);
 
     private final NMONVisualizerGui gui;
@@ -83,6 +85,8 @@ public final class ReportFrame extends JFrame implements DataSetListener {
         systems = new JList<DataSet>(model);
         systems.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
         systems.setCellRenderer(new DefaultListCellRenderer() {
+            private static final long serialVersionUID = -5095717717027686318L;
+
             @Override
             public Component getListCellRendererComponent(JList<?> list, Object value, int index, boolean isSelected,
                     boolean cellHasFocus) {

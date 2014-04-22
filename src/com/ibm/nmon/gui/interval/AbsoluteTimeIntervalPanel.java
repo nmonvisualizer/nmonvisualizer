@@ -31,6 +31,8 @@ import com.ibm.nmon.interval.Interval;
  * Panel for entering intervals using absolute date times
  */
 final class AbsoluteTimeIntervalPanel extends BaseIntervalPanel {
+    private static final long serialVersionUID = 3451148920350034946L;
+
     private final JSpinner start;
     private final JSpinner end;
 
@@ -84,7 +86,7 @@ final class AbsoluteTimeIntervalPanel extends BaseIntervalPanel {
 
         JPanel dataPanel = new JPanel();
         dataPanel.setLayout(new GridBagLayout());
-        
+
         GridBagConstraints labelConstraints = new GridBagConstraints();
         GridBagConstraints fieldConstraints = new GridBagConstraints();
 
@@ -99,16 +101,15 @@ final class AbsoluteTimeIntervalPanel extends BaseIntervalPanel {
 
         labelConstraints.fill = GridBagConstraints.HORIZONTAL;
         fieldConstraints.fill = GridBagConstraints.HORIZONTAL;
-        
+
         dataPanel.add(startLabel, labelConstraints);
         dataPanel.add(start, fieldConstraints);
 
         ++labelConstraints.gridy;
         ++fieldConstraints.gridy;
-        
+
         dataPanel.add(endLabel, labelConstraints);
         dataPanel.add(end, fieldConstraints);
-        
 
         add(namePanel, BorderLayout.PAGE_START);
         add(dataPanel, BorderLayout.CENTER);

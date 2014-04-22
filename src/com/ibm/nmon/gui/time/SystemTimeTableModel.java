@@ -14,6 +14,8 @@ import com.ibm.nmon.data.DataSetListener;
  * Displays a list of start and end times for all DataSets in the UI.
  */
 public final class SystemTimeTableModel extends AbstractTableModel implements DataSetListener {
+    private static final long serialVersionUID = -8130932048768878945L;
+
     private final NMONVisualizerGui gui;
 
     private Interval countInterval;

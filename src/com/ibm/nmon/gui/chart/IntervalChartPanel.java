@@ -18,6 +18,8 @@ import org.jfree.chart.renderer.category.LineAndShapeRenderer;
 import com.ibm.nmon.gui.main.NMONVisualizerGui;
 
 public final class IntervalChartPanel extends BaseChartPanel implements ChartMouseListener {
+    private static final long serialVersionUID = 1129587265457206809L;
+
     private final BasicStroke SELECTED_STROKE = new BasicStroke(5);
 
     public IntervalChartPanel(NMONVisualizerGui gui) {

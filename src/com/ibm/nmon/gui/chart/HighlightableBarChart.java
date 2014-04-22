@@ -20,6 +20,8 @@ import org.jfree.chart.plot.CategoryPlot;
 import org.jfree.chart.renderer.category.CategoryItemRenderer;
 
 public final class HighlightableBarChart extends JFreeChart {
+    private static final long serialVersionUID = -5389731065593870345L;
+
     private final Set<CategoryItemEntity> selectedEntities = new java.util.HashSet<CategoryItemEntity>();
 
     public HighlightableBarChart(Plot plot) {

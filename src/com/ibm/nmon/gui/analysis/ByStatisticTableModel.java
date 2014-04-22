@@ -16,6 +16,8 @@ import com.ibm.nmon.gui.main.NMONVisualizerGui;
  * AnalysisSet. Data for all data sets is displayed, one row per file / measurement combination.
  */
 public final class ByStatisticTableModel extends AnalysisSetTableModel implements PropertyChangeListener {
+    private static final long serialVersionUID = 2863125593272808676L;
+
     // last null is for GRANULARITY_MAXIMUM which will have a custom name
     private static final String[] COLUMN_NAMES = new String[] { "Hostname", "Data Type", "Metric",
             Statistic.MINIMUM.toString(), Statistic.AVERAGE.toString(), Statistic.MAXIMUM.toString(),

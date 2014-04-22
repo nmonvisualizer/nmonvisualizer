@@ -7,6 +7,8 @@ import javax.swing.AbstractListModel;
 import com.ibm.nmon.data.DataSet;
 
 final class ReportSystemsListModel extends AbstractListModel<DataSet> {
+    private static final long serialVersionUID = 2791502501268145566L;
+
     private final List<DataSet> systems = new java.util.ArrayList<DataSet>();
 
     // see ReportFrame's ListCellRenderer which uses index 0 as 'All Systems'

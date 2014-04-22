@@ -33,6 +33,8 @@ import com.ibm.nmon.gui.main.NMONVisualizerGui;
  * @see NMONVisualizerGui#setGranularity(int)
  */
 public final class GranularityDialog extends GUIDialog {
+    private static final long serialVersionUID = 3006930761856999987L;
+
     private final JCheckBox automatic;
     private final JTextField granularity;
 

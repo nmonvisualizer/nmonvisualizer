@@ -19,6 +19,8 @@ import com.ibm.nmon.data.DataType;
  */
 public abstract class AnalysisSetTableModel extends ChoosableColumnTableModel implements DataSetListener,
         AnalysisSetListener {
+   private static final long serialVersionUID = -8898709588877341715L;
+
     protected final NMONVisualizerGui gui;
 
     protected final AnalysisSet analysisSet;

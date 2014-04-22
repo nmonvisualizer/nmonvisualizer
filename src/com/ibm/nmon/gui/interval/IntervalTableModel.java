@@ -20,6 +20,8 @@ import com.ibm.nmon.interval.Interval;
  * </p>
  */
 final class IntervalTableModel extends AbstractTableModel implements IntervalListener {
+    private static final long serialVersionUID = 8444774364976685957L;
+
     private static final String[] columnNames = { "Name", "Start", "End" };
 
     private final List<Interval> intervals = new java.util.LinkedList<Interval>();

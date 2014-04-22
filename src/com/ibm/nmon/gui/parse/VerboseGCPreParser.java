@@ -20,6 +20,8 @@ import com.ibm.nmon.gui.Styles;
  * @see com.ibm.nmon.gui.main.NMONVisualizerGui#getDataForGCParse(String)
  */
 public final class VerboseGCPreParser extends BaseParserDialog {
+    private static final long serialVersionUID = 647178802418910814L;
+
     private JComboBox<String> jvmNames;
 
     public VerboseGCPreParser(NMONVisualizerGui gui) {

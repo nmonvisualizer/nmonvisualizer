@@ -11,6 +11,8 @@ import javax.swing.text.DefaultFormatterFactory;
  * MaskFormatter for times in 24 hour format. This formatter ensures only valid times are entered.
  */
 public final class TimeMaskFormatter extends MaskFormatter {
+    private static final long serialVersionUID = -7862295130660227255L;
+
     private static final TimeMaskFormatter START = new TimeMaskFormatter("00:00:00");
     private static final TimeMaskFormatter END = new TimeMaskFormatter("23:59:59");
 
@@ -48,7 +50,7 @@ public final class TimeMaskFormatter extends MaskFormatter {
         }
         else {
             String time = formatTime((Integer) value);
-       //     System.out.println("vts " + value + "="+ time);
+            // System.out.println("vts " + value + "="+ time);
 
             return time;
         }
@@ -101,7 +103,7 @@ public final class TimeMaskFormatter extends MaskFormatter {
 
         builder.append(seconds);
 
-       // System.out.println(time + "=" + builder.toString());
+        // System.out.println(time + "=" + builder.toString());
         return builder.toString();
     }
 }

@@ -21,6 +21,8 @@ import com.ibm.nmon.gui.Styles;
  * @see ViewManager
  */
 final class ChartTableToggle extends JPanel implements PropertyChangeListener {
+    private static final long serialVersionUID = 6311156984922819016L;
+
     private final NMONVisualizerGui gui;
 
     private final JRadioButton charts;

@@ -33,6 +33,8 @@ import com.ibm.nmon.gui.table.StringCellRenderer;
  * Display SystemDataSet metadata information in a table. Supports copying rows to the clipboard.
  */
 public final class MetadataInfoDialog extends GUIDialog implements PropertyChangeListener {
+    private static final long serialVersionUID = -482137072909463758L;
+
     private final SimpleDateFormat format = new SimpleDateFormat(Styles.DATE_FORMAT_STRING);
 
     private final JTabbedPane tabs;

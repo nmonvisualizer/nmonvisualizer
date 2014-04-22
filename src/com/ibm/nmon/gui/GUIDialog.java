@@ -18,6 +18,8 @@ import com.ibm.nmon.gui.main.NMONVisualizerGui;
  * ability to close the dialog with the ESC key.
  */
 public abstract class GUIDialog extends JDialog {
+    private static final long serialVersionUID = 5717736163308834942L;
+
     protected final NMONVisualizerGui gui;
 
     public GUIDialog(NMONVisualizerGui gui, JFrame parent, String title) {
@@ -51,6 +53,8 @@ public abstract class GUIDialog extends JDialog {
                 "ESCAPE");
 
         rootPane.getActionMap().put("ESCAPE", new AbstractAction() {
+            private static final long serialVersionUID = 4478727588396940932L;
+
             @Override
             public void actionPerformed(ActionEvent e) {
                 dispose();

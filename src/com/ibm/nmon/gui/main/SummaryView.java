@@ -43,6 +43,8 @@ import com.ibm.nmon.gui.report.ReportPanel;
  * @see ReportPanel
  */
 final class SummaryView extends ChartSplitPane implements IntervalListener {
+    private static final long serialVersionUID = 3407771704687182117L;
+
     private final ReportPanel singleIntervalReport;
     private final ReportPanel allIntervalsReport;
 
@@ -102,6 +104,8 @@ final class SummaryView extends ChartSplitPane implements IntervalListener {
         InputMap inputs = allIntervals.getInputMap(JComponent.WHEN_IN_FOCUSED_WINDOW);
 
         actions.put("allIntervals", new AbstractAction() {
+            private static final long serialVersionUID = -442106516679509723L;
+
             @Override
             public void actionPerformed(ActionEvent e) {
                 allIntervals.doClick();

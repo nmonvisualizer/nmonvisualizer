@@ -26,6 +26,8 @@ import com.ibm.nmon.gui.util.HostnameComboBoxModel;
  * @see com.ibm.nmon.gui.main.NMONVisualizerGui#getDataForHATJParse(String)
  */
 abstract class BaseParserDialog extends GUIDialog {
+    private static final long serialVersionUID = 5488444964553569979L;
+
     private final JLabel parsedFileLabel;
     private final JComboBox<String> hostnames;
 

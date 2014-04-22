@@ -12,6 +12,8 @@ import javax.swing.JTable;
  * Renders integer data with thousands separator.
  */
 public final class IntegerCellRenderer extends DefaultTableCellRenderer {
+    private static final long serialVersionUID = 1867029028990000830L;
+
     private static final DecimalFormat FORMAT = new DecimalFormat("#,##0");
 
     public IntegerCellRenderer() {

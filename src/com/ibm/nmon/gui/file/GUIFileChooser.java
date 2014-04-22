@@ -18,6 +18,8 @@ import com.ibm.nmon.gui.main.NMONVisualizerGui;
  * used when the user has not entered a file name.
  */
 public class GUIFileChooser extends JFileChooser {
+    private static final long serialVersionUID = 3483905864541979923L;
+
     protected final NMONVisualizerGui gui;
 
     private String defaultFileName;

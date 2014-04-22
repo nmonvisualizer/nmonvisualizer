@@ -27,6 +27,8 @@ import com.ibm.nmon.gui.util.HostnameComboBoxModel;
  * @see SystemDataSet#addData(SystemDataSet)
  */
 public final class MergeDataSetDialog extends GUIDialog {
+    private static final long serialVersionUID = 8152894318175367260L;
+
     private JComboBox<String> hostnames;
     private JButton merge;
     private SystemDataSet toMerge;

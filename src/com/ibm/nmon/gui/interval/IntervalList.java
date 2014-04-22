@@ -59,6 +59,8 @@ import com.ibm.nmon.util.TimeFormatCache;
  * </p>
  */
 final class IntervalList extends JPanel implements HierarchyListener, PropertyChangeListener {
+    private static final long serialVersionUID = -2227815465031324337L;
+
     private final GUITable intervals;
 
     private final NMONVisualizerGui gui;
@@ -91,6 +93,8 @@ final class IntervalList extends JPanel implements HierarchyListener, PropertyCh
 
         // make the current interval bold
         intervals.setDefaultRenderer(Long.class, new DefaultTableCellRenderer() {
+            private static final long serialVersionUID = 7101632198507145234L;
+
             @Override
             public Component getTableCellRendererComponent(JTable table, Object value, boolean isSelected,
                     boolean hasFocus, int row, int column) {
@@ -167,6 +171,8 @@ final class IntervalList extends JPanel implements HierarchyListener, PropertyCh
         add(temp, BorderLayout.PAGE_END);
 
         getActionMap().put("clear", new AbstractAction() {
+            private static final long serialVersionUID = 317117736111534324L;
+
             @Override
             public void actionPerformed(ActionEvent e) {
                 clear.doClick();

@@ -33,6 +33,8 @@ import com.ibm.nmon.util.FileHelper;
  * supports DataTypes and fields; entire DataSets cannot be dragged.
  */
 public final class TreeTransferHandler extends TransferHandler {
+    private static final long serialVersionUID = -2072907261684848635L;
+
     private static final Logger LOGGER = org.slf4j.LoggerFactory.getLogger(TreeTransferHandler.class);
 
     private final TreeTransferPathParser pathParser;

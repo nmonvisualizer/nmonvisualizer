@@ -16,6 +16,8 @@ import com.ibm.nmon.gui.main.NMONVisualizerGui;
  * all data sets is displayed; each data set is a separate column.
  */
 public final class ByDataSetTableModel extends AnalysisSetTableModel {
+    private static final long serialVersionUID = 8726311839297203648L;
+
     private Statistic stat;
 
     private final List<String> columns;

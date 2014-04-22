@@ -23,6 +23,8 @@ import com.ibm.nmon.analysis.AnalysisSet;
  * Support dragging data to a table from a tree. Also, support copying table data to the clipboard.
  */
 public final class TableTransferHandler extends TransferHandler {
+    private static final long serialVersionUID = 9014181654705663702L;
+
     private static final DecimalFormat FORMAT = new DecimalFormat("0.000");
 
     private final JTable table;

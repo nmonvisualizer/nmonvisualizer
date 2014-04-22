@@ -20,6 +20,8 @@ import com.ibm.nmon.gui.util.GranularityDialog;
 import com.ibm.nmon.gui.util.LogViewerDialog;
 
 final class ReportMenu extends JMenuBar {
+    private static final long serialVersionUID = 2244915433441666995L;
+
     private final NMONVisualizerGui gui;
     private final ReportFrame parent;
 

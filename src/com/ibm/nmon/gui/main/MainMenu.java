@@ -56,6 +56,8 @@ import java.lang.reflect.Method;
  * menu items stay in sync with the rest of the UI.
  */
 final class MainMenu extends JMenuBar implements IntervalListener, DataSetListener, PropertyChangeListener {
+    private static final long serialVersionUID = -7255908769208090151L;
+
     private final NMONVisualizerGui gui;
 
     // 1-based index -- see createHelpMenu()
@@ -210,6 +212,8 @@ final class MainMenu extends JMenuBar implements IntervalListener, DataSetListen
         });
 
         AbstractAction doClick = new AbstractAction() {
+            private static final long serialVersionUID = -9151414102717456362L;
+
             @Override
             public void actionPerformed(ActionEvent e) {
                 ((JMenuItem) e.getSource()).doClick();

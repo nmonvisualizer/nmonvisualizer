@@ -28,6 +28,8 @@ import com.ibm.nmon.gui.main.NMONVisualizerGui;
  * clipboard.
  */
 public final class SystemInfoDialog extends GUIDialog implements PropertyChangeListener {
+    private static final long serialVersionUID = -5471229750755128948L;
+
     private final SimpleDateFormat format = new SimpleDateFormat(Styles.DATE_FORMAT_STRING);
 
     private final JTabbedPane tabs;

@@ -23,6 +23,8 @@ import com.ibm.nmon.interval.IntervalManager;
  */
 final class IntervalComboBoxModel extends AbstractListModel<Interval> implements ComboBoxModel<Interval>,
         PropertyChangeListener, IntervalListener {
+    private static final long serialVersionUID = -5885429600547069451L;
+
     private final IntervalManager manager;
 
     private final List<Interval> intervals = new java.util.LinkedList<Interval>();

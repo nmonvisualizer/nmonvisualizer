@@ -26,6 +26,8 @@ import com.ibm.nmon.util.TimeHelper;
  * @see com.ibm.nmon.gui.main.NMONVisualizerGui#getDataForGCParse(String)
  */
 public final class IOStatPostParser extends BaseParserDialog {
+    private static final long serialVersionUID = -5466944320034595370L;
+
     private JSpinner date;
 
     public IOStatPostParser(NMONVisualizerGui gui) {

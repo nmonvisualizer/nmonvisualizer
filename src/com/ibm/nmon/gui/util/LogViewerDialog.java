@@ -41,6 +41,8 @@ import com.ibm.nmon.gui.main.NMONVisualizerGui;
 import com.ibm.nmon.util.BasicFormatter;
 
 public final class LogViewerDialog extends JFrame {
+    private static final long serialVersionUID = 2036301168126084250L;
+
     public static final ImageIcon LOG_ICON = Styles.buildIcon("page_error.png");
 
     private final JComboBox<Level> levels;
@@ -81,6 +83,8 @@ public final class LogViewerDialog extends JFrame {
         });
 
         AbstractAction clearAction = new AbstractAction() {
+            private static final long serialVersionUID = 2136102234176694095L;
+
             @Override
             public void actionPerformed(ActionEvent e) {
 
@@ -144,6 +148,8 @@ public final class LogViewerDialog extends JFrame {
                 "ESCAPE");
 
         rootPane.getActionMap().put("ESCAPE", new AbstractAction() {
+            private static final long serialVersionUID = 5405906817147819455L;
+
             @Override
             public void actionPerformed(ActionEvent e) {
                 setVisible(false);

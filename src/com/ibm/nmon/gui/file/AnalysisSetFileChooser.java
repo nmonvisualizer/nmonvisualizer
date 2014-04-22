@@ -25,6 +25,8 @@ import com.ibm.nmon.gui.main.NMONVisualizerGui;
  * the files and adding them to the given {@link AnalysisSet}.
  */
 public final class AnalysisSetFileChooser extends GUIFileChooser {
+    private static final long serialVersionUID = 4581059821787454370L;
+
     private final AnalysisSet analysis;
 
     public AnalysisSetFileChooser(NMONVisualizerGui gui, AnalysisSet analysis) {

@@ -38,6 +38,8 @@ import com.ibm.nmon.interval.Interval;
  * </p>
  */
 public final class SystemTimeList extends JPanel implements HierarchyListener, PropertyChangeListener {
+    private static final long serialVersionUID = -7601601214911823159L;
+
     private final NMONVisualizerGui gui;
 
     private final GUITable systemTimes;

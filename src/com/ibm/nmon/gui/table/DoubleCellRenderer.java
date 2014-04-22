@@ -12,6 +12,8 @@ import com.ibm.nmon.gui.Styles;
  * Renders double data with thousands separator and 3 decimal points. Renders NaN as "N/A".
  */
 public final class DoubleCellRenderer extends DefaultTableCellRenderer {
+    private static final long serialVersionUID = -8018894006090877953L;
+
     public DoubleCellRenderer() {
         super();
     }

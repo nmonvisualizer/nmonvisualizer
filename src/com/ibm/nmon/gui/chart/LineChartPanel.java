@@ -26,6 +26,8 @@ import com.ibm.nmon.gui.chart.builder.LineChartBuilder;
 import com.ibm.nmon.gui.main.NMONVisualizerGui;
 
 public class LineChartPanel extends BaseChartPanel implements ChartMouseListener {
+    private static final long serialVersionUID = 7999499157941027546L;
+
     private final BasicStroke SELECTED_STROKE = new BasicStroke(5);
 
     public LineChartPanel(NMONVisualizerGui gui) {

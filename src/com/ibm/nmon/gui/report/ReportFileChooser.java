@@ -8,6 +8,7 @@ import com.ibm.nmon.gui.file.GUIFileChooser;
 import com.ibm.nmon.gui.main.NMONVisualizerGui;
 
 final class ReportFileChooser extends GUIFileChooser {
+    private static final long serialVersionUID = 8165418208287452749L;
 
     ReportFileChooser(NMONVisualizerGui gui) {
         super(gui, "Parse Report XML");

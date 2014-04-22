@@ -28,6 +28,8 @@ import static com.ibm.nmon.analysis.Statistic.*;
  * charts, there will be one row for each series (i.e. line).
  */
 public final class ChartSummaryTableModel extends ChoosableColumnTableModel {
+    private static final long serialVersionUID = -4224937019632087892L;
+
     // check mark
     static final String VISIBLE = "\u2713";
 

@@ -57,6 +57,8 @@ import com.ibm.nmon.interval.Interval;
  * </p>
  */
 public final class ReportPanel extends JTabbedPane implements PropertyChangeListener, IntervalListener {
+    private static final long serialVersionUID = 6377401207979477789L;
+
     private static final Logger LOGGER = org.slf4j.LoggerFactory.getLogger(ReportPanel.class);
 
     public static enum MultiplexMode {

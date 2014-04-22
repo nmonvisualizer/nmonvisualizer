@@ -48,6 +48,8 @@ import com.ibm.nmon.gui.Styles;
  * Offsets between each interval are also supported.
  */
 public final class BulkIntervalPanel extends BaseIntervalPanel {
+    private static final long serialVersionUID = 1817418187436308391L;
+
     // base date time
     private final JSpinner start;
 

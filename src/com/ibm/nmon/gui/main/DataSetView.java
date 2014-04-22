@@ -15,6 +15,8 @@ import com.ibm.nmon.report.ReportCache;
  * @see ReportPanel
  */
 final class DataSetView extends ChartSplitPane {
+    private static final long serialVersionUID = 6066688638520302421L;
+
     private final Map<String, ReportPanel> reportPanels;
 
     private ReportPanel currentReport;

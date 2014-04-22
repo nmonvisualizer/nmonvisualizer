@@ -14,6 +14,8 @@ import com.ibm.nmon.data.Process;
 import com.ibm.nmon.gui.Styles;
 
 final class TreeCellRenderer extends DefaultTreeCellRenderer {
+    private static final long serialVersionUID = -2417103407578950522L;
+
     private static final ImageIcon DATATYPE_ICON = Styles.buildIcon("package.png");
     private static final ImageIcon DATASUBTYPE_ICON = Styles.buildIcon("package_green.png");
     private static final ImageIcon FIELD_ICON = Styles.buildIcon("page.png");

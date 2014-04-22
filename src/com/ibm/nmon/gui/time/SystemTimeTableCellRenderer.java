@@ -17,6 +17,8 @@ import com.ibm.nmon.util.TimeFormatCache;
  * italic. If an interval does not include a time, the text will be striken out.
  */
 final class SystemTimeTableCellRenderer extends DefaultTableCellRenderer {
+    private static final long serialVersionUID = 4392809910722437137L;
+
     private Interval toCompare;
 
     public SystemTimeTableCellRenderer() {

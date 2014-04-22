@@ -11,6 +11,8 @@ import com.ibm.nmon.gui.Styles;
  * Makes string columns bold and right aligned.
  */
 public final class StringCellRenderer extends DefaultTableCellRenderer {
+    private static final long serialVersionUID = 7643288582532589280L;
+
     @Override
     public Component getTableCellRendererComponent(JTable table, Object value, boolean isSelected, boolean hasFocus,
             int row, int column) {

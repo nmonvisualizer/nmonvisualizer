@@ -13,6 +13,8 @@ import com.ibm.nmon.gui.Styles;
  * Modal progress dialog box that includes a name for the item and a progress bar.
  */
 public final class ItemProgressDialog extends JDialog {
+    private static final long serialVersionUID = -7316137795169235117L;
+
     private final JFrame parent;
     private final JLabel itemName;
     private final JProgressBar progress;

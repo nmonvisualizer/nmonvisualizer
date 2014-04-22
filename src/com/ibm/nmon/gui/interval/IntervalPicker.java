@@ -27,6 +27,8 @@ import com.ibm.nmon.util.TimeFormatCache;
  * management dialog. Selecting an interval sets the current value for the application.
  */
 public final class IntervalPicker extends JPanel implements DataSetListener {
+    private static final long serialVersionUID = 5742043118375163400L;
+
     private final NMONVisualizerGui gui;
 
     private final JComboBox<Interval> intervals;
@@ -44,6 +46,8 @@ public final class IntervalPicker extends JPanel implements DataSetListener {
 
         intervals = new JComboBox<Interval>(new IntervalComboBoxModel(gui.getIntervalManager()));
         intervals.setRenderer(new DefaultListCellRenderer() {
+            private static final long serialVersionUID = 1999400159683985218L;
+
             @Override
             public Component getListCellRendererComponent(JList<?> list, Object value, int index, boolean isSelected,
                     boolean cellHasFocus) {

@@ -11,6 +11,7 @@ import com.ibm.nmon.gui.GUITable;
 import com.ibm.nmon.gui.main.NMONVisualizerGui;
 
 final class ByDataSetTable extends GUITable {
+    private static final long serialVersionUID = -7024288344925891200L;
 
     public ByDataSetTable(NMONVisualizerGui gui) {
         super(gui);
@@ -21,6 +22,8 @@ final class ByDataSetTable extends GUITable {
     @Override
     protected JTableHeader createDefaultTableHeader() {
         return new JTableHeader(getColumnModel()) {
+            private static final long serialVersionUID = -9130260383688373828L;
+
             @Override
             public String getToolTipText(MouseEvent event) {
                 super.getToolTipText(event);

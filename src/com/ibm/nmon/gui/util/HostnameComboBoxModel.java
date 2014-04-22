@@ -24,6 +24,8 @@ import com.ibm.nmon.gui.main.NMONVisualizerGui;
  */
 public final class HostnameComboBoxModel extends AbstractListModel<String> implements ComboBoxModel<String>,
         DataSetListener {
+    private static final long serialVersionUID = 6370252527474683605L;
+
     private final List<String> hosts = new java.util.LinkedList<String>();
 
     private String selected = null;

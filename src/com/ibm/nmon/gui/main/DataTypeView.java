@@ -14,6 +14,8 @@ import com.ibm.nmon.data.DataType;
  * @see DataTypeChartPanel
  */
 final class DataTypeView extends ChartSplitPane {
+    private static final long serialVersionUID = -1143801614058577721L;
+
     private final DataTypeChartPanel chartPanel;
 
     DataTypeView(NMONVisualizerGui gui) {

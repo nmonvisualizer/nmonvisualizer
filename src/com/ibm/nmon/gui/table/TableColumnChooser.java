@@ -45,6 +45,8 @@ import com.ibm.nmon.gui.main.NMONVisualizerGui;
  * </p>
  */
 public final class TableColumnChooser extends GUIDialog {
+    private static final long serialVersionUID = -9173600303234433460L;
+
     private final ChoosableColumnTableModel tableModel;
 
     public TableColumnChooser(NMONVisualizerGui gui, JFrame parent, ChoosableColumnTableModel choosableTableModel) {
@@ -60,6 +62,8 @@ public final class TableColumnChooser extends GUIDialog {
         // only allow changing the checkbox if the column can be disabled; note that checkbox should
         // not show up anyway - see CheckBoxCellRenderer
         DefaultTableModel model = new DefaultTableModel() {
+            private static final long serialVersionUID = 947165395586168365L;
+
             @Override
             public boolean isCellEditable(int row, int column) {
                 return column == 1 && tableModel.canDisableColumn(row);
@@ -152,6 +156,8 @@ public final class TableColumnChooser extends GUIDialog {
     }
 
     private final AbstractAction allAction = new AbstractAction() {
+        private static final long serialVersionUID = 5118961708188081301L;
+
         @Override
         public void actionPerformed(ActionEvent e) {
             DefaultTableModel model = getModel();
@@ -163,6 +169,8 @@ public final class TableColumnChooser extends GUIDialog {
     };
 
     private final AbstractAction noneAction = new AbstractAction() {
+        private static final long serialVersionUID = -6547510475096869295L;
+
         @Override
         public void actionPerformed(ActionEvent e) {
             DefaultTableModel model = getModel();
@@ -176,6 +184,8 @@ public final class TableColumnChooser extends GUIDialog {
     };
 
     private final AbstractAction defaultsAction = new AbstractAction() {
+        private static final long serialVersionUID = -826694390009398839L;
+
         @Override
         public void actionPerformed(ActionEvent e) {
             DefaultTableModel model = getModel();

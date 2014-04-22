@@ -70,6 +70,8 @@ import com.ibm.nmon.interval.IntervalListener;
  */
 public final class SummaryTablePanel extends JPanel implements IntervalListener, AnalysisSetListener,
         PropertyChangeListener {
+    private static final long serialVersionUID = 5581753452007550696L;
+
     private static final Icon TRANSPOSE_ICON = Styles.buildIcon("arrow_rotate_clockwise.png");
 
     private final NMONVisualizerGui gui;
@@ -527,6 +529,8 @@ public final class SummaryTablePanel extends JPanel implements IntervalListener,
     };
 
     private final Action transposeTable = new AbstractAction() {
+        private static final long serialVersionUID = 8993427044737174594L;
+
         @Override
         public void actionPerformed(ActionEvent e) {
             if (statsPanel.isVisible()) {

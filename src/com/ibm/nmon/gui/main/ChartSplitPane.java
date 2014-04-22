@@ -28,6 +28,8 @@ import com.ibm.nmon.gui.chart.summary.ChartSummaryPanel;
  * @see BaseChartPanel#highlightElement(int, int)
  */
 public abstract class ChartSplitPane extends JSplitPane implements PropertyChangeListener, DataSetListener {
+    private static final long serialVersionUID = 7352498559598556656L;
+
     protected final NMONVisualizerGui gui;
 
     protected final ChartSummaryPanel summaryTable;

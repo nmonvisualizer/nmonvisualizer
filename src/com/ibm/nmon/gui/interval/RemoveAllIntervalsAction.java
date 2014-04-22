@@ -13,6 +13,8 @@ import com.ibm.nmon.gui.main.NMONVisualizerGui;
  * Action listener that removes all intervals from the IntervalManager.
  */
 public final class RemoveAllIntervalsAction extends AbstractAction {
+    private static final long serialVersionUID = -4929882417533803013L;
+
     private final NMONVisualizerGui gui;
     private final Component parent;
 

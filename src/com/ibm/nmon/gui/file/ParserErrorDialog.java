@@ -39,6 +39,8 @@ import com.ibm.nmon.gui.util.LogViewerDialog;
 import com.ibm.nmon.gui.util.ScrollingTableFix;
 
 final class ParserErrorDialog extends GUIDialog {
+    private static final long serialVersionUID = -9140024700542269099L;
+
     private final Map<String, String> errors;
 
     private final JSplitPane splitPane;

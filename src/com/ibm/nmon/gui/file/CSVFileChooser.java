@@ -23,6 +23,8 @@ import com.ibm.nmon.util.CSVWriter;
  * @see CSVWriter
  */
 public final class CSVFileChooser extends GUIFileChooser {
+    private static final long serialVersionUID = 6573073002190791008L;
+
     private final DataSet data;
     private final DataType type;
     private final List<String> fields;

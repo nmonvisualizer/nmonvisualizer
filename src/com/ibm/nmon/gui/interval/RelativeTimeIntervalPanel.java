@@ -41,6 +41,8 @@ import com.ibm.nmon.interval.Interval;
  * user changes inputs.
  */
 final class RelativeTimeIntervalPanel extends BaseIntervalPanel {
+    private static final long serialVersionUID = -1611515609994676644L;
+
     // base date time
     private final JSpinner base;
 
@@ -268,9 +270,12 @@ final class RelativeTimeIntervalPanel extends BaseIntervalPanel {
     }
 
     /**
-     * @param base epoch start time
-     * @param start milliseconds < 1 day
-     * @param end epoch end time
+     * @param base
+     *            epoch start time
+     * @param start
+     *            milliseconds < 1 day
+     * @param end
+     *            epoch end time
      */
     @Override
     protected void setStartToEnd() {

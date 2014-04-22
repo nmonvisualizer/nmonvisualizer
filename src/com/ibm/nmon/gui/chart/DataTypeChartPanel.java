@@ -27,6 +27,8 @@ import com.ibm.nmon.interval.Interval;
  * Display a time series plot of the selected data.
  */
 public final class DataTypeChartPanel extends LineChartPanel implements IntervalListener {
+    private static final long serialVersionUID = 7780208253045360843L;
+
     private final LineChartBuilder chartBuilder;
 
     private ExactDataDefinition definition;
