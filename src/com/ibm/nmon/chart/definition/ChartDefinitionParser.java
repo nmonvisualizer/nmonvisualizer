@@ -147,15 +147,40 @@ public final class ChartDefinitionParser extends BasicXMLParser {
 
                 ((LineChartDefinition) currentChart).setXAxisLabel(attributes.get("label"));
             }
-            else if (currentChart instanceof HistogramChartDefinition) {
-                Map<String, String> attributes = parseAttributes(unparsedAttributes);
-
-                ((HistogramChartDefinition) currentChart).setXAxisLabel(attributes.get("label"));
-            }
             else if (currentChart instanceof BarChartDefinition) {
                 Map<String, String> attributes = parseAttributes(unparsedAttributes);
 
                 ((BarChartDefinition) currentChart).setCategoryAxisLabel(attributes.get("label"));
+            }
+            else if (currentChart instanceof HistogramChartDefinition) {
+                Map<String, String> attributes = parseAttributes(unparsedAttributes);
+
+                ((HistogramChartDefinition) currentChart).setXAxisLabel(attributes.get("label"));
+
+                String minString = attributes.get("min");
+                String maxString = attributes.get("max");
+
+                if (((minString != null) && (maxString == null)) || ((maxString != null) && (minString == null))) {
+                    logger.warn("ignoring " + "<histogram>" + " attributes 'min' and 'max' "
+                            + "must both be specified " + " at line {}" + ", if a defined range is desired",
+                            getLineNumber());
+                }
+                else {
+                    try {
+                        ((HistogramChartDefinition) currentChart).setXAxisRange(new org.jfree.data.Range(Integer
+                                .parseInt(minString), Integer.parseInt(maxString)));
+                    }
+                    catch (NumberFormatException nfe) {
+                        logger.warn("ignoring " + "<histogram>" + " attributes 'min' and 'max' "
+                                + "with values '{}' and '{}'" + " at line {}" + ", are not a valid numbers", minString,
+                                maxString, getLineNumber());
+                    }
+                    catch (IllegalArgumentException iae) {
+                        logger.warn("ignoring " + "<histogram>" + " attributes 'min' and 'max' "
+                                + "with values '{}' and '{}'" + " at line {}" + ", invalid range", minString,
+                                maxString, getLineNumber());
+                    }
+                }
             }
             else {
                 logger.warn("ignoring " + "<xAxis>" + " element for chart "

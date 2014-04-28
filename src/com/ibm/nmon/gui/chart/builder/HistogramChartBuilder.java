@@ -90,6 +90,10 @@ public final class HistogramChartBuilder extends BaseChartBuilder<HistogramChart
             plot.getDomainAxis().setLabel(definition.getXAxisLabel());
         }
 
+        if (definition.getXAxisRange() != null) {
+            plot.getDomainAxis().setRange(definition.getXAxisRange());
+        }
+
         if ("".equals(definition.getYAxisLabel())) {
             if (definition.usePercentYAxis()) {
                 plot.getRangeAxis().setLabel("Percent");
@@ -178,7 +182,14 @@ public final class HistogramChartBuilder extends BaseChartBuilder<HistogramChart
                             ++x;
                         }
 
-                        dataset.addSeries(fieldName, values, definition.getBins());
+                        if (definition.getXAxisRange() == null) {
+                            dataset.addSeries(fieldName, values, definition.getBins());
+                        }
+                        else {
+                            dataset.addSeries(fieldName, values, definition.getBins(), definition.getXAxisRange()
+                                    .getLowerBound(), definition.getXAxisRange().getUpperBound());
+                        }
+
                         dataset.associateTuple(fieldName, null, new DataTuple(data, type, fieldName));
                     }
                 }

@@ -2,14 +2,16 @@ package com.ibm.nmon.chart.definition;
 
 import java.util.List;
 
-import com.ibm.nmon.data.definition.NamingMode;
+import org.jfree.data.Range;
 
+import com.ibm.nmon.data.definition.NamingMode;
 import com.ibm.nmon.analysis.Statistic;
 
 public final class HistogramChartDefinition extends YAxisChartDefinition {
     private int bins = 10;
 
     private String xAxisLabel = "";
+    private Range xAxisRange;
 
     private NamingMode histogramNamingMode;
 
@@ -17,6 +19,8 @@ public final class HistogramChartDefinition extends YAxisChartDefinition {
 
     public HistogramChartDefinition(String shortName, String title) {
         super(shortName, title, false);
+
+        xAxisRange = null;
 
         histogramNamingMode = NamingMode.FIELD;
 
@@ -47,13 +51,21 @@ public final class HistogramChartDefinition extends YAxisChartDefinition {
         return xAxisLabel;
     }
 
-    public final void setXAxisLabel(String xAxisLabel) {
+    public void setXAxisLabel(String xAxisLabel) {
         if (xAxisLabel == null) {
             this.xAxisLabel = "";
         }
         else {
             this.xAxisLabel = xAxisLabel;
         }
+    }
+
+    public Range getXAxisRange() {
+        return xAxisRange;
+    }
+
+    public void setXAxisRange(Range range) {
+        this.xAxisRange = range;
     }
 
     public NamingMode getHistogramNamingMode() {
