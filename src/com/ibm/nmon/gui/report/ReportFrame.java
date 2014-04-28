@@ -226,6 +226,7 @@ public final class ReportFrame extends JFrame implements DataSetListener {
 
     @Override
     public void dataCleared() {
+        systems.setSelectedIndex(0);
         ((ReportSystemsListModel) systems.getModel()).clearData();
     }
 

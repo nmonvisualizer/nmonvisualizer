@@ -1,13 +1,11 @@
 package com.ibm.nmon.gui.main;
 
 import java.awt.BorderLayout;
-
 import java.beans.PropertyChangeListener;
 import java.beans.PropertyChangeEvent;
 
 import javax.swing.event.TreeSelectionListener;
 import javax.swing.event.TreeSelectionEvent;
-
 import javax.swing.tree.TreePath;
 
 import com.ibm.nmon.gui.tree.TreePathParser;
@@ -17,10 +15,8 @@ import javax.swing.JPanel;
 
 import com.ibm.nmon.data.DataSet;
 import com.ibm.nmon.data.DataType;
-
 import com.ibm.nmon.gui.analysis.SummaryTablePanel;
 import com.ibm.nmon.gui.file.GUIFileChooser;
-
 import com.ibm.nmon.gui.Styles;
 
 /**

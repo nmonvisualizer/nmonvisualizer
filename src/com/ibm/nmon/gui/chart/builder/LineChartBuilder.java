@@ -196,6 +196,8 @@ public class LineChartBuilder extends BaseChartBuilder<LineChartDefinition> {
 
     private void addData(DataTupleXYDataset dataset, DataSet data, DataType type, List<String> fields,
             List<String> fieldNames) {
+        long start = System.nanoTime();
+
         double[] totals = new double[fields.size()];
         // use NaN as chart data when no values are defined rather than 0
         java.util.Arrays.fill(totals, Double.NaN);
@@ -276,6 +278,12 @@ public class LineChartBuilder extends BaseChartBuilder<LineChartDefinition> {
                 dataset.associateTuple(fieldNames.get(idx), null, new DataTuple(data, type, fields.get(idx)));
             }
         }
+
+        if (logger.isDebugEnabled()) {
+            logger.debug("{}: {}-({} fields) added {} data points to chart '{}'  in {}ms", data, type,
+                    fieldNames.size(), dataset.getItemCount(), definition.getTitle(),
+                    (System.nanoTime() - start) / 1000000.0d);
+        }
     }
 
     private void updateChart() {
@@ -305,6 +313,8 @@ public class LineChartBuilder extends BaseChartBuilder<LineChartDefinition> {
             return;
         }
         else {
+            long start = System.nanoTime();
+
             XYPlot plot = chart.getXYPlot();
 
             if (plot.getDataset(datasetIndex).getItemCount(0) > 0) {
@@ -348,6 +358,11 @@ public class LineChartBuilder extends BaseChartBuilder<LineChartDefinition> {
             }
             else {
                 ((StandardXYItemRenderer) plot.getRenderer()).setGapThreshold(Integer.MAX_VALUE);
+            }
+
+            if (logger.isTraceEnabled()) {
+                logger.trace("complete for chart '{}', series {} in {}ms", definition.getTitle(), datasetIndex,
+                        (System.nanoTime() - start) / 1000000.0d);
             }
         }
     }

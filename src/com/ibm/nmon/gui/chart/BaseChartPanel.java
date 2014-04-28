@@ -2,18 +2,15 @@ package com.ibm.nmon.gui.chart;
 
 import org.slf4j.Logger;
 
+import java.awt.Graphics;
 import java.awt.Toolkit;
 import java.awt.datatransfer.Clipboard;
 import java.awt.datatransfer.StringSelection;
-
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-
 import java.awt.event.MouseEvent;
-
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
-
 import java.io.File;
 import java.io.IOException;
 import java.io.StringWriter;
@@ -22,27 +19,20 @@ import javax.swing.JFileChooser;
 import javax.swing.JMenuItem;
 import javax.swing.JOptionPane;
 import javax.swing.JPopupMenu;
-
 import javax.swing.MenuElement;
 
 import org.jfree.chart.ChartPanel;
 import org.jfree.chart.ChartTransferable;
 import org.jfree.chart.ChartUtilities;
-
 import org.jfree.chart.JFreeChart;
-
 import org.jfree.chart.plot.Plot;
 import org.jfree.chart.plot.CategoryPlot;
 import org.jfree.chart.plot.XYPlot;
-
 import org.jfree.ui.ExtensionFileFilter;
 
 import com.ibm.nmon.gui.chart.data.*;
-
 import com.ibm.nmon.gui.main.NMONVisualizerGui;
-
 import com.ibm.nmon.gui.file.GUIFileChooser;
-
 import com.ibm.nmon.util.CSVWriter;
 
 public class BaseChartPanel extends ChartPanel implements PropertyChangeListener {
@@ -330,4 +320,21 @@ public class BaseChartPanel extends ChartPanel implements PropertyChangeListener
 
     @Override
     public void mouseDragged(MouseEvent e) {}
+
+    @Override
+    public void paintComponent(Graphics g) {
+        long start = System.nanoTime();
+
+        super.paintComponent(g);
+
+        if (logger.isDebugEnabled()) {
+            String title = "<no title>";
+
+            if ((getChart() != null) && (getChart().getTitle()) != null) {
+                title = getChart().getTitle().getText();
+            }
+
+            logger.debug("painted chart '{}' in {} ms", title, (System.nanoTime() - start) / 1000000.0d);
+        }
+    }
 }
