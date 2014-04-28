@@ -340,13 +340,12 @@ public abstract class NMONVisualizerApp implements IntervalListener {
         TimeFormatCache.setDefaultIntervalRange(minSystemTime, maxSystemTime);
         intervalManager.setCurrentInterval(Interval.DEFAULT);
 
+        analysisRecords.clear();
+
         for (DataSetListener listener : listeners) {
             listener.dataCleared();
         }
 
-        // clear the records last to avoid errors when listeners still need access to analysis
-        // records
-        analysisRecords.clear();
     }
 
     public final Iterable<SystemDataSet> getDataSets() {

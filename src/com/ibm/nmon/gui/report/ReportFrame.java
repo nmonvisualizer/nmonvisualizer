@@ -211,11 +211,27 @@ public final class ReportFrame extends JFrame implements DataSetListener {
 
     @Override
     public void dataAdded(DataSet data) {
+        if (systems.getSelectedIndex() == 0) {
+            // update All Systems chart
+            reportSplitPane.setData(ReportFrame.this.gui.getDataSets());
+        }
+
         ((ReportSystemsListModel) systems.getModel()).addData(data);
     }
 
     @Override
     public void dataRemoved(DataSet data) {
+        if (systems.getSelectedIndex() == 0) {
+            // update All Systems chart
+            reportSplitPane.setData(ReportFrame.this.gui.getDataSets());
+        }
+        else {
+            if (systems.getSelectedValue().equals(data)) {
+                // data removed, back to All Systems
+                systems.setSelectedIndex(0);
+            }
+        }
+
         ((ReportSystemsListModel) systems.getModel()).removeData(data);
     }
 
@@ -226,7 +242,14 @@ public final class ReportFrame extends JFrame implements DataSetListener {
 
     @Override
     public void dataCleared() {
-        systems.setSelectedIndex(0);
+        if (systems.getSelectedIndex() == 0) {
+            // update All Systems chart
+            reportSplitPane.setData(ReportFrame.this.gui.getDataSets());
+        }
+        else {
+            systems.setSelectedIndex(0);
+        }
+
         ((ReportSystemsListModel) systems.getModel()).clearData();
     }
 
