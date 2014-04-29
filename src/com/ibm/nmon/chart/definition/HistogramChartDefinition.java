@@ -35,6 +35,7 @@ public final class HistogramChartDefinition extends YAxisChartDefinition {
 
         this.bins = copy.bins;
         this.xAxisLabel = copy.xAxisLabel;
+        this.xAxisRange = copy.xAxisRange;
         this.histogramNamingMode = copy.histogramNamingMode;
         this.markers = new java.util.ArrayList<Statistic>(copy.markers);
     }
