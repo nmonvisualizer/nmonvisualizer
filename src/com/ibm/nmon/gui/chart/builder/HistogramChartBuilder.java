@@ -3,6 +3,7 @@ package com.ibm.nmon.gui.chart.builder;
 import java.awt.BasicStroke;
 import java.awt.Color;
 import java.awt.Font;
+import java.util.List;
 
 import org.jfree.chart.JFreeChart;
 import org.jfree.chart.axis.NumberAxis;
@@ -162,6 +163,8 @@ public final class HistogramChartBuilder extends BaseChartBuilder<HistogramChart
             throw new IllegalStateException("initChart() must be called first");
         }
 
+        long start = System.nanoTime();
+
         XYPlot plot = chart.getXYPlot();
         DataTupleHistogramDataset dataset = (DataTupleHistogramDataset) plot
                 .getDataset(definition.hasSecondaryYAxis() ? 1 : 0);
@@ -174,26 +177,42 @@ public final class HistogramChartBuilder extends BaseChartBuilder<HistogramChart
                         String fieldName = definition.getHistogramNamingMode().getName(dataDefinition, data, type,
                                 field, granularity);
 
-                        double[] values = new double[data.getRecordCount()];
-                        int x = 0;
+                        List<Double> values = new java.util.ArrayList<Double>(data.getRecordCount());
 
-                        for (DataRecord record : data.getRecords()) {
-                            values[x] = record.getData(type)[type.getFieldIndex(field)];
-                            ++x;
+                        // Use the analysis record's internal Interval is used rather than this
+                        // class' record. Assume this class' interval and the record's are
+                        // synchronized by the caller.
+
+                        for (DataRecord record : data.getRecords(analysis.getInterval())) {
+                            if (record.hasData(type)) {
+                                values.add(record.getData(type)[type.getFieldIndex(field)]);
+                            }
+                        }
+
+                        // convert to double for HistogramDataset
+                        double[] toAdd = new double[values.size()];
+
+                        for (int i = 0; i < toAdd.length; i++) {
+                            toAdd[i] = values.get(i);
                         }
 
                         if (definition.getXAxisRange() == null) {
-                            dataset.addSeries(fieldName, values, definition.getBins());
+                            dataset.addSeries(fieldName, toAdd, definition.getBins());
                         }
                         else {
-                            dataset.addSeries(fieldName, values, definition.getBins(), definition.getXAxisRange()
+                            dataset.addSeries(fieldName, toAdd, definition.getBins(), definition.getXAxisRange()
                                     .getLowerBound(), definition.getXAxisRange().getUpperBound());
                         }
 
                         dataset.associateTuple(fieldName, null, new DataTuple(data, type, fieldName));
+
+                        if (logger.isDebugEnabled()) {
+                            logger.debug("{}: {}-{} added {} data points to chart '{}'  in {}ms", data, type,
+                                    fieldName, toAdd.length, definition.getTitle(),
+                                    (System.nanoTime() - start) / 1000000.0d);
+                        }
                     }
                 }
-
             }
         }
 
@@ -226,7 +245,7 @@ public final class HistogramChartBuilder extends BaseChartBuilder<HistogramChart
             }
         }
 
-        chart.getXYPlot().configureRangeAxes();
+        // chart.getXYPlot().configureRangeAxes();
 
         if (chart.getLegend() == null) {
             int seriesCount = chart.getXYPlot().getDataset(0).getSeriesCount();
