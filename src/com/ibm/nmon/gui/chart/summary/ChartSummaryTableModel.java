@@ -466,7 +466,7 @@ public final class ChartSummaryTableModel extends ChoosableColumnTableModel {
 
                 logger.trace("set data for XY chart with {}", series);
             }
-            else {
+            else if (dataset instanceof DataTupleXYDataset) {
                 DataTupleCategoryDataset d = (DataTupleCategoryDataset) dataset;
                 Map<String, List<String>> series = new java.util.HashMap<String, List<String>>();
 
@@ -480,6 +480,16 @@ public final class ChartSummaryTableModel extends ChoosableColumnTableModel {
                 }
 
                 logger.trace("set data for category chart with {}", series);
+            }
+            else if (dataset instanceof DataTupleHistogramDataset) {
+                DataTupleHistogramDataset d = ((DataTupleHistogramDataset) dataset);
+                List<String> series = new java.util.ArrayList<String>();
+
+                for (int i = 0; i < d.getSeriesCount(); i++) {
+                    series.add(d.getSeriesKey(i).toString());
+                }
+
+                logger.trace("set data for histogram chart with {}", series);
             }
         }
 
