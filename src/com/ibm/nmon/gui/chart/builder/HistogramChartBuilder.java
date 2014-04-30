@@ -204,12 +204,11 @@ public final class HistogramChartBuilder extends BaseChartBuilder<HistogramChart
                                     .getLowerBound(), definition.getXAxisRange().getUpperBound());
                         }
 
-                        dataset.associateTuple(fieldName, null, new DataTuple(data, type, fieldName));
+                        dataset.associateTuple(fieldName, null, new DataTuple(data, type, field));
 
                         if (logger.isDebugEnabled()) {
-                            logger.debug("{}: {}-{} added {} data points to chart '{}'  in {}ms", data, type,
-                                    fieldName, toAdd.length, definition.getTitle(),
-                                    (System.nanoTime() - start) / 1000000.0d);
+                            logger.debug("{}: {}-{} added {} data points to chart '{}'  in {}ms", data, type, field,
+                                    toAdd.length, definition.getTitle(), (System.nanoTime() - start) / 1000000.0d);
                         }
                     }
                 }
