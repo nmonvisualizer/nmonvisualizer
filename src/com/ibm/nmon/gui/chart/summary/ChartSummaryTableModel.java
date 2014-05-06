@@ -10,16 +10,17 @@ import java.util.List;
 import java.util.Map;
 
 import com.ibm.nmon.data.DataTuple;
+import com.ibm.nmon.data.DataType;
 
 import com.ibm.nmon.data.ProcessDataType;
+import com.ibm.nmon.data.SystemDataSet;
 
 import com.ibm.nmon.gui.chart.data.*;
 
 import com.ibm.nmon.analysis.AnalysisRecord;
+import static com.ibm.nmon.analysis.Statistic.*;
 
 import com.ibm.nmon.gui.main.NMONVisualizerGui;
-
-import static com.ibm.nmon.analysis.Statistic.*;
 
 /**
  * Table model for {@link ChartSummaryPanel}. This model holds a single {@link DataTupleDataset}
@@ -39,6 +40,10 @@ public final class ChartSummaryTableModel extends ChoosableColumnTableModel {
             "Graph " + MINIMUM.toString(), "Graph " + AVERAGE.toString(), "Graph " + MAXIMUM.toString(),
             "Graph " + STD_DEV.toString(), "Graph " + MEDIAN.toString(), "Graph " + PERCENTILE_95.toString(),
             "Graph " + PERCENTILE_99.toString(), "Graph " + SUM.toString(), "Graph " + COUNT.toString() };
+
+    private static final DataTuple NULL_TUPLE = new DataTuple(new SystemDataSet("N/A"), new DataType("N/A", "N/A",
+            "N/A"), "N/A");
+    private static final AnalysisRecord NULL_ANALYSIS = new AnalysisRecord(NULL_TUPLE.getDataSet());
 
     private final NMONVisualizerGui gui;
 
@@ -104,6 +109,7 @@ public final class ChartSummaryTableModel extends ChoosableColumnTableModel {
             DataTupleCategoryDataset d = (DataTupleCategoryDataset) dataset;
 
             if (d.containsIntervals()) {
+                // one table row per interval
                 return d.getRowCount();
             }
             else if (d.categoriesHaveDifferentStats()) {
@@ -186,13 +192,7 @@ public final class ChartSummaryTableModel extends ChoosableColumnTableModel {
             int datasetRow = row / columnCount;
             int datasetColumn = row % columnCount;
 
-            // System.out.println(row + " " + column + "\t" + datasetRow + " " + datasetColumn);
-
             tuple = d.getTuple(datasetRow, datasetColumn);
-
-            // System.out.println(tuple.getDataSet().getHostname() + " " +
-            // tuple.getDataType().toString() + " "
-            // + tuple.getField() + "\t" + getColumnName(column));
 
             if (d.containsIntervals()) {
                 seriesName = d.getRowKey(datasetColumn).toString();
@@ -226,8 +226,16 @@ public final class ChartSummaryTableModel extends ChoosableColumnTableModel {
 
         AnalysisRecord analysis = null;
 
-        if (!graphDataOnly) {
-            analysis = gui.getAnalysis(tuple.getDataSet());
+        // will happen with bar charts that are not 'symmetric', i.e. all DataTypes are not
+        // available for all DataSets
+        if (tuple == null) {
+            tuple = NULL_TUPLE;
+            analysis = NULL_ANALYSIS;
+        }
+        else {
+            if (!graphDataOnly) {
+                analysis = gui.getAnalysis(tuple.getDataSet());
+            }
         }
 
         switch (column) {
