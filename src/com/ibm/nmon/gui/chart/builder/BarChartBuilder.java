@@ -53,7 +53,7 @@ public final class BarChartBuilder extends BaseChartBuilder<BarChartDefinition> 
 
         if (definition.hasSecondaryYAxis()) {
             // second Y axis uses a separate dataset and axis
-            plot.setDataset(1, new DataTupleCategoryDataset(definition.isStacked()));
+            plot.setDataset(1, new DataTupleCategoryDataset(false));
 
             valueAxis = new NumberAxis();
 

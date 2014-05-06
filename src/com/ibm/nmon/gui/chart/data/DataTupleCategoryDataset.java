@@ -161,8 +161,9 @@ public final class DataTupleCategoryDataset extends DefaultCategoryDataset imple
     }
 
     public final DataTupleCategoryDataset merge(DataTupleCategoryDataset other) {
-        DataTupleCategoryDataset toReturn = new DataTupleCategoryDataset(this.categoriesHaveDifferentStats
-                | other.categoriesHaveDifferentStats);
+        DataTupleCategoryDataset toReturn = new DataTupleCategoryDataset(other.containsIntervals());
+
+        toReturn.categoriesHaveDifferentStats = this.categoriesHaveDifferentStats | other.categoriesHaveDifferentStats;
 
         toReturn.tuples.putAll(this.tuples);
         toReturn.tuples.putAll(other.tuples);

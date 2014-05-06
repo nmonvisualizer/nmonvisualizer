@@ -35,8 +35,6 @@ public final class IntervalChartBuilder extends BaseChartBuilder<IntervalChartDe
 
     @Override
     protected JFreeChart createChart() {
-        // stacked is always false for IntervalChart
-
         // note that IntervalChartDefinition is a line chart but this class creates a JFreeChart
         // category plot
         // interval charts use a non-numeric x-axis (1 value per interval) which requires a category
@@ -53,7 +51,7 @@ public final class IntervalChartBuilder extends BaseChartBuilder<IntervalChartDe
 
         if (definition.hasSecondaryYAxis()) {
             // second Y axis uses a separate dataset and axis
-            plot.setDataset(1, new DataTupleCategoryDataset(false));
+            plot.setDataset(1, new DataTupleCategoryDataset(true));
 
             valueAxis = new NumberAxis();
             valueAxis.setAutoRangeIncludesZero(true);
