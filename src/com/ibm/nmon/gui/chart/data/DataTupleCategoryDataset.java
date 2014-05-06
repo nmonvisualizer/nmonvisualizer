@@ -160,7 +160,7 @@ public final class DataTupleCategoryDataset extends DefaultCategoryDataset imple
         return false;
     }
 
-    public final DataTupleCategoryDataset merge(DataTupleCategoryDataset other) {
+    public DataTupleCategoryDataset merge(DataTupleCategoryDataset other) {
         DataTupleCategoryDataset toReturn = new DataTupleCategoryDataset(other.containsIntervals());
 
         toReturn.categoriesHaveDifferentStats = this.categoriesHaveDifferentStats | other.categoriesHaveDifferentStats;
@@ -191,7 +191,6 @@ public final class DataTupleCategoryDataset extends DefaultCategoryDataset imple
                 graphData = GraphData.calculate(callback);
             }
         }
-
     }
 
     public boolean containsIntervals() {

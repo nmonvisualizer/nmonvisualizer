@@ -121,7 +121,7 @@ public final class DataTupleXYDataset extends TimeTableXYDataset implements Data
         return tuples.contains(tuple);
     }
 
-    public final DataTupleXYDataset merge(DataTupleXYDataset other) {
+    public DataTupleXYDataset merge(DataTupleXYDataset other) {
         DataTupleXYDataset toReturn = new DataTupleXYDataset(this.stacked || other.stacked);
 
         toReturn.tuples.addAll(this.tuples);

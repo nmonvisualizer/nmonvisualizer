@@ -129,7 +129,7 @@ public final class DataTupleHistogramDataset extends HistogramDataset implements
         return tuples.contains(tuple);
     }
 
-    public final DataTupleHistogramDataset merge(DataTupleHistogramDataset other) {
+    public DataTupleHistogramDataset merge(DataTupleHistogramDataset other) {
         DataTupleHistogramDataset toReturn = new DataTupleHistogramDataset();
 
         toReturn.tuples.addAll(this.tuples);

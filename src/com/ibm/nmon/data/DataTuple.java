@@ -60,6 +60,11 @@ public final class DataTuple {
     }
 
     @Override
+    public String toString() {
+        return dataSet + ": " + type + (field == null ? "-" + field : "");
+    }
+
+    @Override
     public int hashCode() {
         int code = getDataSet().hashCode();
         code = code * 59 + getDataType().hashCode();
