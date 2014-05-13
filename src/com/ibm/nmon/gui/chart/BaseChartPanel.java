@@ -25,6 +25,7 @@ import org.jfree.chart.ChartPanel;
 import org.jfree.chart.ChartTransferable;
 import org.jfree.chart.ChartUtilities;
 import org.jfree.chart.JFreeChart;
+
 import org.jfree.chart.plot.Plot;
 import org.jfree.chart.plot.CategoryPlot;
 import org.jfree.chart.plot.XYPlot;
@@ -49,7 +50,7 @@ public class BaseChartPanel extends ChartPanel implements PropertyChangeListener
         // Unfortunately, chartBuffer in ChartPanel is private so there is no way to clear the
         // memory used when the chart is not being displayed.
         super(null, DEFAULT_WIDTH, DEFAULT_HEIGHT, DEFAULT_MINIMUM_DRAW_WIDTH, DEFAULT_MINIMUM_DRAW_HEIGHT,
-                DEFAULT_MAXIMUM_DRAW_WIDTH, DEFAULT_MAXIMUM_DRAW_HEIGHT, false, true, true, false, false, true);
+                DEFAULT_MAXIMUM_DRAW_WIDTH, DEFAULT_MAXIMUM_DRAW_HEIGHT, false, true, false, false, false, true);
 
         setBackground(java.awt.Color.WHITE);
 
@@ -281,7 +282,6 @@ public class BaseChartPanel extends ChartPanel implements PropertyChangeListener
         int n = 0;
 
         // find the existing 'Copy' menu item and add an option to copy chart data after that
-        // rename the existing 'Save as...' item to 'Save Chart'
         for (MenuElement element : popup.getSubElements()) {
             JMenuItem item = (JMenuItem) element;
 
@@ -298,12 +298,18 @@ public class BaseChartPanel extends ChartPanel implements PropertyChangeListener
                 popup.add(copyData, n + 2);
                 popup.add(new JPopupMenu.Separator(), n + 3);
             }
-            else if (item.getText().equals("Save as...")) {
-                item.setText("Save Chart...");
-            }
 
             n++;
         }
+
+        // create Save Chart item
+        // note that the default 'Save as' item is no present since false was passed into the
+        // BaseChartPanel constructor when creating this class' instance
+        JMenuItem savePNG = new JMenuItem("Save Chart...");
+        savePNG.setActionCommand("SAVE_AS_PNG");
+        savePNG.addActionListener(this);
+
+        popup.add(savePNG);
 
         return popup;
     }
