@@ -27,6 +27,8 @@ final class ReportMenu extends JMenuBar {
 
     private final ReportFileChooser chooser;
 
+    private final JMenuItem save;
+
     ReportMenu(NMONVisualizerGui gui, ReportFrame parent) {
         super();
 
@@ -44,26 +46,56 @@ final class ReportMenu extends JMenuBar {
             @Override
             public void actionPerformed(ActionEvent e) {
                 if (chooser.showDialog(ReportMenu.this.parent, "Parse") == JFileChooser.APPROVE_OPTION) {
-                    ReportMenu.this.parent.loadReportDefinition(chooser.getSelectedFile());
+                    boolean reportLoaded = ReportMenu.this.parent.loadReportDefinition(chooser.getSelectedFile());
+
+                    save.setEnabled(reportLoaded);
                 }
             }
         });
 
         file.add(item);
 
-        item = new JMenuItem("Save...");
-        item.setMnemonic('s');
-        item.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_S, InputEvent.CTRL_DOWN_MASK));
+        JMenu loadDefaults = new JMenu("Load Default");
+        loadDefaults.setMnemonic('d');
+        file.add(loadDefaults);
+
+        item = new JMenuItem("DataSet Report");
+        item.setMnemonic('d');
         item.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                ReportMenu.this.parent.loadDefaultDataSetReport();
+                save.setEnabled(false);
+            }
+        });
+
+        loadDefaults.add(item);
+
+        item = new JMenuItem("All Systems Report");
+        item.setMnemonic('a');
+        item.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                ReportMenu.this.parent.loadDefaultSummaryReport();
+                save.setEnabled(false);
+            }
+        });
+
+        loadDefaults.add(item);
+
+        save = new JMenuItem("Save...");
+        save.setMnemonic('s');
+        save.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_S, InputEvent.CTRL_DOWN_MASK));
+        save.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
                 ReportMenu.this.parent.saveAllCharts();
             }
         });
         // no report initially loaded
-        item.setEnabled(false);
+        save.setEnabled(false);
 
-        file.add(item);
+        file.add(save);
         file.addSeparator();
 
         item = new JMenuItem("Close");

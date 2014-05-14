@@ -44,32 +44,45 @@ final class ReportSplitPane extends ChartSplitPane {
         setTopComponent(blank);
     }
 
+    boolean hasReport() {
+        return getTopComponent() != blank;
+    }
+
     void loadReport(File reportFile) throws IOException {
-        int location = getDividerLocation();
+        try {
+            gui.getReportCache().addReport("custom", reportFile.getAbsolutePath());
+        }
+        catch (IOException ioe) {
+            throw ioe;
+        }
+
+        createReportPanel("custom");
+    }
+
+    void loadDefaultDataSetReport() {
+        createReportPanel(com.ibm.nmon.report.ReportCache.DEFAULT_DATASET_CHARTS_KEY);
+    }
+
+    void loadDefaultSummaryReport() {
+        createReportPanel(com.ibm.nmon.report.ReportCache.DEFAULT_SUMMARY_CHARTS_KEY);
+    }
+
+    private void createReportPanel(String cacheKey) {
         setTopComponent(null);
         dispose();
 
-        try {
-            gui.getReportCache().addReport("custom", reportFile.getAbsolutePath());
+        int location = getDividerLocation();
 
-            // start with an empty list; ReportFrame will handle added the data
-            reportPanel = new ReportPanel(gui, parent, "custom", new java.util.ArrayList<DataSet>(), multiplexMode);
-            setTopComponent(reportPanel);
+        // start with an empty list; ReportFrame will handle adding the data
+        reportPanel = new ReportPanel(gui, parent, cacheKey, new java.util.ArrayList<DataSet>(), multiplexMode);
+        setTopComponent(reportPanel);
 
-            reportPanel.addPropertyChangeListener("chart", summaryTable);
-            reportPanel.addPropertyChangeListener("highlightedLine", this);
-            reportPanel.addPropertyChangeListener("highlightedBar", this);
+        reportPanel.addPropertyChangeListener("chart", summaryTable);
+        reportPanel.addPropertyChangeListener("highlightedLine", this);
+        reportPanel.addPropertyChangeListener("highlightedBar", this);
 
-            reportPanel.setEnabled(true);
-            setDividerLocation(location);
-        }
-        catch (IOException ioe) {
-            setTopComponent(blank);
-            validate();
-            reportPanel = null;
-
-            throw ioe;
-        }
+        reportPanel.setEnabled(true);
+        setDividerLocation(location);
     }
 
     void setData(Iterable<? extends DataSet> dataSets) {

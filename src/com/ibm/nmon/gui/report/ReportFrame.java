@@ -275,42 +275,62 @@ public final class ReportFrame extends JFrame implements DataSetListener {
         return gui;
     }
 
-    void loadReportDefinition(File reportFile) {
+    boolean loadReportDefinition(File reportFile) {
         if (!reportFile.exists()) {
-            int result = JOptionPane.showConfirmDialog(this, "File '" + reportFile.getName() + "' is not a valid file",
-                    "Invalid File", JOptionPane.OK_CANCEL_OPTION, JOptionPane.ERROR_MESSAGE);
+            JOptionPane.showMessageDialog(this, "File '" + reportFile.getName() + "' is not a valid file",
+                    "Invalid File", JOptionPane.ERROR_MESSAGE);
 
-            if (result != JOptionPane.OK_OPTION) {
-                return;
-            }
+            // existing report => true
+            return reportSplitPane.hasReport();
         }
 
         try {
             reportSplitPane.loadReport(reportFile);
 
-            // set the report's data
-            DataSet selected = systems.getModel().getElementAt(systems.getSelectionModel().getMinSelectionIndex());
-
-            if (selected == null) {
-                reportSplitPane.setData(ReportFrame.this.gui.getDataSets());
-            }
-            else {
-                reportSplitPane.setData(java.util.Collections.singletonList(selected));
-            }
-
             setTitle("Custom Report" + " - " + reportFile.getName());
 
-            // enable Save Charts
-            getJMenuBar().getMenu(0).getItem(1).setEnabled(true);
-        }
-        catch (java.io.IOException ioe) {
-            setTitle("Custom Report");
-            getJMenuBar().getMenu(0).getItem(1).setEnabled(false);
+            configureReport();
 
-            LOGGER.error("could not parse report file '{}'", reportFile.getAbsolutePath(), ioe);
-            JOptionPane.showMessageDialog(ReportFrame.this,
-                    "Error parsing '" + reportFile.getName() + "'\n" + ioe.getMessage(), "Parse Error",
-                    JOptionPane.ERROR_MESSAGE);
+            return true;
+        }
+        catch (Exception e) {
+            setTitle("Custom Report");
+
+            LOGGER.error("could not parse report file '{}'", reportFile.getAbsolutePath(), e);
+            JOptionPane.showMessageDialog(this, "Error parsing '" + reportFile.getName() + "'\n" + e.getMessage(),
+                    "Parse Error", JOptionPane.ERROR_MESSAGE);
+
+            //reportSplitPane.clearReport();
+
+            return false;
+        }
+    }
+
+    void loadDefaultDataSetReport() {
+        reportSplitPane.loadDefaultDataSetReport();
+
+        setTitle("Default DataSet Report");
+
+        configureReport();
+    }
+
+    void loadDefaultSummaryReport() {
+        reportSplitPane.loadDefaultSummaryReport();
+
+        setTitle("Default All Systems Report");
+
+        configureReport();
+    }
+
+    private void configureReport() {
+        // set the report's data
+        DataSet selected = systems.getModel().getElementAt(systems.getSelectionModel().getMinSelectionIndex());
+
+        if (selected == null) {
+            reportSplitPane.setData(ReportFrame.this.gui.getDataSets());
+        }
+        else {
+            reportSplitPane.setData(java.util.Collections.singletonList(selected));
         }
     }
 
