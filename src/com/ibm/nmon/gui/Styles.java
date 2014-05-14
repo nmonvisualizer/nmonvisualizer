@@ -3,16 +3,15 @@ package com.ibm.nmon.gui;
 import java.util.Map;
 
 import java.awt.Color;
-
 import java.awt.Font;
 import java.awt.font.TextAttribute;
+import java.awt.BasicStroke;
 
 import javax.swing.BorderFactory;
 import javax.swing.JComponent;
 import javax.swing.border.Border;
 
 import javax.swing.ImageIcon;
-
 import javax.swing.UIManager;
 
 import java.text.DecimalFormat;
@@ -41,6 +40,8 @@ public final class Styles {
 
     public static final Font TITLE;
 
+    public static final Font ANNOTATION_FONT;
+
     public static final Border CONTENT_BORDER = BorderFactory.createEmptyBorder(0, 5, 2, 2);
     public static final Border TITLE_BORDER = BorderFactory.createEmptyBorder(5, 2, 5, 2);
     public static final Border LOWER_LINE_BORDER = BorderFactory.createMatteBorder(0, 0, 1, 0,
@@ -50,6 +51,10 @@ public final class Styles {
 
     public static final Color ERROR_COLOR = Color.RED;
     public static final Color DEFAULT_COLOR = Color.BLACK;
+
+    public static final Color ANNOTATION_COLOR = new Color(0x222266);
+
+    public static final BasicStroke ANNOTATION_STROKE = new BasicStroke(.6f, 0, 0, 1.0f, new float[] { 1, 2, 5, 2 }, 5);
 
     public static final ImageIcon IBM_ICON = buildIcon("ibmicon.png");
 
@@ -79,6 +84,8 @@ public final class Styles {
         Map attributes = defaultFont.getAttributes();
         attributes.put(TextAttribute.STRIKETHROUGH, TextAttribute.STRIKETHROUGH_ON);
         STRIKETHROUGH = defaultFont.deriveFont(attributes);
+
+        ANNOTATION_FONT = defaultFont;
     }
 
     /**

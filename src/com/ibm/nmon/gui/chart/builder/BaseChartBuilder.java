@@ -63,6 +63,9 @@ abstract class BaseChartBuilder<C extends BaseChartDefinition> {
     protected static final Color GRID_COLOR = Color.LIGHT_GRAY;
     protected static final BasicStroke GRID_LINES = new BasicStroke(0.5f, 0, 0, 1.0f, new float[] { 5.0f, 2.0f }, 0);
 
+    protected static final java.awt.Color OUTLINE_COLOR = new java.awt.Color(0xCCCCCC);
+    protected static final BasicStroke OUTLINE_STROKE = new BasicStroke(3);
+
     protected final Logger logger = org.slf4j.LoggerFactory.getLogger(getClass());
 
     protected Interval interval;
@@ -113,7 +116,8 @@ abstract class BaseChartBuilder<C extends BaseChartDefinition> {
     /**
      * Retrieve the chart from the builder.
      * 
-     * @throws IllegalStateException if {@link #initChart()} has not been called}
+     * @throws IllegalStateException
+     *             if {@link #initChart()} has not been called}
      */
     public final JFreeChart getChart() {
         if (chart == null) {

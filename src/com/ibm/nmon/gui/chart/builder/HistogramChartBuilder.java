@@ -1,8 +1,5 @@
 package com.ibm.nmon.gui.chart.builder;
 
-import java.awt.BasicStroke;
-import java.awt.Color;
-import java.awt.Font;
 import java.util.List;
 
 import org.jfree.chart.JFreeChart;
@@ -34,11 +31,6 @@ import com.ibm.nmon.gui.chart.data.DataTupleHistogramDataset;
 import com.ibm.nmon.chart.definition.HistogramChartDefinition;
 
 public final class HistogramChartBuilder extends BaseChartBuilder<HistogramChartDefinition> {
-    private static final java.awt.Color OUTLINE_COLOR = new java.awt.Color(0xCCCCCC);
-    private static final Font MARKER_FONT = new Font("null", Font.PLAIN, 12);
-    private static final Color MARKER_COLOR = new Color(0x222266);
-    private static final BasicStroke MARKER_LINE = new BasicStroke(.6f, 0, 0, 1.0f, new float[] { 1, 2, 5, 2 }, 5);
-
     // current vertical position for annotations
     // incremented in addHistogram to prevent overlapping
     private int insetTop = 5;
@@ -141,7 +133,7 @@ public final class HistogramChartBuilder extends BaseChartBuilder<HistogramChart
             renderer.setBaseToolTipGenerator(new StandardXYToolTipGenerator("{1} - {2}", Styles.NUMBER_FORMAT,
                     Styles.NUMBER_FORMAT));
 
-            renderer.setBaseOutlineStroke(new BasicStroke(3));
+            renderer.setBaseOutlineStroke(OUTLINE_STROKE);
             renderer.setBaseOutlinePaint(OUTLINE_COLOR);
         }
 
@@ -230,10 +222,10 @@ public final class HistogramChartBuilder extends BaseChartBuilder<HistogramChart
                     ValueMarker marker = new ValueMarker(value);
                     marker.setLabel((useFieldName ? dataset.getSeriesKey(i) + " " : "")
                             + stat.getName(getGranularity()) + ": " + Styles.NUMBER_FORMAT.format(value));
-                    marker.setStroke(MARKER_LINE);
-                    marker.setPaint(MARKER_COLOR);
-                    marker.setLabelFont(MARKER_FONT);
-                    marker.setLabelPaint(MARKER_COLOR);
+                    marker.setStroke(Styles.ANNOTATION_STROKE);
+                    marker.setPaint(Styles.ANNOTATION_COLOR);
+                    marker.setLabelFont(Styles.ANNOTATION_FONT);
+                    marker.setLabelPaint(Styles.ANNOTATION_COLOR);
                     marker.setLabelOffset(new RectangleInsets(insetTop, 5, 5, 10));
                     marker.setLabelTextAnchor(TextAnchor.TOP_CENTER);
 

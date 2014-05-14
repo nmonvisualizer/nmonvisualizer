@@ -1,7 +1,5 @@
 package com.ibm.nmon.gui.chart.builder;
 
-import java.awt.BasicStroke;
-
 import org.jfree.chart.JFreeChart;
 import org.jfree.chart.axis.CategoryAxis;
 import org.jfree.chart.axis.NumberAxis;
@@ -30,8 +28,6 @@ import com.ibm.nmon.gui.chart.data.DataTupleCategoryDataset;
 import com.ibm.nmon.chart.definition.BarChartDefinition;
 
 public final class BarChartBuilder extends BaseChartBuilder<BarChartDefinition> {
-    private static final java.awt.Color OUTLINE_COLOR = new java.awt.Color(0xCCCCCC);
-
     public BarChartBuilder() {
         super();
     }
@@ -94,7 +90,7 @@ public final class BarChartBuilder extends BaseChartBuilder<BarChartDefinition> 
             renderer.setBaseToolTipGenerator(new StandardCategoryToolTipGenerator("{1} {0} - {2} ({3})",
                     Styles.NUMBER_FORMAT));
 
-            renderer.setBaseOutlineStroke(new BasicStroke(3));
+            renderer.setBaseOutlineStroke(OUTLINE_STROKE);
             renderer.setBaseOutlinePaint(OUTLINE_COLOR);
 
             plot.getRangeAxis(i).setLabelFont(LABEL_FONT);
