@@ -70,6 +70,9 @@ public final class ReportPanel extends JTabbedPane implements PropertyChangeList
 
     private final List<DataSet> dataSets;
 
+    // either Annotation or Marker
+    private final List<Object> annotations;
+
     private final String reportCacheKey;
     private MultiplexMode multiplexMode;
     private List<BaseChartDefinition> chartsInUse;
@@ -112,6 +115,8 @@ public final class ReportPanel extends JTabbedPane implements PropertyChangeList
         this.chartNeedsUpdate = new BitSet(reports.size());
 
         this.chartNeedsUpdate.set(0, chartNeedsUpdate.size(), true);
+
+        this.annotations = new java.util.ArrayList<Object>();
 
         buildTabs(gui);
 
@@ -178,8 +183,7 @@ public final class ReportPanel extends JTabbedPane implements PropertyChangeList
                 }
 
                 // leave the listeners enabled
-                // the heavy work done in the listeners is in updateChart() which checks for enabled
-                // too
+                // the heavy work is in updateChart() which checks for enabled too
             }
         }
     }
@@ -332,6 +336,18 @@ public final class ReportPanel extends JTabbedPane implements PropertyChangeList
             // propagate chart events to listeners
             firePropertyChange(evt.getPropertyName(), evt.getOldValue(), evt.getNewValue());
         }
+        else if ("annotation".equals(evt.getPropertyName())) {
+            // called by chart panels when annotations / markers are added
+            // store the object and propagate chart events to listeners
+            annotations.add(evt.getNewValue());
+
+            // all charts except the current need to be updated to show the new annotation
+            chartNeedsUpdate.set(0, chartNeedsUpdate.size(), true);
+            ;
+            chartNeedsUpdate.flip(getSelectedIndex());
+
+            firePropertyChange(evt.getPropertyName(), evt.getOldValue(), evt.getNewValue());
+        }
         else if (evt.getPropertyName().startsWith("highlighted")) {
             // called by chart panels when an element is highlighted
             // propagate chart events to listeners
@@ -473,8 +489,7 @@ public final class ReportPanel extends JTabbedPane implements PropertyChangeList
                     }
 
                     // this class will receive each chart's change events and forward them rather
-                    // than
-                    // expose each chart as a separate listener
+                    // than expose each chart as a separate listener
                     chartPanel.addPropertyChangeListener(this);
                     addTab(report.getShortName(), chartPanel);
                 }
@@ -495,6 +510,7 @@ public final class ReportPanel extends JTabbedPane implements PropertyChangeList
 
         // setChart will fire the event that updates the data table
         getChartPanel(index).setChart(chart);
+        getChartPanel(index).addAnnotations(java.util.Collections.unmodifiableList(annotations));
     }
 
     public void saveAllCharts(final String directory) {
