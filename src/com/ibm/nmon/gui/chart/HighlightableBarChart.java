@@ -52,26 +52,29 @@ public final class HighlightableBarChart extends JFreeChart {
     public void draw(Graphics2D g2, Rectangle2D chartArea, Point2D anchor, ChartRenderingInfo info) {
         super.draw(g2, chartArea, anchor, info);
 
-        // for each CategoryItem, highlight the bar
-        // this has to be done during painting so it carries over on repaints
-        for (CategoryItemEntity entity : selectedEntities) {
-            Rectangle2D area = ((Rectangle2D) entity.getArea()).createIntersection(info.getPlotInfo().getDataArea());
+        if (info != null) {
+            // for each CategoryItem, highlight the bar
+            // this has to be done during painting so it carries over on repaints
+            for (CategoryItemEntity entity : selectedEntities) {
+                Rectangle2D area = ((Rectangle2D) entity.getArea())
+                        .createIntersection(info.getPlotInfo().getDataArea());
 
-            CategoryItemRenderer renderer = ((CategoryPlot) getPlot()).getRenderer();
-            int row = entity.getDataset().getRowIndex(entity.getRowKey());
-            int column = entity.getDataset().getColumnIndex(entity.getColumnKey());
+                CategoryItemRenderer renderer = ((CategoryPlot) getPlot()).getRenderer();
+                int row = entity.getDataset().getRowIndex(entity.getRowKey());
+                int column = entity.getDataset().getColumnIndex(entity.getColumnKey());
 
-            java.awt.Color baseColor = (java.awt.Color) renderer.getItemPaint(row, column);
+                java.awt.Color baseColor = (java.awt.Color) renderer.getItemPaint(row, column);
 
-            // redraw the bar with the base color
-            // assuming bar was drawn with SimpleGradientBarPainter, this will be a flat color
-            g2.setPaint(baseColor);
-            g2.fill(area);
+                // redraw the bar with the base color
+                // assuming bar was drawn with SimpleGradientBarPainter, this will be a flat color
+                g2.setPaint(baseColor);
+                g2.fill(area);
 
-            // draw a brighter outline around the bar
-            g2.setStroke(renderer.getBaseOutlineStroke());
-            g2.setPaint(baseColor.darker());
-            g2.draw(area);
+                // draw a brighter outline around the bar
+                g2.setStroke(renderer.getBaseOutlineStroke());
+                g2.setPaint(baseColor.darker());
+                g2.draw(area);
+            }
         }
     }
 }
