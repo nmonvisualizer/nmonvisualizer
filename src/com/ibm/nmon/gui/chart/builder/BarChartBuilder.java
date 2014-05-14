@@ -53,7 +53,13 @@ public final class BarChartBuilder extends BaseChartBuilder<BarChartDefinition> 
 
             valueAxis = new NumberAxis();
 
-            plot.setRenderer(1, new BarRenderer());
+            if (definition.isStacked()) {
+                plot.setRenderer(1, new StackedBarRenderer());
+            }
+            else {
+                plot.setRenderer(1, new BarRenderer());
+            }
+
             plot.setRangeAxis(1, valueAxis);
             plot.mapDatasetToRangeAxis(1, 1);
         }

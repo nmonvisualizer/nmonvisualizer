@@ -227,7 +227,7 @@ public final class HistogramChartBuilder extends BaseChartBuilder<HistogramChart
                     marker.setLabelFont(Styles.ANNOTATION_FONT);
                     marker.setLabelPaint(Styles.ANNOTATION_COLOR);
                     marker.setLabelOffset(new RectangleInsets(insetTop, 5, 5, 10));
-                    marker.setLabelTextAnchor(TextAnchor.TOP_CENTER);
+                    marker.setLabelTextAnchor(TextAnchor.TOP_RIGHT);
 
                     plot.addDomainMarker(marker);
 
