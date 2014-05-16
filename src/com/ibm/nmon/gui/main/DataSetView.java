@@ -125,6 +125,10 @@ final class DataSetView extends ChartSplitPane {
             reportPanel.addPropertyChangeListener("highlightedLine", this);
             reportPanel.addPropertyChangeListener("highlightedBar", this);
 
+            // ensure ChartSplitPane forwards these events
+            reportPanel.addPropertyChangeListener("chart", this);
+            reportPanel.addPropertyChangeListener("annotation", this);
+
             reportPanel.setEnabled(false);
 
             reportPanels.put(data.getHostname(), reportPanel);

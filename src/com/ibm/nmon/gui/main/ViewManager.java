@@ -15,8 +15,16 @@ import javax.swing.JPanel;
 
 import com.ibm.nmon.data.DataSet;
 import com.ibm.nmon.data.DataType;
+
 import com.ibm.nmon.gui.analysis.SummaryTablePanel;
+
+import com.ibm.nmon.gui.chart.BaseChartPanel;
+
+import com.ibm.nmon.gui.chart.annotate.AnnotationCache;
+import com.ibm.nmon.gui.chart.annotate.AnnotationListener;
+
 import com.ibm.nmon.gui.file.GUIFileChooser;
+
 import com.ibm.nmon.gui.Styles;
 
 /**
@@ -25,7 +33,8 @@ import com.ibm.nmon.gui.Styles;
  * {@link SummaryTablePanel}. The chart view will be one of {@link SummaryView}, {@link DataSetView}
  * or {@link DataTypeView} depending on the current tree path selected.
  */
-public final class ViewManager extends JPanel implements PropertyChangeListener, TreeSelectionListener {
+public final class ViewManager extends JPanel implements PropertyChangeListener, TreeSelectionListener,
+        AnnotationListener {
     private static final long serialVersionUID = 1411425971480047253L;
 
     private final NMONVisualizerGui gui;
@@ -44,6 +53,9 @@ public final class ViewManager extends JPanel implements PropertyChangeListener,
 
     private ChartSplitPane currentView;
 
+    // if adding an annotation, ignore events from AnnotationCache
+    private boolean addingAnnotation = false;
+
     // single use flag to make sure the ChartSplitPane is setup correctly
     // see PathParser.onReturn()
     private boolean displayedOnce = false;
@@ -57,6 +69,14 @@ public final class ViewManager extends JPanel implements PropertyChangeListener,
         dataSetView = new DataSetView(gui);
         dataTypeView = new DataTypeView(gui);
 
+        summaryView.addPropertyChangeListener("annotation", this);
+        dataSetView.addPropertyChangeListener("annotation", this);
+        dataTypeView.addPropertyChangeListener("annotation", this);
+
+        summaryView.addPropertyChangeListener("chart", this);
+        dataSetView.addPropertyChangeListener("chart", this);
+        dataTypeView.addPropertyChangeListener("chart", this);
+
         blank = new JPanel();
         blank.setBackground(java.awt.Color.WHITE);
         blank.setBorder(Styles.createTopLineBorder(this));
@@ -65,6 +85,8 @@ public final class ViewManager extends JPanel implements PropertyChangeListener,
         tablePanel.setEnabled(false);
 
         gui.addPropertyChangeListener("chartsDisplayed", this);
+
+        AnnotationCache.addAnnotationListener(this);
 
         add(blank);
     }
@@ -155,6 +177,16 @@ public final class ViewManager extends JPanel implements PropertyChangeListener,
         }
     }
 
+    private void updateDividerLocation() {
+        if (currentView != null) {
+            int location = currentView.getDividerLocation();
+
+            summaryView.setDividerLocation(location);
+            dataSetView.setDividerLocation(location);
+            dataTypeView.setDividerLocation(location);
+        }
+    }
+
     public void saveCharts() {
         if (currentView != null) {
             // note title here is consistent with BaseChartPanel.doSaveAs()
@@ -183,6 +215,43 @@ public final class ViewManager extends JPanel implements PropertyChangeListener,
                 // disabling the chart menu will be handled in MainMenu.propertyChange()
             }
         }
+        else if ("chart".equals(evt.getPropertyName())) {
+            if (AnnotationCache.hasAnnotations()) {
+                if (evt.getNewValue() != null) {
+                    ((BaseChartPanel) evt.getNewValue()).addAnnotations(AnnotationCache.getAnnotations());
+                    ((BaseChartPanel) evt.getNewValue()).addMarkers(AnnotationCache.getMarkers());
+                }
+            }
+        }
+        else if ("annotation".equals(evt.getPropertyName())) {
+            addingAnnotation = true;
+            AnnotationCache.add(evt.getNewValue());
+            addingAnnotation = false;
+        }
+    }
+
+    @Override
+    public void annotationAdded() {
+        annotationsCleared();
+    }
+
+    @Override
+    public void annotationRemoved() {
+        annotationsCleared();
+    }
+
+    @Override
+    public void annotationsCleared() {
+        if (!addingAnnotation) {
+            if (currentView != null) {
+                BaseChartPanel currentChart = currentView.getChartPanel();
+
+                if (currentChart != null) {
+                    currentChart.addAnnotations(AnnotationCache.getAnnotations());
+                    currentChart.addMarkers(AnnotationCache.getMarkers());
+                }
+            }
+        }
     }
 
     @Override
@@ -190,16 +259,6 @@ public final class ViewManager extends JPanel implements PropertyChangeListener,
         currentPath = e.getNewLeadSelectionPath();
 
         pathParser.parse(currentPath);
-    }
-
-    private void updateDividerLocation() {
-        if (currentView != null) {
-            int location = currentView.getDividerLocation();
-
-            summaryView.setDividerLocation(location);
-            dataSetView.setDividerLocation(location);
-            dataTypeView.setDividerLocation(location);
-        }
     }
 
     private final class PathParser extends TreePathParser {

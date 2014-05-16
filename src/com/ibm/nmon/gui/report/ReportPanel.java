@@ -70,9 +70,6 @@ public final class ReportPanel extends JTabbedPane implements PropertyChangeList
 
     private final List<DataSet> dataSets;
 
-    // either Annotation or Marker
-    private final List<Object> annotations;
-
     private final String reportCacheKey;
     private MultiplexMode multiplexMode;
     private List<BaseChartDefinition> chartsInUse;
@@ -116,8 +113,6 @@ public final class ReportPanel extends JTabbedPane implements PropertyChangeList
 
         this.chartNeedsUpdate.set(0, chartNeedsUpdate.size(), true);
 
-        this.annotations = new java.util.ArrayList<Object>();
-
         buildTabs(gui);
 
         addChangeListener(new ChangeListener() {
@@ -130,7 +125,7 @@ public final class ReportPanel extends JTabbedPane implements PropertyChangeList
                     if (idx != -1) {
                         if (!updateChart()) {
                             // still need to notify listeners that the chart is now showing
-                            firePropertyChange("chart", null, getChartPanel(idx).getDataset());
+                            firePropertyChange("chart", null, getChartPanel(idx));
                         }
 
                         if ((previousTab != -1) && (previousTab < getTabCount())) {
@@ -163,7 +158,7 @@ public final class ReportPanel extends JTabbedPane implements PropertyChangeList
                     if (idx != -1) {
                         if (!updateChart()) {
                             // still need to notify listeners that the chart is now showing
-                            firePropertyChange("chart", null, getChartPanel(idx).getDataset());
+                            firePropertyChange("chart", null, getChartPanel(idx));
                         }
                     }
                 }
@@ -173,7 +168,7 @@ public final class ReportPanel extends JTabbedPane implements PropertyChangeList
                         getChartPanel().clearChart();
                         // ensure chart is recreated when re-enabled
                         chartNeedsUpdate.set(idx);
-                        firePropertyChange("chart", null, null);
+                        // chart panel will already have fired a PropertyChange event
                     }
                 }
 
@@ -298,7 +293,12 @@ public final class ReportPanel extends JTabbedPane implements PropertyChangeList
 
     @Override
     public void propertyChange(PropertyChangeEvent evt) {
-        if ("granularity".equals(evt.getPropertyName())) {
+        if ("chart".equals(evt.getPropertyName())) {
+            // called by chart panels when the chart changes
+            // propagate chart events to listeners
+            firePropertyChange(evt.getPropertyName(), evt.getOldValue(), evt.getNewValue());
+        }
+        else if ("granularity".equals(evt.getPropertyName())) {
             int newGranularity = (Integer) evt.getNewValue();
 
             ChartFactory.setGranularity(newGranularity);
@@ -325,25 +325,10 @@ public final class ReportPanel extends JTabbedPane implements PropertyChangeList
                 updateChart();
             }
         }
-        else if ("timeZone".equals(evt.getPropertyName())) {
-            // assume bar charts do not need to be updated and linecharts handle this internally
-            // interval charts may have unnamed intervals that need to be re-displayed
-            // just recreate the chart
-            updateIntervalCharts();
-        }
-        else if ("chart".equals(evt.getPropertyName())) {
-            // called by chart panels when the chart changes
-            // propagate chart events to listeners
-            firePropertyChange(evt.getPropertyName(), evt.getOldValue(), evt.getNewValue());
-        }
         else if ("annotation".equals(evt.getPropertyName())) {
             // called by chart panels when annotations / markers are added
-            // store the object and propagate chart events to listeners
-            annotations.add(evt.getNewValue());
-
             // all charts except the current need to be updated to show the new annotation
             chartNeedsUpdate.set(0, chartNeedsUpdate.size(), true);
-            ;
             chartNeedsUpdate.flip(getSelectedIndex());
 
             firePropertyChange(evt.getPropertyName(), evt.getOldValue(), evt.getNewValue());
@@ -352,6 +337,12 @@ public final class ReportPanel extends JTabbedPane implements PropertyChangeList
             // called by chart panels when an element is highlighted
             // propagate chart events to listeners
             firePropertyChange(evt.getPropertyName(), evt.getOldValue(), evt.getNewValue());
+        }
+        else if ("timeZone".equals(evt.getPropertyName())) {
+            // assume bar charts do not need to be updated and linecharts handle this internally
+            // interval charts may have unnamed intervals that need to be re-displayed
+            // just recreate the chart
+            updateIntervalCharts();
         }
     }
 
@@ -472,16 +463,16 @@ public final class ReportPanel extends JTabbedPane implements PropertyChangeList
                     BaseChartPanel chartPanel = null;
 
                     if (report.getClass() == LineChartDefinition.class) {
-                        chartPanel = new LineChartPanel(gui);
+                        chartPanel = new LineChartPanel(gui, parent);
                     }
                     else if (report.getClass() == IntervalChartDefinition.class) {
-                        chartPanel = new IntervalChartPanel(gui);
+                        chartPanel = new IntervalChartPanel(gui, parent);
                     }
                     else if (report.getClass() == BarChartDefinition.class) {
-                        chartPanel = new BarChartPanel(gui);
+                        chartPanel = new BarChartPanel(gui, parent);
                     }
                     else if (report.getClass() == HistogramChartDefinition.class) {
-                        chartPanel = new LineChartPanel(gui);
+                        chartPanel = new LineChartPanel(gui, parent);
                     }
                     else {
                         LOGGER.error("cannot create chart panel for {} ({})", report.getShortName(), report.getClass()
@@ -510,7 +501,7 @@ public final class ReportPanel extends JTabbedPane implements PropertyChangeList
 
         // setChart will fire the event that updates the data table
         getChartPanel(index).setChart(chart);
-        getChartPanel(index).addAnnotations(java.util.Collections.unmodifiableList(annotations));
+        // getChartPanel(index).addAnnotations(java.util.Collections.unmodifiableList(annotations));
     }
 
     public void saveAllCharts(final String directory) {

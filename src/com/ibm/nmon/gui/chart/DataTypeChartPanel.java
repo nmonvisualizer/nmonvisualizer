@@ -34,7 +34,7 @@ public final class DataTypeChartPanel extends LineChartPanel implements Interval
     private ExactDataDefinition definition;
 
     public DataTypeChartPanel(NMONVisualizerGui gui) {
-        super(gui);
+        super(gui, gui.getMainFrame());
 
         chartBuilder = new LineChartBuilder();
         chartBuilder.addPlugin(new LineChartBuilderPlugin(gui));

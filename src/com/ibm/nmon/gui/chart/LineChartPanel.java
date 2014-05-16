@@ -4,9 +4,13 @@ import java.awt.Stroke;
 import java.awt.BasicStroke;
 import java.awt.event.ActionListener;
 import java.awt.event.ActionEvent;
+
 import java.beans.PropertyChangeEvent;
+
 import java.util.List;
 import java.util.TimeZone;
+
+import javax.swing.JFrame;
 
 import javax.swing.JMenu;
 import javax.swing.JMenuItem;
@@ -49,8 +53,8 @@ public class LineChartPanel extends BaseChartPanel implements ChartMouseListener
 
     private final BasicStroke SELECTED_STROKE = new BasicStroke(5);
 
-    public LineChartPanel(NMONVisualizerGui gui) {
-        super(gui);
+    public LineChartPanel(NMONVisualizerGui gui, JFrame parent) {
+        super(gui, parent);
 
         addChartMouseListener(this);
 
@@ -114,22 +118,35 @@ public class LineChartPanel extends BaseChartPanel implements ChartMouseListener
 
     @Override
     public void addAnnotations(List<Annotation> annotations) {
-        for (Annotation a : annotations) {
-            if (a instanceof XYAnnotation) {
-                XYAnnotation annotation = (XYAnnotation) a;
-                getChart().getXYPlot().addAnnotation(annotation);
+        if (getChart() != null) {
+            XYPlot plot = getChart().getXYPlot();
+
+            plot.clearAnnotations();
+
+            for (Annotation a : annotations) {
+                if (a instanceof XYAnnotation) {
+                    XYAnnotation annotation = (XYAnnotation) a;
+                    plot.addAnnotation(annotation);
+                }
             }
         }
     }
 
     @Override
     public void addMarkers(List<Marker> markers) {
-        for (Marker marker : markers) {
-            if (marker instanceof RangeValueMarker) {
-                getChart().getXYPlot().addRangeMarker(marker);
-            }
-            else if (marker instanceof DomainValueMarker) {
-                getChart().getXYPlot().addDomainMarker(marker);
+        if (getChart() != null) {
+            XYPlot plot = getChart().getXYPlot();
+
+            plot.clearDomainMarkers();
+            plot.clearRangeMarkers();
+
+            for (Marker marker : markers) {
+                if (marker instanceof RangeValueMarker) {
+                    plot.addRangeMarker(marker);
+                }
+                else if (marker instanceof DomainValueMarker) {
+                    plot.addDomainMarker(marker);
+                }
             }
         }
     }
@@ -144,7 +161,22 @@ public class LineChartPanel extends BaseChartPanel implements ChartMouseListener
         item.addActionListener(new AnnotateLineAction() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                ValueMarker marker = createVerticalMarker();
+                ValueMarker marker = createVerticalMarker(null);
+
+                getChart().getXYPlot().addDomainMarker(marker);
+
+                firePropertyChange("annotation", null, marker);
+            }
+        });
+        annotate.add(item);
+
+        item = new JMenuItem("Vertical Line with Text");
+        item.addActionListener(new AnnotateLineAction() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                String text = getAnnotationText();
+
+                ValueMarker marker = createVerticalMarker(text);
 
                 getChart().getXYPlot().addDomainMarker(marker);
 
@@ -157,7 +189,22 @@ public class LineChartPanel extends BaseChartPanel implements ChartMouseListener
         item.addActionListener(new AnnotateLineAction() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                ValueMarker marker = createHorizontalMarker();
+                ValueMarker marker = createHorizontalMarker(null);
+
+                getChart().getXYPlot().addRangeMarker(marker);
+
+                firePropertyChange("annotation", null, marker);
+            }
+        });
+        annotate.add(item);
+
+        item = new JMenuItem("Horizontal Line with Text");
+        item.addActionListener(new AnnotateLineAction() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                String text = getAnnotationText();
+
+                ValueMarker marker = createHorizontalMarker(text);
 
                 getChart().getXYPlot().addRangeMarker(marker);
 
@@ -261,41 +308,50 @@ public class LineChartPanel extends BaseChartPanel implements ChartMouseListener
     }
 
     public abstract class AnnotateLineAction implements ActionListener {
-        protected final ValueMarker createVerticalMarker() {
+        protected final ValueMarker createVerticalMarker(String text) {
             double x = getGraphCoordinates()[0];
 
-            ValueMarker marker = new ValueMarker(x);
-            marker.setLabel(Styles.NUMBER_FORMAT.format(x));
+            ValueMarker marker = new DomainValueMarker(x);
             marker.setLabelOffset(new RectangleInsets(5, 5, 5, 5));
             marker.setLabelTextAnchor(TextAnchor.TOP_RIGHT);
             formatMarker(marker);
 
-            if (getChart().getXYPlot().getDomainAxis() instanceof org.jfree.chart.axis.DateAxis) {
-                double range = getChart().getXYPlot().getDomainAxis().getUpperBound()
-                        - getChart().getXYPlot().getDomainAxis().getLowerBound();
+            if (text == null) {
+                if (getChart().getXYPlot().getDomainAxis() instanceof org.jfree.chart.axis.DateAxis) {
+                    double range = getChart().getXYPlot().getDomainAxis().getUpperBound()
+                            - getChart().getXYPlot().getDomainAxis().getLowerBound();
 
-                if (range > (86400 * 1000)) {
-                    marker.setLabel(new java.text.SimpleDateFormat(Styles.DATE_FORMAT_STRING).format(x));
+                    if (range > (86400 * 1000)) {
+                        marker.setLabel(new java.text.SimpleDateFormat(Styles.DATE_FORMAT_STRING).format(x));
+                    }
+                    else {
+                        marker.setLabel(new java.text.SimpleDateFormat(Styles.DATE_FORMAT_STRING_SHORT).format(x));
+                    }
                 }
                 else {
-                    marker.setLabel(new java.text.SimpleDateFormat(Styles.DATE_FORMAT_STRING_SHORT).format(x));
+                    marker.setLabel(Styles.NUMBER_FORMAT.format(x));
                 }
             }
             else {
-                marker.setLabel(Styles.NUMBER_FORMAT.format(x));
+                marker.setLabel(text);
             }
 
             return marker;
         }
 
-        protected final ValueMarker createHorizontalMarker() {
+        protected final ValueMarker createHorizontalMarker(String text) {
             double y = getGraphCoordinates()[1];
 
-            ValueMarker marker = new ValueMarker(y);
-            marker.setLabel(Styles.NUMBER_FORMAT.format(y));
+            ValueMarker marker = new RangeValueMarker(y);
             marker.setLabelTextAnchor(TextAnchor.BASELINE_LEFT);
             formatMarker(marker);
 
+            if (text == null) {
+                marker.setLabel(Styles.NUMBER_FORMAT.format(y));
+            }
+            else {
+                marker.setLabel(text);
+            }
             return marker;
         }
 

@@ -4,6 +4,7 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.util.List;
 
+import javax.swing.JFrame;
 import javax.swing.JMenuItem;
 import javax.swing.JOptionPane;
 
@@ -30,8 +31,8 @@ public final class BarChartPanel extends BaseChartPanel implements ChartMouseLis
     private final JMenuItem annotateBar;
     private boolean canAnnotate = false;
 
-    public BarChartPanel(NMONVisualizerGui gui) {
-        super(gui);
+    public BarChartPanel(NMONVisualizerGui gui, JFrame parent) {
+        super(gui, parent);
 
         addChartMouseListener(this);
 
@@ -98,10 +99,18 @@ public final class BarChartPanel extends BaseChartPanel implements ChartMouseLis
 
     @Override
     public void addAnnotations(List<Annotation> annotations) {
-        for (Annotation a : annotations) {
-            if (a instanceof CategoryTextAnnotation) {
-                CategoryTextAnnotation annotation = (CategoryTextAnnotation) a;
-                getChart().getCategoryPlot().addAnnotation(annotation);
+        if (getChart() != null) {
+            CategoryPlot plot = getChart().getCategoryPlot();
+
+            plot.clearAnnotations();
+            for (Annotation a : annotations) {
+                if (a instanceof CategoryTextAnnotation) {
+                    CategoryTextAnnotation annotation = (CategoryTextAnnotation) a;
+
+                    if (plot.getCategories().contains(annotation.getCategory())) {
+                        plot.addAnnotation(annotation);
+                    }
+                }
             }
         }
     }

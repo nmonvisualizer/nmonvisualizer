@@ -3,48 +3,52 @@ package com.ibm.nmon.gui.report;
 import org.slf4j.Logger;
 
 import javax.swing.JFrame;
-
 import javax.swing.ButtonGroup;
 import javax.swing.JLabel;
 import javax.swing.JList;
 import javax.swing.JRadioButton;
 import javax.swing.ListSelectionModel;
 import javax.swing.DefaultListCellRenderer;
-
 import javax.swing.JSplitPane;
 import javax.swing.JOptionPane;
-
 import javax.swing.JFileChooser;
 
 import java.awt.BorderLayout;
 import java.awt.Component;
 import java.awt.Dimension;
-import java.awt.event.ActionEvent;
+
 import java.awt.event.ActionListener;
+import java.awt.event.ActionEvent;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
+import javax.swing.event.ListSelectionListener;
+import javax.swing.event.ListSelectionEvent;
+
+import java.beans.PropertyChangeListener;
 
 import java.io.File;
 
 import javax.swing.JPanel;
+
 import javax.swing.border.EmptyBorder;
-import javax.swing.event.ListSelectionEvent;
-import javax.swing.event.ListSelectionListener;
 
 import com.ibm.nmon.data.DataSet;
 import com.ibm.nmon.data.DataSetListener;
 
 import com.ibm.nmon.gui.main.NMONVisualizerGui;
+import com.ibm.nmon.gui.chart.BaseChartPanel;
+
+import com.ibm.nmon.gui.chart.annotate.AnnotationCache;
+import com.ibm.nmon.gui.chart.annotate.AnnotationListener;
 
 import com.ibm.nmon.gui.file.GUIFileChooser;
-
 import com.ibm.nmon.gui.Styles;
 
 /**
- * Window for displaying a custom set of charts. Includes a list of process datasets (systems) on
+ * Window for displaying a custom set of charts. Includes a list of processed datasets (systems) on
  * the left and a chart on the right.
  */
-public final class ReportFrame extends JFrame implements DataSetListener {
+public final class ReportFrame extends JFrame implements DataSetListener, PropertyChangeListener, AnnotationListener {
     private static final long serialVersionUID = -2870624156130798498L;
 
     private static final Logger LOGGER = org.slf4j.LoggerFactory.getLogger(ReportFrame.class);
@@ -55,11 +59,15 @@ public final class ReportFrame extends JFrame implements DataSetListener {
 
     private final JList<DataSet> systems;
 
+    // if adding an annotation, ignore events from AnnotationCache
+    private boolean addingAnnotation = false;
+
     public ReportFrame(NMONVisualizerGui gui) {
         super("Custom Report");
 
         this.gui = gui;
         this.reportSplitPane = new ReportSplitPane(gui, this);
+        this.reportSplitPane.addPropertyChangeListener(this);
 
         setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
         setResizable(true);
@@ -197,6 +205,7 @@ public final class ReportFrame extends JFrame implements DataSetListener {
         enableMultiplexing(false);
 
         gui.addDataSetListener(this);
+        AnnotationCache.addAnnotationListener(this);
 
         addWindowListener(new WindowAdapter() {
             @Override
@@ -213,7 +222,7 @@ public final class ReportFrame extends JFrame implements DataSetListener {
     public void dataAdded(DataSet data) {
         if (systems.getSelectedIndex() == 0) {
             // update All Systems chart
-            reportSplitPane.setData(ReportFrame.this.gui.getDataSets());
+            reportSplitPane.setData(gui.getDataSets());
         }
 
         ((ReportSystemsListModel) systems.getModel()).addData(data);
@@ -223,7 +232,7 @@ public final class ReportFrame extends JFrame implements DataSetListener {
     public void dataRemoved(DataSet data) {
         if (systems.getSelectedIndex() == 0) {
             // update All Systems chart
-            reportSplitPane.setData(ReportFrame.this.gui.getDataSets());
+            reportSplitPane.setData(gui.getDataSets());
         }
         else {
             if (systems.getSelectedValue().equals(data)) {
@@ -244,7 +253,7 @@ public final class ReportFrame extends JFrame implements DataSetListener {
     public void dataCleared() {
         if (systems.getSelectedIndex() == 0) {
             // update All Systems chart
-            reportSplitPane.setData(ReportFrame.this.gui.getDataSets());
+            reportSplitPane.setData(gui.getDataSets());
         }
         else {
             systems.setSelectedIndex(0);
@@ -267,8 +276,45 @@ public final class ReportFrame extends JFrame implements DataSetListener {
         reportSplitPane.dispose();
 
         gui.removeDataSetListener(this);
+        AnnotationCache.removeAnnoationListener(this);
 
         super.dispose();
+    }
+
+    public void propertyChange(java.beans.PropertyChangeEvent evt) {
+        if ("chart".equals(evt.getPropertyName())) {
+            if (evt.getNewValue() != null) {
+                ((BaseChartPanel) evt.getNewValue()).addAnnotations(AnnotationCache.getAnnotations());
+                ((BaseChartPanel) evt.getNewValue()).addMarkers(AnnotationCache.getMarkers());
+            }
+        }
+        if ("annotation".equals(evt.getPropertyName())) {
+            addingAnnotation = true;
+            AnnotationCache.add(evt.getNewValue());
+            addingAnnotation = false;
+        }
+    }
+
+    @Override
+    public void annotationAdded() {
+        annotationsCleared();
+    }
+
+    @Override
+    public void annotationRemoved() {
+        annotationsCleared();
+    }
+
+    @Override
+    public void annotationsCleared() {
+        if (!addingAnnotation) {
+            BaseChartPanel currentChart = reportSplitPane.getChartPanel();
+
+            if (currentChart != null) {
+                currentChart.addAnnotations(AnnotationCache.getAnnotations());
+                currentChart.addMarkers(AnnotationCache.getMarkers());
+            }
+        }
     }
 
     NMONVisualizerGui getGui() {
@@ -300,7 +346,7 @@ public final class ReportFrame extends JFrame implements DataSetListener {
             JOptionPane.showMessageDialog(this, "Error parsing '" + reportFile.getName() + "'\n" + e.getMessage(),
                     "Parse Error", JOptionPane.ERROR_MESSAGE);
 
-            //reportSplitPane.clearReport();
+            // reportSplitPane.clearReport();
 
             return false;
         }
@@ -327,7 +373,7 @@ public final class ReportFrame extends JFrame implements DataSetListener {
         DataSet selected = systems.getModel().getElementAt(systems.getSelectionModel().getMinSelectionIndex());
 
         if (selected == null) {
-            reportSplitPane.setData(ReportFrame.this.gui.getDataSets());
+            reportSplitPane.setData(gui.getDataSets());
         }
         else {
             reportSplitPane.setData(java.util.Collections.singletonList(selected));
@@ -335,7 +381,7 @@ public final class ReportFrame extends JFrame implements DataSetListener {
     }
 
     void saveAllCharts() {
-        GUIFileChooser chooser = new GUIFileChooser(ReportFrame.this.gui, "Select Save Location");
+        GUIFileChooser chooser = new GUIFileChooser(gui, "Select Save Location");
         chooser.setFileSelectionMode(GUIFileChooser.DIRECTORIES_ONLY);
         chooser.setMultiSelectionEnabled(false);
 

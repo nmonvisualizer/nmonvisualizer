@@ -6,16 +6,14 @@ import javax.swing.JMenuItem;
 
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-
 import java.awt.event.InputEvent;
-
 import java.awt.event.KeyEvent;
-import javax.swing.KeyStroke;
 
+import javax.swing.KeyStroke;
 import javax.swing.JFileChooser;
 
+import com.ibm.nmon.gui.chart.annotate.AnnotationCache;
 import com.ibm.nmon.gui.main.NMONVisualizerGui;
-
 import com.ibm.nmon.gui.util.GranularityDialog;
 import com.ibm.nmon.gui.util.LogViewerDialog;
 
@@ -124,6 +122,38 @@ final class ReportMenu extends JMenuBar {
             @Override
             public void actionPerformed(ActionEvent e) {
                 new GranularityDialog(ReportMenu.this.gui, ReportMenu.this.parent).setVisible(true);
+            }
+        });
+
+        view.add(item);
+
+        view.addSeparator();
+
+        item = new JMenuItem("Clear Annotations");
+        item.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                AnnotationCache.clear();
+            }
+        });
+
+        view.add(item);
+
+        item = new JMenuItem("Remove Last Line");
+        item.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                AnnotationCache.removeLastMarker();
+            }
+        });
+
+        view.add(item);
+
+        item = new JMenuItem("Remove Last Text");
+        item.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                AnnotationCache.removeLastAnnotation();
             }
         });
 

@@ -17,6 +17,7 @@ import java.io.IOException;
 import java.io.StringWriter;
 import java.util.List;
 
+import javax.swing.JFrame;
 import javax.swing.JFileChooser;
 import javax.swing.JOptionPane;
 import javax.swing.JPopupMenu;
@@ -49,11 +50,12 @@ public class BaseChartPanel extends ChartPanel implements PropertyChangeListener
     protected final Logger logger = org.slf4j.LoggerFactory.getLogger(getClass());
 
     protected final NMONVisualizerGui gui;
+    protected final JFrame parent;
 
     // used by subclasses for adding annotations
     protected java.awt.Point clickLocation = null;
 
-    protected BaseChartPanel(NMONVisualizerGui gui) {
+    protected BaseChartPanel(NMONVisualizerGui gui, JFrame parent) {
         // With multiple charts for each ReportPanel and one report panel per DataSet, there could
         // be a large number of active charts. To keep memory usage down, disable using a buffered
         // image despite any performance benefit.
@@ -74,6 +76,7 @@ public class BaseChartPanel extends ChartPanel implements PropertyChangeListener
         removeMouseListener(this);
 
         this.gui = gui;
+        this.parent = parent;
 
         setEnabled(false);
         clearChart();
@@ -270,7 +273,7 @@ public class BaseChartPanel extends ChartPanel implements PropertyChangeListener
     public void addMarkers(List<Marker> markers) {}
 
     protected final String getAnnotationText() {
-        String text = JOptionPane.showInputDialog(BaseChartPanel.this.gui.getMainFrame(), "Annotation Text",
+        String text = JOptionPane.showInputDialog(BaseChartPanel.this.parent, "Annotation Text",
                 "Annotate Chart", JOptionPane.QUESTION_MESSAGE);
 
         if (text != null) {

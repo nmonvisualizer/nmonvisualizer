@@ -3,6 +3,8 @@ package com.ibm.nmon.gui.chart;
 import java.awt.Stroke;
 import java.awt.BasicStroke;
 
+import javax.swing.JFrame;
+
 import org.jfree.chart.ChartMouseListener;
 import org.jfree.chart.ChartMouseEvent;
 
@@ -22,8 +24,8 @@ public final class IntervalChartPanel extends BaseChartPanel implements ChartMou
 
     private final BasicStroke SELECTED_STROKE = new BasicStroke(5);
 
-    public IntervalChartPanel(NMONVisualizerGui gui) {
-        super(gui);
+    public IntervalChartPanel(NMONVisualizerGui gui, JFrame parent) {
+        super(gui, parent);
 
         addChartMouseListener(this);
     }

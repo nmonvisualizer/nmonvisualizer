@@ -8,39 +8,30 @@ import javax.swing.JSplitPane;
 import javax.swing.JOptionPane;
 
 import java.awt.BorderLayout;
-
 import java.awt.GraphicsConfiguration;
 import java.awt.GraphicsDevice;
 import java.awt.GraphicsEnvironment;
-
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 
 import javax.swing.SwingUtilities;
 
 import com.ibm.nmon.NMONVisualizerApp;
-
 import com.ibm.nmon.data.DataSet;
 import com.ibm.nmon.data.transform.name.HostRenamer;
-
 import com.ibm.nmon.gui.interval.IntervalPicker;
 import com.ibm.nmon.interval.Interval;
-
 import com.ibm.nmon.util.GranularityHelper;
 import com.ibm.nmon.util.TimeFormatCache;
-
+import com.ibm.nmon.gui.report.ReportFrame;
 import com.ibm.nmon.gui.tree.TreePanel;
 import com.ibm.nmon.gui.util.LogViewerDialog;
-
 import com.ibm.nmon.parser.HATJParser;
 import com.ibm.nmon.parser.IOStatParser;
-
 import com.ibm.nmon.report.ReportCache;
-
 import com.ibm.nmon.gui.parse.HATJPostParser;
 import com.ibm.nmon.gui.parse.IOStatPostParser;
 import com.ibm.nmon.gui.parse.VerboseGCPreParser;
-
 import com.ibm.nmon.gui.Styles;
 
 public final class NMONVisualizerGui extends NMONVisualizerApp {
@@ -173,6 +164,11 @@ public final class NMONVisualizerGui extends NMONVisualizerApp {
 
     public ViewManager getViewManager() {
         return (ViewManager) ((JPanel) ((JSplitPane) mainFrame.getContentPane()).getRightComponent()).getComponent(1);
+    }
+
+    public void showReportFrame() {
+        ReportFrame report = new ReportFrame(this);
+        report.setVisible(true);
     }
 
     public LogViewerDialog getLogViewer() {

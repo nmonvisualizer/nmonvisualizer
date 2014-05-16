@@ -81,6 +81,10 @@ final class ReportSplitPane extends ChartSplitPane {
         reportPanel.addPropertyChangeListener("highlightedLine", this);
         reportPanel.addPropertyChangeListener("highlightedBar", this);
 
+        // ensure ChartSplitPane forwards these events
+        reportPanel.addPropertyChangeListener("chart", this);
+        reportPanel.addPropertyChangeListener("annotation", this);
+
         reportPanel.setEnabled(true);
         setDividerLocation(location);
     }

@@ -123,6 +123,13 @@ final class SummaryView extends ChartSplitPane implements IntervalListener {
         singleIntervalReport.addPropertyChangeListener("chart", summaryTable);
         singleIntervalReport.addPropertyChangeListener("highlightedLine", this);
         singleIntervalReport.addPropertyChangeListener("highlightedBar", this);
+
+        // ensure ChartSplitPane forwards these events
+        allIntervalsReport.addPropertyChangeListener("chart", this);
+        allIntervalsReport.addPropertyChangeListener("annotation", this);
+
+        singleIntervalReport.addPropertyChangeListener("chart", this);
+        singleIntervalReport.addPropertyChangeListener("annotation", this);
     }
 
     @Override

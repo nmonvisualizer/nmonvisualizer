@@ -20,8 +20,8 @@ import com.ibm.nmon.gui.chart.summary.ChartSummaryPanel;
  * <p>
  * This class listens for selection events from the table and highlights the associated value on the
  * chart. For the other direction of event flow, subclasses should link property change events on
- * their chart to this class so that highlight selections made on the chart updated the selected row
- * of the table.
+ * their chart to this class' <code>ChartSummaryPanel</code> so that highlight selections made on
+ * the chart updated the selected row of the table.
  * </p>
  * 
  * @see ChartSummaryPanel
@@ -79,8 +79,6 @@ public abstract class ChartSplitPane extends JSplitPane implements PropertyChang
             else {
                 summaryTable.selectRow(newRow);
             }
-
-            changeInProgress = false;
         }
         else if ("highlightedBar".equals(evt.getPropertyName())) {
             changeInProgress = true;
@@ -93,8 +91,6 @@ public abstract class ChartSplitPane extends JSplitPane implements PropertyChang
             else {
                 summaryTable.selectRow(newValues[0], newValues[1]);
             }
-
-            changeInProgress = false;
         }
         else if ("highlightedIntervalLine".equals(evt.getPropertyName())) {
             changeInProgress = true;
@@ -107,8 +103,6 @@ public abstract class ChartSplitPane extends JSplitPane implements PropertyChang
             else {
                 summaryTable.selectRow(newRow);
             }
-
-            changeInProgress = false;
         }
         else if ("selectedRows".equals(evt.getPropertyName())) {
             changeInProgress = true;
@@ -128,8 +122,6 @@ public abstract class ChartSplitPane extends JSplitPane implements PropertyChang
                     }
                 }
             }
-
-            changeInProgress = false;
         }
         else if ("rowVisible".equals(evt.getPropertyName())) {
             changeInProgress = true;
@@ -137,9 +129,12 @@ public abstract class ChartSplitPane extends JSplitPane implements PropertyChang
             Object[] values = (Object[]) evt.getNewValue();
 
             chartPanel.setElementVisible((Integer) values[0], (Integer) values[1], (Boolean) values[2]);
-
-            changeInProgress = false;
         }
+
+        changeInProgress = false;
+
+        // forward event to this class' listeners
+        firePropertyChange(evt.getPropertyName(), evt.getOldValue(), evt.getNewValue());
     }
 
     /**

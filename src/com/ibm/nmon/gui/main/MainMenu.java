@@ -1,11 +1,9 @@
 package com.ibm.nmon.gui.main;
 
 import javax.swing.ButtonGroup;
-
 import javax.swing.AbstractAction;
 import javax.swing.InputMap;
 import javax.swing.KeyStroke;
-
 import javax.swing.JCheckBoxMenuItem;
 import javax.swing.JComponent;
 import javax.swing.JFileChooser;
@@ -16,23 +14,17 @@ import javax.swing.JOptionPane;
 
 import com.ibm.nmon.data.DataSet;
 import com.ibm.nmon.data.DataSetListener;
-
 import com.ibm.nmon.data.transform.name.HostRenamerFactory;
 import com.ibm.nmon.data.transform.name.HostRenamer;
-
 import com.ibm.nmon.gui.Styles;
 import com.ibm.nmon.gui.file.FileLoadAction;
 import com.ibm.nmon.gui.file.GUIFileChooser;
-
+import com.ibm.nmon.gui.chart.annotate.AnnotationCache;
 import com.ibm.nmon.gui.data.RemoveAllDataSetsAction;
 import com.ibm.nmon.gui.interval.RemoveAllIntervalsAction;
-
 import com.ibm.nmon.gui.interval.IntervalManagerDialog;
-
-import com.ibm.nmon.gui.report.ReportFrame;
 import com.ibm.nmon.gui.util.GranularityDialog;
 import com.ibm.nmon.gui.util.LogViewerDialog;
-
 import com.ibm.nmon.interval.IntervalListener;
 import com.ibm.nmon.interval.Interval;
 import com.ibm.nmon.util.TimeFormatCache;
@@ -42,13 +34,10 @@ import java.awt.event.ActionListener;
 import java.awt.event.ActionEvent;
 import java.awt.event.InputEvent;
 import java.awt.event.KeyEvent;
-
 import java.beans.PropertyChangeListener;
 import java.beans.PropertyChangeEvent;
-
 import java.lang.management.ManagementFactory;
 import java.lang.management.MemoryPoolMXBean;
-
 import java.lang.reflect.Method;
 
 /**
@@ -352,6 +341,38 @@ final class MainMenu extends JMenuBar implements IntervalListener, DataSetListen
 
         chartSubMenu.add(checkItem);
 
+        chartSubMenu.addSeparator();
+
+        item = new JMenuItem("Clear Annotations");
+        item.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                AnnotationCache.clear();
+            }
+        });
+
+        chartSubMenu.add(item);
+
+        item = new JMenuItem("Remove Last Line");
+        item.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                AnnotationCache.removeLastMarker();
+            }
+        });
+
+        chartSubMenu.add(item);
+
+        item = new JMenuItem("Remove Last Text");
+        item.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                AnnotationCache.removeLastAnnotation();
+            }
+        });
+
+        chartSubMenu.add(item);
+
         menu.add(chartSubMenu);
 
         menu.addSeparator();
@@ -377,7 +398,7 @@ final class MainMenu extends JMenuBar implements IntervalListener, DataSetListen
         item.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                new ReportFrame(gui).setVisible(true);
+                gui.showReportFrame();
             }
         });
 
