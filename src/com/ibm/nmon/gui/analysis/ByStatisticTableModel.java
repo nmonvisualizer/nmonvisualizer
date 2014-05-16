@@ -48,8 +48,6 @@ public final class ByStatisticTableModel extends AnalysisSetTableModel implement
 
         // alert the owning table that it has columns so it can be sized in the column model
         fireTableStructureChanged();
-
-        gui.addPropertyChangeListener("granularity", this);
     }
 
     @Override

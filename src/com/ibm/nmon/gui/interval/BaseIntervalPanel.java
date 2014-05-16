@@ -184,6 +184,7 @@ abstract class BaseIntervalPanel extends JPanel implements DataSetListener, Prop
             else {
                 gui.removeDataSetListener(this);
                 gui.removePropertyChangeListener("timeZone", this);
+                getRootPane().setDefaultButton(null);
             }
         }
     }

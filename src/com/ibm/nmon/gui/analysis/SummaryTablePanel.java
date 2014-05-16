@@ -1,27 +1,20 @@
 package com.ibm.nmon.gui.analysis;
 
 import java.awt.BorderLayout;
-
 import java.awt.event.ActionListener;
 import java.awt.event.ActionEvent;
 import java.awt.event.InputEvent;
 import java.awt.event.KeyEvent;
-
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
-
 import java.beans.PropertyChangeListener;
 import java.beans.PropertyChangeEvent;
-
 import java.util.Set;
 
 import javax.swing.AbstractAction;
 import javax.swing.Action;
-
 import javax.swing.DefaultComboBoxModel;
-
 import javax.swing.Icon;
-
 import javax.swing.JFrame;
 import javax.swing.JComboBox;
 import javax.swing.JLabel;
@@ -35,19 +28,15 @@ import javax.swing.JTable;
 import javax.swing.KeyStroke;
 import javax.swing.RowFilter;
 import javax.swing.TransferHandler;
-
 import javax.swing.SwingConstants;
-
 import javax.swing.table.TableRowSorter;
 
 import com.ibm.nmon.analysis.AnalysisSet;
 import com.ibm.nmon.analysis.AnalysisSetListener;
 import com.ibm.nmon.analysis.Statistic;
 import com.ibm.nmon.data.DataType;
-
 import com.ibm.nmon.gui.GUITable;
 import com.ibm.nmon.gui.Styles;
-
 import com.ibm.nmon.gui.dnd.TableTransferHandler;
 import com.ibm.nmon.gui.file.AnalysisSetFileChooser;
 import com.ibm.nmon.gui.main.NMONVisualizerGui;
@@ -57,7 +46,6 @@ import com.ibm.nmon.gui.table.IntegerCellRenderer;
 import com.ibm.nmon.gui.table.StringCellRenderer;
 import com.ibm.nmon.gui.table.TableColumnChooser;
 import com.ibm.nmon.gui.util.ScrollingTableFix;
-
 import com.ibm.nmon.interval.Interval;
 import com.ibm.nmon.interval.IntervalListener;
 
@@ -139,9 +127,6 @@ public final class SummaryTablePanel extends JPanel implements IntervalListener,
 
         add(label, BorderLayout.PAGE_END);
 
-        gui.getIntervalManager().addListener(this);
-        gui.addPropertyChangeListener("granularity", this);
-
         analysisSet.addListener(this);
 
         // check the count column, if it is 0, do not display
@@ -173,20 +158,46 @@ public final class SummaryTablePanel extends JPanel implements IntervalListener,
         }
     }
 
+    private void updateStatisticsComboBox() {
+        String newName = Statistic.GRANULARITY_MAXIMUM.getName(gui.getGranularity());
+
+        @SuppressWarnings("unchecked")
+        DefaultComboBoxModel<String> model = (DefaultComboBoxModel<String>) ((JComboBox<String>) statsPanel
+                .getComponent(1)).getModel();
+
+        boolean reselect = false;
+
+        if (model.getSelectedItem() == model.getElementAt(3)) {
+            reselect = true;
+        }
+
+        model.removeElementAt(3);
+        model.insertElementAt(newName, 3);
+
+        if (reselect) {
+            model.setSelectedItem(newName);
+        }
+    }
+
     // when the analysis is not enabled, do not update the table
     @Override
     public void setEnabled(boolean enabled) {
         if (enabled) {
             gui.getIntervalManager().addListener(this);
+            gui.addPropertyChangeListener("granularity", this);
+            gui.addPropertyChangeListener("granularity", (ByStatisticTableModel) statisticsTable.getModel());
 
             // note update setSaveEnabled() if menu position changes
             gui.getMainFrame().getJMenuBar().add(menu, 3);
             gui.getMainFrame().getJMenuBar().revalidate();
 
+            updateStatisticsComboBox();
             updateTable();
         }
         else {
             gui.getIntervalManager().removeListener(this);
+            gui.removePropertyChangeListener("granularity", this);
+            gui.removePropertyChangeListener("granularity", (ByStatisticTableModel) statisticsTable.getModel());
 
             gui.getMainFrame().getJMenuBar().remove(menu);
             gui.getMainFrame().getJMenuBar().revalidate();
@@ -251,24 +262,7 @@ public final class SummaryTablePanel extends JPanel implements IntervalListener,
         if ("granularity".equals(evt.getPropertyName())) {
             updateTable();
 
-            String newName = Statistic.GRANULARITY_MAXIMUM.getName(gui.getGranularity());
-
-            @SuppressWarnings("unchecked")
-            DefaultComboBoxModel<String> model = (DefaultComboBoxModel<String>) ((JComboBox<String>) statsPanel
-                    .getComponent(1)).getModel();
-
-            boolean reselect = false;
-
-            if (model.getSelectedItem() instanceof String) {
-                reselect = true;
-            }
-
-            model.removeElementAt(3);
-            model.insertElementAt(newName, 3);
-
-            if (reselect) {
-                model.setSelectedItem(newName);
-            }
+            updateStatisticsComboBox();
         }
     }
 
