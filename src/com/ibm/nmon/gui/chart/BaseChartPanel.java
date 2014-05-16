@@ -5,17 +5,13 @@ import org.slf4j.Logger;
 import java.awt.Graphics;
 import java.awt.Point;
 import java.awt.Toolkit;
-
 import java.awt.datatransfer.Clipboard;
 import java.awt.datatransfer.StringSelection;
-
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.MouseEvent;
-
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
-
 import java.io.File;
 import java.io.IOException;
 import java.io.StringWriter;
@@ -25,27 +21,23 @@ import javax.swing.JFileChooser;
 import javax.swing.JOptionPane;
 import javax.swing.JPopupMenu;
 import javax.swing.MenuElement;
-import javax.swing.JMenu;
 import javax.swing.JMenuItem;
 
 import org.jfree.chart.ChartPanel;
 import org.jfree.chart.ChartTransferable;
 import org.jfree.chart.ChartUtilities;
 import org.jfree.chart.JFreeChart;
-import org.jfree.chart.annotations.CategoryTextAnnotation;
-import org.jfree.chart.annotations.XYTextAnnotation;
+
+import org.jfree.chart.annotations.Annotation;
+
 import org.jfree.chart.plot.Plot;
 import org.jfree.chart.plot.CategoryPlot;
-import org.jfree.chart.plot.ValueMarker;
 import org.jfree.chart.plot.XYPlot;
-import org.jfree.chart.entity.ChartEntity;
-import org.jfree.chart.entity.CategoryItemEntity;
+
+import org.jfree.chart.plot.Marker;
 
 import org.jfree.ui.ExtensionFileFilter;
-import org.jfree.ui.RectangleInsets;
-import org.jfree.ui.TextAnchor;
 
-import com.ibm.nmon.gui.Styles;
 import com.ibm.nmon.gui.chart.data.*;
 import com.ibm.nmon.gui.main.NMONVisualizerGui;
 import com.ibm.nmon.gui.file.GUIFileChooser;
@@ -58,11 +50,8 @@ public class BaseChartPanel extends ChartPanel implements PropertyChangeListener
 
     protected final NMONVisualizerGui gui;
 
-    private java.awt.Point clickLocation = null;
-
-    private JMenuItem currentAnnotationMenu;
-    private final JMenuItem annotateBar;
-    private final JMenu annotateLine;
+    // used by subclasses for adding annotations
+    protected java.awt.Point clickLocation = null;
 
     protected BaseChartPanel(NMONVisualizerGui gui) {
         // With multiple charts for each ReportPanel and one report panel per DataSet, there could
@@ -89,97 +78,6 @@ public class BaseChartPanel extends ChartPanel implements PropertyChangeListener
         setEnabled(false);
         clearChart();
         setEnforceFileExtensions(true);
-
-        annotateBar = new JMenuItem("Annotate Bar");
-        annotateBar.addActionListener(new AnnotateBarWithText());
-
-        annotateLine = new JMenu("Annotate");
-
-        JMenuItem item = new JMenuItem("Vertical Line");
-        item.addActionListener(new BaseLineAnnotationAction() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                double x = getGraphCoordinates()[0];
-
-                ValueMarker marker = new ValueMarker(x);
-                marker.setStroke(Styles.ANNOTATION_STROKE);
-                marker.setPaint(Styles.ANNOTATION_COLOR);
-                marker.setLabelFont(Styles.ANNOTATION_FONT);
-                marker.setLabelPaint(Styles.ANNOTATION_COLOR);
-                marker.setLabelOffset(new RectangleInsets(5, 5, 5, 5));
-                marker.setLabelTextAnchor(TextAnchor.TOP_RIGHT);
-
-                if (getChart().getXYPlot().getDomainAxis() instanceof org.jfree.chart.axis.DateAxis) {
-                    double range = getChart().getXYPlot().getDomainAxis().getUpperBound()
-                            - getChart().getXYPlot().getDomainAxis().getLowerBound();
-
-                    if (range > (86400 * 1000)) {
-                        marker.setLabel(new java.text.SimpleDateFormat(Styles.DATE_FORMAT_STRING).format(x));
-                    }
-                    else {
-                        marker.setLabel(new java.text.SimpleDateFormat(Styles.DATE_FORMAT_STRING_SHORT).format(x));
-                    }
-                }
-                else {
-                    marker.setLabel(Styles.NUMBER_FORMAT.format(x));
-                }
-
-                getChart().getXYPlot().addDomainMarker(marker);
-
-                firePropertyChange("annotation", null, marker);
-            }
-        });
-        annotateLine.add(item);
-
-        item = new JMenuItem("Horizontal Line");
-        item.addActionListener(new BaseLineAnnotationAction() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                double y = getGraphCoordinates()[1];
-
-                ValueMarker marker = new ValueMarker(y);
-                marker.setLabel(Styles.NUMBER_FORMAT.format(y));
-                marker.setStroke(Styles.ANNOTATION_STROKE);
-                marker.setPaint(Styles.ANNOTATION_COLOR);
-                marker.setLabelFont(Styles.ANNOTATION_FONT);
-                marker.setLabelPaint(Styles.ANNOTATION_COLOR);
-                marker.setLabelTextAnchor(TextAnchor.BASELINE_LEFT);
-
-                getChart().getXYPlot().addRangeMarker(marker);
-
-                firePropertyChange("annotation", null, marker);
-            }
-        });
-        annotateLine.add(item);
-
-        item = new JMenuItem("Text");
-        item.addActionListener(new BaseLineAnnotationAction() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                String text = JOptionPane.showInputDialog(BaseChartPanel.this.gui.getMainFrame(), "Annotation Text",
-                        "Annotate Bar Chart", JOptionPane.QUESTION_MESSAGE);
-
-                if (text != null) {
-                    text = text.trim();
-
-                    if ("".equals(text)) {
-                        return;
-                    }
-
-                    double[] graphCoords = getGraphCoordinates();
-
-                    XYTextAnnotation annotation = new XYTextAnnotation(text, graphCoords[0], graphCoords[1]);
-                    annotation.setFont(Styles.ANNOTATION_FONT);
-                    annotation.setPaint(Styles.ANNOTATION_COLOR);
-
-                    getChart().getXYPlot().addAnnotation(annotation);
-
-                    firePropertyChange("annotation", null, annotation);
-                }
-            }
-        });
-
-        annotateLine.add(item);
     }
 
     public final void setChart(JFreeChart chart) {
@@ -194,7 +92,7 @@ public class BaseChartPanel extends ChartPanel implements PropertyChangeListener
                     addMouseListener(this);
                 }
 
-                firePropertyChange("chart", null, getDataset());
+                firePropertyChange("chart", null, this);
             }
             else {
                 // fix memory leak; rendering info holds ChartEntitiy objects that reference the
@@ -211,8 +109,6 @@ public class BaseChartPanel extends ChartPanel implements PropertyChangeListener
 
             // do not display the popup menu when there is no chart
             removeMouseListener(this);
-
-            removeCurrentAnnotationMenu();
         }
     }
 
@@ -369,36 +265,23 @@ public class BaseChartPanel extends ChartPanel implements PropertyChangeListener
         }
     }
 
-    public final void addAnnotations(List<Object> annotations) {
-        if (getChart() == null) {
-            return;
-        }
+    public void addAnnotations(List<Annotation> annotations) {}
 
-        System.out.println("adding annotations");
-        if (getChart().getPlot() instanceof CategoryPlot) {
-            for (Object o : annotations) {
-                if (o instanceof CategoryTextAnnotation) {
-                    CategoryTextAnnotation annotation = (CategoryTextAnnotation) o;
-System.out.println("\t" + annotation.getCategory());
-                    getChart().getCategoryPlot().addAnnotation(annotation);
-                }
+    public void addMarkers(List<Marker> markers) {}
+
+    protected final String getAnnotationText() {
+        String text = JOptionPane.showInputDialog(BaseChartPanel.this.gui.getMainFrame(), "Annotation Text",
+                "Annotate Chart", JOptionPane.QUESTION_MESSAGE);
+
+        if (text != null) {
+            text = text.trim();
+
+            if ("".equals(text)) {
+                text = null;
             }
         }
-        else if (getChart().getPlot() instanceof XYPlot) {
-            for (Object o : annotations) {
-                if (o instanceof XYTextAnnotation) {
-                    XYTextAnnotation annotation = (XYTextAnnotation) o;
-                    System.out.println("\t" + annotation.getX() + " " + annotation.getY());
-                    getChart().getXYPlot().addAnnotation(annotation);
-                }
-                else if (o instanceof ValueMarker) {
-                    ValueMarker marker = (ValueMarker) o;
-                    System.out.println("\t" + marker.getLabel() + " " + marker.getValue());
 
-                    getChart().getXYPlot().addDomainMarker(marker);
-                }
-            }
-        }
+        return text;
     }
 
     protected String validateSaveFileName(String filename) {
@@ -461,85 +344,6 @@ System.out.println("\t" + annotation.getCategory());
     }
 
     @Override
-    protected void displayPopupMenu(int x, int y) {
-        // always add Annotate menu for XYPlots; for CategoryPlots, only show if the mouse if over
-        // an actual bar
-        if (getChart().getPlot() instanceof CategoryPlot) {
-            // find the CategoryItemEntity that matches the given x, y
-            // assume there are not that many entities in the chart and this will be relatively
-            // fast
-            @SuppressWarnings("rawtypes")
-            java.util.Iterator i = getChartRenderingInfo().getEntityCollection().iterator();
-
-            boolean valid = false;
-
-            while (i.hasNext()) {
-                ChartEntity entity = (ChartEntity) i.next();
-
-                if (entity.getClass() == CategoryItemEntity.class) {
-                    CategoryItemEntity categoryEntity = (CategoryItemEntity) entity;
-
-                    if (categoryEntity.getArea().contains(x, y)) {
-                        ((AnnotateBarWithText) annotateBar.getActionListeners()[0]).categoryKey = (String) categoryEntity
-                                .getColumnKey();
-                        valid = true;
-                        break;
-                    }
-                }
-            }
-
-            if (valid) {
-                if (currentAnnotationMenu != annotateBar) {
-                    getPopupMenu().addSeparator();
-                    getPopupMenu().add(annotateBar);
-
-                    currentAnnotationMenu = annotateBar;
-                }
-            }
-            else {
-                removeCurrentAnnotationMenu();
-            }
-        }
-        else {
-            if (currentAnnotationMenu != annotateLine) {
-                removeCurrentAnnotationMenu();
-
-                getPopupMenu().addSeparator();
-                getPopupMenu().add(annotateLine);
-
-                currentAnnotationMenu = annotateLine;
-            }
-        }
-
-        if (currentAnnotationMenu != null) {
-
-        }
-
-        super.displayPopupMenu(x, y);
-    }
-
-    private void removeCurrentAnnotationMenu() {
-        if (currentAnnotationMenu != null) {
-            boolean removed = false;
-
-            for (java.awt.Component c : getPopupMenu().getComponents()) {
-                if (c == currentAnnotationMenu) {
-                    getPopupMenu().remove(currentAnnotationMenu);
-                    removed = true;
-                    break;
-                }
-            }
-
-            if (removed) {
-                // remove separator
-                getPopupMenu().remove(getPopupMenu().getComponentCount() - 1);
-
-                currentAnnotationMenu = null;
-            }
-        }
-    }
-
-    @Override
     public void propertyChange(PropertyChangeEvent evt) {}
 
     // disable mouse movement to avoid constantly searching for ChartEntity objects when there are
@@ -573,7 +377,7 @@ System.out.println("\t" + annotation.getCategory());
 
     @Override
     public void paintComponent(Graphics g) {
-        if (logger.isDebugEnabled()) {
+        if (logger.isTraceEnabled()) {
             long start = System.nanoTime();
 
             super.paintComponent(g);
@@ -584,79 +388,10 @@ System.out.println("\t" + annotation.getCategory());
                 title = getChart().getTitle().getText();
             }
 
-            logger.debug("painted chart '{}' in {} ms", title, (System.nanoTime() - start) / 1000000.0d);
+            logger.trace("painted chart '{}' in {} ms", title, (System.nanoTime() - start) / 1000000.0d);
         }
         else {
             super.paintComponent(g);
-        }
-    }
-
-    private final class AnnotateBarWithText implements ActionListener {
-        String categoryKey = null;
-
-        @Override
-        public void actionPerformed(ActionEvent e) {
-            if (categoryKey == null) {
-                return;
-            }
-
-            String text = JOptionPane.showInputDialog(gui.getMainFrame(), "Annotation Text", "Annotate Bar Chart",
-                    JOptionPane.QUESTION_MESSAGE);
-
-            if (text != null) {
-                text = text.trim();
-
-                if ("".equals(text)) {
-                    return;
-                }
-
-                CategoryPlot categoryPlot = getChart().getCategoryPlot();
-
-                double y = categoryPlot.getRangeAxis().java2DToValue(clickLocation.getY(),
-                        getChartRenderingInfo().getPlotInfo().getDataArea(), categoryPlot.getRangeAxisEdge());
-
-                if (y < categoryPlot.getRangeAxis().getLowerBound()) {
-                    y = categoryPlot.getRangeAxis().getLowerBound();
-                }
-                if (y > categoryPlot.getRangeAxis().getUpperBound()) {
-                    y = categoryPlot.getRangeAxis().getUpperBound();
-                }
-
-                CategoryTextAnnotation annotation = new CategoryTextAnnotation(text, categoryKey, y);
-                annotation.setFont(Styles.ANNOTATION_FONT);
-                annotation.setPaint(Styles.ANNOTATION_COLOR);
-
-                getChart().getCategoryPlot().addAnnotation(annotation);
-
-                firePropertyChange("annotation", null, annotation);
-            }
-        }
-    }
-
-    private abstract class BaseLineAnnotationAction implements ActionListener {
-        protected final double[] getGraphCoordinates() {
-            XYPlot xyPlot = getChart().getXYPlot();
-
-            java.awt.geom.Rectangle2D dataArea = getChartRenderingInfo().getPlotInfo().getDataArea();
-
-            double x = xyPlot.getDomainAxis().java2DToValue(clickLocation.getX(), dataArea, xyPlot.getDomainAxisEdge());
-            double y = xyPlot.getRangeAxis().java2DToValue(clickLocation.getY(), dataArea, xyPlot.getRangeAxisEdge());
-
-            if (x < xyPlot.getDomainAxis().getLowerBound()) {
-                x = xyPlot.getDomainAxis().getLowerBound();
-            }
-            if (x > xyPlot.getDomainAxis().getUpperBound()) {
-                x = xyPlot.getDomainAxis().getUpperBound();
-            }
-
-            if (y < xyPlot.getRangeAxis().getLowerBound()) {
-                y = xyPlot.getRangeAxis().getLowerBound();
-            }
-            if (y > xyPlot.getRangeAxis().getUpperBound()) {
-                y = xyPlot.getRangeAxis().getUpperBound();
-            }
-
-            return new double[] { x, y };
         }
     }
 }

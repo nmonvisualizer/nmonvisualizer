@@ -1,7 +1,6 @@
 package com.ibm.nmon.gui.chart.summary;
 
 import java.awt.Component;
-
 import java.awt.event.MouseEvent;
 
 import javax.swing.event.ListSelectionEvent;
@@ -16,21 +15,23 @@ import javax.swing.JLabel;
 import javax.swing.JScrollPane;
 import javax.swing.JTable;
 import javax.swing.ListSelectionModel;
-
 import javax.swing.table.JTableHeader;
 import javax.swing.table.DefaultTableColumnModel;
 import javax.swing.table.TableCellRenderer;
-
 import javax.swing.ToolTipManager;
+
+import com.ibm.nmon.gui.main.NMONVisualizerGui;
 
 import com.ibm.nmon.gui.GUITable;
 
+import com.ibm.nmon.gui.chart.BaseChartPanel;
 import com.ibm.nmon.gui.chart.data.DataTupleDataset;
-import com.ibm.nmon.gui.main.NMONVisualizerGui;
+
 import com.ibm.nmon.gui.table.DoubleCellRenderer;
 import com.ibm.nmon.gui.table.IntegerCellRenderer;
 import com.ibm.nmon.gui.table.StringCellRenderer;
 import com.ibm.nmon.gui.table.TableColumnChooser;
+
 import com.ibm.nmon.gui.util.ScrollingTableFix;
 
 /**
@@ -68,9 +69,11 @@ public final class ChartSummaryPanel extends JScrollPane implements PropertyChan
     @Override
     public void propertyChange(PropertyChangeEvent evt) {
         if ("chart".equals(evt.getPropertyName())) {
-            DataTupleDataset dataset = (DataTupleDataset) evt.getNewValue();
-
             if (evt.getNewValue() != null) {
+                BaseChartPanel chartPanel = ((BaseChartPanel) evt.getNewValue());
+
+                DataTupleDataset dataset = chartPanel.getDataset();
+
                 tableModel.setData(dataset);
             }
             else {
