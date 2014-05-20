@@ -78,6 +78,8 @@ public final class LineChartAnnotationDialog extends GUIDialog {
         // calculate graph's x, y coordinates from the mouse click position
         xyPlot = lineChartPanel.getChart().getXYPlot();
 
+        addPropertyChangeListener(lineChartPanel);
+
         java.awt.geom.Rectangle2D dataArea = lineChartPanel.getChartRenderingInfo().getPlotInfo().getDataArea();
 
         double x = xyPlot.getDomainAxis().java2DToValue(clickLocation.getX(), dataArea, xyPlot.getDomainAxisEdge());
