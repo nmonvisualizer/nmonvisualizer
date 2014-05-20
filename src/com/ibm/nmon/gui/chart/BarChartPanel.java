@@ -109,6 +109,7 @@ public final class BarChartPanel extends BaseChartPanel implements ChartMouseLis
 
                     if (plot.getCategories().contains(annotation.getCategory())) {
                         plot.addAnnotation(annotation);
+                        firePropertyChange("annotation", null, annotation);
                     }
                 }
             }

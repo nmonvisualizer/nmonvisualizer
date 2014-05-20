@@ -121,6 +121,7 @@ public class LineChartPanel extends BaseChartPanel implements ChartMouseListener
                 if (a instanceof XYAnnotation) {
                     XYAnnotation annotation = (XYAnnotation) a;
                     plot.addAnnotation(annotation);
+                    firePropertyChange("annotation", null, annotation);
                 }
             }
         }
@@ -141,6 +142,8 @@ public class LineChartPanel extends BaseChartPanel implements ChartMouseListener
                 else if (marker instanceof DomainValueMarker) {
                     plot.addDomainMarker(marker);
                 }
+                
+                firePropertyChange("annotation", null, marker);
             }
         }
     }

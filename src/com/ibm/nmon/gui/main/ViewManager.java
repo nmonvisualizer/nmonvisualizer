@@ -218,13 +218,15 @@ public final class ViewManager extends JPanel implements PropertyChangeListener,
         else if ("chart".equals(evt.getPropertyName())) {
             if (AnnotationCache.hasAnnotations()) {
                 if (evt.getNewValue() != null) {
+                    addingAnnotation = true;
                     ((BaseChartPanel) evt.getNewValue()).addAnnotations(AnnotationCache.getAnnotations());
                     ((BaseChartPanel) evt.getNewValue()).addMarkers(AnnotationCache.getMarkers());
+                    addingAnnotation = false;
                 }
             }
         }
         else if ("annotation".equals(evt.getPropertyName())) {
-            if (evt.getNewValue() != null) {
+            if ((evt.getNewValue() != null) && !addingAnnotation) {
                 addingAnnotation = true;
                 AnnotationCache.add(evt.getNewValue());
                 addingAnnotation = false;
@@ -249,8 +251,10 @@ public final class ViewManager extends JPanel implements PropertyChangeListener,
                 BaseChartPanel currentChart = currentView.getChartPanel();
 
                 if (currentChart != null) {
+                    addingAnnotation = true;
                     currentChart.addAnnotations(AnnotationCache.getAnnotations());
                     currentChart.addMarkers(AnnotationCache.getMarkers());
+                    addingAnnotation = false;
                 }
             }
         }

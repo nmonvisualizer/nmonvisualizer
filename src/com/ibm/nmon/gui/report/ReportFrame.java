@@ -283,12 +283,16 @@ public final class ReportFrame extends JFrame implements DataSetListener, Proper
 
     public void propertyChange(java.beans.PropertyChangeEvent evt) {
         if ("chart".equals(evt.getPropertyName())) {
-            if (evt.getNewValue() != null) {
-                ((BaseChartPanel) evt.getNewValue()).addAnnotations(AnnotationCache.getAnnotations());
-                ((BaseChartPanel) evt.getNewValue()).addMarkers(AnnotationCache.getMarkers());
+            if (AnnotationCache.hasAnnotations()) {
+                if (evt.getNewValue() != null) {
+                    addingAnnotation = true;
+                    ((BaseChartPanel) evt.getNewValue()).addAnnotations(AnnotationCache.getAnnotations());
+                    ((BaseChartPanel) evt.getNewValue()).addMarkers(AnnotationCache.getMarkers());
+                    addingAnnotation = false;
+                }
             }
         }
-        if ("annotation".equals(evt.getPropertyName())) {
+        else if ("annotation".equals(evt.getPropertyName())) {
             if (evt.getNewValue() != null) {
                 addingAnnotation = true;
                 AnnotationCache.add(evt.getNewValue());
@@ -313,8 +317,10 @@ public final class ReportFrame extends JFrame implements DataSetListener, Proper
             BaseChartPanel currentChart = reportSplitPane.getChartPanel();
 
             if (currentChart != null) {
+                addingAnnotation = true;
                 currentChart.addAnnotations(AnnotationCache.getAnnotations());
                 currentChart.addMarkers(AnnotationCache.getMarkers());
+                addingAnnotation = false;
             }
         }
     }
