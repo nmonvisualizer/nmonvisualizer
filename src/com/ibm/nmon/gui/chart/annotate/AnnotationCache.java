@@ -18,6 +18,9 @@ public final class AnnotationCache {
         else if (o instanceof Annotation) {
             annotations.add((Annotation) o);
         }
+        else {
+            return;
+        }
 
         for (AnnotationListener listener : listeners) {
             listener.annotationAdded();
@@ -25,18 +28,22 @@ public final class AnnotationCache {
     }
 
     public static void addMarker(Marker marker) {
-        markers.add(marker);
+        if (marker != null) {
+            markers.add(marker);
 
-        for (AnnotationListener listener : listeners) {
-            listener.annotationAdded();
+            for (AnnotationListener listener : listeners) {
+                listener.annotationAdded();
+            }
         }
     }
 
     public static void addAnnotation(Annotation annotation) {
-        annotations.add(annotation);
+        if (annotation != null) {
+            annotations.add(annotation);
 
-        for (AnnotationListener listener : listeners) {
-            listener.annotationAdded();
+            for (AnnotationListener listener : listeners) {
+                listener.annotationAdded();
+            }
         }
     }
 
@@ -53,11 +60,22 @@ public final class AnnotationCache {
     }
 
     public static void clear() {
-        markers.clear();
-        annotations.clear();
+        boolean cleared = false;
 
-        for (AnnotationListener listener : listeners) {
-            listener.annotationsCleared();
+        if (!markers.isEmpty()) {
+            markers.clear();
+            cleared = true;
+        }
+
+        if (!annotations.isEmpty()) {
+            annotations.clear();
+            cleared = true;
+        }
+
+        if (cleared) {
+            for (AnnotationListener listener : listeners) {
+                listener.annotationsCleared();
+            }
         }
     }
 

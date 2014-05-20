@@ -224,9 +224,11 @@ public final class ViewManager extends JPanel implements PropertyChangeListener,
             }
         }
         else if ("annotation".equals(evt.getPropertyName())) {
-            addingAnnotation = true;
-            AnnotationCache.add(evt.getNewValue());
-            addingAnnotation = false;
+            if (evt.getNewValue() != null) {
+                addingAnnotation = true;
+                AnnotationCache.add(evt.getNewValue());
+                addingAnnotation = false;
+            }
         }
     }
 
