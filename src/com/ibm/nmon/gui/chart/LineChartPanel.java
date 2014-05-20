@@ -1,52 +1,46 @@
 package com.ibm.nmon.gui.chart;
 
+import com.ibm.nmon.gui.main.NMONVisualizerGui;
+
 import java.awt.Stroke;
 import java.awt.BasicStroke;
+
 import java.awt.event.ActionListener;
 import java.awt.event.ActionEvent;
-
 import java.beans.PropertyChangeEvent;
 
 import java.util.List;
 import java.util.TimeZone;
 
 import javax.swing.JFrame;
-
-import javax.swing.JMenu;
-import javax.swing.JMenuItem;
 import javax.swing.JPopupMenu;
+import javax.swing.JMenuItem;
 
 import org.jfree.data.xy.XYDataset;
-import org.jfree.ui.RectangleInsets;
-import org.jfree.ui.TextAnchor;
 
 import org.jfree.chart.ChartMouseListener;
 import org.jfree.chart.ChartMouseEvent;
 
-import org.jfree.chart.plot.Marker;
-import org.jfree.chart.plot.ValueMarker;
 import org.jfree.chart.plot.XYPlot;
+import org.jfree.chart.plot.Marker;
 
 import org.jfree.chart.renderer.AbstractRenderer;
 import org.jfree.chart.renderer.xy.XYItemRenderer;
 
 import org.jfree.chart.annotations.Annotation;
 import org.jfree.chart.annotations.XYAnnotation;
-import org.jfree.chart.annotations.XYTextAnnotation;
 
 import org.jfree.chart.axis.DateAxis;
+
 import org.jfree.chart.entity.ChartEntity;
 import org.jfree.chart.entity.XYItemEntity;
 import org.jfree.chart.entity.LegendItemEntity;
 
-import com.ibm.nmon.gui.Styles;
-
+import com.ibm.nmon.gui.chart.annotate.LineChartAnnotationDialog;
 import com.ibm.nmon.gui.chart.annotate.DomainValueMarker;
 import com.ibm.nmon.gui.chart.annotate.RangeValueMarker;
 
 import com.ibm.nmon.gui.chart.builder.LineChartBuilder;
-
-import com.ibm.nmon.gui.main.NMONVisualizerGui;
 
 public class LineChartPanel extends BaseChartPanel implements ChartMouseListener {
     private static final long serialVersionUID = 7999499157941027546L;
@@ -155,82 +149,18 @@ public class LineChartPanel extends BaseChartPanel implements ChartMouseListener
     protected JPopupMenu createPopupMenu(boolean properties, boolean copy, boolean save, boolean print, boolean zoom) {
         JPopupMenu popupMenu = super.createPopupMenu(properties, copy, save, print, zoom);
 
-        JMenu annotate = new JMenu("Annotate");
-
-        JMenuItem item = new JMenuItem("Vertical Line");
-        item.addActionListener(new AnnotateLineAction() {
+        JMenuItem item = new JMenuItem("Annotate");
+        item.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                ValueMarker marker = createVerticalMarker(null);
-
-                getChart().getXYPlot().addDomainMarker(marker);
-
-                firePropertyChange("annotation", null, marker);
+                LineChartAnnotationDialog dialog = new LineChartAnnotationDialog(LineChartPanel.this, gui, parent,
+                        clickLocation);
+                dialog.setVisible(true);
             }
         });
-        annotate.add(item);
-
-        item = new JMenuItem("Vertical Line with Text");
-        item.addActionListener(new AnnotateLineAction() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                String text = getAnnotationText();
-
-                ValueMarker marker = createVerticalMarker(text);
-
-                getChart().getXYPlot().addDomainMarker(marker);
-
-                firePropertyChange("annotation", null, marker);
-            }
-        });
-        annotate.add(item);
-
-        item = new JMenuItem("Horizontal Line");
-        item.addActionListener(new AnnotateLineAction() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                ValueMarker marker = createHorizontalMarker(null);
-
-                getChart().getXYPlot().addRangeMarker(marker);
-
-                firePropertyChange("annotation", null, marker);
-            }
-        });
-        annotate.add(item);
-
-        item = new JMenuItem("Horizontal Line with Text");
-        item.addActionListener(new AnnotateLineAction() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                String text = getAnnotationText();
-
-                ValueMarker marker = createHorizontalMarker(text);
-
-                getChart().getXYPlot().addRangeMarker(marker);
-
-                firePropertyChange("annotation", null, marker);
-            }
-        });
-        annotate.add(item);
-
-        item = new JMenuItem("Text");
-        item.addActionListener(new AnnotateLineAction() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                String text = getAnnotationText();
-
-                if (text != null) {
-                    getChart().getXYPlot().addAnnotation(createAnnotation(text));
-
-                    firePropertyChange("annotation", null, text);
-                }
-            }
-        });
-
-        annotate.add(item);
 
         popupMenu.addSeparator();
-        popupMenu.add(annotate);
+        popupMenu.add(item);
 
         return popupMenu;
     }
@@ -307,94 +237,4 @@ public class LineChartPanel extends BaseChartPanel implements ChartMouseListener
         }
     }
 
-    public abstract class AnnotateLineAction implements ActionListener {
-        protected final ValueMarker createVerticalMarker(String text) {
-            double x = getGraphCoordinates()[0];
-
-            ValueMarker marker = new DomainValueMarker(x);
-            marker.setLabelOffset(new RectangleInsets(5, 5, 5, 5));
-            marker.setLabelTextAnchor(TextAnchor.TOP_RIGHT);
-            formatMarker(marker);
-
-            if (text == null) {
-                if (getChart().getXYPlot().getDomainAxis() instanceof org.jfree.chart.axis.DateAxis) {
-                    double range = getChart().getXYPlot().getDomainAxis().getUpperBound()
-                            - getChart().getXYPlot().getDomainAxis().getLowerBound();
-
-                    if (range > (86400 * 1000)) {
-                        marker.setLabel(new java.text.SimpleDateFormat(Styles.DATE_FORMAT_STRING).format(x));
-                    }
-                    else {
-                        marker.setLabel(new java.text.SimpleDateFormat(Styles.DATE_FORMAT_STRING_SHORT).format(x));
-                    }
-                }
-                else {
-                    marker.setLabel(Styles.NUMBER_FORMAT.format(x));
-                }
-            }
-            else {
-                marker.setLabel(text);
-            }
-
-            return marker;
-        }
-
-        protected final ValueMarker createHorizontalMarker(String text) {
-            double y = getGraphCoordinates()[1];
-
-            ValueMarker marker = new RangeValueMarker(y);
-            marker.setLabelTextAnchor(TextAnchor.BASELINE_LEFT);
-            formatMarker(marker);
-
-            if (text == null) {
-                marker.setLabel(Styles.NUMBER_FORMAT.format(y));
-            }
-            else {
-                marker.setLabel(text);
-            }
-            return marker;
-        }
-
-        protected final XYTextAnnotation createAnnotation(String text) {
-            double[] graphCoords = getGraphCoordinates();
-
-            XYTextAnnotation annotation = new XYTextAnnotation(text, graphCoords[0], graphCoords[1]);
-            annotation.setFont(Styles.ANNOTATION_FONT);
-            annotation.setPaint(Styles.ANNOTATION_COLOR);
-
-            return annotation;
-        }
-
-        private final double[] getGraphCoordinates() {
-            XYPlot xyPlot = getChart().getXYPlot();
-
-            java.awt.geom.Rectangle2D dataArea = getChartRenderingInfo().getPlotInfo().getDataArea();
-
-            double x = xyPlot.getDomainAxis().java2DToValue(clickLocation.getX(), dataArea, xyPlot.getDomainAxisEdge());
-            double y = xyPlot.getRangeAxis().java2DToValue(clickLocation.getY(), dataArea, xyPlot.getRangeAxisEdge());
-
-            if (x < xyPlot.getDomainAxis().getLowerBound()) {
-                x = xyPlot.getDomainAxis().getLowerBound();
-            }
-            if (x > xyPlot.getDomainAxis().getUpperBound()) {
-                x = xyPlot.getDomainAxis().getUpperBound();
-            }
-
-            if (y < xyPlot.getRangeAxis().getLowerBound()) {
-                y = xyPlot.getRangeAxis().getLowerBound();
-            }
-            if (y > xyPlot.getRangeAxis().getUpperBound()) {
-                y = xyPlot.getRangeAxis().getUpperBound();
-            }
-
-            return new double[] { x, y };
-        }
-
-        private final void formatMarker(ValueMarker marker) {
-            marker.setStroke(Styles.ANNOTATION_STROKE);
-            marker.setPaint(Styles.ANNOTATION_COLOR);
-            marker.setLabelFont(Styles.ANNOTATION_FONT);
-            marker.setLabelPaint(Styles.ANNOTATION_COLOR);
-        }
-    }
 }

@@ -272,21 +272,6 @@ public class BaseChartPanel extends ChartPanel implements PropertyChangeListener
 
     public void addMarkers(List<Marker> markers) {}
 
-    protected final String getAnnotationText() {
-        String text = JOptionPane.showInputDialog(BaseChartPanel.this.parent, "Annotation Text",
-                "Annotate Chart", JOptionPane.QUESTION_MESSAGE);
-
-        if (text != null) {
-            text = text.trim();
-
-            if ("".equals(text)) {
-                text = null;
-            }
-        }
-
-        return text;
-    }
-
     protected String validateSaveFileName(String filename) {
         if ((filename == null) || "".equals(filename)) {
             String title = getChart().getTitle().getText();
