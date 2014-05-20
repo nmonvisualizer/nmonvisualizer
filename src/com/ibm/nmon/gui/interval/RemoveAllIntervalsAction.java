@@ -25,8 +25,11 @@ public final class RemoveAllIntervalsAction extends AbstractAction {
 
     @Override
     public void actionPerformed(ActionEvent e) {
-        if (JOptionPane.showConfirmDialog(parent, "Are you sure?", "Remove All Intervals", JOptionPane.YES_NO_OPTION) == JOptionPane.OK_OPTION) {
-            gui.getIntervalManager().clearIntervals();
+        if (gui.getIntervalManager().getIntervalCount() > 0) {
+            if (JOptionPane.showConfirmDialog(parent, "Are you sure?", "Remove All Intervals",
+                    JOptionPane.YES_NO_OPTION) == JOptionPane.OK_OPTION) {
+                gui.getIntervalManager().clearIntervals();
+            }
         }
     }
 }
