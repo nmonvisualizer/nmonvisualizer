@@ -119,9 +119,6 @@ public final class LineChartAnnotationDialog extends GUIDialog {
         lineType.add(horizontal);
         lineType.add(none);
 
-        // default to vertical line and time annotations
-        vertical.setSelected(true);
-
         // annotation text with ability to set using x or y axis values
         JLabel annotationLabel = new JLabel("Annotation:");
         annotationLabel.setFont(Styles.LABEL);
@@ -401,6 +398,9 @@ public final class LineChartAnnotationDialog extends GUIDialog {
         horizontal.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
+                useYAxisValue.setEnabled(true);
+                useXAxisValue.setEnabled(false);
+
                 if (!useYAxisValue.isSelected()) {
                     useYAxisValue.doClick();
                 }
@@ -410,6 +410,9 @@ public final class LineChartAnnotationDialog extends GUIDialog {
         vertical.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
+                useYAxisValue.setEnabled(false);
+                useXAxisValue.setEnabled(true);
+
                 if (!useXAxisValue.isSelected()) {
                     useXAxisValue.doClick();
                 }
@@ -419,9 +422,13 @@ public final class LineChartAnnotationDialog extends GUIDialog {
         none.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
+                useYAxisValue.setEnabled(true);
+                useXAxisValue.setEnabled(true);
+
                 if (useXAxisValue.isSelected()) {
                     useXAxisValue.doClick();
                 }
+
                 if (useYAxisValue.isSelected()) {
                     useYAxisValue.doClick();
                 }
@@ -429,6 +436,10 @@ public final class LineChartAnnotationDialog extends GUIDialog {
         });
 
         getRootPane().setDefaultButton(ok);
+
+        // default to vertical line and time annotations
+        vertical.setSelected(true);
+        useYAxisValue.setEnabled(false);
 
         // set annotation assuming vertical line as the default
         useXAxisValue.doClick();
