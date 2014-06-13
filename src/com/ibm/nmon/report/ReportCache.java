@@ -7,21 +7,25 @@ import java.util.Map;
 
 import org.slf4j.Logger;
 
-import com.ibm.nmon.chart.definition.BarChartDefinition;
-import com.ibm.nmon.chart.definition.ChartDefinitionParser;
 import com.ibm.nmon.chart.definition.BaseChartDefinition;
+import com.ibm.nmon.chart.definition.LineChartDefinition;
 import com.ibm.nmon.chart.definition.HistogramChartDefinition;
 import com.ibm.nmon.chart.definition.IntervalChartDefinition;
-import com.ibm.nmon.chart.definition.LineChartDefinition;
+import com.ibm.nmon.chart.definition.BarChartDefinition;
+
+import com.ibm.nmon.chart.definition.ChartDefinitionParser;
+
 import com.ibm.nmon.data.DataSet;
 import com.ibm.nmon.data.DataType;
+
 import com.ibm.nmon.data.definition.DataDefinition;
 import com.ibm.nmon.data.definition.DefaultDataDefinition;
 import com.ibm.nmon.data.definition.ExactDataDefinition;
+
 import com.ibm.nmon.data.definition.NamingMode;
+
 import com.ibm.nmon.data.matcher.ExactFieldMatcher;
 import com.ibm.nmon.data.matcher.ExactTypeMatcher;
-import com.ibm.nmon.gui.chart.ChartFactory;
 
 /**
  * A simple cache for storing 'reports', a list of parsed chart definitions. Reports are stored and
@@ -44,12 +48,14 @@ public final class ReportCache {
 
     public ReportCache() {
         try {
-            reports.put(DEFAULT_SUMMARY_CHARTS_KEY, parser.parseCharts(ChartFactory.class
-                    .getResourceAsStream("/com/ibm/nmon/report/summary_single_interval.xml")));
-            reports.put(DEFAULT_INTERVAL_CHARTS_KEY, parser.parseCharts(ChartFactory.class
-                    .getResourceAsStream("/com/ibm/nmon/report/summary_all_intervals.xml")));
-            reports.put(DEFAULT_DATASET_CHARTS_KEY, parser.parseCharts(ChartFactory.class
-                    .getResourceAsStream("/com/ibm/nmon/report/dataset_report.xml")));
+            reports.put(
+                    DEFAULT_SUMMARY_CHARTS_KEY,
+                    parser.parseCharts(getClass().getResourceAsStream(
+                            "/com/ibm/nmon/report/summary_single_interval.xml")));
+            reports.put(DEFAULT_INTERVAL_CHARTS_KEY, parser.parseCharts(getClass().getResourceAsStream(
+                    "/com/ibm/nmon/report/summary_all_intervals.xml")));
+            reports.put(DEFAULT_DATASET_CHARTS_KEY,
+                    parser.parseCharts(getClass().getResourceAsStream("/com/ibm/nmon/report/dataset_report.xml")));
         }
         catch (IOException e) {
             LOGGER.error("cannot parse default report definition xmls", e);
@@ -59,7 +65,8 @@ public final class ReportCache {
     /**
      * Parse the given chart definition XML file and store the report with the given key.
      * 
-     * @param file a valid XML file for processing by {@link ChartDefinitionParser}
+     * @param file
+     *            a valid XML file for processing by {@link ChartDefinitionParser}
      */
     public void addReport(String key, String file) throws IOException {
         if (DEFAULT_SUMMARY_CHARTS_KEY.equals(key) || DEFAULT_INTERVAL_CHARTS_KEY.equals(key)
@@ -90,7 +97,8 @@ public final class ReportCache {
      * Get the report for the given key filtering based on a given data set. Charts that are not
      * applicable to a host in the data set will not be included in the returned list.
      * 
-     * @param dataSets the DataSets to match
+     * @param dataSets
+     *            the DataSets to match
      * @return the filtered list of chart definitions
      * @see DataDefinition#matchesHost(DataSet)
      */
@@ -135,7 +143,8 @@ public final class ReportCache {
      * create a large number of charts, especially if multiple DataTypes and/or fields are matched.
      * </p>
      * 
-     * @param filterByData should the initial reports list be filtered by the given data? See
+     * @param filterByData
+     *            should the initial reports list be filtered by the given data? See
      *            {@link #getReport(String, Iterable)}.
      */
     public List<BaseChartDefinition> multiplexChartsAcrossTypes(String key, DataSet data, boolean filterByData) {
@@ -206,7 +215,8 @@ public final class ReportCache {
      * create a large number of charts, especially if multiple DataTypes and/or fields are matched.
      * </p>
      * 
-     * @param filterByData should the initial reports list be filtered by the given data? See
+     * @param filterByData
+     *            should the initial reports list be filtered by the given data? See
      *            {@link #getReport(String, Iterable)}.
      */
     public List<BaseChartDefinition> multiplexChartsAcrossFields(String key, DataSet data, boolean filterByData) {

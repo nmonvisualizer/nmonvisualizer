@@ -186,7 +186,7 @@ public class LineChartBuilder extends BaseChartBuilder<LineChartDefinition> {
                 List<String> fieldNames = new java.util.ArrayList<String>(fields.size());
 
                 for (String field : fields) {
-                    fieldNames.add(lineNamingMode.getName(definition, data, type, field, granularity));
+                    fieldNames.add(lineNamingMode.getName(definition, data, type, field, getGranularity()));
                 }
 
                 addData(dataset, data, type, fields, fieldNames);
@@ -204,9 +204,9 @@ public class LineChartBuilder extends BaseChartBuilder<LineChartDefinition> {
 
         int n = 0;
 
-        long lastOutputTime = Math.max(interval.getStart(), data.getStartTime());
+        long lastOutputTime = Math.max(getInterval().getStart(), data.getStartTime());
 
-        for (DataRecord record : data.getRecords(interval)) {
+        for (DataRecord record : data.getRecords(getInterval())) {
             if ((record != null) && record.hasData(type)) {
                 for (int i = 0; i < fields.size(); i++) {
                     if (type.hasField(fields.get(i))) {
@@ -226,7 +226,7 @@ public class LineChartBuilder extends BaseChartBuilder<LineChartDefinition> {
             }
             // else no data for this type at this time but may still need to output
 
-            if ((n > 0) && ((record.getTime() - lastOutputTime) >= granularity)) {
+            if ((n > 0) && ((record.getTime() - lastOutputTime) >= getGranularity())) {
                 FixedMillisecond graphTime = new FixedMillisecond(record.getTime());
 
                 for (int i = 0; i < fields.size(); i++) {

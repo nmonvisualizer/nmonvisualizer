@@ -167,7 +167,7 @@ public final class HistogramChartBuilder extends BaseChartBuilder<HistogramChart
                 for (DataType type : dataDefinition.getMatchingTypes(data)) {
                     for (String field : dataDefinition.getMatchingFields(type)) {
                         String fieldName = definition.getHistogramNamingMode().getName(dataDefinition, data, type,
-                                field, granularity);
+                                field, getGranularity());
 
                         List<Double> values = new java.util.ArrayList<Double>(data.getRecordCount());
 

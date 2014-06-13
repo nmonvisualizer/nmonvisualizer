@@ -74,7 +74,7 @@ public final class ReportPanel extends JTabbedPane implements PropertyChangeList
     private MultiplexMode multiplexMode;
     private List<BaseChartDefinition> chartsInUse;
 
-    private final ChartFactory ChartFactory;
+    private final ChartFactory chartFactory;
 
     private final BitSet chartNeedsUpdate;
 
@@ -95,7 +95,7 @@ public final class ReportPanel extends JTabbedPane implements PropertyChangeList
             MultiplexMode multiplexMode) {
         super();
 
-        this.ChartFactory = new ChartFactory(gui);
+        this.chartFactory = new ChartFactory(gui);
 
         this.gui = gui;
         this.parent = parent;
@@ -288,7 +288,7 @@ public final class ReportPanel extends JTabbedPane implements PropertyChangeList
     }
 
     public void addPlugin(ChartBuilderPlugin plugin) {
-        ChartFactory.addPlugin(plugin);
+        chartFactory.addPlugin(plugin);
     }
 
     @Override
@@ -301,7 +301,7 @@ public final class ReportPanel extends JTabbedPane implements PropertyChangeList
         else if ("granularity".equals(evt.getPropertyName())) {
             int newGranularity = (Integer) evt.getNewValue();
 
-            ChartFactory.setGranularity(newGranularity);
+            chartFactory.setGranularity(newGranularity);
 
             // always update line charts on granularity changes
             // bar charts and interval line charts do not need to be updated unless the stat is
@@ -311,7 +311,7 @@ public final class ReportPanel extends JTabbedPane implements PropertyChangeList
 
                 if (chartDefinition.getClass().equals(IntervalChartDefinition.class)
                         || chartDefinition.getClass().equals(BarChartDefinition.class)) {
-                    for (DataDefinition definition : chartsInUse.get(i).getData()) {
+                    for (DataDefinition definition : chartDefinition.getData()) {
                         if (definition.getStatistic() == Statistic.GRANULARITY_MAXIMUM) {
                             chartNeedsUpdate.set(i);
                             break;
@@ -363,7 +363,7 @@ public final class ReportPanel extends JTabbedPane implements PropertyChangeList
 
     @Override
     public void currentIntervalChanged(Interval interval) {
-        ChartFactory.setInterval(interval);
+        chartFactory.setInterval(interval);
 
         // update non-interval charts
         for (int i = 0; i < chartsInUse.size(); i++) {
@@ -497,7 +497,7 @@ public final class ReportPanel extends JTabbedPane implements PropertyChangeList
     private void createChart(int index) {
         BaseChartDefinition definition = chartsInUse.get(index);
 
-        JFreeChart chart = ChartFactory.createChart(definition, dataSets);
+        JFreeChart chart = chartFactory.createChart(definition, dataSets);
 
         // setChart will fire the event that updates the data table
         getChartPanel(index).setChart(chart);

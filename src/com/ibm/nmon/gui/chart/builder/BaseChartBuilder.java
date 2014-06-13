@@ -68,8 +68,8 @@ abstract class BaseChartBuilder<C extends BaseChartDefinition> {
 
     protected final Logger logger = org.slf4j.LoggerFactory.getLogger(getClass());
 
-    protected Interval interval;
-    protected int granularity = GranularityHelper.DEFAULT_GRANULARITY;
+    private Interval interval;
+    private int granularity = GranularityHelper.DEFAULT_GRANULARITY;
 
     private List<ChartBuilderPlugin> plugins;
 
@@ -78,6 +78,10 @@ abstract class BaseChartBuilder<C extends BaseChartDefinition> {
 
     protected BaseChartBuilder() {
         interval = Interval.DEFAULT;
+    }
+
+    public Interval getInterval() {
+        return interval;
     }
 
     public final void setInterval(Interval interval) {
