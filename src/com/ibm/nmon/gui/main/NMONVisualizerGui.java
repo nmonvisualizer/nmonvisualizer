@@ -17,6 +17,7 @@ import java.awt.event.WindowEvent;
 import javax.swing.SwingUtilities;
 
 import com.ibm.nmon.NMONVisualizerApp;
+
 import com.ibm.nmon.data.DataSet;
 import com.ibm.nmon.data.transform.name.HostRenamer;
 import com.ibm.nmon.gui.interval.IntervalPicker;
@@ -209,6 +210,10 @@ public final class NMONVisualizerGui extends NMONVisualizerApp {
         }
 
         if (getGranularity() != oldGranularity) {
+            for (DataSet data : getDataSets()) {
+                getAnalysis(data).setGranularity(getGranularity());
+            }
+
             setProperty("granularity", getGranularity());
         }
     }
