@@ -154,7 +154,10 @@ public final class SummaryTablePanel extends JPanel implements IntervalListener,
             ((AnalysisSetTableModel) dataSetTable.getModel()).fireTableDataChanged();
         }
         else {
-            ((AnalysisSetTableModel) statisticsTable.getModel()).fireTableDataChanged();
+            ByStatisticTableModel model = (ByStatisticTableModel) statisticsTable.getModel();
+
+            model.updateGranularityMax();
+            model.fireTableDataChanged();
         }
     }
 
@@ -205,12 +208,13 @@ public final class SummaryTablePanel extends JPanel implements IntervalListener,
 
         // note there is no need to remove the 2 table models as DataSetListeners and
         // AnalysisSetListeners
-        // the only thing that adds data to the analysis set is drag and drop, which is impossible
-        // if this panel is not displayed
-        // adding or removing a DataSet fires table changes, but the table is not refreshed until it
-        // is displayed
+        // the only thing that adds data to the analysis set is drag and drop, which is
+        // impossible if this panel is not displayed
+        // adding or removing a DataSet fires table changes, but the table is not refreshed
+        // until it is displayed
 
         super.setEnabled(enabled);
+
     }
 
     // this class is an IntervalListener rather than each of the table models so that only 1 table

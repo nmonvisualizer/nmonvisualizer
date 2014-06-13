@@ -173,13 +173,17 @@ public final class ByStatisticTableModel extends AnalysisSetTableModel implement
     @Override
     public void propertyChange(PropertyChangeEvent evt) {
         if ("granularity".equals(evt.getPropertyName())) {
-            COLUMN_NAMES[COLUMN_NAMES.length - 1] = Statistic.GRANULARITY_MAXIMUM.getName(gui.getGranularity());
-            buildColumnNameMap();
+            updateGranularityMax();
+        }
+    }
 
-            if (enabledColumns.get(COLUMN_NAMES.length - 1)) {
-                // update granularity max column name
-                fireTableStructureChanged();
-            }
+    void updateGranularityMax() {
+        COLUMN_NAMES[COLUMN_NAMES.length - 1] = Statistic.GRANULARITY_MAXIMUM.getName(gui.getGranularity());
+        buildColumnNameMap();
+
+        if (enabledColumns.get(COLUMN_NAMES.length - 1)) {
+            // update granularity max column name
+            fireTableStructureChanged();
         }
     }
 }

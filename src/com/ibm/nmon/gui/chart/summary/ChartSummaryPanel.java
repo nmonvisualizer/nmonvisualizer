@@ -21,17 +21,13 @@ import javax.swing.table.TableCellRenderer;
 import javax.swing.ToolTipManager;
 
 import com.ibm.nmon.gui.main.NMONVisualizerGui;
-
 import com.ibm.nmon.gui.GUITable;
-
 import com.ibm.nmon.gui.chart.BaseChartPanel;
 import com.ibm.nmon.gui.chart.data.DataTupleDataset;
-
 import com.ibm.nmon.gui.table.DoubleCellRenderer;
 import com.ibm.nmon.gui.table.IntegerCellRenderer;
 import com.ibm.nmon.gui.table.StringCellRenderer;
 import com.ibm.nmon.gui.table.TableColumnChooser;
-
 import com.ibm.nmon.gui.util.ScrollingTableFix;
 
 /**
@@ -64,6 +60,21 @@ public final class ChartSummaryPanel extends JScrollPane implements PropertyChan
 
         // make sure panel takes up entire parent
         setBorder(null);
+    }
+
+    @Override
+    public void setEnabled(boolean enabled) {
+        if (enabled != isEnabled()) {
+            if (enabled) {
+                gui.addPropertyChangeListener("granularity", tableModel);
+                tableModel.updateGranularityMax();
+            }
+            else {
+                gui.removePropertyChangeListener("granularity", tableModel);
+            }
+
+            super.setEnabled(enabled);
+        }
     }
 
     @Override

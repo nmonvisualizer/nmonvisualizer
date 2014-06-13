@@ -63,6 +63,13 @@ public abstract class ChartSplitPane extends JSplitPane implements PropertyChang
     }
 
     @Override
+    public void setEnabled(boolean enabled) {
+        summaryTable.setEnabled(enabled);
+
+        super.setEnabled(enabled);
+    }
+
+    @Override
     public void propertyChange(PropertyChangeEvent evt) {
         if (changeInProgress) {
             return;
