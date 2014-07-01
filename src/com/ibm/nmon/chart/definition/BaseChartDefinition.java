@@ -13,6 +13,9 @@ public abstract class BaseChartDefinition implements Cloneable {
     private String shortName;
     private String title;
 
+    private int width;
+    private int height;
+
     private final List<DataDefinition> data;
 
     private NamingMode subtitleNamingMode = NamingMode.HOST;
@@ -21,12 +24,19 @@ public abstract class BaseChartDefinition implements Cloneable {
         setShortName(shortName);
         setTitle(title);
 
+        this.width = 1920 / 2;
+        this.height = 1080 / 2;
+
         data = new java.util.ArrayList<DataDefinition>(3);
     }
 
     protected BaseChartDefinition(BaseChartDefinition copy, boolean copyData) {
         this.shortName = copy.shortName;
         this.title = copy.title;
+
+        this.width = copy.width;
+        this.height = copy.height;
+
         this.subtitleNamingMode = copy.subtitleNamingMode;
 
         if (copyData) {
@@ -61,6 +71,30 @@ public abstract class BaseChartDefinition implements Cloneable {
         else {
             this.title = title;
         }
+    }
+
+    public int getWidth() {
+        if (width < 1) {
+            throw new IllegalArgumentException("width" + "must be greater than 0");
+        }
+
+        return width;
+    }
+
+    public void setWidth(int width) {
+        if (height < 1) {
+            throw new IllegalArgumentException("height" + "must be greater than 0");
+        }
+
+        this.width = width;
+    }
+
+    public int getHeight() {
+        return height;
+    }
+
+    public void setHeight(int height) {
+        this.height = height;
     }
 
     public final NamingMode getSubtitleNamingMode() {

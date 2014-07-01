@@ -320,7 +320,9 @@ public final class ChartDefinitionParser extends BasicXMLParser {
             ((LineChartDefinition) currentChart).setLineNamingMode(mode);
         }
 
-        logger.debug("parsing line chart {}", currentChart.getShortName());
+        parseSize("<linechart>", attributes);
+
+        logger.debug("parsed line chart {}", currentChart.getShortName());
     }
 
     private void createIntervalChart(Map<String, String> attributes) {
@@ -355,7 +357,9 @@ public final class ChartDefinitionParser extends BasicXMLParser {
             ((LineChartDefinition) currentChart).setLineNamingMode(mode);
         }
 
-        logger.debug("parsing interval chart {}", currentChart.getShortName());
+        parseSize("<intervalchart>", attributes);
+
+        logger.debug("parsed interval chart {}", currentChart.getShortName());
     }
 
     private void createBarChart(Map<String, String> attributes) {
@@ -398,7 +402,9 @@ public final class ChartDefinitionParser extends BasicXMLParser {
             ((BarChartDefinition) currentChart).setCategoryNamingMode(mode);
         }
 
-        logger.debug("parsing bar chart {}", currentChart.getShortName());
+        parseSize("<barchart>", attributes);
+
+        logger.debug("parsed bar chart {}", currentChart.getShortName());
     }
 
     private void createHistogram(Map<String, String> attributes) {
@@ -453,7 +459,9 @@ public final class ChartDefinitionParser extends BasicXMLParser {
             ((HistogramChartDefinition) currentChart).setMarkers(new Statistic[0]);
         }
 
-        logger.debug("parsing histogram chart {}", currentChart.getShortName());
+        parseSize("<histogram>", attributes);
+
+        logger.debug("parsed histogram chart {}", currentChart.getShortName());
     }
 
     private void parseHost(Map<String, String> attributes) {
@@ -612,6 +620,32 @@ public final class ChartDefinitionParser extends BasicXMLParser {
             }
             else {
                 fieldTransformers.put(name, new SimpleNameTransformer(value));
+            }
+        }
+    }
+
+    private void parseSize(String elementName, Map<String, String> attributes) {
+        if (attributes.get("width") != null) {
+            String temp = attributes.get("width");
+
+            try {
+                currentChart.setWidth(Integer.parseInt(temp));
+            }
+            catch (NumberFormatException nfe) {
+                logger.warn("ignoring " + elementName + " attribute " + "'width'" + " with value '{}'" + " at line {}"
+                        + ", is not a valid number", temp, getLineNumber());
+            }
+        }
+
+        if (attributes.get("height") != null) {
+            String temp = attributes.get("height");
+
+            try {
+                currentChart.setHeight(Integer.parseInt(temp));
+            }
+            catch (NumberFormatException nfe) {
+                logger.warn("ignoring " + elementName + " attribute " + "'height'" + " with value '{}'" + " at line {}"
+                        + ", is not a valid number", temp, getLineNumber());
             }
         }
     }

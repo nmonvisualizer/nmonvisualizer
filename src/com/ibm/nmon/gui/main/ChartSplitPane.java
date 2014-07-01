@@ -75,9 +75,9 @@ public abstract class ChartSplitPane extends JSplitPane implements PropertyChang
             return;
         }
 
-        if ("highlightedLine".equals(evt.getPropertyName())) {
-            changeInProgress = true;
+        changeInProgress = true;
 
+        if ("highlightedLine".equals(evt.getPropertyName())) {
             Integer newRow = (Integer) evt.getNewValue();
 
             if (newRow == null) {
@@ -88,8 +88,6 @@ public abstract class ChartSplitPane extends JSplitPane implements PropertyChang
             }
         }
         else if ("highlightedBar".equals(evt.getPropertyName())) {
-            changeInProgress = true;
-
             int[] newValues = (int[]) evt.getNewValue();
 
             if (newValues == null) {
@@ -100,8 +98,6 @@ public abstract class ChartSplitPane extends JSplitPane implements PropertyChang
             }
         }
         else if ("highlightedIntervalLine".equals(evt.getPropertyName())) {
-            changeInProgress = true;
-
             Integer newRow = (Integer) evt.getNewValue();
 
             if (newRow == null) {
@@ -112,8 +108,6 @@ public abstract class ChartSplitPane extends JSplitPane implements PropertyChang
             }
         }
         else if ("selectedRows".equals(evt.getPropertyName())) {
-            changeInProgress = true;
-
             BaseChartPanel chartPanel = getChartPanel();
 
             if (chartPanel != null) {
@@ -131,11 +125,13 @@ public abstract class ChartSplitPane extends JSplitPane implements PropertyChang
             }
         }
         else if ("rowVisible".equals(evt.getPropertyName())) {
-            changeInProgress = true;
             BaseChartPanel chartPanel = getChartPanel();
-            Object[] values = (Object[]) evt.getNewValue();
 
-            chartPanel.setElementVisible((Integer) values[0], (Integer) values[1], (Boolean) values[2]);
+            if (chartPanel != null) {
+                Object[] values = (Object[]) evt.getNewValue();
+
+                chartPanel.setElementVisible((Integer) values[0], (Integer) values[1], (Boolean) values[2]);
+            }
         }
 
         changeInProgress = false;

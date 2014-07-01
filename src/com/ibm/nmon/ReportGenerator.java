@@ -455,7 +455,7 @@ public final class ReportGenerator extends NMONVisualizerApp {
 
         chartsDirectory.mkdirs();
 
-        System.out.println("Writing charts to " + chartsDirectory);
+        System.out.println("Writing charts to " + chartsDirectory.getAbsolutePath());
 
         if (summaryCharts) {
             chartsCreated += createSummaryCharts("Creating summary charts", ReportCache.DEFAULT_SUMMARY_CHARTS_KEY,
@@ -614,7 +614,7 @@ public final class ReportGenerator extends NMONVisualizerApp {
             File chartFile = new File(saveDirectory, definition.getShortName() + ".png");
 
             try {
-                ChartUtilities.saveChartAsPNG(chartFile, chart, 1920 / 2, 1080 / 2);
+                ChartUtilities.saveChartAsPNG(chartFile, chart, definition.getWidth(), definition.getHeight());
             }
             catch (IOException ioe) {
                 System.err.println("cannot create chart " + chartFile.getName());

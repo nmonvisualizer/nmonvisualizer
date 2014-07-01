@@ -500,8 +500,10 @@ public final class ReportPanel extends JTabbedPane implements PropertyChangeList
         JFreeChart chart = chartFactory.createChart(definition, dataSets);
 
         // setChart will fire the event that updates the data table
-        getChartPanel(index).setChart(chart);
-        // getChartPanel(index).addAnnotations(java.util.Collections.unmodifiableList(annotations));
+        BaseChartPanel chartPanel = getChartPanel(index);
+
+        chartPanel.setSaveSize(definition.getWidth(), definition.getHeight());
+        chartPanel.setChart(chart);
     }
 
     public void saveAllCharts(final String directory) {

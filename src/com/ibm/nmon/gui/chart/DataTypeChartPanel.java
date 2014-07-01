@@ -168,6 +168,8 @@ public final class DataTypeChartPanel extends LineChartPanel implements Interval
             chartDefinition.setYAxisLabel(axisLabel);
             chartDefinition.setUsePercentYAxis(percent);
 
+            setSaveSize(chartDefinition.getWidth(), chartDefinition.getHeight());
+
             chartBuilder.initChart(chartDefinition);
             chartBuilder.addLinesForData(definition, data, NamingMode.FIELD);
 

@@ -55,6 +55,9 @@ public class BaseChartPanel extends ChartPanel implements PropertyChangeListener
     // used by subclasses for adding annotations
     protected java.awt.Point clickLocation = null;
 
+    private int saveHeight;
+    private int saveWidth;
+
     protected BaseChartPanel(NMONVisualizerGui gui, JFrame parent) {
         // With multiple charts for each ReportPanel and one report panel per DataSet, there could
         // be a large number of active charts. To keep memory usage down, disable using a buffered
@@ -77,6 +80,9 @@ public class BaseChartPanel extends ChartPanel implements PropertyChangeListener
 
         this.gui = gui;
         this.parent = parent;
+
+        this.saveWidth = 1920 / 2;
+        this.saveHeight = 1080 / 2;
 
         setEnabled(false);
         clearChart();
@@ -195,7 +201,7 @@ public class BaseChartPanel extends ChartPanel implements PropertyChangeListener
     @Override
     public final void doCopy() {
         Clipboard systemClipboard = Toolkit.getDefaultToolkit().getSystemClipboard();
-        ChartTransferable selection = new ChartTransferable(getChart(), 1920 / 2, 1080 / 2);
+        ChartTransferable selection = new ChartTransferable(getChart(), saveWidth, saveHeight);
         systemClipboard.setContents(selection, null);
     }
 
@@ -203,7 +209,7 @@ public class BaseChartPanel extends ChartPanel implements PropertyChangeListener
         DataTupleDataset data = getDataset();
 
         if (data != null) {
-            StringWriter writer = new StringWriter(1024);
+            StringWriter writer = new StringWriter(2048);
 
             try {
                 CSVWriter.write(data, writer);
@@ -248,11 +254,24 @@ public class BaseChartPanel extends ChartPanel implements PropertyChangeListener
                 }
             }
 
-            ChartUtilities.saveChartAsPNG(chartFile, getChart(), 1920 / 2, 1080 / 2);
+            ChartUtilities.saveChartAsPNG(chartFile, getChart(), saveWidth, saveHeight);
         }
 
         // save the last directory whether or not the file is actually saved
         gui.getPreferences().put("lastSaveDirectory", chartFile.getParentFile().getAbsolutePath());
+    }
+
+    public final void setSaveSize(int width, int height) {
+        if (width < 1) {
+            throw new IllegalArgumentException("width" + "must be greater than 0");
+        }
+
+        if (height < 1) {
+            throw new IllegalArgumentException("height" + "must be greater than 0");
+        }
+
+        saveWidth = width;
+        saveHeight = height;
     }
 
     public final void saveChart(String directory, String filename) {
@@ -261,7 +280,7 @@ public class BaseChartPanel extends ChartPanel implements PropertyChangeListener
         File chartFile = new File(directory, filename);
 
         try {
-            ChartUtilities.saveChartAsPNG(chartFile, getChart(), 1920 / 2, 1080 / 2);
+            ChartUtilities.saveChartAsPNG(chartFile, getChart(), saveWidth, saveHeight);
         }
         catch (IOException ioe) {
             logger.error("could not save chart '" + filename + "' to directory '" + directory + "'", ioe);
