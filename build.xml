@@ -8,7 +8,7 @@
     <manifest file="${basedir}/MANIFEST.MF">
       <attribute name="Main-Class" value="org.eclipse.jdt.internal.jarinjarloader.JarRsrcLoader" />
       <attribute name="Class-Path" value="." />
-      <attribute name="Rsrc-Class-Path" value="./ jcommon-1.0.21.jar jfreechart-1.0.17.jar slf4j-api-1.7.6.jar slf4j-jdk14-1.7.6.jar jackson-annotations-2.3.1.jar jackson-core-2.3.1.jar jackson-databind-2.3.1.jar" />
+      <attribute name="Rsrc-Class-Path" value="./ jcommon-1.0.22.jar jfreechart-1.0.18.jar slf4j-api-1.7.7.jar slf4j-jdk14-1.7.7.jar jackson-annotations-2.4.1.jar jackson-core-2.4.1.jar jackson-databind-2.4.1.1.jar" />
       <attribute name="Rsrc-Main-Class" value="com.ibm.nmon.DelegatingMain" />
     </manifest>
 
@@ -42,6 +42,7 @@
         <exclude name="com/ibm/nmon/gui/data/*" />
         <exclude name="com/ibm/nmon/gui/dnd/*" />
         <exclude name="com/ibm/nmon/gui/file/*" />
+        <exclude name="com/ibm/nmon/gui/icons/*" />
         <exclude name="com/ibm/nmon/gui/info/*" />
         <exclude name="com/ibm/nmon/gui/interval/*" />
         <exclude name="com/ibm/nmon/gui/main/*" />
