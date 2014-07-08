@@ -31,8 +31,8 @@ public final class OSMatcher implements HostMatcher {
         else if (operatingSystem.contains("vios")) {
             matcher = VIOS;
         }
-        else if (operatingSystem.contains("esx")) {
-            matcher = ESX;
+        else if (operatingSystem.contains("perfmon")) {
+            matcher = PERFMON;
         }
         else {
             matcher = UNKNOWN;
@@ -191,10 +191,10 @@ public final class OSMatcher implements HostMatcher {
         };
     };
 
-    private static final HostMatcher ESX = new HostMatcher() {
+    private static final HostMatcher PERFMON = new HostMatcher() {
         @Override
         public boolean matchesHost(DataSet data) {
-            return getMetadata(data, "OS").contains("VMWare");
+            return getMetadata(data, "OS").contains("Perfmon");
         }
 
         @Override
@@ -211,7 +211,7 @@ public final class OSMatcher implements HostMatcher {
         }
 
         public String toString() {
-            return "esx";
+            return "perfmon";
         };
     };
 

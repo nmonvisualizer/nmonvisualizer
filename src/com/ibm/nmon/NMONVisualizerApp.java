@@ -45,7 +45,7 @@ public abstract class NMONVisualizerApp implements IntervalListener {
     private final IOStatParser iostatParser;
     private final JSONParser jsonParser;
     private final HATJParser hatJParser;
-    private final ESXTopParser esxTopParser;
+    private final PerfmonParser perfmonParser;
 
     private HostRenamer hostRenamer;
 
@@ -74,7 +74,7 @@ public abstract class NMONVisualizerApp implements IntervalListener {
         iostatParser = new IOStatParser();
         jsonParser = new JSONParser();
         hatJParser = new HATJParser();
-        esxTopParser = new ESXTopParser();
+        perfmonParser = new PerfmonParser();
 
         TimeZone defaultTz = TimeZone.getDefault();
 
@@ -205,8 +205,8 @@ public abstract class NMONVisualizerApp implements IntervalListener {
                 data.setHostname(hostname);
             }
         }
-        else if (filter.getESXTopFileFilter().accept(fileToParse)) {
-            data = esxTopParser.parse(fileToParse);
+        else if (filter.getPerfmonFileFilter().accept(fileToParse)) {
+            data = perfmonParser.parse(fileToParse);
         }
         else {
             throw new IllegalArgumentException("cannot parse " + fileToParse + ": unknown file type");
@@ -276,7 +276,7 @@ public abstract class NMONVisualizerApp implements IntervalListener {
         }
     }
 
-    public void setHostRenamer(HostRenamer hostRenamer) {
+    public final void setHostRenamer(HostRenamer hostRenamer) {
         if (hostRenamer != null) {
             this.hostRenamer = hostRenamer;
         }

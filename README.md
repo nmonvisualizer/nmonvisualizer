@@ -1,6 +1,6 @@
 # NMON Visualizer
 
-NMON Visualizer is a Java GUI tool for analyzing NMON system files from both AIX and Linux. It also parses IOStat files, IBM verbose GC logs, ESXTop CSV data and JSON data.  
+NMON Visualizer is a Java GUI tool for analyzing NMON system files from both AIX and Linux. It also parses IOStat files, IBM verbose GC logs, Perfmon CSV data and JSON data.  
 For more information, including links to download an executable JAR file, see [the website](http://nmonvisualizer.github.io/nmonvisualizer/).
 
 ## Build from Source

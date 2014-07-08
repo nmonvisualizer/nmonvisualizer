@@ -49,8 +49,8 @@ public final class CombinedFileFilter implements FileFilter {
         return (HATJFileFilter) filters.get(4).getFilter();
     }
 
-    public ESXTopFileFilter getESXTopFileFilter() {
-        return (ESXTopFileFilter) filters.get(5).getFilter();
+    public PerfmonFileFilter getPerfmonFileFilter() {
+        return (PerfmonFileFilter) filters.get(5).getFilter();
     }
 
     private CombinedFileFilter(boolean acceptDirectories) {
@@ -59,7 +59,7 @@ public final class CombinedFileFilter implements FileFilter {
         filters.add(new SwingAndIOFileFilter("IOStat Files", new IOStatFileFilter(), acceptDirectories));
         filters.add(new SwingAndIOFileFilter("JSON Files", new JSONFileFilter(), acceptDirectories));
         filters.add(new SwingAndIOFileFilter("HATJ CSV Files", new HATJFileFilter(), acceptDirectories));
-        filters.add(new SwingAndIOFileFilter("ESXTop CSV Files", new ESXTopFileFilter(), acceptDirectories));
+        filters.add(new SwingAndIOFileFilter("Perfmon CSV Files", new PerfmonFileFilter(), acceptDirectories));
     }
 
     private static final CombinedFileFilter INSTANCE = new CombinedFileFilter(false);

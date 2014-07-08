@@ -26,8 +26,8 @@ import com.ibm.nmon.data.SubDataType;
 
 import com.ibm.nmon.util.DataHelper;
 
-public final class ESXTopParser {
-    private static final Logger LOGGER = org.slf4j.LoggerFactory.getLogger(ESXTopParser.class);
+public final class PerfmonParser {
+    private static final Logger LOGGER = org.slf4j.LoggerFactory.getLogger(PerfmonParser.class);
 
     private static final SimpleDateFormat TIMESTAMP_FORMAT = new SimpleDateFormat("MM/dd/yyyy HH:mm:ss");
 
@@ -39,7 +39,9 @@ public final class ESXTopParser {
     private static final Pattern SUBCATEGORY_SPLITTER = Pattern.compile(":");
     // "\\hostname\category (optional subcategory)\metric"
     // note storing a matcher vs a pattern is _NOT_ thread safe
-    private static final Matcher METRIC_MATCHER = Pattern.compile("\\\\\\\\(.*)\\\\(.*)\\\\(.*)").matcher("");
+    // first group is non-greedy (.*?) to allow proper parsing of strings like
+    // \\SYSTEM\Paging File(\??\D:\pagefile.sys)\% Usage
+    private static final Matcher METRIC_MATCHER = Pattern.compile("\\\\\\\\(.*?)\\\\(.*)\\\\(.*)\"?").matcher("");
 
     public BasicDataSet parse(File file) throws IOException, ParseException {
         return parse(file.getAbsolutePath());
@@ -54,8 +56,14 @@ public final class ESXTopParser {
 
         String[] header = DATA_SPLITTER.split(line);
 
+        String lastData = header[header.length - 1];
+
+        if (lastData.endsWith("\"")) {
+            header[header.length - 1] = lastData.substring(0, lastData.length() - 1);
+        }
+
         BasicDataSet data = new BasicDataSet(filename);
-        data.setMetadata("OS", "VMWare ESX");
+        data.setMetadata("OS", "Perfmon");
 
         // read the first column to get the hostname
         for (int i = 1; i < header.length; i++) {
@@ -69,10 +77,10 @@ public final class ESXTopParser {
             }
         }
 
-        Map<String, DataTypeBuilder> builders = new java.util.HashMap<String, DataTypeBuilder>(TYPE_IDS.size());
+        Map<String, DataTypeBuilder> builders = new java.util.HashMap<String, DataTypeBuilder>();
 
         // track the DataType for each column
-        List<String> columnTypes = new java.util.ArrayList<String>(5000);
+        List<String> columnTypes = new java.util.ArrayList<String>(1000);
         // timestamp does not belong to a category
         columnTypes.add(null);
 
@@ -83,10 +91,7 @@ public final class ESXTopParser {
                 // looking for type id (sub type id)
                 String toParse = METRIC_MATCHER.group(2);
                 String name = null;
-                String id = null;
                 String subId = null;
-
-                String unparsedSubId = null;
                 String typeId = null;
 
                 int idx = toParse.indexOf('(');
@@ -101,28 +106,12 @@ public final class ESXTopParser {
                     }
                     else {
                         name = DataHelper.newString(toParse.substring(0, idx));
-                        id = TYPE_IDS.get(name);
-
-                        if (id == null) {
-                            columnTypes.add(null);
-                            continue;
-                        }
-
-                        unparsedSubId = toParse.substring(idx + 1, endIdx);
-                        subId = DataHelper.newString(parseSubId(id, unparsedSubId));
-                        typeId = SubDataType.buildId(id, subId);
+                        subId = DataHelper.newString(parseSubId(name, toParse.substring(idx + 1, endIdx)));
+                        typeId = SubDataType.buildId(name, subId);
                     }
                 }
                 else {
-                    // assume toParse was created from a substring / pattern match so call
-                    // newString()
-                    name = DataHelper.newString(toParse);
-                    id = typeId = TYPE_IDS.get(name);
-
-                    if (id == null) {
-                        columnTypes.add(null);
-                        continue;
-                    }
+                    name = typeId = DataHelper.newString(toParse);
                 }
 
                 DataTypeBuilder builder = builders.get(typeId);
@@ -130,14 +119,14 @@ public final class ESXTopParser {
                 if (builder == null) {
                     builder = new DataTypeBuilder();
 
-                    builder.setId(id);
+                    builder.setId(name);
                     builder.setSubId(subId);
                     builder.setName(name);
 
                     builders.put(typeId, builder);
                 }
 
-                builder.addField(parseField(id, subId, unparsedSubId, METRIC_MATCHER.group(3)));
+                builder.addField(parseField(name, subId, typeId, METRIC_MATCHER.group(3)));
                 columnTypes.add(typeId);
             }
             else {
@@ -158,7 +147,7 @@ public final class ESXTopParser {
                 continue;
             }
 
-            String lastData = rawData[rawData.length - 1];
+            lastData = rawData[rawData.length - 1];
 
             if (lastData.endsWith("\"")) {
                 rawData[rawData.length - 1] = lastData.substring(0, lastData.length() - 1);
@@ -204,6 +193,10 @@ public final class ESXTopParser {
 
                 lastTypeId = typeId;
             }
+
+            // add final data type
+            DataType lastType = data.getType(lastTypeId);
+            record.addData(lastType, values);
         }
 
         if (LOGGER.isDebugEnabled()) {
@@ -217,28 +210,23 @@ public final class ESXTopParser {
     }
 
     private String parseSubId(String id, String toParse) {
-        if ("INTERRUPT".equals(id)) {
+        if ("Interrupt Vector".equals(id)) {
             String[] split = SUBCATEGORY_SPLITTER.split(toParse);
 
             // interrupt id
             return split[0];
         }
-        else if (id.startsWith("GROUP")) {
+        else if (id.startsWith("Group")) {
             // remove leading process id
             return toParse.substring(toParse.indexOf(':') + 1, toParse.length());
         }
-        else if ("VCPU".equals(id)) {
+        else if ("Vcpu".equals(id)) {
             // remove leading process id
             return toParse.substring(toParse.indexOf(':') + 1, toParse.length());
         }
-        else if ("CPU".equals(id)) {
-            if (toParse.charAt(0) == '_') {
-                // _Total = Total
-                return toParse.substring(1);
-            }
-            else {
-                return toParse;
-            }
+        else if (toParse.charAt(0) == '_') {
+            // _Total = Total
+            return toParse.substring(1);
         }
         else {
             return toParse;
@@ -256,7 +244,7 @@ public final class ESXTopParser {
     }
 
     private String parseField(String id, String subId, String unparsedSubId, String toParse) {
-        if ("INTERRUPT".equals(id)) {
+        if ("Interrupt Vector".equals(id)) {
             String[] split = SUBCATEGORY_SPLITTER.split(unparsedSubId);
 
             // total stats for interrupt
@@ -311,45 +299,5 @@ public final class ESXTopParser {
                 return new SubDataType(id, subId, name, fieldsArray);
             }
         }
-    }
-
-    private static final Map<String, String> TYPE_IDS;
-
-    static {
-        Map<String, String> temp = new java.util.HashMap<String, String>();
-
-        // VMWare
-        temp.put("Group Cpu", "GROUPCPU");
-        temp.put("Group Memory", "GROUPMEM");
-
-        temp.put("Interrupt Vector", "INTERRUPT");
-
-        temp.put("Memory", "MEM");
-        temp.put("Numa Node", "NUMA");
-
-        temp.put("Physical Cpu", "CPU");
-
-        temp.put("Network Port", "NET");
-        temp.put("Vcpu", "VCPU");
-
-        temp.put("Virtual Disk", "VDISK");
-        temp.put("Physical Disk", "DISKPHY");
-        temp.put("Physical Disk Adapter", "DISKADPT");
-        temp.put("Physical Disk Partition", "DISKPART");
-        temp.put("Physical Disk Path", "DISKPATH");
-        temp.put("Physical Disk Per-Device-Per-World", "DISKWORLD");
-        temp.put("Physical Disk SCSI Device", "DISKSCSI");
-
-        temp.put("Power", "POWER");
-
-        // Windows
-        temp.put("Processor", "PROC");
-        temp.put("Server", "SERVER");
-        temp.put("PhysicalDisk", "PDISK");
-        temp.put("Network Interface", "NET");
-        temp.put("Process", "PROCESS");
-        temp.put("System", "SYS");
-
-        TYPE_IDS = java.util.Collections.unmodifiableMap(temp);
     }
 }
