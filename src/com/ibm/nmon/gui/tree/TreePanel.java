@@ -308,7 +308,7 @@ public final class TreePanel extends JScrollPane implements DataSetListener {
         // ......|_ TOP fields
 
         // format topNode's name like TypeTreeNode
-        DefaultMutableTreeNode topNode = new DefaultMutableTreeNode("TOP");
+        DefaultMutableTreeNode topNode = new DefaultMutableTreeNode(data.getTypeIdPrefix());
 
         Map<String, List<Process>> processNameToProcesses = DataHelper.getProcessesByName(data, true);
 

@@ -21,6 +21,8 @@ public final class SystemDataSet extends ProcessDataSet {
 
     private final String hostname;
 
+    private String typeIdPrefix = "TOP";
+
     public SystemDataSet(String hostname) {
         if ((hostname == null) || "".equals(hostname)) {
             throw new IllegalArgumentException("hostname cannot be " + "null");
@@ -81,6 +83,10 @@ public final class SystemDataSet extends ProcessDataSet {
         metadata.putAll(newData.metadata);
         systemInfo.putAll(newData.systemInfo);
 
+        if (!typeIdPrefix.equals(newData.typeIdPrefix)) {
+            typeIdPrefix += " + " + newData.typeIdPrefix;
+        }
+
         if (LOGGER.isDebugEnabled()) {
             LOGGER.debug("data for {} consolidated into data for {} in {}ms ", new Object[] { newData, getHostname(),
                     (System.nanoTime() - startT) / 1000000.0d });
@@ -108,6 +114,23 @@ public final class SystemDataSet extends ProcessDataSet {
 
             systemInfo.put(start, nmonData.getSystemInfo());
             metadata.put(start, nmonData.getMetadata());
+        }
+        else if (newData.getClass().equals(PerfmonDataSet.class)) {
+            PerfmonDataSet nmonData = (PerfmonDataSet) newData;
+
+            metadata.put(start, nmonData.getMetadata());
+        }
+
+        if (newData instanceof ProcessDataSet) {
+            String newPrefix = ((ProcessDataSet) newData).getTypeIdPrefix();
+
+            if (getRecordCount() == newData.getRecordCount()) {
+                typeIdPrefix = newPrefix;
+            }
+            else if (!typeIdPrefix.contains(newPrefix)) {
+                typeIdPrefix += " + " + newPrefix;
+            }
+            // else already added
         }
 
         if (LOGGER.isDebugEnabled()) {
@@ -384,5 +407,10 @@ public final class SystemDataSet extends ProcessDataSet {
 
     public int getMetadataCount() {
         return metadata.size();
+    }
+
+    @Override
+    public String getTypeIdPrefix() {
+        return typeIdPrefix;
     }
 }

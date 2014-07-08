@@ -12,8 +12,6 @@ package com.ibm.nmon.data;
  * </p>
  */
 public final class Process implements Comparable<Process> {
-    static final String TOP_TYPE_ID = "TOP";
-
     // note Process with id of -1 is used to represent an aggregate of all processes with the given
     // name; it is treated differently in terms of id, equals and hashcode
     private final int id;
@@ -25,16 +23,20 @@ public final class Process implements Comparable<Process> {
     private final String typeId;
 
     public Process(int id, long startTime, String name) {
+        this(id, startTime, name, "TOP");
+    }
+
+    public Process(int id, long startTime, String name, String typeName) {
         this.id = id;
         this.startTime = startTime;
         this.name = name;
         this.commandLine = "";
 
         if (id == -1) {
-            this.typeId = TOP_TYPE_ID + "-ALL-" + name;
+            this.typeId = typeName + "-ALL-" + name;
         }
         else {
-            this.typeId = TOP_TYPE_ID + "-" + id + '@' + startTime;
+            this.typeId = typeName + "-" + id + '@' + startTime;
         }
     }
 

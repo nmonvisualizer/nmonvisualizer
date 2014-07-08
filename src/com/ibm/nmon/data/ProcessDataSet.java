@@ -21,6 +21,10 @@ public abstract class ProcessDataSet extends DataSet {
         return (ProcessDataType) getType(process.getTypeId());
     }
 
+    public String getTypeIdPrefix() {
+        return "TOP";
+    }
+
     public final Process changeStartTime(Process process, long newStartTime) {
         if (processes.contains(process)) {
             return process;
@@ -44,7 +48,7 @@ public abstract class ProcessDataSet extends DataSet {
 
         processes.remove(process);
         processes.add(newProcess);
-        
+
         return newProcess;
     }
 }

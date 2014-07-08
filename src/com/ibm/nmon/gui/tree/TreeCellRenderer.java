@@ -43,11 +43,17 @@ final class TreeCellRenderer extends DefaultTreeCellRenderer {
             // Truncate names longer than 100 characters
             String commandLine = ((Process) o).getCommandLine();
 
-            if (commandLine.length() > 100) {
-                commandLine = commandLine.substring(0, 50) + " ... " + commandLine.substring(commandLine.length() - 50);
-            }
+            if (commandLine.length() > 0) {
+                if (commandLine.length() > 100) {
+                    commandLine = commandLine.substring(0, 50) + " ... "
+                            + commandLine.substring(commandLine.length() - 50);
+                }
 
-            setToolTipText(commandLine);
+                setToolTipText(commandLine);
+            }
+            else {
+                setToolTipText(((Process) o).getName());
+            }
         }
         else if (o instanceof String) {
             String s = (String) o;
