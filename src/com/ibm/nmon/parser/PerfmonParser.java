@@ -9,7 +9,6 @@ import java.io.FileReader;
 import java.io.LineNumberReader;
 
 import java.text.SimpleDateFormat;
-
 import java.text.ParseException;
 
 import java.util.List;
@@ -25,8 +24,10 @@ import com.ibm.nmon.data.DataRecord;
 import com.ibm.nmon.data.DataType;
 import com.ibm.nmon.data.SubDataType;
 import com.ibm.nmon.data.ProcessDataType;
-
 import com.ibm.nmon.data.Process;
+
+import com.ibm.nmon.data.transform.WindowsNetworkPostProcessor;
+import com.ibm.nmon.data.transform.WindowsProcessPostProcessor;
 
 import com.ibm.nmon.util.DataHelper;
 
@@ -79,12 +80,22 @@ public final class PerfmonParser {
                 parseData(DATA_SPLITTER.split(line));
             }
 
+            // post process after parsing all the data since DataTypes are built lazily
+            WindowsNetworkPostProcessor networkPostProcessor = new WindowsNetworkPostProcessor();
+            WindowsProcessPostProcessor processPostProcessor = new WindowsProcessPostProcessor();
+
+            networkPostProcessor.addDataTypes(data);
+            processPostProcessor.addDataTypes(data);
+
+            for (DataRecord record : data.getRecords()) {
+                networkPostProcessor.postProcess(data, record);
+                processPostProcessor.postProcess(data, record);
+            }
+
             if (LOGGER.isDebugEnabled()) {
                 LOGGER.debug("Parse complete for {} in {}ms", data.getSourceFile(),
                         (System.nanoTime() - start) / 1000000.0d);
             }
-
-            scaleProcessDataByCPUs();
 
             return data;
 
@@ -132,9 +143,9 @@ public final class PerfmonParser {
             if (METRIC_MATCHER.matches()) {
                 // looking for type id (sub type id)
                 String toParse = METRIC_MATCHER.group(2);
-                String name = null;
+                String uniqueId = null;
+                String id = null;
                 String subId = null;
-                String typeId = null;
 
                 int idx = toParse.indexOf('(');
 
@@ -142,34 +153,39 @@ public final class PerfmonParser {
                     int endIdx = toParse.indexOf(')', idx + 1);
 
                     if (endIdx == -1) {
-                        LOGGER.warn("no end parentheses found in '{}' at line {}", toParse, in.getLineNumber());
+                        LOGGER.warn("no end parentheses found in heade column '{}'", toParse);
                         columnTypes.add(null);
                         continue;
                     }
                     else {
-                        name = DataHelper.newString(toParse.substring(0, idx));
-                        subId = DataHelper.newString(parseSubId(name, toParse.substring(idx + 1, endIdx)));
-                        typeId = SubDataType.buildId(name, subId);
+                        id = DataHelper.newString(toParse.substring(0, idx));
+                        subId = DataHelper.newString(parseSubId(id, toParse.substring(idx + 1, endIdx)));
+                        uniqueId = SubDataType.buildId(id, subId);
+                        
+                        // skip Process data for Total and Idle
+                        if ("Process".equals(id) && ("Idle".equals(subId) || "Total".equals(subId))) {
+                            columnTypes.add(null);
+                            continue;
+                        }
                     }
                 }
                 else {
-                    name = typeId = DataHelper.newString(toParse);
+                    id = uniqueId = DataHelper.newString(toParse);
                 }
 
-                DataTypeBuilder builder = builders.get(typeId);
+                DataTypeBuilder builder = builders.get(uniqueId);
 
                 if (builder == null) {
                     builder = new DataTypeBuilder();
 
-                    builder.setId(name);
+                    builder.setId(id);
                     builder.setSubId(subId);
-                    builder.setName(name);
 
-                    builders.put(typeId, builder);
+                    builders.put(uniqueId, builder);
                 }
 
-                builder.addField(parseField(name, subId, typeId, METRIC_MATCHER.group(3)));
-                columnTypes.add(typeId);
+                builder.addField(parseField(id, METRIC_MATCHER.group(3)));
+                columnTypes.add(uniqueId);
             }
             else {
                 LOGGER.warn("'{}' is not a valid header column", header[i]);
@@ -179,7 +195,6 @@ public final class PerfmonParser {
     }
 
     private void parseData(String[] rawData) {
-
         if (rawData.length != columnTypes.size()) {
             LOGGER.warn("invalid number of data columns at line {}, this data will be skipped", in.getLineNumber());
             return;
@@ -209,44 +224,41 @@ public final class PerfmonParser {
         currentRecord = new DataRecord(time, timestamp);
         data.addRecord(currentRecord);
 
-        String lastTypeId = null;
-        int n = 0;
-
-        double[] values = null;
+        // data for Process is out of order so track the values and array indexes and add to the
+        // DataRecord at the end
+        Map<String, double[]> valuesById = new java.util.HashMap<String, double[]>();
+        Map<String, Integer> indexesById = new java.util.HashMap<String, Integer>();
 
         for (int i = 1; i < rawData.length; i++) {
-            String typeId = columnTypes.get(i);
+            String id = columnTypes.get(i);
 
-            if (typeId == null) {
+            if (id == null) {
                 continue;
             }
-            else if (typeId.equals(lastTypeId)) { // use current DataType
-                values[n++] = parseDouble(rawData[i]);
-            }
-            else { // create a new DataType
-                if (lastTypeId != null) {
-                    DataType lastType = getDataType(lastTypeId, in.getLineNumber());
+            else {
+                double[] values = valuesById.get(id);
 
-                    if (lastType instanceof ProcessDataType) {
-                        ((ProcessDataType) lastType).getProcess().setEndTime(currentRecord.getTime());
-                    }
+                if (values == null) {
+                    DataType type = getDataType(id);
 
-                    currentRecord.addData(lastType, values);
+                    values = new double[type.getFieldCount()];
+                    int idx = 0;
+
+                    valuesById.put(id, values);
+                    indexesById.put(id, idx);
                 }
 
-                DataType type = getDataType(typeId, in.getLineNumber());
+                int idx = indexesById.get(id);
 
-                values = new double[type.getFieldCount()];
-                values[0] = parseDouble(rawData[i]);
+                values[idx] = parseDouble(rawData[i]);
 
-                n = 1;
+                indexesById.put(id, ++idx);
             }
-
-            lastTypeId = typeId;
         }
 
-        // add final data type
-        currentRecord.addData(getDataType(lastTypeId, in.getLineNumber()), values);
+        for (String typeId : valuesById.keySet()) {
+            currentRecord.addData(getDataType(typeId), valuesById.get(typeId));
+        }
     }
 
     private String parseSubId(String id, String toParse) {
@@ -258,11 +270,15 @@ public final class PerfmonParser {
         }
         else if (id.startsWith("Group")) {
             // remove leading process id
-            return toParse.substring(toParse.indexOf(':') + 1, toParse.length());
+            String[] split = SUBCATEGORY_SPLITTER.split(toParse);
+
+            return split[1];
         }
         else if ("Vcpu".equals(id)) {
             // remove leading process id
-            return toParse.substring(toParse.indexOf(':') + 1, toParse.length());
+            String[] split = SUBCATEGORY_SPLITTER.split(toParse);
+
+            return split[1];
         }
         else if (toParse.charAt(0) == '_') {
             // _Total = Total
@@ -283,9 +299,9 @@ public final class PerfmonParser {
         }
     }
 
-    private String parseField(String id, String subId, String unparsedSubId, String toParse) {
+    private String parseField(String id, String toParse) {
         if ("Interrupt Vector".equals(id)) {
-            String[] split = SUBCATEGORY_SPLITTER.split(unparsedSubId);
+            String[] split = SUBCATEGORY_SPLITTER.split(toParse);
 
             // total stats for interrupt
             if (split.length > 1) {
@@ -300,8 +316,9 @@ public final class PerfmonParser {
         }
     }
 
-    // lazily build DataTypes; ensure Process data has the correct name
-    private DataType getDataType(String typeId, int lineNumber) {
+    // lazily build DataTypes since Processes need a start time
+    private DataType getDataType(String typeId) {
+        // ensure Process data has the correct name
         if (typeId.startsWith("Process (")) {
             String processName = typeId.substring((data.getTypeIdPrefix() + " (").length(), typeId.length() - 1);
             Process process = processes.get(processName);
@@ -310,7 +327,8 @@ public final class PerfmonParser {
                 DataTypeBuilder builder = builders.get(typeId);
 
                 if (builder == null) {
-                    throw new IllegalStateException("no DataTypeBuilder for '" + typeId + "' at line " + lineNumber);
+                    throw new IllegalStateException("no DataTypeBuilder for '" + typeId + "' at line "
+                            + in.getLineNumber());
                 }
 
                 DataType type = builder.build();
@@ -330,7 +348,8 @@ public final class PerfmonParser {
                 DataTypeBuilder builder = builders.get(typeId);
 
                 if (builder == null) {
-                    throw new IllegalStateException("no DataTypeBuilder for '" + typeId + "' at line " + lineNumber);
+                    throw new IllegalStateException("no DataTypeBuilder for '" + typeId + "' at line "
+                            + in.getLineNumber());
                 }
 
                 type = builder.build();
@@ -341,46 +360,9 @@ public final class PerfmonParser {
         }
     }
 
-    private void scaleProcessDataByCPUs() {
-        // get all CPUs
-        List<DataType> processors = new java.util.ArrayList<DataType>(8);
-
-        for (DataType type : data.getTypes()) {
-            if (type.getName().equals("Processor")) {
-                if (!((SubDataType) type).getSubId().equals("Total")) {
-                    processors.add(type);
-                }
-            }
-        }
-
-        for (DataRecord record : data.getRecords()) {
-            // for each record, count the number of active CPUs
-            int processorCount = 0;
-
-            for (DataType processorType : processors) {
-                if (record.hasData(processorType)) {
-                    ++processorCount;
-                }
-            }
-
-            // scale all the process data by the number of CPUs
-            for (Process process : data.getProcesses()) {
-                DataType processType = data.getType(process);
-
-                if (record.hasData(processType)) {
-                    double[] data = record.getData(processType);
-
-                    data[processType.getFieldIndex("% Processor Time")] /= processorCount;
-                    data[processType.getFieldIndex("% User Time")] /= processorCount;
-                }
-            }
-        }
-    }
-
     private final class DataTypeBuilder {
         private String id = null;
         private String subId = null;
-        private String name = null;
         private final List<String> fields = new java.util.ArrayList<String>();
 
         void setId(String id) {
@@ -389,10 +371,6 @@ public final class PerfmonParser {
 
         void setSubId(String subId) {
             this.subId = subId;
-        }
-
-        void setName(String name) {
-            this.name = name;
         }
 
         void addField(String field) {
@@ -418,10 +396,10 @@ public final class PerfmonParser {
             }
             else {
                 if (subId == null) {
-                    return new DataType(id, name, fieldsArray);
+                    return new DataType(id, id, fieldsArray);
                 }
                 else {
-                    return new SubDataType(id, subId, name, fieldsArray);
+                    return new SubDataType(id, subId, SubDataType.buildId(id, subId), fieldsArray);
                 }
             }
         }
