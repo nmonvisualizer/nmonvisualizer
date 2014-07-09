@@ -40,7 +40,13 @@ public final class SubDataType extends DataType {
     }
 
     public static String buildId(String id, String subId) {
-        return id + " (" + subId + ')';
+        if (subId == null) {
+            // not allowed in constructor but allowed here so that it can be called indempotently
+            return id;
+        }
+        else {
+            return id + " (" + subId + ')';
+        }
     }
 
     @Override

@@ -26,6 +26,7 @@ import com.ibm.nmon.data.SubDataType;
 import com.ibm.nmon.data.ProcessDataType;
 import com.ibm.nmon.data.Process;
 
+import com.ibm.nmon.data.transform.WindowsBytesTransform;
 import com.ibm.nmon.data.transform.WindowsNetworkPostProcessor;
 import com.ibm.nmon.data.transform.WindowsProcessPostProcessor;
 
@@ -55,6 +56,8 @@ public final class PerfmonParser {
 
     // artificial process id; incremented for each Process parsed
     private int currentPid = 1;
+
+    private final WindowsBytesTransform bytesTransform = new WindowsBytesTransform();
 
     private final List<String> columnTypes = new java.util.ArrayList<String>(1000);
     private final Map<String, DataTypeBuilder> builders = new java.util.HashMap<String, DataTypeBuilder>();
@@ -110,6 +113,8 @@ public final class PerfmonParser {
             columnTypes.clear();
             builders.clear();
             processes.clear();
+
+            bytesTransform.reset();
         }
     }
 
@@ -161,7 +166,7 @@ public final class PerfmonParser {
                         id = DataHelper.newString(toParse.substring(0, idx));
                         subId = DataHelper.newString(parseSubId(id, toParse.substring(idx + 1, endIdx)));
                         uniqueId = SubDataType.buildId(id, subId);
-                        
+
                         // skip Process data for Total and Idle
                         if ("Process".equals(id) && ("Idle".equals(subId) || "Total".equals(subId))) {
                             columnTypes.add(null);
@@ -257,7 +262,16 @@ public final class PerfmonParser {
         }
 
         for (String typeId : valuesById.keySet()) {
-            currentRecord.addData(getDataType(typeId), valuesById.get(typeId));
+            DataType type = getDataType(typeId);
+            double[] data = valuesById.get(typeId);
+
+            // no need to parse id and subid from typeId given that we know the typeId here is built
+            // from the type and subtype id and that isValidFor() uses a regex to match
+            if (bytesTransform.isValidFor(typeId, null)) {
+                data = bytesTransform.transform(type, data);
+            }
+
+            currentRecord.addData(type, data);
         }
     }
 
@@ -395,11 +409,18 @@ public final class PerfmonParser {
                 return new ProcessDataType(process, fieldsArray);
             }
             else {
-                if (subId == null) {
-                    return new DataType(id, id, fieldsArray);
+                String name = SubDataType.buildId(id, subId);
+
+                if (bytesTransform.isValidFor(id, subId)) {
+                    return bytesTransform.buildDataType(id, subId, name, fieldsArray);
                 }
                 else {
-                    return new SubDataType(id, subId, SubDataType.buildId(id, subId), fieldsArray);
+                    if (subId == null) {
+                        return new DataType(id, name, fieldsArray);
+                    }
+                    else {
+                        return new SubDataType(id, subId, name, fieldsArray);
+                    }
                 }
             }
         }
