@@ -22,10 +22,10 @@ public final class SubDataType extends DataType {
         this.subId = subId;
 
         if (displayPrimaryId) {
-            this.asString = buildId(id, subId);
+            this.asString = this.id; // same as buildId();
         }
         else {
-            this.asString = subId;
+            this.asString = this.subId;
         }
     }
 

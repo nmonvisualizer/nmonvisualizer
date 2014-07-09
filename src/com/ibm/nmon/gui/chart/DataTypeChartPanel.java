@@ -219,7 +219,7 @@ public final class DataTypeChartPanel extends LineChartPanel implements Interval
         if (label != null) {
             return label;
         }
-        else if (field.endsWith("KB/s")) {
+        else if (field.endsWith("kb/s")) {
             return "KB / s";
         }
         else if (field.contains("packets")) {
@@ -237,16 +237,25 @@ public final class DataTypeChartPanel extends LineChartPanel implements Interval
         else if (field.endsWith("_freed")) {
             return "MB";
         }
-        else if (field.contains("bytes")) {
+        else if (field.toLowerCase().contains("megabytes")) {
+            return "MB";
+        }
+        else if (field.toLowerCase().contains("mbytes")) {
+            return "MB";
+        }
+        else if (field.toLowerCase().contains("kbytes")) {
+            return "KB";
+        }
+        else if (field.toLowerCase().contains("bytes")) {
             return "Bytes";
         }
         else if (field.contains("count")) {
             return "Count";
         }
-        else if (field.endsWith("KB")) {
+        else if (field.endsWith("kb")) {
             return "KB";
         }
-        else if (field.contains("MB")) {
+        else if (field.endsWith("mb")) {
             return "MB";
         }
         else {

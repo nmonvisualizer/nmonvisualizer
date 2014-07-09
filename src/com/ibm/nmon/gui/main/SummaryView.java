@@ -185,6 +185,10 @@ final class SummaryView extends ChartSplitPane implements IntervalListener {
         int index = singleIntervalReport.getPreviousTab();
 
         if (index != -1) {
+            if (index >= singleIntervalReport.getTabCount()) {
+                index = singleIntervalReport.getTabCount() - 1;
+            }
+
             singleIntervalReport.setSelectedIndex(index);
         }
         else {
@@ -194,6 +198,10 @@ final class SummaryView extends ChartSplitPane implements IntervalListener {
         index = allIntervalsReport.getPreviousTab();
 
         if (index != -1) {
+            if (index >= allIntervalsReport.getTabCount()) {
+                index = allIntervalsReport.getTabCount() - 1;
+            }
+
             allIntervalsReport.setSelectedIndex(index);
         }
         else {

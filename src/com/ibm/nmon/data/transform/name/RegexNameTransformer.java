@@ -44,8 +44,8 @@ public final class RegexNameTransformer implements NameTransformer {
     public RegexNameTransformer(String regex, int group) {
         matcher = Pattern.compile(regex).matcher("");
 
-        if (group < 1) {
-            throw new IllegalArgumentException("group cannot be less than 1");
+        if (group < 0) {
+            throw new IllegalArgumentException("group cannot be less than 0");
         }
 
         this.group = group;

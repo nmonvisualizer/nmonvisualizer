@@ -168,7 +168,7 @@ public final class GCParserContext {
                     "tenured_freed", "flipped", "flipped_bytes", "tenured", "tenured_bytes", "moved", "moved_bytes");
         }
         else if ("GCSTAT".equals(typeId)) {
-            type = new SubDataType("GCSTAT", jvmName, "GC Memory Stats", "finalizers", "soft", "weak", "phantom",
+            type = new SubDataType("GCSTAT", jvmName, "GC Memory References", "finalizers", "soft", "weak", "phantom",
                     "tiltratio");
         }
         else if ("GCTIME".equals(typeId)) {

@@ -3,19 +3,18 @@ package com.ibm.nmon.data.matcher;
 import java.util.Collection;
 import java.util.List;
 
-import com.ibm.nmon.data.BasicDataSet;
 import com.ibm.nmon.data.DataSet;
-import com.ibm.nmon.data.NMONDataSet;
-import com.ibm.nmon.data.SystemDataSet;
 
 /**
  * Matches a {@link DataSet} based on the operating system. This class relies on the correct
  * metadata being set by the parser.
  */
-public final class OSMatcher implements HostMatcher {
+public final class OSMatcher extends SimpleHostMatcher {
     private final HostMatcher matcher;
 
     public OSMatcher(String operatingSystem) {
+        super("os");
+
         if ((operatingSystem == null) || "".equals(operatingSystem)) {
             throw new IllegalArgumentException("operatingSystem cannot be null");
         }
@@ -31,29 +30,14 @@ public final class OSMatcher implements HostMatcher {
         else if (operatingSystem.contains("vios")) {
             matcher = VIOS;
         }
+        else if (operatingSystem.contains("unix")) {
+            matcher = UNIX;
+        }
         else if (operatingSystem.contains("perfmon")) {
             matcher = PERFMON;
         }
         else {
             matcher = UNKNOWN;
-        }
-    }
-
-    @Override
-    public List<DataSet> getMatchingHosts(Collection<DataSet> toMatch) {
-        if ((toMatch == null) || toMatch.isEmpty()) {
-            return java.util.Collections.emptyList();
-        }
-        else {
-            List<DataSet> toReturn = new java.util.ArrayList<DataSet>(toMatch.size());
-
-            for (DataSet data : toMatch) {
-                if (matcher.matchesHost(data)) {
-                    toReturn.add(data);
-                }
-            }
-
-            return toReturn;
         }
     }
 
@@ -87,132 +71,39 @@ public final class OSMatcher implements HostMatcher {
         }
     }
 
-    private static final String getMetadata(DataSet data, String key) {
-        String value = null;
-
-        if (data.getClass().equals(BasicDataSet.class)) {
-            value = ((BasicDataSet) data).getMetadata(key);
-        }
-        else if (data.getClass().equals(NMONDataSet.class)) {
-            value = ((NMONDataSet) data).getMetadata(key);
-        }
-        else if (data.getClass().equals(SystemDataSet.class)) {
-            SystemDataSet systemData = (SystemDataSet) data;
-
-            for (long time : systemData.getMetadataTimes()) {
-                java.util.Map<String, String> metadata = systemData.getMetadata(time);
-
-                if (metadata != null) {
-                    value = metadata.get(key);
-
-                    if (value != null) {
-                        break;
-                    }
-                }
-            }
-        }
-
-        if (value == null) {
-            value = "";
-        }
-
-        return value.toLowerCase();
-    }
-
-    private static final HostMatcher LINUX = new HostMatcher() {
+    private static final HostMatcher LINUX = new SimpleHostMatcher("linux") {
         @Override
         public boolean matchesHost(DataSet data) {
             return getMetadata(data, "OS").contains("linux");
         }
-
-        @Override
-        public List<DataSet> getMatchingHosts(Collection<DataSet> toMatch) {
-            java.util.List<DataSet> toReturn = new java.util.ArrayList<DataSet>(toMatch.size());
-
-            for (DataSet data : toMatch) {
-                if (matchesHost(data)) {
-                    toReturn.add(data);
-                }
-            }
-
-            return toReturn;
-        }
-
-        public String toString() {
-            return "linux";
-        };
     };
 
-    private static final HostMatcher AIX = new HostMatcher() {
+    private static final HostMatcher AIX = new SimpleHostMatcher("aix") {
         @Override
         public boolean matchesHost(DataSet data) {
             return !getMetadata(data, "AIX").equals("");
         }
-
-        @Override
-        public List<DataSet> getMatchingHosts(Collection<DataSet> toMatch) {
-            java.util.List<DataSet> toReturn = new java.util.ArrayList<DataSet>(toMatch.size());
-
-            for (DataSet data : toMatch) {
-                if (matchesHost(data)) {
-                    toReturn.add(data);
-                }
-            }
-
-            return toReturn;
-        }
-
-        public String toString() {
-            return "aix";
-        };
     };
 
-    private static final HostMatcher VIOS = new HostMatcher() {
+    private static final HostMatcher VIOS = new SimpleHostMatcher("vios") {
         @Override
         public boolean matchesHost(DataSet data) {
             return !getMetadata(data, "VIOS").equals("");
         }
-
-        @Override
-        public List<DataSet> getMatchingHosts(Collection<DataSet> toMatch) {
-            java.util.List<DataSet> toReturn = new java.util.ArrayList<DataSet>(toMatch.size());
-
-            for (DataSet data : toMatch) {
-                if (matchesHost(data)) {
-                    toReturn.add(data);
-                }
-            }
-
-            return toReturn;
-        }
-
-        public String toString() {
-            return "vios";
-        };
     };
 
-    private static final HostMatcher PERFMON = new HostMatcher() {
+    private static final HostMatcher UNIX = new SimpleHostMatcher("unix") {
         @Override
         public boolean matchesHost(DataSet data) {
-            return getMetadata(data, "OS").contains("Perfmon");
+            return LINUX.matchesHost(data) || AIX.matchesHost(data) || VIOS.matchesHost(data);
         }
+    };
 
+    private static final HostMatcher PERFMON = new SimpleHostMatcher("perfmon") {
         @Override
-        public List<DataSet> getMatchingHosts(Collection<DataSet> toMatch) {
-            java.util.List<DataSet> toReturn = new java.util.ArrayList<DataSet>(toMatch.size());
-
-            for (DataSet data : toMatch) {
-                if (matchesHost(data)) {
-                    toReturn.add(data);
-                }
-            }
-
-            return toReturn;
+        public boolean matchesHost(DataSet data) {
+            return getMetadata(data, "OS").equals("perfmon");
         }
-
-        public String toString() {
-            return "perfmon";
-        };
     };
 
     private static final HostMatcher UNKNOWN = new HostMatcher() {
