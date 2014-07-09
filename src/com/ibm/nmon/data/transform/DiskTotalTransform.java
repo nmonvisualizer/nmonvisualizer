@@ -10,7 +10,7 @@ import com.ibm.nmon.util.DataHelper;
  */
 public final class DiskTotalTransform implements DataTransform {
     @Override
-    public DataType buildDataType(String id, String name, String... fields) {
+    public DataType buildDataType(String id, String subId, String name, String... fields) {
         String[] newFields = new String[fields.length + 1];
         System.arraycopy(fields, 0, newFields, 0, fields.length);
 
@@ -47,7 +47,7 @@ public final class DiskTotalTransform implements DataTransform {
     }
 
     @Override
-    public boolean isValidFor(String typeId) {
+    public boolean isValidFor(String typeId, String subId) {
         return typeId.startsWith("DISK") && !typeId.equals("DISKBUSY");
     }
 }

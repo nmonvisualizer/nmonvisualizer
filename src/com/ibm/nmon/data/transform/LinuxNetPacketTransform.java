@@ -8,7 +8,7 @@ import com.ibm.nmon.data.DataType;
  */
 public final class LinuxNetPacketTransform implements DataTransform {
     @Override
-    public DataType buildDataType(String id, String name, String... fields) {
+    public DataType buildDataType(String id, String subId, String name, String... fields) {
         for (int i = 0; i < fields.length; i++) {
             int idx = fields[i].indexOf("read/s");
 
@@ -32,7 +32,7 @@ public final class LinuxNetPacketTransform implements DataTransform {
     }
 
     @Override
-    public boolean isValidFor(String typeId) {
+    public boolean isValidFor(String typeId, String subId) {
         return typeId.startsWith("NETPACKET");
     }
 }

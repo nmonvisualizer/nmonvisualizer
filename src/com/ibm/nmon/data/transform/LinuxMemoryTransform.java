@@ -7,7 +7,7 @@ import com.ibm.nmon.data.DataType;
  */
 public final class LinuxMemoryTransform implements DataTransform {
     @Override
-    public DataType buildDataType(String id, String name, String... fields) {
+    public DataType buildDataType(String id, String subId, String name, String... fields) {
         String[] newFields = new String[fields.length + 1];
         System.arraycopy(fields, 0, newFields, 0, fields.length);
 
@@ -29,7 +29,7 @@ public final class LinuxMemoryTransform implements DataTransform {
     }
 
     @Override
-    public boolean isValidFor(String typeId) {
+    public boolean isValidFor(String typeId, String subId) {
         return "MEM".equals(typeId);
     }
 }

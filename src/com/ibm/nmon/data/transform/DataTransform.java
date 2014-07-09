@@ -12,12 +12,13 @@ public interface DataTransform {
      * renamed.
      * 
      * @param id the DataType id
+     * @param subIdthe SubDataType id
      * @param name the name of the DataType
      * @param fields the original fields from the parsed file
      * 
      * @return a new, transformed DataType
      */
-    public DataType buildDataType(String id, String name, String... fields);
+    public DataType buildDataType(String id, String subId, String name, String... fields);
 
     /**
      * Transform the given data according to the DataType. This DataType will be the same as created
@@ -38,5 +39,5 @@ public interface DataTransform {
      * 
      * @return true if the parser should apply this transform for the given DataType
      */
-    public boolean isValidFor(String typeId);
+    public boolean isValidFor(String typeId, String subId);
 }

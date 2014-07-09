@@ -478,7 +478,7 @@ public final class NMONParser {
         }
 
         for (DataTransform transform : transforms) {
-            if (transform.isValidFor(type.getId())) {
+            if (transform.isValidFor(type.getId(), null)) {
                 try {
                     recordData = transform.transform(type, recordData);
                 }
@@ -740,8 +740,8 @@ public final class NMONParser {
         }
 
         for (DataTransform transform : transforms) {
-            if (transform.isValidFor(id)) {
-                return transform.buildDataType(id, name, fieldNames);
+            if (transform.isValidFor(id, null)) {
+                return transform.buildDataType(id, null, name, fieldNames);
             }
         }
 

@@ -8,11 +8,11 @@ import com.ibm.nmon.data.DataType;
  */
 public final class CPUBusyTransform implements DataTransform {
     @Override
-    public DataType buildDataType(String id, String name, String... fields) {
+    public DataType buildDataType(String id, String subId, String name, String... fields) {
         for (int i = 0; i < fields.length; i++) {
             String field = fields[i];
 
-            if ("Idle%".equals(field)) {    
+            if ("Idle%".equals(field)) {
                 fields[i] = "CPU%";
             }
             else if ("PhysicalCPUs".equals(field)) {
@@ -35,7 +35,7 @@ public final class CPUBusyTransform implements DataTransform {
     }
 
     @Override
-    public boolean isValidFor(String typeId) {
+    public boolean isValidFor(String typeId, String subId) {
         return typeId.startsWith("CPU");
     }
 }
