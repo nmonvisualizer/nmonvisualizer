@@ -1,77 +1,125 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <charts>
-  <barchart name="Average CPU Utilization" shortName="CPU" stacked="true"
-    categoriesNamedBy="HOST" barsNamedBy="FIELD" subtitledBy="NONE">
+  <barchart name="Average CPU Utilization" shortName="CPU" stacked="true" categoriesNamedBy="HOST" barsNamedBy="FIELD" subtitledBy="NONE">
     <yAxis label="% CPU" asPercent="true" />
     <data>
+      <host os="UNIX" />
       <type name="CPU_ALL" />
       <field name="User%" alias="User" />
       <field name="Sys%" alias="System" />
       <field name="Wait%" alias="Wait" />
     </data>
+
+    <data>
+      <host os="PERFMON" />
+      <type name="Processor (Total)" />
+      <field name="% User Time" alias="User" />
+      <field name="% Privileged Time" alias="System" />
+      <field name="% Interrupt Time" alias="Interrupt" />
+      <field name="% DPC Time" alias="DPC" />
+    </data>
   </barchart>
 
-  <barchart name="Average Disk Activity" shortName="Disk Activity" stacked="true"
-    categoriesNamedBy="HOST" barsNamedBy="FIELD" subtitledBy="NONE">
+  <barchart name="Average Disk Activity" shortName="Disk Activity" stacked="true" categoriesNamedBy="HOST" barsNamedBy="FIELD" subtitledBy="NONE">
     <yAxis label="KB / s" />
     <data>
+      <host os="UNIX" />
       <type name="DISKREAD" />
       <field name="Total" alias="Read" />
     </data>
     <data>
+      <host os="UNIX" />
       <type name="DISKWRITE" />
       <field name="Total" alias="Write" />
     </data>
-  </barchart>
 
-  <barchart name="Average Disk Transfers" shortName="Disk Transfers" stacked="true"
-    categoriesNamedBy="HOST" barsNamedBy="FIELD" subtitledBy="NONE">
-    <yAxis label="Transfers / s" />
     <data>
-      <type name="DISKXFER" />
-      <field name="Total" />
+      <host os="PERFMON" />
+      <type name="LogicalDisk (Total)" />
+      <field name="Disk Read KB/sec" alias="Read" />
+      <field name="Disk Write KB/sec" alias="Write" />
     </data>
   </barchart>
 
-  <barchart name="Average Memory Usage" shortName="Memory" stacked="true"
-    categoriesNamedBy="HOST" barsNamedBy="FIELD" subtitledBy="NONE">
+  <barchart name="Average Disk Transfers" shortName="Disk Transfers" stacked="true" categoriesNamedBy="HOST" barsNamedBy="FIELD" subtitledBy="NONE">
+    <yAxis label="Transfers / s" />
+    <data>
+      <host os="UNIX" />
+      <type name="DISKXFER" />
+      <field name="Total" alias="Transfers/sec"/>
+    </data>
+
+    <data>
+      <host os="PERFMON" />
+      <type name="LogicalDisk (Total)" />
+      <field name="Disk Transfers/sec" alias="Transfers/sec"/>
+    </data>
+  </barchart>
+
+  <barchart name="Average Memory Usage" shortName="Memory" stacked="true" categoriesNamedBy="HOST" barsNamedBy="FIELD" subtitledBy="NONE">
     <yAxis label="MB" />
     <data>
+      <host os="UNIX" />
       <type name="MEM" />
       <!-- Linux -->
       <field name="active" />
       <field name="inactive" />
       <field name="memfree" />
       <!-- AIX -->
-      <field name="Real used(MB)" />
-      <field name="Real free(MB)" />
+      <field name="Real used(MB)" alias="used" />
+      <field name="Real free(MB)" alias="free" />
+    </data>
+
+    <data>
+      <host os="PERFMON" />
+      <type name="Memory" />
+      <field name="Committed MB" alias="Committed" />
+      <field name="Cache MB" alias="Cache" />
+      <field name="Available MB" alias="Available" />
     </data>
   </barchart>
 
-  <barchart name="Average Swap Usage" shortName="Swap" stacked="true" categoriesNamedBy="HOST"
-    barsNamedBy="FIELD" subtitledBy="NONE">
+  <barchart name="Average Swap Usage" shortName="Swap" stacked="true" categoriesNamedBy="HOST" barsNamedBy="FIELD" subtitledBy="NONE">
     <yAxis label="MB" />
     <data>
+      <host os="UNIX" />
       <type name="MEM" />
       <!-- Linux -->
-      <field name="swapused" />
-      <field name="swapfree" />
+      <field name="swapused" alias="used"/>
+      <field name="swapfree" alias="free" />
       <!-- AIX -->
-      <field name="Virtual used(MB)" />
-      <field name="Virtual free(MB)" />
+      <field name="Virtual used(MB)" alias="used" />
+      <field name="Virtual free(MB)" alias="free" />
     </data>
   </barchart>
 
-  <barchart name="Average Ethernet Traffic" shortName="Network Data" stacked="true"
-    categoriesNamedBy="HOST" barsNamedBy="FIELD" subtitledBy="NONE">
+  <barchart name="Average Swap Usage" shortName="Windows Swap" categoriesNamedBy="HOST" barsNamedBy="FIELD" subtitledBy="NONE">
+    <yAxis label="%" asPercent="true" />
+    <data>
+      <host os="PERFMON" />
+      <type name="Paging File (Total)" />
+      <field name="% Usage" />
+    </data>
+  </barchart>
+
+  <barchart name="Average Ethernet Traffic" shortName="Network Data" stacked="true" categoriesNamedBy="HOST" barsNamedBy="FIELD" subtitledBy="NONE">
     <yAxis label="KB / s" />
     <data>
+      <host os="UNIX" />
       <type name="NETETOTAL" />
       <field name="total-read-KB/s" alias="Read" />
     </data>
     <data>
+      <host os="UNIX" />
       <type name="NETETOTAL" />
       <field name="total-write-KB/s" alias="Write" />
+    </data>
+
+    <data>
+      <host os="PERFMON" />
+      <type name="Network Interface (Total)" />
+      <field name="KB Received/sec" alias="Read" />
+      <field name="KB Sent/sec" alias="Write" />
     </data>
   </barchart>
 
@@ -79,12 +127,17 @@
     categoriesNamedBy="HOST" barsNamedBy="FIELD" subtitledBy="NONE">
     <yAxis label="Packets / s" />
     <data>
+      <host os="UNIX" />
       <type name="NETETOTAL" />
       <field name="total-read-packets/s" alias="Read" />
-    </data>
-    <data>
-      <type name="NETETOTAL" />
       <field name="total-write-packets/s" alias="Write" />
+    </data>
+  
+    <data>
+      <host os="PERFMON" />
+      <type name="Network Interface (Total)" />
+      <field name="Packets Received/sec" alias="Read" />
+      <field name="Packets Sent/sec" alias="Write" />
     </data>
   </barchart>
 
@@ -122,8 +175,15 @@
     categoriesNamedBy="HOST" barsNamedBy="FIELD" subtitledBy="NONE">
     <yAxis label="Queue Length" />
     <data>
+      <host os="UNIX" />
       <type name="PROC" />
       <field name="Runnable" alias="Run Queue" />
+    </data>
+
+    <data>
+      <host os="PERFMON" />
+      <type name="System" />
+      <field name="Processor Queue Length" alias="Run Queue" />
     </data>
   </barchart>
 
@@ -131,17 +191,31 @@
     categoriesNamedBy="HOST" barsNamedBy="FIELD" subtitledBy="NONE">
     <yAxis label="Switches / s" />
     <data>
+      <host os="UNIX" />
       <type name="PROC" />
       <field name="pswitch" alias="Process Switches" />
       <field name="fork" alias="Forks" />
+    </data>
+
+    <data>
+      <host os="PERFMON" />
+      <type name="System" />
+      <field name="Context Switches/sec" alias="Process Switches" />
     </data>
   </barchart>
 
   <linechart name="CPU Utilization" shortName="CPU over Time" linesNamedBy="HOST" subtitledBy="NONE">
     <yAxis label="% CPU" asPercent="true" />
     <data>
+      <host os="UNIX" />
       <type name="CPU_ALL" />
-      <field name="CPU%" />
+      <field name="CPU%" alias="% CPU"/>
+    </data>
+    
+    <data>
+      <host os="PERFMON" />
+      <type name="Processor (Total)" />
+      <field name="% Processor Time" alias="% CPU" />
     </data>
   </linechart>
 

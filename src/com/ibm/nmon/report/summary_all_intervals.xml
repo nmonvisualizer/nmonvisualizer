@@ -3,66 +3,126 @@
   <intervalchart name="Average CPU Utilization" shortName="CPU" linesNamedBy="HOST">
     <yAxis label="% CPU" asPercent="true" />
     <data>
+      <host os="UNIX" />
       <type name="CPU_ALL" />
       <field name="CPU%" />
+    </data>
+
+    <data>
+      <host os="PERFMON" />
+      <type name="Processor (Total)" />
+      <field name="% Processor Time" alias="% CPU" />
     </data>
   </intervalchart>
 
   <intervalchart name="Average Disk Activity" shortName="Disk Activity" linesNamedBy="HOST_FIELD">
     <yAxis label="KB / s" />
     <data>
+      <host os="UNIX" />
       <type name="DISKREAD" />
       <field name="Total" alias="Read" />
     </data>
     <data>
+      <host os="UNIX" />
       <type name="DISKWRITE" />
       <field name="Total" alias="Write" />
+    </data>
+
+    <data>
+      <host os="PERFMON" />
+      <type name="LogicalDisk (Total)" />
+      <field name="Disk Read KB/sec" alias="Read" />
+      <field name="Disk Write KB/sec" alias="Write" />
     </data>
   </intervalchart>
 
   <intervalchart name="Average Disk Transfers" shortName="Disk Transfers" linesNamedBy="HOST">
     <yAxis label="Transfers / s" />
     <data>
+      <host os="UNIX" />
       <type name="DISKXFER" />
       <field name="Total" />
     </data>
+
+    <data>
+      <host os="PERFMON" />
+      <type name="LogicalDisk (Total)" />
+      <field name="Disk Transfers/sec" alias="Transfers/sec"/>
+    </data>
   </intervalchart>
 
-  <intervalchart name="Average Memory Usage" shortName="Memory" linesNamedBy="HOST">
+  <intervalchart name="Average Free Memory" shortName="Memory" linesNamedBy="HOST">
     <yAxis label="MB" />
     <data>
+      <host os="UNIX" />
       <type name="MEM" />
       <!-- Linux -->
-      <field name="memfree" />
+      <field name="memfree" alias="free"/>
       <!-- AIX -->
-      <field name="Real free(MB)" />
+      <field name="Real free(MB)" alias="free"/>
+    </data>
+
+    <data>
+      <host os="PERFMON" />
+      <type name="Memory" />
+      <field name="Available MB" alias="free" />
     </data>
   </intervalchart>
 
   <intervalchart name="Average Swap Usage" shortName="Swap" linesNamedBy="HOST">
     <yAxis label="MB" />
     <data>
+      <host os="UNIX" />
       <type name="MEM" />
       <!-- Linux -->
-      <field name="swapused" />
+      <field name="swapused" alias="used" />
       <!-- AIX -->
-      <field name="Virtual used(MB)" />
+      <field name="Virtual used(MB)" alias="used" />
+    </data>
+  </intervalchart>
+
+  <intervalchart name="Average Swap Usage" shortName="Windows Swap" linesNamedBy="HOST">
+    <yAxis label="%" asPercent="true" />
+    <data>
+      <host os="PERFMON" />
+      <type name="Paging File (Total)" />
+      <field name="% Usage" />
     </data>
   </intervalchart>
 
   <intervalchart name="Average Ethernet Traffic" shortName="Network Data" linesNamedBy="HOST">
     <yAxis label="KB / s" />
     <data>
+      <host os="UNIX" />
       <type name="NETETOTAL" />
-      <field name="total-KB/s" />
+      <field name="total-read-KB/s" alias="Read" />
+    </data>
+    <data>
+      <host os="UNIX" />
+      <type name="NETETOTAL" />
+      <field name="total-write-KB/s" alias="Write" />
+    </data>
+
+    <data>
+      <host os="PERFMON" />
+      <type name="Network Interface (Total)" />
+      <field name="KB Received/sec" alias="Read" />
+      <field name="KB Sent/sec" alias="Write" />
     </data>
   </intervalchart>
 
   <intervalchart name="Average Ethernet Packets" shortName="Network Packets" linesNamedBy="HOST">
     <yAxis label="Packets / s" />
     <data>
+      <host os="UNIX" />
       <type name="NETETOTAL" />
-      <field name="total-packets/s" />
+      <field name="total-packets/s" alias="total" />
+    </data>
+
+    <data>
+      <host os="PERFMON" />
+      <type name="Network Interface (Total)" />
+      <field name="Packets/sec" alias="total" />
     </data>
   </intervalchart>
 
@@ -87,17 +147,30 @@
   <intervalchart name="Average Run Queue Length" shortName="Run Queue" linesNamedBy="HOST">
     <yAxis label="Queue Length" />
     <data>
+      <host os="UNIX" />
       <type name="PROC" />
       <field name="Runnable" alias="Run Queue" />
+    </data>
+
+    <data>
+      <host os="PERFMON" />
+      <type name="System" />
+      <field name="Processor Queue Length" alias="Run Queue" />
     </data>
   </intervalchart>
 
   <intervalchart name="Average Process Switches" shortName="Process Switches" linesNamedBy="HOST_FIELD">
     <yAxis label="Switches / s" />
     <data>
+      <host os="UNIX" />
       <type name="PROC" />
       <field name="pswitch" alias="Process Switches" />
-      <field name="fork" alias="Forks" />
+    </data>
+
+    <data>
+      <host os="PERFMON" />
+      <type name="System" />
+      <field name="Context Switches/sec" alias="Process Switches" />
     </data>
   </intervalchart>
 
@@ -105,7 +178,6 @@
     <yAxis label="CPUs" />
     <data>
       <host os="AIX" />
-
       <type name="PCPU_ALL" />
       <field name="Total" />
     </data>
@@ -115,7 +187,6 @@
       <yAxis label="% Entitlement Used" />
     <data>
       <host os="AIX" />
-
       <type name="LPAR" />
       <field name="EC_CPU%" />
     </data>
