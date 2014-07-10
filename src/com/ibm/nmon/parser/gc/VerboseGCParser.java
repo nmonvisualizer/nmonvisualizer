@@ -46,7 +46,7 @@ public class VerboseGCParser extends BasicXMLParser {
 
         data.setMetadata("jvm_name", jvmName);
 
-        context = new GCParserContext(data, logger);
+        context = new GCParserContext(data, logger, timeZone);
 
         try {
             parse(filename);

@@ -14,9 +14,11 @@ public final class Start implements GCState {
     public GCState startElement(GCParserContext context, String elementName, String unparsedAttributes) {
         if ("verbosegc".equals(elementName)) {
             if (XMLParserHelper.parseAttributes(unparsedAttributes).get("xmlns") != null) {
+                Java7GC.INSTANCE.setTimeZone(context.getTimeZone());
                 return Java7GC.INSTANCE;
             }
             else {
+                Java6GC.INSTANCE.setTimeZone(context.getTimeZone());
                 return Java6GC.INSTANCE;
             }
         }

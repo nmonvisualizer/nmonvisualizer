@@ -1,5 +1,7 @@
 package com.ibm.nmon.parser.gc.state;
 
+import java.util.TimeZone;
+
 import com.ibm.nmon.parser.gc.GCParserContext;
 
 /**
@@ -74,6 +76,13 @@ final class Java6GC implements GCState {
         else {
             return this;
         }
+    }
+
+    void setTimeZone(TimeZone timeZone) {
+        nurseryAF.setTimeZone(timeZone);
+        tenuredAF.setTimeZone(timeZone);
+        systemGC.setTimeZone(timeZone);
+        concurrentGC.setTimeZone(timeZone);
     }
 
     @Override

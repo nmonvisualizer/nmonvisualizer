@@ -3,7 +3,10 @@ package com.ibm.nmon.parser.gc.state;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 
+import java.util.TimeZone;
+
 import com.ibm.nmon.data.DataRecord;
+
 import com.ibm.nmon.parser.gc.GCParserContext;
 
 /**
@@ -124,6 +127,10 @@ final class Java7GC implements GCState {
         systemCount = 0;
 
         Java7GCCycle.INSTANCE.reset();
+    }
+
+    void setTimeZone(TimeZone timeZone) {
+        datetime.setTimeZone(timeZone);
     }
 
     private long parseTimestamp(GCParserContext context) {

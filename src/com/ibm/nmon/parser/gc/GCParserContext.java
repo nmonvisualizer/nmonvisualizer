@@ -2,12 +2,12 @@ package com.ibm.nmon.parser.gc;
 
 import java.util.Map;
 
+import java.util.TimeZone;
+
 import org.slf4j.Logger;
 
 import com.ibm.nmon.data.BasicDataSet;
-
 import com.ibm.nmon.data.DataRecord;
-
 import com.ibm.nmon.data.DataType;
 import com.ibm.nmon.data.SubDataType;
 
@@ -23,6 +23,8 @@ public final class GCParserContext {
     private final BasicDataSet data;
     private DataRecord currentRecord;
 
+    private final TimeZone timeZone;
+
     private int lineNumber;
     private Map<String, String> attributes;
 
@@ -31,9 +33,10 @@ public final class GCParserContext {
     // verbose GC does not log a count of compactions
     private int compactionCount;
 
-    GCParserContext(BasicDataSet data, Logger logger) {
+    GCParserContext(BasicDataSet data, Logger logger, TimeZone timeZone) {
         this.data = data;
         this.logger = logger;
+        this.timeZone = timeZone;
 
         reset();
     }
@@ -56,6 +59,10 @@ public final class GCParserContext {
 
     public BasicDataSet getData() {
         return data;
+    }
+
+    public TimeZone getTimeZone() {
+        return timeZone;
     }
 
     public DataRecord getCurrentRecord() {

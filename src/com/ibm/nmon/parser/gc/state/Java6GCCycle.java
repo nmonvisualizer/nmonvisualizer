@@ -2,6 +2,7 @@ package com.ibm.nmon.parser.gc.state;
 
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.util.TimeZone;
 
 import com.ibm.nmon.data.DataRecord;
 import com.ibm.nmon.parser.gc.GCParserContext;
@@ -157,6 +158,10 @@ abstract class Java6GCCycle extends JavaGCCycle {
             // do not record a zero for the first interval
             context.setValue("GCSINCE", intervalField, intervalms / 1000);
         }
+    }
+
+    void setTimeZone(TimeZone timeZone) {
+        datetime.setTimeZone(timeZone);
     }
 
     private long parseTimestamp(GCParserContext context) {
