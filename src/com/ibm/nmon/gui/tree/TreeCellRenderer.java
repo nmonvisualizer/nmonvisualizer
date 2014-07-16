@@ -66,6 +66,10 @@ final class TreeCellRenderer extends DefaultTreeCellRenderer {
                 setIcon(DATASUBTYPE_ICON);
                 setToolTipText("Top Processes");
             }
+            else if (s.equals("Process")) {
+                setIcon(DATASUBTYPE_ICON);
+                setToolTipText("Processes");
+            }
             else if (s.equals("GC")) {
                 setIcon(DATASUBTYPE_ICON);
                 setToolTipText("Garbage Collection");
@@ -84,6 +88,9 @@ final class TreeCellRenderer extends DefaultTreeCellRenderer {
                     String p = parent.toString();
 
                     if (p.equals("TOP")) {
+                        setIcon(DATATYPE_ICON);
+                    }
+                    if (p.equals("Process")) {
                         setIcon(DATATYPE_ICON);
                     }
                     else if (p.equals("GC")) {
