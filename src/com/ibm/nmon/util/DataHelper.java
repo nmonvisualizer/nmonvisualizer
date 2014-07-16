@@ -1,13 +1,16 @@
 package com.ibm.nmon.util;
 
+import org.slf4j.Logger;
+
 import java.util.List;
 import java.util.Map;
 import java.util.SortedSet;
 
+import com.ibm.nmon.data.DataRecord;
 import com.ibm.nmon.data.DataType;
 import com.ibm.nmon.data.ProcessDataSet;
-
 import com.ibm.nmon.data.Process;
+import com.ibm.nmon.data.ProcessDataType;
 
 /**
  * Utility methods for working with DataSets and DataTypes.
@@ -50,6 +53,89 @@ public final class DataHelper {
         }
 
         return processNameToProcesses;
+    }
+
+    public static void aggregateProcessData(ProcessDataSet data, Logger logger) {
+        Map<String, List<Process>> processNameToProcesses = DataHelper.getProcessesByName(data, false);
+
+        for (List<Process> processes : processNameToProcesses.values()) {
+            if (processes.size() > 1) {
+                aggregateProcesses(data, processes, logger);
+            }
+        }
+    }
+
+    private static void aggregateProcesses(ProcessDataSet data, List<Process> processes, Logger logger) {
+        long start = System.nanoTime();
+        long earliestStart = Long.MAX_VALUE;
+
+        for (Process process : processes) {
+            if (process.getStartTime() < earliestStart) {
+                earliestStart = process.getStartTime();
+            }
+        }
+
+        // assume first process is representative and fields do not change
+        // note that this aggregates processes with the same name but different commands lines,
+        // i.e. different Java web servers
+        ProcessDataType processType = data.getType(processes.get(0));
+
+        int fieldCount = processType.getFieldCount() + 1;
+
+        // copy the fields from the Process
+        // add a Count field to count the number of processes running at each time period
+        String[] fields = new String[fieldCount];
+
+        for (int i = 0; i < fieldCount - 1; i++) {
+            fields[i] = processType.getField(i);
+        }
+
+        fields[fieldCount - 1] = "Count";
+
+        String name = processes.get(0).getName();
+
+        Process aggregate = new Process(-1, earliestStart, name);
+        aggregate.setCommandLine("all " + name + " processes");
+        ProcessDataType aggregateType = new ProcessDataType(aggregate, fields);
+
+        data.addProcess(aggregate);
+        data.addType(aggregateType);
+
+        // for every record in the file, sum up all the data for each process and add the aggregated
+        // data to the record
+        for (DataRecord record : data.getRecords()) {
+            double[] totals = new double[fieldCount];
+
+            java.util.Arrays.fill(totals, 0);
+
+            // does any process have data at this time?
+            boolean valid = false;
+
+            for (Process process : processes) {
+                processType = data.getType(process);
+
+                if (record.hasData(processType)) {
+                    valid = true;
+
+                    int n = 0;
+
+                    for (String field : processType.getFields()) {
+                        totals[n++] += record.getData(processType, field);
+                    }
+
+                    // process count
+                    ++totals[n];
+                }
+            }
+
+            if (valid) {
+                record.addData(aggregateType, totals);
+            }
+        }
+
+        if (logger.isDebugEnabled()) {
+            logger.debug("Aggregated process data for {} in {}ms ", name, (System.nanoTime() - start) / 1000000.0d);
+        }
     }
 
     /**

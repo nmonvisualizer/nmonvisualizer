@@ -95,6 +95,8 @@ public final class PerfmonParser {
                 processPostProcessor.postProcess(data, record);
             }
 
+            DataHelper.aggregateProcessData(data, LOGGER);
+
             if (LOGGER.isDebugEnabled()) {
                 LOGGER.debug("Parse complete for {} in {}ms", data.getSourceFile(),
                         (System.nanoTime() - start) / 1000000.0d);
@@ -402,8 +404,40 @@ public final class PerfmonParser {
             fields.toArray(fieldsArray);
 
             if ("Process".equals(id)) {
-                Process process = new Process(currentPid++, currentRecord.getTime(), subId, data.getTypeIdPrefix());
-                processes.put(subId, process);
+                int pid = currentPid;
+                String processName = subId; // store processes with full name
+
+                // parse out pid, if available via
+                // HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Services\PerfProc\Performance
+                // ProcessNameFormat=2
+                int idx = subId.indexOf('_');
+
+                if (idx != -1) {
+                    String temp = subId.substring(idx + 1, subId.length());
+
+                    try {
+                        pid = Integer.parseInt(temp);
+                        subId = DataHelper.newString(subId).substring(0, idx);
+                    }
+                    catch (NumberFormatException nfe) {
+                        LOGGER.warn("invalid pid {} at line {}; using {} instead", temp, in.getLineNumber(), pid);
+
+                        // ignore and use currentPid
+                        ++currentPid;
+                    }
+                }
+                else {
+                    idx = subId.indexOf('#');
+
+                    if (idx != -1) {
+                        subId = DataHelper.newString(subId).substring(0, idx);
+                    }
+
+                    ++currentPid;
+                }
+
+                Process process = new Process(pid, currentRecord.getTime(), subId, data.getTypeIdPrefix());
+                processes.put(processName, process);
                 data.addProcess(process);
 
                 return new ProcessDataType(process, fieldsArray);
