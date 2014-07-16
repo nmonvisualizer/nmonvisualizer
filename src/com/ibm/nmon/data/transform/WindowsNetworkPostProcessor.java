@@ -5,6 +5,10 @@ import com.ibm.nmon.data.DataSet;
 import com.ibm.nmon.data.DataType;
 import com.ibm.nmon.data.SubDataType;
 
+/**
+ * Post processor to add a <code>Network Interface (Total)</code> data type that aggregates data for
+ * all network interfaces.
+ */
 public final class WindowsNetworkPostProcessor implements DataPostProcessor {
     @Override
     public void addDataTypes(DataSet data) {
@@ -48,7 +52,7 @@ public final class WindowsNetworkPostProcessor implements DataPostProcessor {
                 }
             }
         }
-        
+
         record.addData(total, totalData);
     }
 }

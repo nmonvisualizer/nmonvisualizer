@@ -9,6 +9,10 @@ import com.ibm.nmon.data.Process;
 import com.ibm.nmon.data.ProcessDataSet;
 import com.ibm.nmon.data.SubDataType;
 
+/**
+ * Post processor to scale Windows <code>Process</code> CPU utilization data by the currently active
+ * number of CPUs.
+ */
 public class WindowsProcessPostProcessor implements DataPostProcessor {
     private final List<DataType> processors = new java.util.ArrayList<DataType>(8);
 
