@@ -3,19 +3,14 @@ package com.ibm.nmon.parser;
 import org.slf4j.Logger;
 
 import java.io.IOException;
-
 import java.io.File;
 import java.io.FileReader;
 import java.io.LineNumberReader;
-
 import java.text.SimpleDateFormat;
 import java.text.ParseException;
-
 import java.util.List;
 import java.util.Map;
-
 import java.util.TimeZone;
-
 import java.util.regex.Pattern;
 import java.util.regex.Matcher;
 
@@ -25,11 +20,9 @@ import com.ibm.nmon.data.DataType;
 import com.ibm.nmon.data.SubDataType;
 import com.ibm.nmon.data.ProcessDataType;
 import com.ibm.nmon.data.Process;
-
 import com.ibm.nmon.data.transform.WindowsBytesTransform;
 import com.ibm.nmon.data.transform.WindowsNetworkPostProcessor;
 import com.ibm.nmon.data.transform.WindowsProcessPostProcessor;
-
 import com.ibm.nmon.util.DataHelper;
 
 public final class PerfmonParser {
@@ -96,6 +89,8 @@ public final class PerfmonParser {
             }
 
             DataHelper.aggregateProcessData(data, LOGGER);
+
+            scaleProcessDataByCPUs();
 
             if (LOGGER.isDebugEnabled()) {
                 LOGGER.debug("Parse complete for {} in {}ms", data.getSourceFile(),
@@ -270,6 +265,12 @@ public final class PerfmonParser {
             // no need to parse id and subid from typeId given that we know the typeId here is built
             // from the type and subtype id and that isValidFor() uses a regex to match
             if (bytesTransform.isValidFor(typeId, null)) {
+                if (type.hasField("% Used Space")) {
+                    int idx = type.getFieldIndex("% Used Space");
+
+                    data[idx] = 100 - data[idx];
+                }
+
                 data = bytesTransform.transform(type, data);
             }
 
@@ -376,6 +377,54 @@ public final class PerfmonParser {
         }
     }
 
+    private void scaleProcessDataByCPUs() {
+        // get the maximum number of CPUs
+        List<DataType> cpuTypes = new java.util.ArrayList<DataType>(8);
+
+        for (DataType type : data.getTypes()) {
+            if (type.getId().startsWith("Processor") && !type.getId().contains("Total")) {
+                cpuTypes.add(type);
+            }
+        }
+
+        // if there is more than 1 possible CPU, scale the process data by the CPU count
+        if (cpuTypes.size() > 1) {
+            long start = System.nanoTime();
+
+            List<ProcessDataType> processTypes = new java.util.ArrayList<ProcessDataType>(data.getProcessCount());
+
+            for (Process process : data.getProcesses()) {
+                processTypes.add(data.getType(process));
+            }
+
+            for (DataRecord record : data.getRecords()) {
+                // CPUs can change dynamically, so recalculate for each record
+                int cpuCount = 0;
+
+                for (DataType cpuType : cpuTypes) {
+                    if (record.hasData(cpuType)) {
+                        ++cpuCount;
+                    }
+                }
+
+                if (cpuCount > 1) {
+                    for (ProcessDataType processType : processTypes) {
+                        if (record.hasData(processType)) {
+                            for (String field : processType.getFields()) {
+                                if (field.startsWith("%")) {
+                                    // assume % Processor Time, % User Time or % Privileged Time
+                                    record.getData(processType)[processType.getFieldIndex(field)] /= cpuCount;
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+
+            LOGGER.debug("scaling of processes by CPUs complete in {}ms", (System.nanoTime() - start) / 1000000.0d);
+        }
+    }
+
     private final class DataTypeBuilder {
         private String id = null;
         private String subId = null;
@@ -446,6 +495,18 @@ public final class PerfmonParser {
                 String name = SubDataType.buildId(id, subId);
 
                 if (bytesTransform.isValidFor(id, subId)) {
+                    // cannot use a DataTransform for disk free -> disk used since disks also need
+                    // to have WindowsBytesTransform applied
+                    if ("LogicalDisk".equals(id) || "PhysicalDisk".equals(id)) {
+                        for (int i = 0; i < fieldsArray.length; i++) {
+                            String field = fieldsArray[i];
+
+                            if ("% Free Space".equals(field)) {
+                                fieldsArray[i] = "% Used Space";
+                            }
+                        }
+                    }
+
                     return bytesTransform.buildDataType(id, subId, name, fieldsArray);
                 }
                 else {

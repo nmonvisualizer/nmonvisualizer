@@ -9,7 +9,7 @@
       <field name="Sys%" alias="System" />
       <field name="Wait%" alias="Wait" />
     </data>
-    
+
     <data>
       <host os="PERFMON" />
       <type name="Processor (Total)" />
@@ -453,17 +453,17 @@
     <data stat="MINIMUM">
       <host os="PERFMON" />
       <type regex="LogicalDisk(.(?!Total))*" aliasByGroup="0" />
-      <field name="% Free Space" />
+      <field name="% Used Space" />
     </data>
     <data stat="AVERAGE">
       <host os="PERFMON" />
       <type regex="LogicalDisk(.(?!Total))*" aliasByGroup="0" />
-      <field name="% Free Space" />
+      <field name="% Used Space" />
     </data>
     <data stat="MAXIMUM">
       <host os="PERFMON" />
       <type regex="LogicalDisk(.(?!Total))*" aliasByGroup="0" />
-      <field name="% Free Space" />
+      <field name="% Used Space" />
     </data>
   </barchart>
 </charts>

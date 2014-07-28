@@ -15,7 +15,7 @@ import com.ibm.nmon.data.SubDataType;
  * memory.
  * </p>
  * <p>
- * This class maintains state internall, so {@link #reset()} should be called after parsing a
+ * This class maintains state internally, so {@link #reset()} should be called after parsing a
  * particular file.
  * <p>
  */
