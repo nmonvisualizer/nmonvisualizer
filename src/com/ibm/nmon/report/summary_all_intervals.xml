@@ -11,7 +11,7 @@
     <data>
       <host os="PERFMON" />
       <type name="Processor (Total)" />
-      <field name="% Processor Time" alias="% CPU" />
+      <field name="% Processor Time" alias="CPU%" />
     </data>
   </intervalchart>
 

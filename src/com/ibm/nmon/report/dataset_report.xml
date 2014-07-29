@@ -288,7 +288,8 @@
     <data>
       <host os="PERFMON" />
       <type name="Memory" />
-      <field name="Page Faults/sec" alias="Faults" />
+      <field name="Page Faults/sec" alias="Page Faults" />
+      <field name="Cache Faults/sec" alias="Cache Faults" />
     </data>
   </linechart>
 
@@ -328,6 +329,7 @@
       <type name="Memory" />
       <field name="Pages Output/sec" alias="Out" />
       <field name="Pages Input/sec" alias="In" />
+      <field name="Page Reads/sec" alias="Read" />
     </data>
   </linechart>
 
