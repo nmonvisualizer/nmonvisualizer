@@ -30,10 +30,6 @@ public final class PerfmonParser {
 
     private static final SimpleDateFormat TIMESTAMP_FORMAT = new SimpleDateFormat("MM/dd/yyyy HH:mm:ss");
 
-    static {
-        TIMESTAMP_FORMAT.setTimeZone(TimeZone.getTimeZone("UCT"));
-    }
-
     private static final Pattern DATA_SPLITTER = Pattern.compile("\"?,\"?");
     private static final Pattern SUBCATEGORY_SPLITTER = Pattern.compile(":");
     // "\\hostname\category (optional subcategory)\metric"
@@ -141,6 +137,29 @@ public final class PerfmonParser {
             }
         }
 
+        // parse out the timezone in a format like (PDH-CSV 4.0) (GMT Daylight Time)(-60)
+        int idx = header[0].lastIndexOf('(');
+
+        if (idx == -1) {
+            LOGGER.warn("version header '{0}' is not in the right format, the time zone will default to UTC", header[0]);
+            TIMESTAMP_FORMAT.setTimeZone(TimeZone.getTimeZone("UTC"));
+        }
+        else {
+            String temp = header[0].substring(idx + 1, header[0].length() - 1);
+
+            try {
+                // timezone format in negative minutes from UTC
+                double offset = Integer.parseInt(temp) / -60.0d;
+
+                TIMESTAMP_FORMAT.setTimeZone(new java.util.SimpleTimeZone((int) (offset * 3600000), temp));
+            }
+            catch (NumberFormatException nfe) {
+                LOGGER.warn("version header '{0}' is not in the right format, the time zone will default to UTC",
+                        header[0]);
+                TIMESTAMP_FORMAT.setTimeZone(TimeZone.getTimeZone("UTC"));
+            }
+        }
+
         // timestamp does not belong to a category
         columnTypes.add(null);
 
@@ -154,13 +173,13 @@ public final class PerfmonParser {
                 String id = null;
                 String subId = null;
 
-                int idx = toParse.indexOf('(');
+                idx = toParse.indexOf('(');
 
                 if (idx != -1) {
                     int endIdx = toParse.indexOf(')', idx + 1);
 
                     if (endIdx == -1) {
-                        LOGGER.warn("no end parentheses found in heade column '{}'", toParse);
+                        LOGGER.warn("no end parentheses found in header column '{}'", toParse);
                         columnTypes.add(null);
                         continue;
                     }
