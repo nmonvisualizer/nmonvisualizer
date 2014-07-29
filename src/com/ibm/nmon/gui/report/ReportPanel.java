@@ -96,6 +96,7 @@ public final class ReportPanel extends JTabbedPane implements PropertyChangeList
         super();
 
         this.chartFactory = new ChartFactory(gui);
+        this.chartFactory.setGranularity(gui.getGranularity());
 
         this.gui = gui;
         this.parent = parent;
@@ -164,7 +165,7 @@ public final class ReportPanel extends JTabbedPane implements PropertyChangeList
                 }
                 else {
                     if (idx != -1) {
-                        // notify listeners that the chart is now showing
+                        // notify listeners that the chart is not showing
                         getChartPanel().clearChart();
                         // ensure chart is recreated when re-enabled
                         chartNeedsUpdate.set(idx);
