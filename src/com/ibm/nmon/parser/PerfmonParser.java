@@ -76,6 +76,8 @@ public final class PerfmonParser {
                 parseData(DATA_SPLITTER.split(line));
             }
 
+            long postProcessStart = System.nanoTime();
+
             // post process after parsing all the data since DataTypes are built lazily
             WindowsNetworkPostProcessor networkPostProcessor = new WindowsNetworkPostProcessor();
             WindowsProcessPostProcessor processPostProcessor = new WindowsProcessPostProcessor();
@@ -88,12 +90,15 @@ public final class PerfmonParser {
                 processPostProcessor.postProcess(data, record);
             }
 
+            if (LOGGER.isDebugEnabled()) {
+                LOGGER.debug("Post processing" + " complete for {} in {}ms", data.getSourceFile(),
+                        (System.nanoTime() - postProcessStart) / 1000000.0d);
+            }
+
             DataHelper.aggregateProcessData(data, LOGGER);
 
-            scaleProcessDataByCPUs();
-
             if (LOGGER.isDebugEnabled()) {
-                LOGGER.debug("Parse complete for {} in {}ms", data.getSourceFile(),
+                LOGGER.debug("Parse" + " complete for {} in {}ms", data.getSourceFile(),
                         (System.nanoTime() - start) / 1000000.0d);
             }
 
@@ -374,54 +379,6 @@ public final class PerfmonParser {
             }
 
             return type;
-        }
-    }
-
-    private void scaleProcessDataByCPUs() {
-        // get the maximum number of CPUs
-        List<DataType> cpuTypes = new java.util.ArrayList<DataType>(8);
-
-        for (DataType type : data.getTypes()) {
-            if (type.getId().startsWith("Processor") && !type.getId().contains("Total")) {
-                cpuTypes.add(type);
-            }
-        }
-
-        // if there is more than 1 possible CPU, scale the process data by the CPU count
-        if (cpuTypes.size() > 1) {
-            long start = System.nanoTime();
-
-            List<ProcessDataType> processTypes = new java.util.ArrayList<ProcessDataType>(data.getProcessCount());
-
-            for (Process process : data.getProcesses()) {
-                processTypes.add(data.getType(process));
-            }
-
-            for (DataRecord record : data.getRecords()) {
-                // CPUs can change dynamically, so recalculate for each record
-                int cpuCount = 0;
-
-                for (DataType cpuType : cpuTypes) {
-                    if (record.hasData(cpuType)) {
-                        ++cpuCount;
-                    }
-                }
-
-                if (cpuCount > 1) {
-                    for (ProcessDataType processType : processTypes) {
-                        if (record.hasData(processType)) {
-                            for (String field : processType.getFields()) {
-                                if (field.startsWith("%")) {
-                                    // assume % Processor Time, % User Time or % Privileged Time
-                                    record.getData(processType)[processType.getFieldIndex(field)] /= cpuCount;
-                                }
-                            }
-                        }
-                    }
-                }
-            }
-
-            LOGGER.debug("scaling of processes by CPUs complete in {}ms", (System.nanoTime() - start) / 1000000.0d);
         }
     }
 

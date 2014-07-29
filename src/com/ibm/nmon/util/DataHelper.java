@@ -56,12 +56,17 @@ public final class DataHelper {
     }
 
     public static void aggregateProcessData(ProcessDataSet data, Logger logger) {
+        long start = System.nanoTime();
         Map<String, List<Process>> processNameToProcesses = DataHelper.getProcessesByName(data, false);
 
         for (List<Process> processes : processNameToProcesses.values()) {
             if (processes.size() > 1) {
                 aggregateProcesses(data, processes, logger);
             }
+        }
+
+        if (logger.isDebugEnabled()) {
+            logger.debug("Aggregated process data for {} in {}ms ", data, (System.nanoTime() - start) / 1000000.0d);
         }
     }
 
@@ -133,8 +138,8 @@ public final class DataHelper {
             }
         }
 
-        if (logger.isDebugEnabled()) {
-            logger.debug("Aggregated process data for {} in {}ms ", name, (System.nanoTime() - start) / 1000000.0d);
+        if (logger.isTraceEnabled()) {
+            logger.trace("Aggregated process data for {} in {}ms ", name, (System.nanoTime() - start) / 1000000.0d);
         }
     }
 

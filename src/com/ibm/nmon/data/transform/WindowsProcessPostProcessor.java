@@ -41,7 +41,7 @@ public class WindowsProcessPostProcessor implements DataPostProcessor {
 
             if (processors.isEmpty()) {
                 // no data => do not scale
-                processorCount = 1;
+                return;
             }
             else {
                 for (DataType processorType : processors) {
@@ -56,10 +56,12 @@ public class WindowsProcessPostProcessor implements DataPostProcessor {
                 DataType processType = processData.getType(process);
 
                 if (record.hasData(processType)) {
-                    double[] values = record.getData(processType);
-
-                    values[processType.getFieldIndex("% Processor Time")] /= processorCount;
-                    values[processType.getFieldIndex("% User Time")] /= processorCount;
+                    for (String field : processType.getFields()) {
+                        if (field.startsWith("%")) {
+                            // assume % Processor Time, % User Time or % Privileged Time
+                            record.getData(processType)[processType.getFieldIndex(field)] /= processorCount;
+                        }
+                    }
                 }
             }
         }
