@@ -1,13 +1,7 @@
 package com.ibm.nmon;
 
 import java.io.IOException;
-
 import java.io.File;
-import java.io.FileFilter;
-
-import com.ibm.nmon.file.HATJFileFilter;
-import com.ibm.nmon.file.NMONFileFilter;
-import com.ibm.nmon.gui.chart.ChartFactory;
 
 import java.io.FileOutputStream;
 import java.io.PrintStream;
@@ -31,14 +25,18 @@ import com.ibm.nmon.interval.Interval;
 
 import com.ibm.nmon.data.DataSet;
 
+import com.ibm.nmon.gui.chart.ChartFactory;
 import com.ibm.nmon.report.ReportCache;
 import com.ibm.nmon.chart.definition.BaseChartDefinition;
 
 import com.ibm.nmon.util.FileHelper;
 
 import com.ibm.nmon.util.GranularityHelper;
+
 import com.ibm.nmon.util.TimeFormatCache;
 import com.ibm.nmon.util.TimeHelper;
+
+import com.ibm.nmon.file.CombinedFileFilter;
 
 public final class ReportGenerator extends NMONVisualizerApp {
     private static final SimpleDateFormat FILE_TIME_FORMAT = new SimpleDateFormat("HHmmss");
@@ -208,8 +206,8 @@ public final class ReportGenerator extends NMONVisualizerApp {
         for (String path : paths) {
             File pathToParse = new File(path);
 
-            FileHelper.recurseDirectories(java.util.Collections.singletonList(pathToParse), reportFileFilter,
-                    filesToParse);
+            FileHelper.recurseDirectories(java.util.Collections.singletonList(pathToParse),
+                    CombinedFileFilter.getInstance(false), filesToParse);
 
             if (filesToParse.isEmpty()) {
                 System.err.println('\'' + pathToParse.toString() + "' contains no parsable files");
@@ -280,15 +278,6 @@ public final class ReportGenerator extends NMONVisualizerApp {
 
         System.out.println("Charts complete!");
     }
-
-    private static final FileFilter reportFileFilter = new FileFilter() {
-        private final FileFilter nmonFilter = new NMONFileFilter();
-        private final FileFilter hatjFilter = new HATJFileFilter();
-
-        public boolean accept(File pathname) {
-            return nmonFilter.accept(pathname) || hatjFilter.accept(pathname);
-        };
-    };
 
     private static long parseTime(String[] args, int index, char param) {
         if (index > args.length) {
