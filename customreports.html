@@ -1,11 +1,11 @@
 <!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd">
 <head>
-<title>NMON Visualizer - Custom Reports</title>
+<title>NMONVisualizer - Custom Reports</title>
 <link rel="stylesheet"href="nmonvisualizer.css" type="text/css" />
 <link rel="icon" href="favicon.ico" type="image/png" />
 </head>
 <body>
-<h1>NMON Visualizer</h1>
+<h1>NMONVisualizer</h1>
 <h2 class="top">custom report format</h2>
 
 <div id="nav">
@@ -26,7 +26,7 @@
 <div id="content">
   <div class="section">
     <h2>Overview</h2>
-    <p>NMON Visualizer supports generating custom reports from the <a href="commandline.html"/>command line</a>. Custom reports are defined in an XML file format, detailed here.</p>
+    <p>NMONVisualizer supports generating custom reports from the <a href="commandline.html"/>command line</a>. Custom reports are defined in an XML file format, detailed here.</p>
   </div>
 
   <div class="section">
@@ -39,13 +39,14 @@
 
   <div class="section">
     <h2>Charts</h2>
-    <p>The root element of the XML must be <span class="c">&lt;charts&gt;</span>. Within that, there can be any number of chart elements; each one will generate a separate graph. The four chart types each have their own element: <span class="c">&lt;linechart&gt;</span>, <span class="c">&lt;barchart&gt;</span>, <span class="c">&lt;intervalchart&gt;</span> and <span class="c">&lt;histogram&gt;</span>. All chart elements support the following attributes:</p>
+    <p>The root element of the XML must be <span class="c">&lt;charts&gt;</span>. Within that, there can be any number of chart elements; each one will generate a separate graph. The four chart types each have their own element: <span class="c">&lt;linechart&gt;</span>, <span class="c">&lt;barchart&gt;</span>, <span class="c">&lt;intervalchart&gt;</span> and <span class="c">&lt;histogram&gt;</span>. All chart elements support the following attributes:
     <ul>
       <li><span class="c">name</span> - the name of the chart. This value is <span class="i"/>required</span>. This will be used as the title of the chart.</li>
       <li><span class="c">shortName</span> - a more concise name for the chart. This will be used as the file name when the chart is output as well as the tab name in the GUI. If not specified the short name will default to the full name.</li>
       <li><span class="c">stacked</span> - a a boolean value indicating that the lines or bars in the chart should be stacked rather than separate. On a line chart this causes the area between the lines to be filled in. This attribute is ignored for interval charts. The default value is <span class="c">false</span>.</li>
       <li><span class="c">width</span> and <span class="c">height</span> - the size of the chart when saved or copied, in pixels. The default is &#x00BC HD (1920 / 2 x 1080 / 2).
     </ul>
+    </p>
     <p>Bar charts also support a <span class="c">subtractionNeeded</span> attribute to specify that the bar value should be subtracted from the previous bar's value. This is useful for stacked charts where the underlying data for each field is a sum of other data.</p>
     <p>Histograms support a  <span class="c">bins</span> attribute to specify the number of bins to use in the chart. Each bin is displayed as a separate bar on the chart. This value defaults to <span class="c">10</span>. Histograms also support the ability to display annotation markers on a chart via the <span class="c">showMarkers</span> attribute and <span class="c">&lt;marker&gt;</span> sub-elements. Each <span class="c">&lt;marker&gt;</span> element requires a <span class="c">stat</span> attribute that corresponds to a valid <a href="#stat">statistic</a>. By default, <span class="c">showMarkers</span> is <span class="c">true</span> and markers are displayed for <span class="c">AVERAGE</span>, <span class="c">MEDIAN</span> and <span class="c">PERCENTILE_95</span>.<p>
 
@@ -53,7 +54,7 @@
     <p>By default, lines and bars as displayed in a chart legend, are named by their field. On bar charts, the X axis displays a category which defaults to the type name. Optional attributes exist to change the defaults.</p>
     <p>For line and interval charts, the attribute is <span class="c">linesNamedBy</span>. This is most useful when charting multiple types, each with the same field name. For bar charts, there are two attributes: <span class="c">barsNamedBy</span> and <span class="c">categoriesNamedBy</span>; these should not be set to the same value. Histograms support  <span class="c">barsNamedBy</span>.</p>
     <p>All charts also support a <span class="c">subtitledBy</span> attribute that adds a subtitle to the chart. By default, the subtitle naming mode is <span class="c">HOST</span>. Note that the naming mode is only applied if there is a single instance of the given value for the mode. For example, if the mode is <span class="c">HOST</span>, the hostname <span class="i">will not</span> be displayed if the chart only displays data from a single system. Similarly, for the compound naming modes, the actual subtitle may be shortened if one of the values is unique for the charted data.</p>
-    <p>The following naming modes are supported:<p>
+    <p>The following naming modes are supported:
     <ul>
       <li><span class="c">HOST</span> - the hostname of the dataset</li>
       <li><span class="c">TYPE</span> - the name of the data type</li>
@@ -66,6 +67,7 @@
       <li><span class="c">TYPE_STAT</span> - the type name plus the stat</li>
       <li><span class="c">FIELD_STAT</span> - the field name plus the stat</li>
     </ul>
+    </p>
     <p>Note that these values must be capitalized in the XML.</p>
 
     <h3>Data</h3>
@@ -81,7 +83,8 @@
 
   <div class="section">
     <a id="stat"><h2>Statistics</h2></a>
-    <p>In addition to graphing data as-is, aggregate data can also be charted. This is done by specifing the <span class="c">stat</span> attribute in a <span class="c">data</span> element. The following statistics are supported:</p>
+    <p>In addition to graphing data as-is, aggregate data can also be charted. This is done by specifing the <span class="c">stat</span> attribute in a <span class="c">data</span> element.</p>
+    <p>The following statistics are supported:
     <ul>
       <li><span class="c">AVERAGE</span></li>
       <li><span class="c">MINIMUM</span></li>
@@ -94,22 +97,25 @@
       <li><span class="c">COUNT</span></li>
       <li><span class="c">GRANULARITY_MAX</span> - this statistic calculates a peak average using the current granularity as the time scale. The value reported is the <span class="i">maximum</span> peak average of all periods in the current interval.</li>
     </ul>
+    </p>
     <p>Note that these values must be capitalized in the XML. The default value is <span class="c">AVERAGE</span>.</p>
-    <p>Because the <span class="c">STAT</span> values collapse data into a single point, this attribute is ignored for line charts.</p>
+    <p>Because the <span class="c">stat</span> values collapse data into a single point, this attribute is ignored for line charts.</p>
   </div>
 
   <div class="section">
     <a id="matching"><h2>Selecting Data</h2></a>
     <p>Hosts, types and fields can all be selected by name or by regular expression. For matching a specific name, use the <span class="c">name</span> attribute. For regexes, use the <span class="c">regex</span> attribute. Both should not be specified in a single element. Note that the name must be capitalized <span class="i">exactly</span> how it is in the underlying data file; this usually means types are uppercase and fields are lowercase.</p>
     <p>For the <span class="c">regex</span> attribute, any valid regular expression that can be parsed by Java's <span class="c">Pattern</span> class is valid. Note that when escaping values with backslash, only a single <span class="c">\</span> is needed.</p>
-    <p>For the <span class="c">name</span> attribute, there are several special values that can be used:</p>
+    <p>For the <span class="c">name</span> attribute, there are several special values that can be used:
     <ul>
       <li><span class="c">$ALL</span> - matches all values. This is the default but can be useful in combination with renaming.</li>
       <li><span class="c">$PROCESSES</span> - matches all processes and returns only the aggregate process data if there are multiple processes with the same name.</li>
       <li><span class="c">$DISKS</span> - matches all disks (e.g. <span class="c">/dev/sda</span> but not <span class="c">/dev/sda1</span>) for nmon <span class="c">DISK</span> data types.</li>
       <li><span class="c">$PARTITIONS</span> - matches all partitions for nmon <span class="c">DISK</span> data types.</li>
     </ul>
-    <p>For <span class="c">&lt;host&gt;</span> elements, an additional <span class="c">os</span> attribute can also be provided to specify that data should only be matched for a specific operating system. Accepted values for this attribute are <span class="c">linux</span>, <span class="c">aix</span>, <span class="c">vios</span> and <span class="c">esx</span>. These values <span class="i">are not</span> case sensitive.</p>
+    </p>
+    <p>Note for Perfmon data, the disks are identified by subtype (i.e. <span class="c">Logical Disk (C:)</span>). So, the <span class="c">$DISKS</span> and <span class='c'>$PARTITIONS</span> values are not valid for Windows data since they only work on base data types.</p>
+    <p>For <span class="c">&lt;host&gt;</span> elements, an additional <span class="c">os</span> attribute can also be provided to specify that data should only be matched for a specific operating system. Accepted values for this attribute are <span class="c">UNIX</span>, <span class="c">LINUX</span>, <span class="c">AIX</span>, <span class="c">VIOS</span> and <span class="c">PERFMON</span>. These values <span class="i">are not</span> case sensitive.</p>
   </div>
 
   <div class="section">

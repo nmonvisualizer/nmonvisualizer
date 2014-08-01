@@ -1,11 +1,11 @@
 <!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd">
 <head>
-<title>NMON Visualizer - Start nmon at Boot</title>
+<title>NMONVisualizer - Start nmon at Boot</title>
 <link rel="stylesheet"href="nmonvisualizer.css" type="text/css" />
 <link rel="icon" href="favicon.ico" type="image/png" />
 </head>
 <body>
-<h1>NMON Visualizer</h1>
+<h1>NMONVisualizer</h1>
 <h2 class="top">start nmon at boot</h2>
 
 <div id="nav">
@@ -59,7 +59,7 @@ service nmon start
     <p>AIX supports daily nmon collection out of the box. Run <span class="c">smit topas</span> to start smit.
     <ul>
       <li>Select <span class="c">Start New Recording &#8594; Start Persistent local recording</span>
-      <li>Select nmon as type</li>
+      <li>Select <span class="c">nmon</span> as type</li>
       <li>Set the following options</li>
         <ul>
           <li>Recording interval in seconds: <span class="c">30</span></li>
@@ -72,7 +72,7 @@ service nmon start
       <li>Hit enter to run the command</li>
       <li><span class="c">Esc 0</span> to exit smit</li>
     </ul>
-    <p>There should now be an NMON file in <span class="c">/etc/perf/daily</span>.</p>
+    <p>There should now be an nmon file in <span class="c">/etc/perf/daily</span>.</p>
     <p>To stop nmon collection, run <span class="c">smit topas</span>. Then select <span class="c">Stop Recording &#8594; Stop Persistent Recording &#8594; Stop Persistent local nmon Record</span>.</p>
   </div>
 </div>

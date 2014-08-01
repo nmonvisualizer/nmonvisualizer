@@ -1,11 +1,11 @@
 <!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd">
 <head>
-<title>NMON Visualizer - JSON Format</title>
+<title>NMONVisualizer - JSON Format</title>
 <link rel="stylesheet"href="nmonvisualizer.css" type="text/css" />
 <link rel="icon" href="favicon.ico" type="image/png" />
 </head>
 <body>
-<h1>NMON Visualizer</h1>
+<h1>NMONVisualizer</h1>
 <h2 class="top">json</h2>
 
 <div id="nav">
@@ -26,21 +26,23 @@
 <div id="content">
   <div class="section">
     <h2>Overview</h2>
-    <p>NMON Visualizer can process JSON files, but they must be in the correct format. This format consists of 3 main objects: the metadata, the data type definitions and the actual data. These objects are defined as fields of the main JSON object, so they can be placed in the file <span class="i">in any order</span>.</p>
+    <p>NMONVisualizer can process JSON files, but they must be in the correct format. This format consists of 3 main objects: the metadata, the data type definitions and the actual data. These objects are defined as fields of the main JSON object, so they can be placed in the file <span class="i">in any order</span>.</p>
   </div>
 
   <div class="section">
     <h2>Metadata</h2>
-    <p>The metadata section contains information about the JSON file being parsed. The following fields are <span class="i">required</i>:</p>
+    <p>The metadata section contains information about the JSON file being parsed. The following fields are <span class="i">required</i>:
     <ul>
     <li><span class="c">hostname</span><br/>The system name as a string. This can be the short name or the fully qualified domain name.</li>
     <li><span class="c">whenPattern</span><br/>A timestamp pattern as defined by Java's <span class="c">SimpleDateFormat</span> class. This string may contain a time zone pattern (<span class="c">z</span>, <span class="c">Z</span> or <span class="c">X</span> [Java 7 only]).</li>
     </ul>
-    <p>Two other fields are optional:</p>
+    </p>
+    <p>Two other fields are optional:
     <ul>
     <li><span class="c">timezone</span><br/>Either a string or a number. As a string, the value must return a valid value when used in a call to <span class="c">TimeZone.getTimeZone()</span> in Java. As a number, the value will be interpreted as the number of hours offset from UTC (either positive or negative).</li>
     <li><span class="c">metadata</span><br/>An object containing key value pairs as strings. These will be placed directly into the parsed data as metadata. These values can be viewed in the GUI by right clicking on the dataset and selecting <span class="c">Parsed File Info</span>.</li>
     </ul>
+    </p>
     <p>Note that <span class="c">whenPattern</span> may include a time zone. If it does not <span class="i">and</span> no <span class="c">timezone</span> is specified, then the file will be parsed using the current timezone.</p> 
   </div>
   <div class="section">
@@ -55,7 +57,7 @@
   </div>
   <div class="section">
     <h2>Data</h2>
-    <p>The data section contains the actual data. A single array named <span class="c">data</span> contains all the values. Each element of the array contains all the data for a given time and contains the following fields:</p> 
+    <p>The data section contains the actual data. A single array named <span class="c">data</span> contains all the values. Each element of the array contains all the data for a given time and contains the following fields:
     <ul>
      <li><span class="c">when</span><br/>The datetime for the data record. This value must be a string formatted as defined by <span class="c">whenPattern</span>.</li>
      <li>
@@ -67,6 +69,7 @@
        In both cases, any array <span class="i">must</span> contain data for all the <span class="c">fields</span> of the (sub)type <span class="i">in the order they were defined</span>.
      </li>
     </ul>
+    </p>
    <p>If data for a particular (sub)type does not exist for a particular <span class="c">when</span> value, it can be skipped; <span class="c">null</span> or empty arrays <span class="i">should not</span> be used. However, if data for a particular <span class="c">field</span> does not exist but other fields are present at that time, <span class="c">null</span> should be used as the value. This will be interpreted as <span class="c">Double.NaN</span> by the GUI (i.e. a missing value).
   </div>
 

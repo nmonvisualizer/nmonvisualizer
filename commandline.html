@@ -1,11 +1,11 @@
 <!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd">
 <head>
-<title>NMON Visualizer - Command Line</title>
+<title>NMONVisualizer - Command Line</title>
 <link rel="stylesheet"href="nmonvisualizer.css" type="text/css" />
 <link rel="icon" href="favicon.ico" type="image/png" />
 </head>
 <body>
-<h1>NMON Visualizer</h1>
+<h1>NMONVisualizer</h1>
 <h2 class="top">command line</h2>
 
 <div id="nav">
@@ -26,7 +26,7 @@
 <div id="content">
   <div class="section">
     <h2>Report Generator</h2>
-    <p>NMON Visualizer supports generating charts as PNG files from the command line. By default, it will create the same charts that are available in the GUI. Both the summary charts at the 'All Systems' level and charts for each host will be created in a <span class="c">charts</span> subdirectory. There will be another subdirectory for each host's set of charts. Generation of these reports, along with the ability to create custom reports is supported via switches.
+    <p>NMONVisualizer supports generating charts as PNG files from the command line. By default, it will create the same charts that are available in the GUI. Both the summary charts at the 'All Systems' level and charts for each host will be created in a <span class="c">charts</span> subdirectory. There will be another subdirectory for each host's set of charts. Generation of these reports, along with the ability to create custom reports is supported via switches.
     </p>
     <p>The charts produced by this utility default to displaying all the data that was parsed. Command line switches are also supported to specify the start and / or end datetimes for the charts as well as creating custom reports.
     </p>
@@ -35,7 +35,7 @@
     <h3>Running</h3>
     <p>To run the ReportGenerator, specify the class from the command line like the following:<br/>
        <span class="c">java -jar NMONVisualizer_&lt;release_date&gt;.jar com.ibm.nmon.ReportGenerator &lt;file|directory to parse&gt;</span></p>
-    <p>Note that only NMON files are parsed. If a directory is given, then this directory will be searched <span class="i">recursively</span>. so ensure that the JVM has enough memory allocated to it (via <span class="c">-Xmx</span>).</p>
+    <p>Note that only nmon files are parsed. If a directory is given, then this directory will be searched <span class="i">recursively</span>. so ensure that the JVM has enough memory allocated to it (via <span class="c">-Xmx</span>).</p>
   </div>
   <div class="section">
     <h3>Options</h3>

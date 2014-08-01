@@ -1,11 +1,11 @@
 <!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd">
 <head>
-<title>NMON Visualizer - Host Renaming</title>
+<title>NMONVisualizer - Host Renaming</title>
 <link rel="stylesheet"href="nmonvisualizer.css" type="text/css" />
 <link rel="icon" href="favicon.ico" type="image/png" />
 </head>
 <body>
-<h1>NMON Visualizer</h1>
+<h1>NMONVisualizer</h1>
 <h2 class="top">host renaming</h2>
 
 <div id="nav">
@@ -26,15 +26,15 @@
 <div id="content">
   <div class="section">
     <h2>Overview</h2>
-    <p>By default, NMON Visualizer names datasets by hostname. In many cases, this hostname may not be meaningful for reports or data analysis. To support friendly names for datasets, NMON Visualizer suports renaming by several methods. These can be accessed in the GUI via the <span class="c">Name Systems</span> submenu under the <span class="c">File</span> menu.</p>
+    <p>By default, NMONVisualizer names datasets by hostname. In many cases, this hostname may not be meaningful for reports or data analysis. To support friendly names for datasets, NMONVisualizer suports renaming by several methods. These can be accessed in the GUI via the <span class="c">Name Systems</span> submenu under the <span class="c">File</span> menu.</p>
     <p>Three additional methods of renaming are supported:
       <ul>
-      <li>By LPAR name - using the <span class="c">Partition Name</span> from the <span class="c">lparstat -i</span> output embedded in NMON files.</li>
-      <li>By NMON run name - using the <span class='c'>runname</span> attribute in the NMON <span class="c">AAA</span> records. This can be specified by using the <span class="c">-r</span> parameter when starting NMON.</li>
+      <li>By LPAR name - using the <span class="c">Partition Name</span> from the <span class="c">lparstat -i</span> output embedded in nmon files.</li>
+      <li>By nmon run name - using the <span class='c'>runname</span> attribute in the nmon <span class="c">AAA</span> records. This can be specified by using the <span class="c">-r</span> parameter when starting nmon.</li>
       <li>Using a custom JSON file to rename hosts directly, by regex or by the above two methods.</li>
       </ul>
-      Note that if an NMON file does not have a runname or an LPAR name, the dataset will continue to be named using the default hostname.
-    </p>
+     </p>
+     <p>Note that if an nmon file does not have a runname or an LPAR name, the dataset will continue to be named using the default hostname.</p>
   </div>
 
   <div class="section">
