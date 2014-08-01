@@ -155,7 +155,6 @@ final class MainMenu extends JMenuBar implements IntervalListener, DataSetListen
                         ButtonGroup group = ((javax.swing.DefaultButtonModel) ((JCheckBoxMenuItem) e.getSource())
                                 .getModel()).getGroup();
                         group.getElements().nextElement().doClick();
-                        System.err.println();
                     }
                 }
             }
