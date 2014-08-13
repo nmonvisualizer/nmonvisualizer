@@ -21,9 +21,9 @@ import com.ibm.nmon.gui.main.NMONVisualizerGui;
 import com.ibm.nmon.util.TimeHelper;
 
 /**
- * Dialog to get the JVM name and hostname for a particular verbose GC file.
+ * Dialog to get the hostname and time zone for a particular IOStat file.
  * 
- * @see com.ibm.nmon.gui.main.NMONVisualizerGui#getDataForGCParse(String)
+ * @see com.ibm.nmon.gui.main.NMONVisualizerGui#getDataForIOStatParse(String, String)
  */
 public final class IOStatPostParser extends BaseParserDialog {
     private static final long serialVersionUID = -5466944320034595370L;

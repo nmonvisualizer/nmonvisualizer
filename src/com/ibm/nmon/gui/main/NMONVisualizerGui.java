@@ -361,7 +361,7 @@ public final class NMONVisualizerGui extends NMONVisualizerApp {
             });
         }
         catch (Exception e) {
-            logger.error("cannot get hostname and JVM name for file '{}'", fileToParse, e);
+            logger.error("cannot get hostname and time zone for file '{}'", fileToParse, e);
         }
 
         if (ioStatPostParser.isSkipped()) {
@@ -393,7 +393,7 @@ public final class NMONVisualizerGui extends NMONVisualizerApp {
             });
         }
         catch (Exception e) {
-            logger.error("cannot get hostname and JVM name for file '{}'", fileToParse, e);
+            logger.error("cannot get hostname for file '{}'", fileToParse, e);
         }
 
         if (hatJPostParser.isSkipped()) {
