@@ -33,7 +33,7 @@ final class Java7GCCycle extends JavaGCCycle {
 
             String type = context.getAttribute("type");
 
-            if ("nursery".equals(type)) {
+            if ("nursery".equals(type) || "eden".equals(type)) {
                 context.setValue("GCMEM", "flipped", "objects");
                 context.setValue("GCMEM", "flipped_bytes", "bytes");
             }
@@ -77,6 +77,11 @@ final class Java7GCCycle extends JavaGCCycle {
             else if ("compact".equals(type)) {
                 context.setValue("GCTIME", "compact_ms", "timems");
             }
+        }
+        else if ("remembered-set".equals(elementName)) {
+            context.parseAttributes(unparsedAttributes);
+
+            calculateSizes(context, "tenured", "freebytes", "totalbytes");
         }
         else if ("gc-end".equals(elementName)) {
             context.parseAttributes(unparsedAttributes);
