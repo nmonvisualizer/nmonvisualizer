@@ -73,10 +73,9 @@ public final class ReportPanel extends JTabbedPane implements PropertyChangeList
     private final String reportCacheKey;
     private MultiplexMode multiplexMode;
     private List<BaseChartDefinition> chartsInUse;
+    private BitSet chartNeedsUpdate;
 
     private final ChartFactory chartFactory;
-
-    private final BitSet chartNeedsUpdate;
 
     // ignore chart updates when tabs are being built
     private boolean buildingTabs;
@@ -103,16 +102,7 @@ public final class ReportPanel extends JTabbedPane implements PropertyChangeList
         this.dataSets = dataSets;
         this.reportCacheKey = reportCacheKey;
         this.multiplexMode = multiplexMode;
-
-        // use the full size of the reports here since that will be the maximum
-        // this assumes that the reports for the given key DO NOT CHANGE
-        List<BaseChartDefinition> reports = gui.getReportCache().getReport(reportCacheKey);
-
-        this.chartsInUse = new java.util.ArrayList<BaseChartDefinition>(reports.size());
-
-        this.chartNeedsUpdate = new BitSet(reports.size());
-
-        this.chartNeedsUpdate.set(0, chartNeedsUpdate.size(), true);
+        this.chartsInUse = java.util.Collections.emptyList();
 
         buildTabs(gui);
 
@@ -152,7 +142,7 @@ public final class ReportPanel extends JTabbedPane implements PropertyChangeList
         if (enabled != isEnabled()) {
             super.setEnabled(enabled);
 
-            if (!chartsInUse.isEmpty()) {
+            if ((chartsInUse != null) && !chartsInUse.isEmpty()) {
                 int idx = getSelectedIndex();
 
                 if (enabled) {
@@ -238,7 +228,10 @@ public final class ReportPanel extends JTabbedPane implements PropertyChangeList
 
     // mark all charts as invalid; update the current one
     public void resetReport() {
-        chartNeedsUpdate.set(0, chartNeedsUpdate.size(), true);
+        if (chartNeedsUpdate != null) {
+            chartNeedsUpdate.set(0, chartNeedsUpdate.size(), true);
+        }
+
         updateChart();
     }
 
@@ -329,8 +322,10 @@ public final class ReportPanel extends JTabbedPane implements PropertyChangeList
         else if ("annotation".equals(evt.getPropertyName())) {
             // called by chart panels when annotations / markers are added
             // all charts except the current need to be updated to show the new annotation
-            chartNeedsUpdate.set(0, chartNeedsUpdate.size(), true);
-            chartNeedsUpdate.flip(getSelectedIndex());
+            if (chartNeedsUpdate != null) {
+                chartNeedsUpdate.set(0, chartNeedsUpdate.size(), true);
+                chartNeedsUpdate.flip(getSelectedIndex());
+            }
 
             firePropertyChange(evt.getPropertyName(), evt.getOldValue(), evt.getNewValue());
         }
@@ -395,6 +390,8 @@ public final class ReportPanel extends JTabbedPane implements PropertyChangeList
         }
 
         super.removeAll();
+
+        chartsInUse = java.util.Collections.emptyList();
     }
 
     public void dispose() {
@@ -404,7 +401,6 @@ public final class ReportPanel extends JTabbedPane implements PropertyChangeList
 
         // clean up references to charts
         removeAll();
-        chartsInUse.clear();
     }
 
     private void updateIntervalCharts() {
@@ -423,9 +419,9 @@ public final class ReportPanel extends JTabbedPane implements PropertyChangeList
 
     private void buildTabs(NMONVisualizerGui gui) {
         buildingTabs = true;
+
         // note remove all needs to know if charts existed previously, order matters here
         removeAll();
-        chartsInUse.clear();
 
         if (gui.getReportCache().getReport(reportCacheKey).isEmpty()) {
             addTab("No Charts", createNoReportsLabel("No Charts Defined!"));
@@ -458,8 +454,13 @@ public final class ReportPanel extends JTabbedPane implements PropertyChangeList
 
             if (chartsInUse.isEmpty()) {
                 addTab("No Charts", createNoReportsLabel("No Charts for Currently Parsed Data!"));
+                chartsInUse = java.util.Collections.emptyList();
+                chartNeedsUpdate = null;
             }
             else {
+                chartNeedsUpdate = new BitSet(chartsInUse.size());
+                chartNeedsUpdate.set(0, chartNeedsUpdate.size(), true);
+
                 for (BaseChartDefinition report : chartsInUse) {
                     BaseChartPanel chartPanel = null;
 

@@ -74,10 +74,6 @@ public abstract class BaseChartDefinition implements Cloneable {
     }
 
     public int getWidth() {
-        if (width < 1) {
-            throw new IllegalArgumentException("width" + "must be greater than 0");
-        }
-
         return width;
     }
 
@@ -94,6 +90,10 @@ public abstract class BaseChartDefinition implements Cloneable {
     }
 
     public void setHeight(int height) {
+        if (height < 1) {
+            throw new IllegalArgumentException("height" + "must be greater than 0");
+        }
+
         this.height = height;
     }
 
