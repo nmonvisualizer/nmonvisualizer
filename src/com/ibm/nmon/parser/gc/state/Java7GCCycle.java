@@ -79,9 +79,10 @@ final class Java7GCCycle extends JavaGCCycle {
             }
         }
         else if ("remembered-set".equals(elementName)) {
-            context.parseAttributes(unparsedAttributes);
+            // TODO handle remembered-set
+            // context.parseAttributes(unparsedAttributes);
 
-            calculateSizes(context, "tenured", "freebytes", "totalbytes");
+            // calculateSizes(context, "tenured", "freebytes", "totalbytes");
         }
         else if ("gc-end".equals(elementName)) {
             context.parseAttributes(unparsedAttributes);
