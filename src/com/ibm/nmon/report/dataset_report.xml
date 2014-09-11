@@ -382,7 +382,7 @@
     <yAxis label="% CPU" asPercent="true" />
     <data>
       <host os="Linux" />
-      <type regex="CPU(\d*)" />
+      <type regex="CPU0?0?(\d*)" />
       <field name="CPU%" alias="% CPU" />
     </data>
     
@@ -397,7 +397,7 @@
     <yAxis label="% CPU" asPercent="true" />
     <data>
       <host os="AIX" />
-      <type regex="CPU(\d*)" />
+      <type regex="CPU0?0?(\d*)" />
       <field name="CPU%" alias="% CPU" />
     </data>
   </linechart>
@@ -406,7 +406,7 @@
     <yAxis label="% CPU" asPercent="true" />
     <data>
       <host os="Linux" />
-      <type regex="CPU(\d*)" />
+      <type regex="CPU0?0?(\d*)" />
       <field name="User%" alias="User" />
       <field name="Sys%" alias="System" />
       <field name="Wait%" alias="Wait" />
@@ -426,7 +426,7 @@
     <yAxis label="% CPU" asPercent="true" />
     <data>
       <host os="AIX" />
-      <type regex="CPU(\d*)" />
+      <type regex="CPU0?0?(\d*)" />
       <field name="User%" alias="User" />
       <field name="Sys%" alias="System" />
       <field name="Wait%" alias="Wait" />

@@ -2,6 +2,7 @@ package com.ibm.nmon.gui.chart.builder;
 
 import org.jfree.chart.JFreeChart;
 import org.jfree.chart.axis.CategoryAxis;
+
 import org.jfree.chart.axis.NumberAxis;
 import org.jfree.chart.axis.ValueAxis;
 
@@ -20,6 +21,7 @@ import com.ibm.nmon.data.DataType;
 import com.ibm.nmon.data.DataTuple;
 
 import com.ibm.nmon.data.definition.DataDefinition;
+
 import com.ibm.nmon.gui.Styles;
 
 import com.ibm.nmon.gui.chart.HighlightableBarChart;
@@ -193,6 +195,11 @@ public final class BarChartBuilder extends BaseChartBuilder<BarChartDefinition> 
             if (rowCount > 1) {
                 addLegend();
             }
+        }
+
+        // smaller font size for charts with a lot of bars
+        if (dataset.getColumnCount() > 32) {
+            plot.getDomainAxis().setTickLabelFont(AXIS_FONT.deriveFont(AXIS_FONT.getSize() * 0.9f));
         }
 
         plot.configureRangeAxes();

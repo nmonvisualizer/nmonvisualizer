@@ -42,7 +42,7 @@ public class GUIFileChooser extends JFileChooser {
 
         String directory = gui.getPreferences().get("lastSaveDirectory", null);
 
-        if (filename != null) {
+        if (defaultFileName != null) {
             setSelectedFile(new File(directory, defaultFileName));
         }
         else if (directory != null) {
