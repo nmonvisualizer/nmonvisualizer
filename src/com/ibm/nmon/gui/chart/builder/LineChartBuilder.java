@@ -180,6 +180,11 @@ public class LineChartBuilder extends BaseChartBuilder<LineChartDefinition> {
 
     private void addMatchingData(DataTupleXYDataset dataset, DataDefinition definition, DataSet data,
             NamingMode lineNamingMode) {
+
+        if (definition == null) {
+            throw new IllegalArgumentException("LineChartDefintion cannot be null");
+        }
+
         if (definition.matchesHost(data)) {
             for (DataType type : definition.getMatchingTypes(data)) {
                 List<String> fields = definition.getMatchingFields(type);

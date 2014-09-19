@@ -155,6 +155,10 @@ public final class HistogramChartBuilder extends BaseChartBuilder<HistogramChart
             throw new IllegalStateException("initChart() must be called first");
         }
 
+        if (definition == null) {
+            throw new IllegalArgumentException("HistogramChartDefintion cannot be null");
+        }
+
         long start = System.nanoTime();
 
         XYPlot plot = chart.getXYPlot();

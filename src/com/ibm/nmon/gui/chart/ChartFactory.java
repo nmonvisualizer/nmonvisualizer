@@ -72,6 +72,7 @@ public class ChartFactory {
      * @see LineChartBuilder
      * @see BarChartBuilder
      * @see IntervalChartBuilder
+     * @see HistogramChartBuilder
      */
     public JFreeChart createChart(BaseChartDefinition definition, Iterable<? extends DataSet> dataSets) {
         long startT = System.nanoTime();

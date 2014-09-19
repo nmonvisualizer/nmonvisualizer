@@ -124,6 +124,10 @@ public final class IntervalChartBuilder extends BaseChartBuilder<IntervalChartDe
             throw new IllegalStateException("initChart() must be called first");
         }
 
+        if (definition == null) {
+            throw new IllegalArgumentException("IntervalChartDefintion cannot be null");
+        }
+
         if ((records == null) || records.isEmpty()) {
             // => no intervals defined
             return;
