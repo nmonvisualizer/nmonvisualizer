@@ -43,6 +43,7 @@ public final class NMONParser {
     private int fileCPUs = 1;
     private boolean seenFirstDataType = false;
     private boolean isAIX = false;
+    private boolean scaleProcessesByCPU = true;
 
     private final Map<Integer, Process> processes = new java.util.HashMap<Integer, Process>();
     private final Map<String, StringBuilder> systemInfo = new java.util.HashMap<String, StringBuilder>();
@@ -57,12 +58,14 @@ public final class NMONParser {
         processors.add(new EthernetTotalPostProcessor("SEA"));
     }
 
-    public NMONDataSet parse(File file, TimeZone timeZone) throws IOException {
-        return parse(file.getAbsolutePath(), timeZone);
+    public NMONDataSet parse(File file, TimeZone timeZone, boolean scaleProcessesByCPU) throws IOException {
+        return parse(file.getAbsolutePath(), timeZone, scaleProcessesByCPU);
     }
 
-    public NMONDataSet parse(String filename, TimeZone timeZone) throws IOException {
+    public NMONDataSet parse(String filename, TimeZone timeZone, boolean scaleProcessesByCPU) throws IOException {
         long start = System.nanoTime();
+
+        this.scaleProcessesByCPU = scaleProcessesByCPU;
 
         in = new LineNumberReader(new java.io.FileReader(filename));
 
@@ -615,7 +618,12 @@ public final class NMONParser {
 
         process.setEndTime(currentRecord.getTime());
 
-        currentRecord.addData(processType, scaleProcessDataByCPUs(processType, recordData));
+        if (scaleProcessesByCPU) {
+            currentRecord.addData(processType, scaleProcessDataByCPUs(processType, recordData));
+        }
+        else {
+            currentRecord.addData(processType, recordData);
+        }
     }
 
     private void parseUARG(String[] values) {
@@ -746,14 +754,14 @@ public final class NMONParser {
     // process CPU can be > 100, so normalize based on the number of CPUs
     private double[] scaleProcessDataByCPUs(ProcessDataType processType, double[] values) {
         // use the cpu count from the file if no data is available at a given time
-        int CPUs = fileCPUs;
+        double CPUs = fileCPUs;
 
         if (isAIX) {
             DataType cpuAll = data.getType("PCPU_ALL");
 
             // hasData should also cover cpuAll == null
             if (currentRecord.hasData(cpuAll)) {
-                CPUs = (int) currentRecord.getData(cpuAll, "Entitled Capacity");
+                CPUs = currentRecord.getData(cpuAll, "Entitled Capacity");
             }
         }
         else {
@@ -764,10 +772,12 @@ public final class NMONParser {
             }
         }
 
-        for (String field : processType.getFields()) {
-            if (field.startsWith("%")) {
-                // assume %CPU, %Usr, %Sys or %Wait
-                values[processType.getFieldIndex(field)] /= CPUs;
+        if (CPUs > 1) {
+            for (String field : processType.getFields()) {
+                if (field.startsWith("%")) {
+                    // assume %CPU, %Usr, %Sys or %Wait
+                    values[processType.getFieldIndex(field)] /= CPUs;
+                }
             }
         }
 

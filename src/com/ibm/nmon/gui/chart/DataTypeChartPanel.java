@@ -14,6 +14,7 @@ import com.ibm.nmon.gui.main.NMONVisualizerGui;
 
 import com.ibm.nmon.data.DataSet;
 import com.ibm.nmon.data.DataType;
+import com.ibm.nmon.data.ProcessDataType;
 
 import com.ibm.nmon.data.definition.ExactDataDefinition;
 import com.ibm.nmon.data.definition.NamingMode;
@@ -157,7 +158,13 @@ public final class DataTypeChartPanel extends LineChartPanel implements Interval
                         percent = false;
                         break;
                     }
+
                     if (PERCENT_AXIS_EXCEPTIONS.contains(field)) {
+                        percent = false;
+                        break;
+                    }
+
+                    if ((type.getClass() == ProcessDataType.class) && gui.getBooleanProperty("scaleProcessesByCPUs")) {
                         percent = false;
                         break;
                     }

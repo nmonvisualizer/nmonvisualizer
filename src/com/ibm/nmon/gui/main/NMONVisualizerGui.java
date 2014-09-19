@@ -100,6 +100,10 @@ public final class NMONVisualizerGui extends NMONVisualizerApp {
 
             setProperty("systemsNamedBy", systemsNamedBy);
         }
+        // else NMONVisualizerApp already set HostRenamer to BY_HOST and systemsNamedBy property
+
+        // NMONVisuzlizerApp already set default value for scaleProcessesByCPUs property
+        setProperty("scaleProcessesByCPUs", preferences.get("scaleProcessesByCPUs", getProperty("scaleProcessesByCPUs")));
 
         mainFrame = new JFrame(DEFAULT_WINDOW_TITLE);
         mainFrame.setDefaultCloseOperation(JFrame.DO_NOTHING_ON_CLOSE);
@@ -185,9 +189,8 @@ public final class NMONVisualizerGui extends NMONVisualizerApp {
      * This method causes either a <code>automaticGranularity</code> or <code>granularity</code>
      * property change event to be fired.
      * 
-     * @param granularity
-     *            the new granularity, in seconds. A zero or negative value implies that granularity
-     *            will be automatically calculated based on the current interval.
+     * @param granularity the new granularity, in seconds. A zero or negative value implies that
+     *        granularity will be automatically calculated based on the current interval.
      */
     public void setGranularity(int granularity) {
         int oldGranularity = getGranularity();
@@ -286,6 +289,7 @@ public final class NMONVisualizerGui extends NMONVisualizerApp {
             }
 
             getPreferences().put("systemsNamedBy", getProperty("systemsNamedBy"));
+            getPreferences().put("scaleProcessesByCPUs", getProperty("scaleProcessesByCPUs"));
 
             logViewer.dispose();
             mainFrame.dispose();

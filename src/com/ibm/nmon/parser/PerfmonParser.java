@@ -52,11 +52,11 @@ public final class PerfmonParser {
     private final Map<String, DataTypeBuilder> builders = new java.util.HashMap<String, DataTypeBuilder>();
     private final Map<String, Process> processes = new java.util.HashMap<String, Process>();
 
-    public PerfmonDataSet parse(File file) throws IOException, ParseException {
-        return parse(file.getAbsolutePath());
+    public PerfmonDataSet parse(File file, boolean scaleProcessesByCPU) throws IOException, ParseException {
+        return parse(file.getAbsolutePath(), scaleProcessesByCPU);
     }
 
-    public PerfmonDataSet parse(String filename) throws IOException, ParseException {
+    public PerfmonDataSet parse(String filename, boolean scaleProcessesByCPU) throws IOException, ParseException {
         long start = System.nanoTime();
 
         data = new PerfmonDataSet(filename);
@@ -76,14 +76,21 @@ public final class PerfmonParser {
 
             // post process after parsing all the data since DataTypes are built lazily
             WindowsNetworkPostProcessor networkPostProcessor = new WindowsNetworkPostProcessor();
-            WindowsProcessPostProcessor processPostProcessor = new WindowsProcessPostProcessor();
+            WindowsProcessPostProcessor processPostProcessor = null;
 
             networkPostProcessor.addDataTypes(data);
-            processPostProcessor.addDataTypes(data);
+
+            if (scaleProcessesByCPU) {
+                processPostProcessor = new WindowsProcessPostProcessor();
+                processPostProcessor.addDataTypes(data);
+            }
 
             for (DataRecord record : data.getRecords()) {
                 networkPostProcessor.postProcess(data, record);
-                processPostProcessor.postProcess(data, record);
+
+                if (scaleProcessesByCPU) {
+                    processPostProcessor.postProcess(data, record);
+                }
             }
 
             if (LOGGER.isDebugEnabled()) {

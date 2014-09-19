@@ -101,6 +101,8 @@ public abstract class NMONVisualizerApp implements IntervalListener {
 
         setProperty("systemsNamedBy", "host");
         hostRenamer = HostRenamer.BY_HOST;
+
+        setProperty("scaleProcessesByCPUs", "true");
     }
 
     /**
@@ -132,7 +134,7 @@ public abstract class NMONVisualizerApp implements IntervalListener {
         CombinedFileFilter filter = CombinedFileFilter.getInstance(false);
 
         if (filter.getNMONFileFilter().accept(fileToParse)) {
-            data = nmonParser.parse(fileToParse, timeZone);
+            data = nmonParser.parse(fileToParse, timeZone, getBooleanProperty("scaleProcessesByCPUs"));
         }
         else if (filter.getGCFileFilter().accept(fileToParse)) {
             // GC data does not have a hostname or JVM name so get it before parsing
@@ -206,7 +208,7 @@ public abstract class NMONVisualizerApp implements IntervalListener {
             }
         }
         else if (filter.getPerfmonFileFilter().accept(fileToParse)) {
-            data = perfmonParser.parse(fileToParse);
+            data = perfmonParser.parse(fileToParse, getBooleanProperty("scaleProcessesByCPUs"));
         }
         else {
             throw new IllegalArgumentException("cannot parse " + fileToParse + ": unknown file type");

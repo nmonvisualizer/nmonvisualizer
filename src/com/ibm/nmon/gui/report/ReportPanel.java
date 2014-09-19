@@ -465,6 +465,13 @@ public final class ReportPanel extends JTabbedPane implements PropertyChangeList
                     BaseChartPanel chartPanel = null;
 
                     if (report.getClass() == LineChartDefinition.class) {
+                        // handle special case when not scaling CPUs
+                        // need to allow the axis to scale past 100, up to maximum CPU value
+                        if (report.getTitle().equals("CPU Utilization by Process")
+                                && !gui.getBooleanProperty("scaleProcessesByCPUs")) {
+                            ((LineChartDefinition) report).setUsePercentYAxis(false);
+                        }
+
                         chartPanel = new LineChartPanel(gui, parent);
                     }
                     else if (report.getClass() == IntervalChartDefinition.class) {
