@@ -51,7 +51,8 @@ public final class AIXLPARTransform implements DataTransform {
             }
             else if (field.equals("Unfolded")) {
                 // Unfolded is the virtual CPU count minus the folded count
-                newData[j++] = data[type.getFieldIndex("virtualCPUs")] - data[type.getFieldIndex("Folded")];
+                newData[j] = data[type.getFieldIndex("virtualCPUs")] - data[type.getFieldIndex("Folded")];
+                i--;
             }
             else {
                 newData[j] = data[i];

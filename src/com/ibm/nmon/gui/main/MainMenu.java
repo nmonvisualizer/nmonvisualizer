@@ -727,7 +727,7 @@ final class MainMenu extends JMenuBar implements IntervalListener, DataSetListen
 
     public void dataAdded(DataSet data) {
         // File -> Remove All
-        JMenuItem item = this.getMenu(0).getItem(1);
+        JMenuItem item = this.getMenu(0).getItem(2);
         item.setEnabled(true);
 
         changeDefaultIntervalName();
@@ -743,7 +743,7 @@ final class MainMenu extends JMenuBar implements IntervalListener, DataSetListen
 
     public void dataCleared() {
         // File -> Remove All
-        JMenuItem item = this.getMenu(0).getItem(1);
+        JMenuItem item = this.getMenu(0).getItem(2);
         item.setEnabled(false);
 
         changeDefaultIntervalName();
