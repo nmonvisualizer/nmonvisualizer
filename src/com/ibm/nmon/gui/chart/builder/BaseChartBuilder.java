@@ -104,6 +104,10 @@ abstract class BaseChartBuilder<C extends BaseChartDefinition> {
      * Creates the chart, formats it and calls any {@link ChartBuilderPlugin plugins}.
      */
     public final void initChart(C definition) {
+        if (definition == null) {
+            throw new IllegalArgumentException("chart definition cannot be null");
+        }
+
         this.definition = definition;
         chart = createChart();
         chart.setSubtitles(java.util.Collections.singletonList(new TextTitle()));
@@ -120,8 +124,7 @@ abstract class BaseChartBuilder<C extends BaseChartDefinition> {
     /**
      * Retrieve the chart from the builder.
      * 
-     * @throws IllegalStateException
-     *             if {@link #initChart()} has not been called}
+     * @throws IllegalStateException if {@link #initChart()} has not been called}
      */
     public final JFreeChart getChart() {
         if (chart == null) {
