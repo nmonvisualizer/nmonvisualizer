@@ -79,7 +79,10 @@ final class MainMenu extends JMenuBar implements IntervalListener, DataSetListen
         item.setMnemonic('l');
         item.addActionListener(new FileLoadAction(gui));
         item.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_O, InputEvent.CTRL_DOWN_MASK));
+
         menu.add(item);
+
+        menu.addSeparator();
 
         item = new JMenuItem("Remove All");
         item.setMnemonic('a');
@@ -88,6 +91,8 @@ final class MainMenu extends JMenuBar implements IntervalListener, DataSetListen
         item.addActionListener(new RemoveAllDataSetsAction(gui, gui.getMainFrame()));
 
         menu.add(item);
+
+        menu.addSeparator();
 
         item = new JMenuItem("Exit");
         item.setMnemonic('x');
