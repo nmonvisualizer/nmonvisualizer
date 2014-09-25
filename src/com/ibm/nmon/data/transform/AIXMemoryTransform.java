@@ -50,8 +50,9 @@ public final class AIXMemoryTransform implements DataTransform {
         newData[6] = data[4] - data[2];
         newData[7] = data[5] - data[3];
 
-        newData[8] = data[4];
-        newData[9] = data[5];
+        for (int i = 4; i < data.length; i++) {
+            newData[i + 4] = data[i];
+        }
 
         return newData;
     }
