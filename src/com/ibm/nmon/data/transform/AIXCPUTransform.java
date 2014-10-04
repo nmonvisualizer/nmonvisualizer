@@ -10,7 +10,7 @@ public final class AIXCPUTransform implements DataTransform {
     public DataType buildDataType(String id, String subId, String name, String... fields) {
         String[] newFields = new String[fields.length + 1];
 
-        // Assume User, Sys, Wait, Idle + Entitled Capcity on PCPU
+        // Assume User, Sys, Wait, Idle + Entitled Capacity on PCPU
         System.arraycopy(fields, 0, newFields, 0, 4);
 
         if (fields.length == 4) {
