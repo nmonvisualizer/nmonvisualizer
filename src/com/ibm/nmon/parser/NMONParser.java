@@ -156,7 +156,7 @@ public final class NMONParser {
                     else if ("MachineType".equals(values[1])) {
                         data.setMetadata("MachineType", DataHelper.newString(values[2] + ' ' + values[3]));
                     }
-                    else if ("LPARNumberName".equals(values[1])) {
+                    else if  (("LPARNumberName".equals(values[1])) && (values.length > 3)) {
                         data.setMetadata("LPARNumber", DataHelper.newString(values[2]));
                         data.setMetadata("LPARName", DataHelper.newString(values[3]));
                     }
