@@ -156,14 +156,16 @@ public final class NMONParser {
                     else if ("MachineType".equals(values[1])) {
                         data.setMetadata("MachineType", DataHelper.newString(values[2] + ' ' + values[3]));
                     }
-                    else if  (("LPARNumberName".equals(values[1])) && (values.length > 3)) {
-                        data.setMetadata("LPARNumber", DataHelper.newString(values[2]));
-                        data.setMetadata("LPARName", DataHelper.newString(values[3]));
+                    else if ("LPARNumberName".equals(values[1])) {
+                        // AAA,LPARNumberName,none => whole system LPAR
+                        if (values.length > 3) {
+                            data.setMetadata("LPARNumber", DataHelper.newString(values[2]));
+                            data.setMetadata("LPARName", DataHelper.newString(values[3]));
+                        }
                     }
                     else if ("cpus".equals(values[1])) {
                         // use the current CPU count, not the max if available
                         if (values.length == 4) {
-
                             data.setMetadata(DataHelper.newString(values[1]), DataHelper.newString(values[3]));
                         }
                         else {
