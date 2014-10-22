@@ -226,9 +226,13 @@ public final class ReportGenerator extends NMONVisualizerApp {
             pathToParse = new File(System.getProperty("user.dir"));
         }
 
-        ReportGenerator generator = new ReportGenerator();
-
         File baseDirectory = pathToParse.isDirectory() ? pathToParse : pathToParse.getParentFile();
+
+        ReportGenerator generator = new ReportGenerator(customSummaryCharts, customDataCharts, multiplexedFieldCharts,
+                multiplexedTypeCharts);
+
+        // parse files
+        generator.parse(filesToParse, baseDirectory);
 
         // parse intervals
         if (!"".equals(intervalsFile)) {
@@ -241,39 +245,17 @@ public final class ReportGenerator extends NMONVisualizerApp {
             }
         }
 
-        // parse files
-        generator.parse(filesToParse, baseDirectory);
-
         // set interval after parse so min and max system times are set
-        createIntervalIfNecessary(startTime, endTime, generator);
-
-        // load chart definitions
-        for (String file : customSummaryCharts) {
-            generator.parseChartDefinition(file);
-        }
-
-        for (String file : customDataCharts) {
-            generator.parseChartDefinition(file);
-        }
-
-        for (String file : multiplexedFieldCharts) {
-            generator.parseChartDefinition(file);
-        }
-
-        for (String file : multiplexedTypeCharts) {
-            generator.parseChartDefinition(file);
-        }
+        generator.createIntervalIfNecessary(startTime, endTime);
 
         if (generator.getIntervalManager().getIntervalCount() != 0) {
             // create charts for all intervals
             for (Interval interval : generator.getIntervalManager().getIntervals()) {
-                generator.createReport(interval, baseDirectory, summaryCharts, dataSetCharts, customSummaryCharts,
-                        customDataCharts, multiplexedFieldCharts, multiplexedTypeCharts);
+                generator.createReport(interval, baseDirectory, summaryCharts, dataSetCharts);
             }
         }
         else {
-            generator.createReport(Interval.DEFAULT, baseDirectory, summaryCharts, dataSetCharts, customSummaryCharts,
-                    customDataCharts, multiplexedFieldCharts, multiplexedTypeCharts);
+            generator.createReport(Interval.DEFAULT, baseDirectory, summaryCharts, dataSetCharts);
         }
 
         System.out.println("Charts complete!");
@@ -293,46 +275,45 @@ public final class ReportGenerator extends NMONVisualizerApp {
         }
     }
 
-    private static void createIntervalIfNecessary(long startTime, long endTime, ReportGenerator generator) {
-        if (startTime == Interval.DEFAULT.getStart()) {
-            startTime = generator.getMinSystemTime();
-        }
-
-        if (endTime == Interval.DEFAULT.getEnd()) {
-            endTime = generator.getMaxSystemTime();
-        }
-
-        Interval toChart = null;
-
-        if ((startTime == generator.getMinSystemTime() && (endTime == generator.getMaxSystemTime()))) {
-            toChart = Interval.DEFAULT;
-        }
-        else {
-            try {
-                toChart = new Interval(startTime, endTime);
-            }
-            catch (Exception e) {
-                System.err.println("invalid start and end times: " + e.getMessage());
-                System.err.println("The default interval will be used instead");
-                toChart = Interval.DEFAULT;
-            }
-        }
-
-        generator.getIntervalManager().addInterval(toChart);
-    }
-
     private final GranularityHelper granularityHelper;
 
     private final ChartFactory factory;
     private final ReportCache cache;
 
-    private ReportGenerator() {
+    private final List<String> customSummaryCharts;
+    private final List<String> customDataCharts;
+    private final List<String> multiplexedFieldCharts;
+    private final List<String> multiplexedTypeCharts;
+
+    private ReportGenerator(List<String> customSummaryCharts, List<String> customDataCharts,
+            List<String> multiplexedFieldCharts, List<String> multiplexedTypeCharts) {
         factory = new ChartFactory(this);
         cache = new ReportCache();
 
         granularityHelper = new GranularityHelper(this);
         granularityHelper.setAutomatic(true);
 
+        this.customSummaryCharts = customSummaryCharts;
+        this.customDataCharts = customDataCharts;
+        this.multiplexedFieldCharts = multiplexedFieldCharts;
+        this.multiplexedTypeCharts = multiplexedTypeCharts;
+
+        // load chart definitions
+        for (String file : customSummaryCharts) {
+            parseChartDefinition(file);
+        }
+
+        for (String file : customDataCharts) {
+            parseChartDefinition(file);
+        }
+
+        for (String file : multiplexedFieldCharts) {
+            parseChartDefinition(file);
+        }
+
+        for (String file : multiplexedTypeCharts) {
+            parseChartDefinition(file);
+        }
     }
 
     private void parse(List<String> filesToParse, File baseDirectory) {
@@ -413,9 +394,35 @@ public final class ReportGenerator extends NMONVisualizerApp {
         }
     }
 
-    private void createReport(Interval interval, File baseDirectory, boolean summaryCharts, boolean dataSetCharts,
-            List<String> customSummaryCharts, List<String> customDataCharts, List<String> multiplexedFieldCharts,
-            List<String> multiplexedTypeCharts) {
+    private void createIntervalIfNecessary(long startTime, long endTime) {
+        if (startTime == Interval.DEFAULT.getStart()) {
+            startTime = getMinSystemTime();
+        }
+
+        if (endTime == Interval.DEFAULT.getEnd()) {
+            endTime = getMaxSystemTime();
+        }
+
+        Interval toChart = null;
+
+        if ((startTime == getMinSystemTime() && (endTime == getMaxSystemTime()))) {
+            toChart = Interval.DEFAULT;
+        }
+        else {
+            try {
+                toChart = new Interval(startTime, endTime);
+            }
+            catch (Exception e) {
+                System.err.println("invalid start and end times: " + e.getMessage());
+                System.err.println("The default interval will be used instead");
+                toChart = Interval.DEFAULT;
+            }
+        }
+
+        getIntervalManager().addInterval(toChart);
+    }
+
+    private void createReport(Interval interval, File baseDirectory, boolean summaryCharts, boolean dataSetCharts) {
         System.out.println();
 
         getIntervalManager().setCurrentInterval(interval);
