@@ -1,17 +1,18 @@
 package com.ibm.nmon;
 
+import java.util.List;
+import java.util.Map;
+
 import java.io.IOException;
 import java.io.File;
 
 import java.io.FileOutputStream;
 import java.io.PrintStream;
+import java.io.FileWriter;
 
 import java.util.Date;
 import java.text.SimpleDateFormat;
 import java.text.ParseException;
-
-import java.util.List;
-import java.util.Map;
 
 import org.jfree.chart.ChartUtilities;
 import org.jfree.chart.JFreeChart;
@@ -24,18 +25,20 @@ import com.ibm.nmon.util.ParserLog;
 import com.ibm.nmon.interval.Interval;
 
 import com.ibm.nmon.data.DataSet;
+import com.ibm.nmon.gui.chart.data.DataTupleDataset;
 
 import com.ibm.nmon.gui.chart.ChartFactory;
 import com.ibm.nmon.report.ReportCache;
 import com.ibm.nmon.chart.definition.BaseChartDefinition;
 
-import com.ibm.nmon.util.FileHelper;
+import com.ibm.nmon.util.CSVWriter;
 
 import com.ibm.nmon.util.GranularityHelper;
 
 import com.ibm.nmon.util.TimeFormatCache;
 import com.ibm.nmon.util.TimeHelper;
 
+import com.ibm.nmon.util.FileHelper;
 import com.ibm.nmon.file.CombinedFileFilter;
 
 public final class ReportGenerator extends NMONVisualizerApp {
@@ -74,6 +77,9 @@ public final class ReportGenerator extends NMONVisualizerApp {
 
         long startTime = Interval.DEFAULT.getStart();
         long endTime = Interval.DEFAULT.getEnd();
+
+        boolean writeRawData = false;
+        boolean writeChartData = false;
 
         for (int i = 0; i < args.length; i++) {
             String arg = args[i];
@@ -118,7 +124,7 @@ public final class ReportGenerator extends NMONVisualizerApp {
                         ++i;
 
                         if (i > args.length) {
-                            System.err.println("file must be specified for " + '-' + 's');
+                            System.err.println("file must be specified for " + '-' + 'a');
                             return;
                         }
 
@@ -166,6 +172,12 @@ public final class ReportGenerator extends NMONVisualizerApp {
                                 }
 
                                 multiplexedTypeCharts.add(args[i]);
+                            }
+                            else if ("rawdata".equals(param)) {
+                                writeRawData = true;
+                            }
+                            else if ("chartdata".equals(param)) {
+                                writeChartData = true;
                             }
                             else {
                                 System.err.println("ignoring " + "unknown parameter " + '-' + '-' + param);
@@ -215,24 +227,25 @@ public final class ReportGenerator extends NMONVisualizerApp {
             }
         }
 
-        File pathToParse = null;
-
-        if (paths.size() == 1) {
-            // all subsequent output goes into the directory given by the user
-            pathToParse = new File(paths.get(0));
-        }
-        else {
-            // otherwise, use the current working directory
-            pathToParse = new File(System.getProperty("user.dir"));
-        }
-
-        File baseDirectory = pathToParse.isDirectory() ? pathToParse : pathToParse.getParentFile();
-
         ReportGenerator generator = new ReportGenerator(customSummaryCharts, customDataCharts, multiplexedFieldCharts,
                 multiplexedTypeCharts);
 
+        File outputDirectory = null;
+
+        if (paths.size() == 1) {
+            // all subsequent output goes into the directory given by the user
+            outputDirectory = new File(paths.get(0));
+        }
+        else {
+            // otherwise, use the current working directory
+            outputDirectory = new File(System.getProperty("user.dir"));
+        }
+
+        generator.outputDirectory = outputDirectory.isDirectory() ? outputDirectory : outputDirectory.getParentFile();
+        generator.writeChartData = writeChartData;
+
         // parse files
-        generator.parse(filesToParse, baseDirectory);
+        generator.parse(filesToParse);
 
         // parse intervals
         if (!"".equals(intervalsFile)) {
@@ -251,14 +264,34 @@ public final class ReportGenerator extends NMONVisualizerApp {
         if (generator.getIntervalManager().getIntervalCount() != 0) {
             // create charts for all intervals
             for (Interval interval : generator.getIntervalManager().getIntervals()) {
-                generator.createReport(interval, baseDirectory, summaryCharts, dataSetCharts);
+                generator.createReport(interval, summaryCharts, dataSetCharts);
+
+                if (writeRawData) {
+                    generator.writeRawData(interval);
+                }
             }
         }
         else {
-            generator.createReport(Interval.DEFAULT, baseDirectory, summaryCharts, dataSetCharts);
+            generator.createReport(Interval.DEFAULT, summaryCharts, dataSetCharts);
         }
 
         System.out.println("Charts complete!");
+
+        if (writeRawData) {
+            System.out.println();
+
+            if (generator.getIntervalManager().getIntervalCount() != 0) {
+                // write data for all intervals
+                for (Interval interval : generator.getIntervalManager().getIntervals()) {
+                    generator.writeRawData(interval);
+                }
+            }
+            else {
+                generator.writeRawData(Interval.DEFAULT);
+            }
+        }
+
+        System.out.println("Raw data complete!");
     }
 
     private static long parseTime(String[] args, int index, char param) {
@@ -284,6 +317,10 @@ public final class ReportGenerator extends NMONVisualizerApp {
     private final List<String> customDataCharts;
     private final List<String> multiplexedFieldCharts;
     private final List<String> multiplexedTypeCharts;
+
+    private File outputDirectory;
+
+    private boolean writeChartData = false;
 
     private ReportGenerator(List<String> customSummaryCharts, List<String> customDataCharts,
             List<String> multiplexedFieldCharts, List<String> multiplexedTypeCharts) {
@@ -316,7 +353,7 @@ public final class ReportGenerator extends NMONVisualizerApp {
         }
     }
 
-    private void parse(List<String> filesToParse, File baseDirectory) {
+    private void parse(List<String> filesToParse) {
         // avoid logging parsing errors to console
         ParserLog log = ParserLog.getInstance();
         java.util.logging.Logger.getLogger(log.getLogger().getName()).setUseParentHandlers(false);
@@ -355,7 +392,7 @@ public final class ReportGenerator extends NMONVisualizerApp {
         System.out.println("Parsing complete!");
 
         if (!errors.isEmpty()) {
-            File errorFile = new File(baseDirectory, "ReportGenerator_"
+            File errorFile = new File(outputDirectory, "ReportGenerator_"
                     + new SimpleDateFormat("yyyyMMdd_HHmmss").format(System.currentTimeMillis()) + ".log");
 
             PrintStream out = null;
@@ -422,34 +459,16 @@ public final class ReportGenerator extends NMONVisualizerApp {
         getIntervalManager().addInterval(toChart);
     }
 
-    private void createReport(Interval interval, File baseDirectory, boolean summaryCharts, boolean dataSetCharts) {
+    private void createReport(Interval interval, boolean summaryCharts, boolean dataSetCharts) {
         System.out.println();
 
         getIntervalManager().setCurrentInterval(interval);
 
         System.out.println("Charting interval " + TimeFormatCache.formatInterval(interval));
 
-        File chartsDirectory = null;
-
-        // put in base charts directory if the default interval or there is only a single interval
-        if (getIntervalManager().getIntervalCount() <= 1) {
-            chartsDirectory = new File(baseDirectory, "charts");
-        }
-        else {
-            // use the interval name if possible
-            if ("".equals(interval.getName())) {
-                chartsDirectory = new File(baseDirectory, "charts" + '/'
-                        + FILE_TIME_FORMAT.format(new Date(interval.getStart())) + '-'
-                        + FILE_TIME_FORMAT.format(new Date(interval.getEnd())));
-            }
-            else {
-                chartsDirectory = new File(baseDirectory, "charts" + '/' + interval.getName());
-            }
-        }
+        File chartsDirectory = createSubdirectory("charts", interval);
 
         int chartsCreated = 0;
-
-        chartsDirectory.mkdirs();
 
         System.out.println("Writing charts to " + chartsDirectory.getAbsolutePath());
 
@@ -506,6 +525,7 @@ public final class ReportGenerator extends NMONVisualizerApp {
 
         if (!report.isEmpty()) {
             System.out.print("\t" + message + " ");
+            System.out.flush();
 
             for (BaseChartDefinition definition : report) {
                 if (saveChart(definition, dataSets, chartsDirectory)) {
@@ -527,6 +547,7 @@ public final class ReportGenerator extends NMONVisualizerApp {
 
         if (!report.isEmpty()) {
             System.out.print("\t" + message + " ");
+            System.out.flush();
 
             File datasetDirectory = new File(chartsDirectory, data.getHostname());
             datasetDirectory.mkdir();
@@ -554,6 +575,7 @@ public final class ReportGenerator extends NMONVisualizerApp {
 
         if (!report.isEmpty()) {
             System.out.print("\t" + message + " ");
+            System.out.flush();
 
             Iterable<? extends DataSet> dataSets = java.util.Collections.singletonList(data);
             File datasetDirectory = new File(chartsDirectory, data.getHostname());
@@ -582,6 +604,7 @@ public final class ReportGenerator extends NMONVisualizerApp {
 
         if (!report.isEmpty()) {
             System.out.print("\t" + message + " ");
+            System.out.flush();
 
             Iterable<? extends DataSet> dataSets = java.util.Collections.singletonList(data);
             File datasetDirectory = new File(chartsDirectory, data.getHostname());
@@ -616,6 +639,10 @@ public final class ReportGenerator extends NMONVisualizerApp {
                 System.err.println("cannot create chart " + chartFile.getName());
             }
 
+            if (writeChartData) {
+                writeChartData(chart, definition, saveDirectory);
+            }
+
             System.out.print('.');
             System.out.flush();
 
@@ -624,6 +651,108 @@ public final class ReportGenerator extends NMONVisualizerApp {
         else {
             return false;
         }
+    }
+
+    private void writeRawData(Interval interval) {
+        System.out.println("Writing data for interval " + TimeFormatCache.formatInterval(interval));
+
+        File rawDirectory = createSubdirectory("rawdata", interval);
+
+        System.out.println("Writing CSV files to " + rawDirectory.getAbsolutePath());
+
+        for (DataSet data : getDataSets()) {
+            File dataFile = new File(rawDirectory, data.getHostname() + ".csv");
+            FileWriter writer = null;
+
+            try {
+                writer = new FileWriter(dataFile);
+
+                System.out.print("\tWriting CSV for " + data.getHostname() + " ... ");
+                System.out.flush();
+
+                CSVWriter.write(data, interval, writer);
+
+                System.out.println("Complete");
+            }
+            catch (IOException ioe) {
+                System.err.println("could not output raw data to " + dataFile.getName());
+            }
+            finally {
+                if (writer != null) {
+                    try {
+                        writer.close();
+                    }
+                    catch (IOException ioe) {
+                        // ignore
+                    }
+                }
+            }
+        }
+    }
+
+    private void writeChartData(JFreeChart chart, BaseChartDefinition definition, File saveDirectory) {
+        File csvFile = new File(saveDirectory, definition.getShortName() + ".csv");
+        FileWriter writer = null;
+
+        Plot plot = chart.getPlot();
+        DataTupleDataset dataset = null;
+
+        if (plot instanceof CategoryPlot) {
+            CategoryPlot cPlot = (CategoryPlot) plot;
+            dataset = (DataTupleDataset) cPlot.getDataset();
+        }
+        else if (plot instanceof XYPlot) {
+            XYPlot xyPlot = (XYPlot) plot;
+            dataset = (DataTupleDataset) xyPlot.getDataset();
+        }
+        else {
+            System.err.println("unknown plot type " + plot.getClass() + " for chart " + chart.getTitle());
+        }
+
+        if (dataset != null) {
+            try {
+                writer = new FileWriter(csvFile);
+
+                CSVWriter.write(dataset, writer);
+            }
+            catch (IOException ioe) {
+                System.err.println("could not output raw data to " + csvFile.getName());
+            }
+            finally {
+                if (writer != null) {
+                    try {
+                        writer.close();
+                    }
+                    catch (IOException ioe) {
+                        // ignore
+                    }
+                }
+            }
+        }
+    }
+
+    private File createSubdirectory(String subDirName, Interval interval) {
+        File toCreate = null;
+
+        // put in base charts directory if the default interval or there is only a single interval
+        if (getIntervalManager().getIntervalCount() <= 1) {
+            toCreate = new File(outputDirectory, subDirName);
+        }
+        else {
+            // use the interval name if possible
+            if ("".equals(interval.getName())) {
+                toCreate = new File(outputDirectory, subDirName + '/'
+                        + FILE_TIME_FORMAT.format(new Date(interval.getStart())) + '-'
+                        + FILE_TIME_FORMAT.format(new Date(interval.getEnd())));
+            }
+            else {
+                toCreate = new File(outputDirectory, subDirName + '/' + interval.getName());
+            }
+        }
+
+        toCreate.mkdirs();
+
+        return toCreate;
     }
 
     private boolean chartHasData(JFreeChart chart) {
