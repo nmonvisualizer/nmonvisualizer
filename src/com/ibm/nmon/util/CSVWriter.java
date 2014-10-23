@@ -38,7 +38,7 @@ public final class CSVWriter {
         int i = 0;
 
         for (DataType type : data.getTypes()) {
-            n = type.getFieldCount() - 1;
+            n = type.getFieldCount();
             i = 0;
 
             for (String field : type.getFields()) {
@@ -60,7 +60,7 @@ public final class CSVWriter {
 
             for (DataType type : data.getTypes()) {
                 if (record.hasData(type)) {
-                    n = type.getFieldCount() - 1;
+                    n = type.getFieldCount();
                     i = 0;
 
                     for (String field : type.getFields()) {
@@ -145,15 +145,25 @@ public final class CSVWriter {
             for (int j = 0; j < seriesCount - 1; j++) {
                 Number n = data.getY(j, i);
 
-                if (n != null) {
+                if (n == null) {
+                    writer.write(format(Double.NaN));
+                }
+                else {
                     writer.write(format(n.doubleValue()));
                 }
 
                 writer.write(',');
-
             }
 
-            writer.write(format(data.getY(seriesCount - 1, i).doubleValue()));
+            Number n = data.getY(seriesCount - 1, i);
+
+            if (n == null) {
+                writer.write(format(Double.NaN));
+            }
+            else {
+                writer.write(format(n.doubleValue()));
+            }
+
             writer.write('\n');
         }
     }
@@ -163,6 +173,7 @@ public final class CSVWriter {
         writer.write(',');
 
         int columnCount = data.getColumnCount();
+
         for (int i = 0; i < columnCount - 1; i++) {
             writer.write(data.getColumnKey(i).toString());
             writer.write(',');

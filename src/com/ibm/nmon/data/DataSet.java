@@ -131,8 +131,13 @@ public abstract class DataSet implements Comparable<DataSet> {
     }
 
     public final Iterable<DataRecord> getRecords(Interval interval) {
-        return java.util.Collections.unmodifiableCollection(data.subMap(interval.getStart(), true, interval.getEnd(),
-                true).values());
+        if (Interval.DEFAULT.equals(interval)) {
+            return java.util.Collections.unmodifiableCollection(data.values());
+        }
+        else {
+            return java.util.Collections.unmodifiableCollection(data.subMap(interval.getStart(), true,
+                    interval.getEnd(), true).values());
+        }
     }
 
     /**
