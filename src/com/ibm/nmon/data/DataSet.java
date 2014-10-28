@@ -116,7 +116,12 @@ public abstract class DataSet implements Comparable<DataSet> {
     }
 
     public final int getRecordCount(Interval interval) {
-        return data.subMap(interval.getStart(), true, interval.getEnd(), true).size();
+        if (Interval.DEFAULT.equals(interval)) {
+            return data.size();
+        }
+        else {
+            return data.subMap(interval.getStart(), true, interval.getEnd(), true).size();
+        }
     }
 
     public final DataRecord getRecord(long time) {

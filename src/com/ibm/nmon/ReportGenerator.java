@@ -25,6 +25,8 @@ import com.ibm.nmon.util.ParserLog;
 import com.ibm.nmon.interval.Interval;
 
 import com.ibm.nmon.data.DataSet;
+import com.ibm.nmon.data.ProcessDataSet;
+
 import com.ibm.nmon.gui.chart.data.DataTupleDataset;
 
 import com.ibm.nmon.gui.chart.ChartFactory;
@@ -265,10 +267,6 @@ public final class ReportGenerator extends NMONVisualizerApp {
             // create charts for all intervals
             for (Interval interval : generator.getIntervalManager().getIntervals()) {
                 generator.createReport(interval, summaryCharts, dataSetCharts);
-
-                if (writeRawData) {
-                    generator.writeRawData(interval);
-                }
             }
         }
         else {
@@ -661,14 +659,19 @@ public final class ReportGenerator extends NMONVisualizerApp {
         System.out.println("Writing CSV files to " + rawDirectory.getAbsolutePath());
 
         for (DataSet data : getDataSets()) {
+            if (data.getRecordCount(interval) == 0) {
+                System.out.println("\tNo data for " + data.getHostname() + " during the interval");
+                continue;
+            }
+
+            System.out.print("\tWriting CSV for " + data.getHostname() + " ... ");
+            System.out.flush();
+
             File dataFile = new File(rawDirectory, data.getHostname() + ".csv");
             FileWriter writer = null;
 
             try {
                 writer = new FileWriter(dataFile);
-
-                System.out.print("\tWriting CSV for " + data.getHostname() + " ... ");
-                System.out.flush();
 
                 CSVWriter.write(data, interval, writer);
 
@@ -684,6 +687,38 @@ public final class ReportGenerator extends NMONVisualizerApp {
                     }
                     catch (IOException ioe) {
                         // ignore
+                    }
+                }
+            }
+
+            if (data instanceof ProcessDataSet) {
+                ProcessDataSet processData = (ProcessDataSet) data;
+
+                if (processData.getProcessCount() == 0) {
+                    continue;
+                }
+
+                dataFile = new File(rawDirectory, data.getHostname() + "_processes" + ".csv");
+                writer = null;
+
+                try {
+                    writer = new FileWriter(dataFile);
+
+                    CSVWriter.writeProcesses(data, writer);
+
+                    System.out.println("Complete");
+                }
+                catch (IOException ioe) {
+                    System.err.println("could not output raw data to " + dataFile.getName());
+                }
+                finally {
+                    if (writer != null) {
+                        try {
+                            writer.close();
+                        }
+                        catch (IOException ioe) {
+                            // ignore
+                        }
                     }
                 }
             }

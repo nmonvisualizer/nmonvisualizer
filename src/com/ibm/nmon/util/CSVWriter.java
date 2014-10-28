@@ -12,9 +12,13 @@ import com.ibm.nmon.data.DataRecord;
 import com.ibm.nmon.data.DataType;
 import com.ibm.nmon.data.DataSet;
 
+import com.ibm.nmon.data.ProcessDataSet;
+import com.ibm.nmon.data.Process;
+
 import com.ibm.nmon.gui.chart.data.DataTupleCategoryDataset;
 import com.ibm.nmon.gui.chart.data.DataTupleDataset;
 import com.ibm.nmon.gui.chart.data.DataTupleXYDataset;
+
 import com.ibm.nmon.interval.Interval;
 
 /**
@@ -32,48 +36,46 @@ public final class CSVWriter {
     }
 
     public static final void write(DataSet data, Interval interval, Writer writer) throws IOException {
-        writer.write("Date,Time,");
+        StringBuilder builder = new StringBuilder(1024);
 
-        int n = 0;
-        int i = 0;
+        builder.append("Date,Time,");
 
         for (DataType type : data.getTypes()) {
-            n = type.getFieldCount();
-            i = 0;
-
             for (String field : type.getFields()) {
-                writer.write(type.toString());
-                writer.write(' ');
-                writer.write(field);
-
-                if (i++ < n) {
-                    writer.write(',');
-                }
+                builder.append(type.toString());
+                builder.append(' ');
+                builder.append(field);
+                builder.append(',');
             }
         }
 
-        writer.write('\n');
+        builder.setCharAt(builder.length() - 1, '\n');
+
+        writer.write(builder.toString());
+        builder.setLength(0);
 
         for (DataRecord record : data.getRecords(interval)) {
-            writer.write(DATETIME.format(new java.util.Date(record.getTime())));
-            writer.write(',');
+            builder.append(DATETIME.format(new java.util.Date(record.getTime())));
+            builder.append(',');
 
             for (DataType type : data.getTypes()) {
                 if (record.hasData(type)) {
-                    n = type.getFieldCount();
-                    i = 0;
-
                     for (String field : type.getFields()) {
-                        writer.write(format(record.getData(type, field)));
-
-                        if (i++ < n) {
-                            writer.write(',');
-                        }
+                        builder.append(FORMAT.format(record.getData(type, field)));
+                        builder.append(',');
+                    }
+                }
+                else {
+                    for (int i = 0; i < type.getFieldCount(); i++) {
+                        builder.append(',');
                     }
                 }
             }
 
-            writer.write('\n');
+            builder.setCharAt(builder.length() - 1, '\n');
+
+            writer.write(builder.toString());
+            builder.setLength(0);
         }
     }
 
@@ -111,8 +113,36 @@ public final class CSVWriter {
 
                 writer.write(FORMAT.format(record.getData(type, fields.get(fields.size() - 1))));
             }
+            else {
+                for (int i = 0; i < fields.size(); i++) {
+                    writer.write(',');
+                }
+            }
 
             writer.write('\n');
+        }
+    }
+
+    public static void writeProcesses(DataSet data, Writer writer) throws IOException {
+        if (data instanceof ProcessDataSet) {
+            ProcessDataSet processData = (ProcessDataSet) data;
+
+            writer.write("PID,Name,StartDate,StartTime,EndDate,EndTime,CommandLine\n");
+
+            for (Process process : processData.getProcesses()) {
+                writer.write(Integer.toString(process.getId()));
+                writer.write(',');
+                writer.write(process.getName());
+                writer.write(',');
+                writer.write(DATETIME.format(process.getStartTime()));
+                writer.write(',');
+                writer.write(DATETIME.format(process.getEndTime()));
+                writer.write(',');
+                writer.write('"');
+                writer.write(process.getCommandLine());
+                writer.write('"');
+                writer.write('\n');
+            }
         }
     }
 
@@ -146,10 +176,10 @@ public final class CSVWriter {
                 Number n = data.getY(j, i);
 
                 if (n == null) {
-                    writer.write(format(Double.NaN));
+                    writer.write(FORMAT.format(Double.NaN));
                 }
                 else {
-                    writer.write(format(n.doubleValue()));
+                    writer.write(FORMAT.format(n.doubleValue()));
                 }
 
                 writer.write(',');
@@ -158,10 +188,10 @@ public final class CSVWriter {
             Number n = data.getY(seriesCount - 1, i);
 
             if (n == null) {
-                writer.write(format(Double.NaN));
+                writer.write(FORMAT.format(Double.NaN));
             }
             else {
-                writer.write(format(n.doubleValue()));
+                writer.write(FORMAT.format(n.doubleValue()));
             }
 
             writer.write('\n');
@@ -193,10 +223,10 @@ public final class CSVWriter {
                 Object o = data.getValue(rowKey, data.getColumnKey(j));
 
                 if (o == null) {
-                    writer.write(format(Double.NaN));
+                    writer.write(FORMAT.format(Double.NaN));
                 }
                 else {
-                    writer.write(format(((Double) o).doubleValue()));
+                    writer.write(FORMAT.format(((Double) o).doubleValue()));
                 }
 
                 writer.write(',');
@@ -205,22 +235,13 @@ public final class CSVWriter {
             Object o = data.getValue(rowKey, data.getColumnKey(columnCount - 1));
 
             if (o == null) {
-                writer.write(format(Double.NaN));
+                writer.write(FORMAT.format(Double.NaN));
             }
             else {
-                writer.write(format(((Double) o).doubleValue()));
+                writer.write(FORMAT.format(((Double) o).doubleValue()));
             }
 
             writer.write('\n');
-        }
-    }
-
-    private static String format(Double value) {
-        if (Double.isNaN(value)) {
-            return "";
-        }
-        else {
-            return FORMAT.format(value);
         }
     }
 
