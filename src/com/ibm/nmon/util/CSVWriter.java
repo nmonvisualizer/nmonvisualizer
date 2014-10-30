@@ -31,7 +31,8 @@ public final class CSVWriter {
     static {
         // get and set required because DecimalFormat clones the symbols
         java.text.DecimalFormatSymbols symbols = FORMAT.getDecimalFormatSymbols();
-        symbols.setNaN("");
+        symbols.setNaN(""); // missing data => no output
+        symbols.setDecimalSeparator('.'); // force to avoid locale issues with , as separator
         FORMAT.setDecimalFormatSymbols(symbols);
     }
 
@@ -42,9 +43,9 @@ public final class CSVWriter {
 
         for (DataType type : data.getTypes()) {
             for (String field : type.getFields()) {
-                builder.append(type.toString());
+                escape(type.toString(), builder);
                 builder.append(' ');
-                builder.append(field);
+                escape(field, builder);
                 builder.append(',');
             }
         }
@@ -94,11 +95,11 @@ public final class CSVWriter {
         writer.write("Date,Time,");
 
         for (int i = 0; i < fields.size() - 1; i++) {
-            writer.write(fields.get(i));
+            escape(fields.get(i), writer);
             writer.write(',');
         }
 
-        writer.write(fields.get(fields.size() - 1));
+        escape(fields.get(fields.size() - 1), writer);
         writer.write('\n');
 
         for (DataRecord record : data.getRecords(interval)) {
@@ -132,14 +133,14 @@ public final class CSVWriter {
             for (Process process : processData.getProcesses()) {
                 writer.write(Integer.toString(process.getId()));
                 writer.write(',');
-                writer.write(process.getName());
+                escape(process.getName(), writer);
                 writer.write(',');
                 writer.write(DATETIME.format(process.getStartTime()));
                 writer.write(',');
                 writer.write(DATETIME.format(process.getEndTime()));
                 writer.write(',');
                 writer.write('"');
-                writer.write(process.getCommandLine());
+                escape(process.getCommandLine(), writer);
                 writer.write('"');
                 writer.write('\n');
             }
@@ -242,6 +243,20 @@ public final class CSVWriter {
             }
 
             writer.write('\n');
+        }
+    }
+
+    private static void escape(String toEscape, Appendable appendable) throws IOException {
+        // no quotes or commas, just output the original string
+        if ((toEscape.indexOf("\"") == -1) && (toEscape.indexOf(",") == -1)) {
+            appendable.append(toEscape);
+        }
+        else {
+            // escape " with "" and quote the whole string
+            toEscape = toEscape.replaceAll("\"", "\"\"");
+            appendable.append("\"");
+            appendable.append(toEscape);
+            appendable.append("\"");
         }
     }
 
