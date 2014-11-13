@@ -203,10 +203,12 @@ public final class ReportGenerator extends NMONVisualizerApp {
             }
         }
 
+        boolean createCharts = true;
+
         if (!summaryCharts && !dataSetCharts && customDataCharts.isEmpty() && customSummaryCharts.isEmpty()) {
-            System.err.println("--" + "nodata" + " and " + "--" + "nosummary"
-                    + " were specifed but no custom chart definitions (-d or -a) were given");
-            return;
+            System.out.println("--" + "nodata" + ", " + "--" + "nosummary"
+                    + " were specifed and no custom chart definitions (-d or -a) were given: no charts will be output");
+            createCharts = false;
         }
 
         if (paths.isEmpty()) {
@@ -263,20 +265,24 @@ public final class ReportGenerator extends NMONVisualizerApp {
         // set interval after parse so min and max system times are set
         generator.createIntervalIfNecessary(startTime, endTime);
 
-        if (generator.getIntervalManager().getIntervalCount() != 0) {
-            // create charts for all intervals
-            for (Interval interval : generator.getIntervalManager().getIntervals()) {
-                generator.createReport(interval, summaryCharts, dataSetCharts);
+        if (createCharts) {
+            if (generator.getIntervalManager().getIntervalCount() != 0) {
+                // create charts for all intervals
+                for (Interval interval : generator.getIntervalManager().getIntervals()) {
+                    generator.createReport(interval, summaryCharts, dataSetCharts);
+                }
             }
-        }
-        else {
-            generator.createReport(Interval.DEFAULT, summaryCharts, dataSetCharts);
-        }
+            else {
+                generator.createReport(Interval.DEFAULT, summaryCharts, dataSetCharts);
+            }
 
-        System.out.println("Charts complete!");
+            System.out.println("Charts complete!");
+        }
 
         if (writeRawData) {
-            System.out.println();
+            if (createCharts) {
+                System.out.println();
+            }
 
             if (generator.getIntervalManager().getIntervalCount() != 0) {
                 // write data for all intervals
@@ -287,9 +293,10 @@ public final class ReportGenerator extends NMONVisualizerApp {
             else {
                 generator.writeRawData(Interval.DEFAULT);
             }
-        }
 
-        System.out.println("Raw data complete!");
+            System.out.println("Raw data complete!");
+
+        }
     }
 
     private static long parseTime(String[] args, int index, char param) {
