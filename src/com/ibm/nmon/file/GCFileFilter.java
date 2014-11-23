@@ -13,5 +13,5 @@ public final class GCFileFilter extends BaseFileFilter {
         return name.contains("verbose") || name.contains("native_stderr");
     }
 
-    GCFileFilter() {}
+    public GCFileFilter() {}
 }

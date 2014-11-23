@@ -13,8 +13,8 @@ public class SwingAndIOFileFilter extends FileFilter {
 
     private final boolean acceptsDirectories;
 
-    public SwingAndIOFileFilter(String descrption, java.io.FileFilter filter, boolean acceptsDirectories) {
-        this.description = descrption;
+    public SwingAndIOFileFilter(String description, java.io.FileFilter filter, boolean acceptsDirectories) {
+        this.description = description;
         this.filter = filter;
         this.acceptsDirectories = acceptsDirectories;
     }

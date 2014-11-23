@@ -6,5 +6,5 @@ public final class PerfmonFileFilter extends BaseFileFilter {
         return name.endsWith(".csv");
     }
 
-    PerfmonFileFilter() {}
+    public PerfmonFileFilter() {}
 }
