@@ -232,6 +232,10 @@ public class LineChartPanel extends BaseChartPanel implements ChartMouseListener
 
             if (plot.getDomainAxis() instanceof DateAxis) {
                 ((DateAxis) plot.getDomainAxis()).setTimeZone(timeZone);
+
+                if (plot.getRenderer().getBaseToolTipGenerator().getClass() == TimeAndValueTooltipGenerator.class) {
+                    ((TimeAndValueTooltipGenerator) plot.getRenderer().getBaseToolTipGenerator()).setTimeZone(timeZone);
+                }
             }
         }
     }

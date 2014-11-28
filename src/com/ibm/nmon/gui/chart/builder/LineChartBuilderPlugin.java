@@ -4,7 +4,7 @@ import org.jfree.chart.JFreeChart;
 import org.jfree.chart.axis.DateAxis;
 
 import com.ibm.nmon.NMONVisualizerApp;
-
+import com.ibm.nmon.gui.chart.TimeAndValueTooltipGenerator;
 import com.ibm.nmon.interval.Interval;
 
 /**
@@ -39,6 +39,11 @@ public final class LineChartBuilderPlugin implements ChartBuilderPlugin {
         Interval current = app.getIntervalManager().getCurrentInterval();
 
         axis.setTimeZone(app.getDisplayTimeZone());
+
+        if (chart.getXYPlot().getRenderer().getBaseToolTipGenerator().getClass() == TimeAndValueTooltipGenerator.class) {
+            ((TimeAndValueTooltipGenerator) chart.getXYPlot().getRenderer().getBaseToolTipGenerator()).setTimeZone(app
+                    .getDisplayTimeZone());
+        }
 
         if (Interval.DEFAULT.equals(current)) {
             if (app.getMinSystemTime() == 0) {
