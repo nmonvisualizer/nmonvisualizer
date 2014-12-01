@@ -138,7 +138,7 @@ public final class PerfmonParser {
 
             if (METRIC_MATCHER.matches()) {
                 // assume hostname does not change
-                data.setHostname(METRIC_MATCHER.group(1));
+                data.setHostname(METRIC_MATCHER.group(1).toLowerCase());
 
                 break;
             }
