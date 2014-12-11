@@ -315,6 +315,7 @@ public final class NMONParser {
                                 String[] newValues = new String[values.length - 1];
                                 newValues[0] = values[0];
                                 System.arraycopy(values, 2, newValues, 1, values.length - 2);
+
                                 type = buildDataType(newValues);
                                 data.addType(type);
                             }
