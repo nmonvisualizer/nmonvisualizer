@@ -307,7 +307,20 @@ public final class NMONParser {
                     }
                     else {
                         if (type == null) {
-                            LOGGER.warn("undefined data type {} at line {}", values[0], in.getLineNumber());
+                            if ("VM".equals(values[0])) {
+                                // fix for issue #7
+                                // NMON outputs the VM data type at T0001
+                                // older versions contain the timestamp
+                                // newer versions are handled below
+                                String[] newValues = new String[values.length - 1];
+                                newValues[0] = values[0];
+                                System.arraycopy(values, 2, newValues, 1, values.length - 2);
+                                type = buildDataType(newValues);
+                                data.addType(type);
+                            }
+                            else {
+                                LOGGER.warn("undefined data type {} at line {}", values[0], in.getLineNumber());
+                            }
                         }
                         else {
                             parseData(type, values);
@@ -331,8 +344,8 @@ public final class NMONParser {
                     else if (values[0].startsWith("BBB")) {
                         parseSystemInfo(values);
                     }
-                    // otherwise,assume it is a new data type
-                    // since data types can be added at any time in the NMON file
+                    // otherwise, assume it is a new data type since data types can be added at any
+                    // time in the NMON file
                     else if (data.getType(values[0]) == null) {
                         DataType type = buildDataType(values);
 
