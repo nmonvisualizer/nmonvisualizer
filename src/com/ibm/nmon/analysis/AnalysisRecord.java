@@ -135,7 +135,7 @@ public final class AnalysisRecord {
 
     private AnalysisHolder analyzeIfNecessary(DataType type, String fieldName) {
         if (type == null) {
-            throw new IllegalArgumentException("cannot analyze null " + " type");
+            throw new IllegalArgumentException("cannot analyze null " + "type");
         }
 
         if ((fieldName == null) || "".equals(fieldName)) {

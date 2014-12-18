@@ -10,9 +10,11 @@ import java.util.SimpleTimeZone;
  * {@link SimpleTimeZone} for all 25 hours from -12 UTC to +12 UTC.
  */
 public final class TimeZoneFactory {
-    public static final List<TimeZone> TIMEZONES = new java.util.ArrayList<TimeZone>(25);
+    public static final List<TimeZone> TIMEZONES;
 
     static {
+        List<TimeZone> temp = new java.util.ArrayList<TimeZone>(25);
+
         for (int i = -12; i <= 12; i++) {
             String id = "UTC";
 
@@ -26,8 +28,10 @@ public final class TimeZoneFactory {
                 id += ":00";
             }
 
-            TIMEZONES.add(new SimpleTimeZone(i * 3600000, id));
+            temp.add(new SimpleTimeZone(i * 3600000, id));
         }
+
+        TIMEZONES = java.util.Collections.unmodifiableList(temp);
     }
 
     private TimeZoneFactory() {}
