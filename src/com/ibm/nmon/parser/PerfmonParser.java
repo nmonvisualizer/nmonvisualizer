@@ -445,7 +445,7 @@ public final class PerfmonParser {
 
                 if (pid == 0) {
                     // artificial process id
-                    pid = data.getProcessCount();
+                    pid = data.getProcessCount() + 1;
                 }
 
                 Process process = new Process(pid, startTime, processName, data.getTypeIdPrefix());
