@@ -218,13 +218,12 @@ public final class PerfmonParser {
                 buildersById.put(uniqueId, builder);
             }
 
-            // skip unneeded fields
             if (data.getTypeIdPrefix().equals(id)) { // Process
-                // skip Total and Idle
-                if ("Idle".equals(field) || "Total".equals(field)) {
+                // skip Total and Idle processes
+                if ("Idle".equals(subId) || "Total".equals(subId)) {
                     buildersByColumn[i] = null;
                 }
-                // skip ID Process but use is as the process id
+                // skip ID Process field but use is as the process id
                 else if ("ID Process".equals(field)) {
                     buildersByColumn[i] = null;
                     builder.setProcessIdColumn(i);
@@ -297,7 +296,20 @@ public final class PerfmonParser {
             DataHolder holder = dataByType.get(unique);
 
             DataType type = builder.build(time, rawData);
-            record.addData(type, holder.data);
+
+            double[] values = holder.data;
+            
+            if (bytesTransform.isValidFor(builder.id, builder.subId)) {
+                if (type.hasField("% Used Space")) {
+                    int idx = type.getFieldIndex("% Used Space");
+
+                   values[idx] = 100 - values[idx];
+                }
+
+                values = bytesTransform.transform(type, values);
+            }
+
+            record.addData(type, values);
         }
 
         data.addRecord(record);
