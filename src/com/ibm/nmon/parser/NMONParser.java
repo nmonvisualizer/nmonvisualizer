@@ -719,10 +719,16 @@ public final class NMONParser {
         if (values.length < 3) {
             // Linux disk groups usually are not defined; no need for spurious error output
             if (!values[0].startsWith("DG")) {
-                LOGGER.warn("invalid data type definition, no fields defined at line {} for data {}",
+                LOGGER.warn("invalid data type definition, no fields defined" + " at line {} for data {}",
                         in.getLineNumber(), java.util.Arrays.toString(values));
             }
 
+            return null;
+        }
+
+        if ("ERROR".equals(values[0])) {
+            LOGGER.warn("not creating ERROR data type" + " at line{} for data{}", in.getLineNumber(),
+                    java.util.Arrays.toString(values));
             return null;
         }
 
