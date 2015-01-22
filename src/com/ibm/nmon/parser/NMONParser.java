@@ -727,7 +727,7 @@ public final class NMONParser {
         }
 
         if ("ERROR".equals(values[0])) {
-            LOGGER.warn("not creating ERROR data type" + " at line{} for data{}", in.getLineNumber(),
+            LOGGER.warn("not creating ERROR data type" + " at line{} for data {}", in.getLineNumber(),
                     java.util.Arrays.toString(values));
             return null;
         }

@@ -34,19 +34,20 @@ public final class WindowsNetworkPostProcessor implements DataPostProcessor {
             return;
         }
 
-        double[] totalData = new double[total.getFieldCount()];
+        int totalFieldCount = total.getFieldCount();
+        double[] totalData = new double[totalFieldCount];
 
         for (int i = 0; i < totalData.length; i++) {
             totalData[i] = 0;
         }
 
         for (DataType type : data.getTypes()) {
-            if (type.getId().contains("Network Interface") && (type != total)) {
+            if (type.getId().startsWith("Network Interface") && (type != total)) {
                 if (record.hasData(type)) {
                     double[] typeData = record.getData(type);
 
                     // assume ordering is the same for all types
-                    for (int i = 0; i < total.getFieldCount(); i++) {
+                    for (int i = 0; i < totalFieldCount; i++) {
                         totalData[i] += typeData[i];
                     }
                 }
