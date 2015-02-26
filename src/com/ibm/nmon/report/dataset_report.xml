@@ -64,6 +64,17 @@
     </data>
   </linechart>
 
+  <linechart name="Memory Usage by Component" shortName="Memory Use" stacked="true">
+    <yAxis label="MB" asPercent="true" />
+    <data>
+      <host os="AIX" />
+      <type name="MEMNEW" />
+      <field name="System%" alias="System" />
+      <field name="FScache%" alias="File System" />
+      <field name="Process%" alias="Processes" />
+    </data>
+  </linechart>
+
   <linechart name="Swap Usage" shortName="Swap" stacked="true">
     <yAxis label="MB" />
     <data>
