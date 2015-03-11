@@ -79,7 +79,8 @@ public final class FileLoadAction implements ActionListener {
 
         if (!toParse.isEmpty()) {
             // parse files outside of the Swing event thread
-            new Thread(new ParserRunner(gui, toParse, timeZones.getSelectedTimeZone()), "DataSet Parser").start();
+            new Thread(new ParserRunner(gui, toParse, timeZones.getSelectedTimeZone()), getClass().getName()
+                    + " Parser").start();
         }
     }
 }

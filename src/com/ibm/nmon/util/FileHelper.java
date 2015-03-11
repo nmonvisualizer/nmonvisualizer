@@ -9,14 +9,14 @@ import java.util.List;
  * Utility methods for recursive directory searches.
  */
 public final class FileHelper {
-    public static void recurseDirectories(File[] files, FileFilter filter, List<String> toParse) {
+    public static void recurseDirectories(File[] files, FileFilter filter, List<String> filenames) {
         for (int i = 0; i < files.length; i++) {
             if (files[i].isDirectory()) {
-                recurseDirectories(files[i].listFiles(), filter, toParse);
+                recurseDirectories(files[i].listFiles(), filter, filenames);
             }
             else {
                 if (filter.accept(files[i])) {
-                    toParse.add(files[i].getAbsolutePath());
+                    filenames.add(files[i].getAbsolutePath());
                 }
             }
         }

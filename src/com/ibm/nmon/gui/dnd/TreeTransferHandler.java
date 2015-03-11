@@ -110,7 +110,8 @@ public final class TreeTransferHandler extends TransferHandler {
 
             FileHelper.recurseDirectories(files, CombinedFileFilter.getInstance(false), toParse);
 
-            new Thread(new ParserRunner(gui, toParse, gui.getDisplayTimeZone()), "DataSet Parser").start();
+            new Thread(new ParserRunner(gui, toParse, gui.getDisplayTimeZone()), getClass().getName() + " Parser")
+                    .start();
 
             return true;
         }
