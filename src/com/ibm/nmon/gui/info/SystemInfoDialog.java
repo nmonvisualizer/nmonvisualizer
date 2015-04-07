@@ -23,6 +23,8 @@ import com.ibm.nmon.data.SystemDataSet;
 
 import com.ibm.nmon.gui.main.NMONVisualizerGui;
 
+import com.ibm.nmon.interval.Interval;
+
 /**
  * Display SystemDateSet system information for a given file. Supports copying data to the
  * clipboard.
@@ -55,7 +57,7 @@ public final class SystemInfoDialog extends GUIDialog implements PropertyChangeL
 
         JPanel tab = null;
 
-        for (long time : data.getSourceFileTimes()) {
+        for (Interval interval : data.getSourceFileIntervals()) {
             tab = new JPanel(new BorderLayout());
             tab.setBorder(Styles.LOWER_LINE_BORDER);
 
@@ -64,7 +66,7 @@ public final class SystemInfoDialog extends GUIDialog implements PropertyChangeL
             final JTabbedPane subTabs = new JTabbedPane();
             // subTabs.setBorder(null);
 
-            Map<String, String> systemInfo = data.getSystemInfo(time);
+            Map<String, String> systemInfo = data.getSystemInfo(interval.getStart());
 
             if (systemInfo.isEmpty()) {
                 continue;
@@ -105,8 +107,8 @@ public final class SystemInfoDialog extends GUIDialog implements PropertyChangeL
             tab.add(panel, java.awt.BorderLayout.PAGE_END);
 
             if (data.getSystemInfoCount() > 1) {
-                tabs.add(format.format(new java.util.Date(time)), tab);
-                tabs.setToolTipTextAt(tabs.getTabCount() - 1, data.getSourceFile(time));
+                tabs.add(format.format(new java.util.Date(interval.getStart())), tab);
+                tabs.setToolTipTextAt(tabs.getTabCount() - 1, data.getSourceFile(interval));
             }
         }
 

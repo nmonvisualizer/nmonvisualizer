@@ -29,6 +29,8 @@ import com.ibm.nmon.gui.main.NMONVisualizerGui;
 import com.ibm.nmon.gui.table.ReadOnlyTableModel;
 import com.ibm.nmon.gui.table.StringCellRenderer;
 
+import com.ibm.nmon.interval.Interval;
+
 /**
  * Display SystemDataSet metadata information in a table. Supports copying rows to the clipboard.
  */
@@ -59,7 +61,7 @@ public final class MetadataInfoDialog extends GUIDialog implements PropertyChang
 
         JPanel tab = null;
 
-        for (long time : data.getSourceFileTimes()) {
+        for (Interval interval : data.getSourceFileIntervals()) {
             tab = new JPanel(new BorderLayout());
 
             ReadOnlyTableModel model = new ReadOnlyTableModel();
@@ -68,7 +70,7 @@ public final class MetadataInfoDialog extends GUIDialog implements PropertyChang
             model.addColumn("Name");
             model.addColumn("Value");
 
-            Map<String, String> metadata = data.getMetadata(time);
+            Map<String, String> metadata = data.getMetadata(interval.getStart());
 
             if (metadata.isEmpty()) {
                 continue;
@@ -108,8 +110,8 @@ public final class MetadataInfoDialog extends GUIDialog implements PropertyChang
             tab.add(panel, java.awt.BorderLayout.PAGE_END);
 
             if (data.getMetadataCount() > 1) {
-                tabs.add(format.format(new java.util.Date(time)), tab);
-                tabs.setToolTipTextAt(tabs.getTabCount() - 1, data.getSourceFile(time));
+                tabs.add(format.format(new java.util.Date(interval.getStart())), tab);
+                tabs.setToolTipTextAt(tabs.getTabCount() - 1, data.getSourceFile(interval));
             }
         }
 

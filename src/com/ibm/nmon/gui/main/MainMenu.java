@@ -425,6 +425,18 @@ final class MainMenu extends JMenuBar implements IntervalListener, DataSetListen
 
         menu.add(checkItem);
 
+        checkItem = new JCheckBoxMenuItem("Show Status Bar");
+        checkItem.setMnemonic('b');
+        checkItem.setSelected(gui.getBooleanProperty("showStatusBar"));
+
+        checkItem.addActionListener(new ActionListener() {
+            public void actionPerformed(ActionEvent e) {
+                gui.setProperty("showStatusBar", ((JCheckBoxMenuItem) e.getSource()).isSelected());
+            }
+        });
+
+        menu.add(checkItem);
+
         return menu;
     }
 

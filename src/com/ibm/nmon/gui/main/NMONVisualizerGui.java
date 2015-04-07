@@ -1,7 +1,6 @@
 package com.ibm.nmon.gui.main;
 
 import java.util.List;
-
 import java.io.File;
 
 import java.util.prefs.Preferences;
@@ -30,6 +29,7 @@ import com.ibm.nmon.interval.Interval;
 import com.ibm.nmon.file.CombinedFileFilter;
 
 import com.ibm.nmon.gui.file.ParserRunner;
+
 import com.ibm.nmon.gui.interval.IntervalPicker;
 import com.ibm.nmon.gui.report.ReportFrame;
 import com.ibm.nmon.gui.tree.TreePanel;
@@ -38,11 +38,12 @@ import com.ibm.nmon.gui.util.LogViewerDialog;
 import com.ibm.nmon.parser.HATJParser;
 import com.ibm.nmon.parser.IOStatParser;
 
-import com.ibm.nmon.report.ReportCache;
-
 import com.ibm.nmon.gui.parse.HATJPostParser;
 import com.ibm.nmon.gui.parse.IOStatPostParser;
 import com.ibm.nmon.gui.parse.VerboseGCPreParser;
+
+import com.ibm.nmon.report.ReportCache;
+
 import com.ibm.nmon.gui.Styles;
 
 import com.ibm.nmon.util.FileHelper;
@@ -141,6 +142,8 @@ public final class NMONVisualizerGui extends NMONVisualizerApp {
         setProperty("scaleProcessesByCPUs",
                 preferences.get("scaleProcessesByCPUs", getProperty("scaleProcessesByCPUs")));
 
+        setProperty("showStatusBar", preferences.get("showStatusBar", "false"));
+
         mainFrame = new JFrame(DEFAULT_WINDOW_TITLE);
         mainFrame.setDefaultCloseOperation(JFrame.DO_NOTHING_ON_CLOSE);
         mainFrame.addWindowListener(windowManager);
@@ -176,9 +179,13 @@ public final class NMONVisualizerGui extends NMONVisualizerApp {
         // ViewManager's SummaryView adds the checkbox to the top panel
         // so top must already be created and added to the gui before the data panel is initialized
         ViewManager dataPanel = new ViewManager(this);
+        StatusBar statusBar = new StatusBar(this);
+
         treePanel.addTreeSelectionListener(dataPanel);
+        treePanel.addTreeSelectionListener(statusBar);
 
         right.add(dataPanel, BorderLayout.CENTER);
+        right.add(statusBar, BorderLayout.PAGE_END);
 
         mainFrame.pack();
         positionMainFrame();
@@ -326,6 +333,7 @@ public final class NMONVisualizerGui extends NMONVisualizerApp {
 
             getPreferences().put("systemsNamedBy", getProperty("systemsNamedBy"));
             getPreferences().put("scaleProcessesByCPUs", getProperty("scaleProcessesByCPUs"));
+            getPreferences().put("showStatusBar", getProperty("showStatusBar"));
 
             logViewer.dispose();
             mainFrame.dispose();

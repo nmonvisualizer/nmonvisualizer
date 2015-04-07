@@ -6,6 +6,8 @@ import java.util.Set;
 import java.util.Map;
 import java.util.TreeMap;
 
+import com.ibm.nmon.interval.Interval;
+
 /**
  * A DataSet designed to hold data for a single 'system' or host across a number of parsed files.
  * Parsed files are identified by the {@link DataSet#getStartTime() start time} of the file, so
@@ -17,7 +19,7 @@ public final class SystemDataSet extends ProcessDataSet {
     private final TreeMap<Long, Map<String, String>> systemInfo = new TreeMap<Long, Map<String, String>>();
     private final TreeMap<Long, Map<String, String>> metadata = new TreeMap<Long, Map<String, String>>();
 
-    private final TreeMap<Long, String> sourceFiles = new java.util.TreeMap<Long, String>();
+    private final TreeMap<Interval, String> sourceFiles = new java.util.TreeMap<Interval, String>();
 
     private final String hostname;
 
@@ -47,7 +49,7 @@ public final class SystemDataSet extends ProcessDataSet {
             return "no data";
         }
         else if (size == 1) {
-            return sourceFiles.get(0);
+            return sourceFiles.values().iterator().next();
         }
         else {
             return size + " files";
@@ -58,15 +60,15 @@ public final class SystemDataSet extends ProcessDataSet {
         return java.util.Collections.unmodifiableCollection(sourceFiles.values());
     }
 
-    public String getSourceFile(long time) {
-        return sourceFiles.get(time);
+    public String getSourceFile(Interval interval) {
+        return sourceFiles.get(interval);
     }
 
     public int getSourceFileCount() {
         return sourceFiles.size();
     }
 
-    public Iterable<Long> getSourceFileTimes() {
+    public Iterable<Interval> getSourceFileIntervals() {
         return java.util.Collections.unmodifiableSet(sourceFiles.keySet());
     }
 
@@ -103,8 +105,9 @@ public final class SystemDataSet extends ProcessDataSet {
         merge(newData);
 
         long start = newData.getStartTime();
+        long end = newData.getEndTime();
 
-        sourceFiles.put(start, sourceFile);
+        sourceFiles.put(new Interval(start, end), sourceFile);
 
         if (newData.getClass().equals(BasicDataSet.class)) {
             metadata.put(start, ((BasicDataSet) newData).getMetadata());
