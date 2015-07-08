@@ -89,7 +89,7 @@ public final class IntervalManager {
             return true;
         }
         else {
-            LOGGER.trace("interval {}" + "already present", TimeFormatCache.formatInterval(interval));
+            LOGGER.trace("interval {}" + " already present", TimeFormatCache.formatInterval(interval));
             return false;
         }
     }

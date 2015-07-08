@@ -1,29 +1,33 @@
 package com.ibm.nmon.gui.chart.builder;
 
-import java.util.List;
-
 import java.text.DecimalFormat;
+import java.text.SimpleDateFormat;
+
+import java.util.List;
 
 import org.jfree.chart.JFreeChart;
 import org.jfree.chart.axis.DateAxis;
 import org.jfree.chart.axis.NumberAxis;
+import org.jfree.chart.labels.XYToolTipGenerator;
 import org.jfree.chart.plot.XYPlot;
+
 import org.jfree.chart.renderer.xy.StackedXYAreaRenderer2;
 import org.jfree.chart.renderer.xy.StandardXYItemRenderer;
+
 import org.jfree.chart.util.RelativeDateFormat;
 import org.jfree.util.UnitType;
+
 import org.jfree.data.time.FixedMillisecond;
 
+import org.jfree.data.xy.XYDataset;
+
 import com.ibm.nmon.data.DataSet;
-import com.ibm.nmon.data.DataType;
 import com.ibm.nmon.data.DataRecord;
+import com.ibm.nmon.data.DataType;
 import com.ibm.nmon.data.DataTuple;
 
 import com.ibm.nmon.data.definition.DataDefinition;
 import com.ibm.nmon.data.definition.NamingMode;
-
-import com.ibm.nmon.gui.chart.TimeAndValueTooltipGenerator;
-
 import com.ibm.nmon.gui.chart.data.DataTupleXYDataset;
 
 import com.ibm.nmon.chart.definition.LineChartDefinition;
@@ -91,8 +95,6 @@ public class LineChartBuilder extends BaseChartBuilder<LineChartDefinition> {
         if (definition.usePercentYAxis()) {
             LineChartBuilder.setPercentYAxis(chart);
         }
-
-        TimeAndValueTooltipGenerator tooltipGenerator = new TimeAndValueTooltipGenerator();
 
         if (definition.isStacked()) {
             StackedXYAreaRenderer2 renderer = (StackedXYAreaRenderer2) plot.getRenderer();
@@ -417,4 +419,17 @@ public class LineChartBuilder extends BaseChartBuilder<LineChartDefinition> {
         NumberAxis yAxis = (NumberAxis) chart.getXYPlot().getRangeAxis();
         yAxis.setRange(0, 100);
     }
+
+    // customize tool tips on the graph to display the date time and the value
+    private final XYToolTipGenerator tooltipGenerator = new XYToolTipGenerator() {
+        private final SimpleDateFormat DATE_FORMAT = new SimpleDateFormat("HH:mm:ss");
+        private final DecimalFormat NUMBER_FORMAT = new DecimalFormat("#,##0.000");
+
+        @Override
+        public String generateToolTip(XYDataset dataset, int series, int item) {
+            return (dataset.getSeriesCount() > 1 ? dataset.getSeriesKey(series) + " " : "")
+                    + DATE_FORMAT.format(new java.util.Date((long) dataset.getXValue(series, item))) + " - "
+                    + NUMBER_FORMAT.format(dataset.getYValue(series, item));
+        }
+    };
 }

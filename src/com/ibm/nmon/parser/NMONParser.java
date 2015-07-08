@@ -341,6 +341,9 @@ public final class NMONParser {
                     if ("BBBP".equals(values[0])) {
                         parseBBBP(values);
                     }
+                    else if ("AAA".equals(values[0])) {
+                        // ignore AAA records not in the header
+                    }
                     // handle case where other BBB records wrote later in the file
                     else if (values[0].startsWith("BBB")) {
                         parseSystemInfo(values);
