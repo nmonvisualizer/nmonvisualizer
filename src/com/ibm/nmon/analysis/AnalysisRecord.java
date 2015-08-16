@@ -172,41 +172,58 @@ public final class AnalysisRecord {
             int countSinceLastGranularity = 0;
             double granularityTotal = 0;
 
+            boolean isProcess = type.getClass() == com.ibm.nmon.data.ProcessDataType.class;
+
             for (DataRecord dataRecord : data.getRecords(interval)) {
-                if (dataRecord.hasData(typeToAnalyze)) {
-                    double value = dataRecord.getData(typeToAnalyze, fieldName);
+                double value = Double.NaN;
+
+                // for processes, missing values are 0 since NMON does not output data for processes
+                // if there is no activity
+                if (isProcess) {
+                    if (dataRecord.hasData(typeToAnalyze)) {
+                        value = dataRecord.getData(typeToAnalyze, fieldName);
+                    }
+
+                    if (Double.isNaN(value)) {
+                        value = 0;
+                    }
+                }
+                else { // for other types, assume missing values really are missing
+                    if (dataRecord.hasData(typeToAnalyze)) {
+                        value = dataRecord.getData(typeToAnalyze, fieldName);
+                    }
 
                     if (Double.isNaN(value)) {
                         continue;
                     }
+                }
 
-                    holder.sum += value;
+                holder.sum += value;
 
-                    if (value > holder.maximum) {
-                        holder.maximum = value;
+                if (value > holder.maximum) {
+                    holder.maximum = value;
+                }
+
+                if (value < holder.minimum) {
+                    holder.minimum = value;
+                }
+
+                allValues.add(value);
+
+                ++countSinceLastGranularity;
+                granularityTotal += value;
+
+                if ((dataRecord.getTime() - lastGranularityTime) >= granularity) {
+                    double peakAverage = granularityTotal / countSinceLastGranularity;
+
+                    if (peakAverage > holder.granularityMaximum) {
+                        holder.granularityMaximum = peakAverage;
                     }
 
-                    if (value < holder.minimum) {
-                        holder.minimum = value;
-                    }
+                    countSinceLastGranularity = 0;
+                    granularityTotal = 0;
 
-                    allValues.add(value);
-
-                    ++countSinceLastGranularity;
-                    granularityTotal += value;
-
-                    if ((dataRecord.getTime() - lastGranularityTime) >= granularity) {
-                        double peakAverage = granularityTotal / countSinceLastGranularity;
-
-                        if (peakAverage > holder.granularityMaximum) {
-                            holder.granularityMaximum = peakAverage;
-                        }
-
-                        countSinceLastGranularity = 0;
-                        granularityTotal = 0;
-
-                        lastGranularityTime = dataRecord.getTime();
-                    }
+                    lastGranularityTime = dataRecord.getTime();
                 }
             }
 
