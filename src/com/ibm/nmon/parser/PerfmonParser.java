@@ -176,7 +176,6 @@ public final class PerfmonParser {
 
             if (!METRIC_MATCHER.matches()) {
                 LOGGER.warn("'{}' is not a valid header column", header[i]);
-                // columnTypes.add(null);
                 buildersByColumn[i] = null;
                 continue;
             }
@@ -298,12 +297,12 @@ public final class PerfmonParser {
             DataType type = builder.build(time, rawData);
 
             double[] values = holder.data;
-            
+
             if (bytesTransform.isValidFor(builder.id, builder.subId)) {
                 if (type.hasField("% Used Space")) {
                     int idx = type.getFieldIndex("% Used Space");
 
-                   values[idx] = 100 - values[idx];
+                    values[idx] = 100 - values[idx];
                 }
 
                 values = bytesTransform.transform(type, values);
@@ -423,11 +422,6 @@ public final class PerfmonParser {
             fields.toArray(fieldsArray);
 
             if (data.getTypeIdPrefix().equals(id)) { // Process
-                if (processIdColumn == 0) {
-                    System.out.println("!");
-                }
-
-                // (int) Double.NaN == 0
                 int pid = (int) (processIdColumn != -1 ? parseDouble(rawData[processIdColumn]) : 0);
                 String processName = subId; // store processes with full name
 

@@ -26,7 +26,7 @@ import com.ibm.nmon.gui.main.NMONVisualizerGui;
 import com.ibm.nmon.interval.Interval;
 
 /**
- * Display SystemDateSet system information for a given file. Supports copying data to the
+ * Display SystemDataSet system information for a given file. Supports copying data to the
  * clipboard.
  */
 public final class SystemInfoDialog extends GUIDialog implements PropertyChangeListener {
