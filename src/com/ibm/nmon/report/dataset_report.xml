@@ -147,7 +147,7 @@
     <yAxis label="KB / s" />
     <data>
       <host os="PERFMON" />
-      <type regex="LogicalDisk(.(?!Total))*" aliasByGroup="0" />
+      <type regex="LogicalDisk \(((?!Total).*)\)" />
       <field name="Disk Read KB/sec" />
     </data>
   </linechart>
@@ -156,7 +156,7 @@
     <yAxis label="KB / s" />
     <data>
       <host os="PERFMON" />
-      <type regex="LogicalDisk(.(?!Total))*" aliasByGroup="0" />
+      <type regex="LogicalDisk \(((?!Total).*)\)" />
       <field name="Disk Write KB/sec" />
     </data>
   </linechart>
@@ -174,7 +174,7 @@
     <yAxis label="% Busy" asPercent="true" />
     <data>
       <host os="PERFMON" />
-      <type regex="LogicalDisk(.(?!Total))*" aliasByGroup="0" />
+      <type regex="LogicalDisk \(((?!Total).*)\)" />
       <field name="% Disk Time" />
     </data>
   </linechart>
@@ -192,7 +192,7 @@
     <yAxis label="Transfers / s" />
     <data>
       <host os="PERFMON" />
-      <type regex="LogicalDisk(.(?!Total))*" aliasByGroup="0" />
+      <type regex="LogicalDisk \(((?!Total).*)\)" />
       <field name="Disk Transfers/sec" />
     </data>
   </linechart>
@@ -219,7 +219,7 @@
     <yAxis label="KB / s" />
     <data>
       <host os="PERFMON" />
-      <type regex="Network Interface(.(?!Total))*" aliasByGroup="0" />
+      <type regex="Network Interface \(((?!Total).*)\)" />
       <field name="KB Received/sec" />
     </data>
   </linechart>
@@ -228,7 +228,7 @@
     <yAxis label="KB / s" />
     <data>
       <host os="PERFMON" />
-      <type regex="Network Interface(.(?!Total))*" aliasByGroup="0" />
+      <type regex="Network Interface \(((?!Total).*)\)" />
       <field name="KB Sent/sec" />
     </data>
   </linechart>
@@ -399,7 +399,7 @@
     
     <data>
       <host os="PERFMON" />
-      <type regex="Processor \((.(?!Total)*)\)" />
+      <type regex="Processor \(((?!Total).*)\)" />
       <field name="% Processor Time" />
     </data>
   </linechart>
@@ -425,7 +425,7 @@
 
     <data>
       <host os="PERFMON" />
-      <type regex="Processor \((.(?!Total)*)\)" />
+      <type regex="Processor \(((?!Total).*)\)" />
       <field name="% User Time" alias="User" />
       <field name="% Privileged Time" alias="System" />
       <field name="% Interrupt Time" alias="Interrupt" />
@@ -465,17 +465,17 @@
 
     <data stat="MINIMUM">
       <host os="PERFMON" />
-      <type regex="LogicalDisk(.(?!Total))*" aliasByGroup="0" />
+      <type regex="LogicalDisk \(((?!Total).*)\)" />
       <field name="% Used Space" />
     </data>
     <data stat="AVERAGE">
       <host os="PERFMON" />
-      <type regex="LogicalDisk(.(?!Total))*" aliasByGroup="0" />
+      <type regex="LogicalDisk \(((?!Total).*)\)" />
       <field name="% Used Space" />
     </data>
     <data stat="MAXIMUM">
       <host os="PERFMON" />
-      <type regex="LogicalDisk(.(?!Total))*" aliasByGroup="0" />
+      <type regex="LogicalDisk \(((?!Total).*)\)" />
       <field name="% Used Space" />
     </data>
   </barchart>

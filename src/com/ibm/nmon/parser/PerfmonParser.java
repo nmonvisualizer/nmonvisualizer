@@ -30,7 +30,8 @@ public final class PerfmonParser {
 
     private static final SimpleDateFormat TIMESTAMP_FORMAT = new SimpleDateFormat("MM/dd/yyyy HH:mm:ss");
 
-    private static final Pattern DATA_SPLITTER = Pattern.compile("\"?,\"?");
+    // Issue #26 \D to prevent splitting on something like \SRVXYZ\Processor Information(2,10)\% DPC Time see in Win2012
+    private static final Pattern DATA_SPLITTER = Pattern.compile("\"?,\\D\"?");
     private static final Pattern SUBCATEGORY_SPLITTER = Pattern.compile(":");
     // "\\hostname\category (optional subcategory)\metric"
     // note storing a matcher vs a pattern is _NOT_ thread safe
