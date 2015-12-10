@@ -12,7 +12,7 @@
 
     <pathconvert property="path.lib" refid="file.lib" pathsep=" ">
       <!-- strip out the absolute path -->
-      <map from="${dir.lib}/" to="" />
+      <mapper type="flatten" />
     </pathconvert>
 
     <manifest file="${basedir}/MANIFEST.MF">
