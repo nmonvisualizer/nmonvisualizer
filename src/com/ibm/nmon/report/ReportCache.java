@@ -28,9 +28,9 @@ import com.ibm.nmon.data.matcher.ExactFieldMatcher;
 import com.ibm.nmon.data.matcher.ExactTypeMatcher;
 
 /**
- * A simple cache for storing 'reports', a list of parsed chart definitions. Reports are stored and
- * retrieved using a key, which can be any String. Cached reports can be filtered for a list of data
- * sets to avoid creating charts that are not needed for the application's current set of data.
+ * A simple cache for storing 'reports', a list of parsed chart definitions. Reports are stored and retrieved using a
+ * key, which can be any String. Cached reports can be filtered for a list of data sets to avoid creating charts that
+ * are not needed for the application's current set of data.
  * 
  * @see BaseChartDefinition
  * @see ChartDefinitionParser
@@ -65,8 +65,7 @@ public final class ReportCache {
     /**
      * Parse the given chart definition XML file and store the report with the given key.
      * 
-     * @param file
-     *            a valid XML file for processing by {@link ChartDefinitionParser}
+     * @param file a valid XML file for processing by {@link ChartDefinitionParser}
      */
     public void addReport(String key, String file) throws IOException {
         if (DEFAULT_SUMMARY_CHARTS_KEY.equals(key) || DEFAULT_INTERVAL_CHARTS_KEY.equals(key)
@@ -94,11 +93,10 @@ public final class ReportCache {
     }
 
     /**
-     * Get the report for the given key filtering based on a given data set. Charts that are not
-     * applicable to a host in the data set will not be included in the returned list.
+     * Get the report for the given key filtering based on a given data set. Charts that are not applicable to a host in
+     * the data set will not be included in the returned list.
      * 
-     * @param dataSets
-     *            the DataSets to match
+     * @param dataSets the DataSets to match
      * @return the filtered list of chart definitions
      * @see DataDefinition#matchesHost(DataSet)
      */
@@ -134,18 +132,16 @@ public final class ReportCache {
 
     /**
      * <p>
-     * Get the a custom report for the given key and data. Rather than creating a single chart with
-     * a line/bar for each type, this function creates a chart for <em>each</em> type that matches
-     * the given definition.
+     * Get the a custom report for the given key and data. Rather than creating a single chart with a line/bar for each
+     * type, this function creates a chart for <em>each</em> type that matches the given definition.
      * </p>
      * <p>
-     * This function uses all charts in the given report so it is possible for this function to
-     * create a large number of charts, especially if multiple DataTypes and/or fields are matched.
+     * This function uses all charts in the given report so it is possible for this function to create a large number of
+     * charts, especially if multiple DataTypes and/or fields are matched.
      * </p>
      * 
-     * @param filterByData
-     *            should the initial reports list be filtered by the given data? See
-     *            {@link #getReport(String, Iterable)}.
+     * @param filterByData should the initial reports list be filtered by the given data? See
+     *        {@link #getReport(String, Iterable)}.
      */
     public List<BaseChartDefinition> multiplexChartsAcrossTypes(String key, DataSet data, boolean filterByData) {
         List<BaseChartDefinition> chartDefinitions = null;
@@ -206,18 +202,16 @@ public final class ReportCache {
 
     /**
      * <p>
-     * Get the a custom report for the given key and data. Rather than creating a single chart with
-     * a line/bar for each field, this function creates a chart for <em>each</em> field that matches
-     * the given definition.
+     * Get the a custom report for the given key and data. Rather than creating a single chart with a line/bar for each
+     * field, this function creates a chart for <em>each</em> field that matches the given definition.
      * </p>
      * <p>
-     * This function uses all charts in the given report so it is possible for this function to
-     * create a large number of charts, especially if multiple DataTypes and/or fields are matched.
+     * This function uses all charts in the given report so it is possible for this function to create a large number of
+     * charts, especially if multiple DataTypes and/or fields are matched.
      * </p>
      * 
-     * @param filterByData
-     *            should the initial reports list be filtered by the given data? See
-     *            {@link #getReport(String, Iterable)}.
+     * @param filterByData should the initial reports list be filtered by the given data? See
+     *        {@link #getReport(String, Iterable)}.
      */
     public List<BaseChartDefinition> multiplexChartsAcrossFields(String key, DataSet data, boolean filterByData) {
         List<BaseChartDefinition> chartDefinitions = null;
@@ -231,24 +225,31 @@ public final class ReportCache {
 
         LOGGER.debug("multiplexing charts {} for dataset {} across fields", chartDefinitions, data.getHostname());
 
-        List<BaseChartDefinition> multiplexedChartDefinitions = new java.util.ArrayList<BaseChartDefinition>(
-                10 * chartDefinitions.size());
+        Map<String, BaseChartDefinition> multiplexedChartDefinitions = new java.util.HashMap<String, BaseChartDefinition>(
+                chartDefinitions.size() * 10);
 
         for (BaseChartDefinition chartDefinition : chartDefinitions) {
             for (DataDefinition dataDefinition : chartDefinition.getData()) {
                 if (dataDefinition.matchesHost(data)) {
                     for (DataType type : dataDefinition.getMatchingTypes(data)) {
                         for (String field : dataDefinition.getMatchingFields(type)) {
-                            BaseChartDefinition newChartDefinition = copyChart(chartDefinition);
-
                             // short name used as filename and/or tabname, so make sure it
                             // is unique
-                            newChartDefinition.setShortName(chartDefinition.getShortName() + "_"
-                                    + dataDefinition.renameField(field));
+                            String name = chartDefinition.getShortName() + "_" + dataDefinition.renameField(field);
 
-                            newChartDefinition.setTitle(chartDefinition.getTitle());
-                            newChartDefinition.setSubtitleNamingMode(NamingMode.FIELD);
+                            BaseChartDefinition newChartDefinition = multiplexedChartDefinitions.get(name);
 
+                            if (newChartDefinition == null) {
+                                newChartDefinition = copyChart(chartDefinition);
+
+                                newChartDefinition.setShortName(name);
+
+                                newChartDefinition.setTitle(chartDefinition.getTitle());
+                                newChartDefinition.setSubtitleNamingMode(NamingMode.FIELD);
+
+                                multiplexedChartDefinitions.put(name, newChartDefinition);
+                            }
+                            
                             DataDefinition newData = null;
 
                             if (dataDefinition instanceof DefaultDataDefinition) {
@@ -263,8 +264,6 @@ public final class ReportCache {
                             }
 
                             newChartDefinition.addData(newData);
-
-                            multiplexedChartDefinitions.add(newChartDefinition);
                         }
                     }
                 }
@@ -276,7 +275,7 @@ public final class ReportCache {
                     data.getHostname(), multiplexedChartDefinitions });
         }
 
-        return multiplexedChartDefinitions;
+        return new java.util.ArrayList<BaseChartDefinition>(multiplexedChartDefinitions.values());
     }
 
     private BaseChartDefinition copyChart(BaseChartDefinition copy) {
