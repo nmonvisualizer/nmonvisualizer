@@ -54,6 +54,22 @@ public final class NMONVisualizerGui extends NMONVisualizerApp {
     public static void main(final String[] args) throws Exception {
         javax.swing.UIManager.setLookAndFeel("com.sun.java.swing.plaf.nimbus.NimbusLookAndFeel");
 
+        String temp = System.getProperty("fontSize");
+
+        if (temp != null) {
+            try {
+                int fontSize = Integer.parseInt(temp);
+
+                javax.swing.UIManager.getLookAndFeelDefaults()
+                        .put("defaultFont",
+                                new javax.swing.plaf.FontUIResource(new java.awt.Font("Dialog", java.awt.Font.PLAIN,
+                                        fontSize)));
+            }
+            catch (NumberFormatException nfe) {
+                System.err.println("ignoring -DfontSize=" + temp + "; it must be an integer");
+            }
+        }
+
         SwingUtilities.invokeLater(new Runnable() {
             public void run() {
                 try {
@@ -201,8 +217,7 @@ public final class NMONVisualizerGui extends NMONVisualizerApp {
     }
 
     /**
-     * Gets the main JFrame used by this class. This frame should be considered the "main window"
-     * for the application.
+     * Gets the main JFrame used by this class. This frame should be considered the "main window" for the application.
      * 
      * @return the application's main window
      */
@@ -228,12 +243,11 @@ public final class NMONVisualizerGui extends NMONVisualizerApp {
     }
 
     /**
-     * Defines how granular charts will be, i.e. how many seconds will pass between data points.
-     * This method causes either a <code>automaticGranularity</code> or <code>granularity</code>
-     * property change event to be fired.
+     * Defines how granular charts will be, i.e. how many seconds will pass between data points. This method causes
+     * either a <code>automaticGranularity</code> or <code>granularity</code> property change event to be fired.
      * 
-     * @param granularity the new granularity, in seconds. A zero or negative value implies that
-     *        granularity will be automatically calculated based on the current interval.
+     * @param granularity the new granularity, in seconds. A zero or negative value implies that granularity will be
+     *        automatically calculated based on the current interval.
      */
     public void setGranularity(int granularity) {
         int oldGranularity = getGranularity();
@@ -298,9 +312,9 @@ public final class NMONVisualizerGui extends NMONVisualizerApp {
     }
 
     /**
-     * Gracefully exits the application. This method asks the user for confirmation through a
-     * JOptionPane before continuing. If the user selects "Yes", the application saves all
-     * preferences and calls dispose() on the main frame.
+     * Gracefully exits the application. This method asks the user for confirmation through a JOptionPane before
+     * continuing. If the user selects "Yes", the application saves all preferences and calls dispose() on the main
+     * frame.
      */
     void exit() {
         int confirm = JOptionPane.showConfirmDialog(mainFrame, "Are you sure you want to Exit?", "Exit?",
