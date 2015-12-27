@@ -15,8 +15,8 @@ import com.ibm.nmon.analysis.Statistic;
 
 /**
  * <p>
- * Standard {@link DataDefintion} that uses various <code>matcher</code> classes to define the data
- * this class will match. Data is renamed using various {@link NameTransformer} classes.
+ * Standard {@link DataDefintion} that uses various <code>matcher</code> classes to define the data this class will
+ * match. Data is renamed using various {@link NameTransformer} classes.
  * </p>
  * 
  * <p>
@@ -30,8 +30,7 @@ import com.ibm.nmon.analysis.Statistic;
  */
 public final class DefaultDataDefinition extends DataDefinition {
     /**
-     * Use this key to specify the <code>NameTransformer</code> to use by default in the rename
-     * methods.
+     * Use this key to specify the <code>NameTransformer</code> to use by default in the rename methods.
      */
     public static final String DEFAULT_NAME_TRANSFORMER_KEY = "$ALL";
 
@@ -50,6 +49,18 @@ public final class DefaultDataDefinition extends DataDefinition {
         this.hostMatcher = hostMatcher == null ? HostMatcher.ALL : hostMatcher;
         this.typeMatcher = typeMatcher == null ? TypeMatcher.ALL : typeMatcher;
         this.fieldMatcher = fieldMatcher == null ? FieldMatcher.ALL : fieldMatcher;
+    }
+
+    private DefaultDataDefinition(DefaultDataDefinition copy, HostMatcher hostMatcher, TypeMatcher typeMatcher,
+            FieldMatcher fieldMatcher) {
+        this(hostMatcher, typeMatcher, fieldMatcher, copy.getStatistic(), copy.usesSecondaryYAxis());
+
+        this.hostTransformers = copy.hostTransformers == null ? null : new java.util.HashMap<String, NameTransformer>(
+                copy.hostTransformers);
+        this.typeTransformers = copy.typeTransformers == null ? null : new java.util.HashMap<String, NameTransformer>(
+                copy.typeTransformers);
+        this.fieldTransformers = copy.fieldTransformers == null ? null
+                : new java.util.HashMap<String, NameTransformer>(copy.fieldTransformers);
     }
 
     public void addHostnameTransformer(String hostname, NameTransformer transformer) {
@@ -197,8 +208,7 @@ public final class DefaultDataDefinition extends DataDefinition {
                 return this;
             }
             else {
-                return new DefaultDataDefinition(matcher, this.typeMatcher, this.fieldMatcher, this.getStatistic(),
-                        this.usesSecondaryYAxis());
+                return new DefaultDataDefinition(this, matcher, this.typeMatcher, this.fieldMatcher);
             }
         }
         else {
@@ -212,8 +222,8 @@ public final class DefaultDataDefinition extends DataDefinition {
                 return this;
             }
             else {
-                return new DefaultDataDefinition(this.hostMatcher, matcher, this.fieldMatcher, this.getStatistic(),
-                        this.usesSecondaryYAxis());
+                return new DefaultDataDefinition(this, this.hostMatcher, matcher, this.fieldMatcher);
+
             }
         }
         else {
@@ -227,8 +237,7 @@ public final class DefaultDataDefinition extends DataDefinition {
                 return this;
             }
             else {
-                return new DefaultDataDefinition(this.hostMatcher, this.typeMatcher, matcher, this.getStatistic(),
-                        this.usesSecondaryYAxis());
+                return new DefaultDataDefinition(this, this.hostMatcher, this.typeMatcher, matcher);
             }
         }
         else {
