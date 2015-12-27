@@ -67,6 +67,14 @@ final class ReportSplitPane extends ChartSplitPane {
         createReportPanel(com.ibm.nmon.report.ReportCache.DEFAULT_SUMMARY_CHARTS_KEY);
     }
 
+    void loadDefaultIOStatReport() {
+        createReportPanel(com.ibm.nmon.report.ReportCache.DEFAULT_IOSTAT_CHARTS_KEY);
+    }
+    
+    void loadDefaultIOStatDiskDataReport() {
+        createReportPanel(com.ibm.nmon.report.ReportCache.DEFAULT_IOSTAT_DISKDATA_CHARTS_KEY);
+    }
+
     private void createReportPanel(String cacheKey) {
         setTopComponent(null);
         dispose();

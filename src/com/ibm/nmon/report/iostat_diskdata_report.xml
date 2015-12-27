@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- this report must be multiplexed across fields -->
+<charts>
+  <linechart name="Disk Wait" subtitledBy="FIELD" shortName="Disk Wait" linesNamedBy="TYPE" stacked="TRUE">
+    <yAxis label="ms" />
+    <data>
+      <type name="r_await" alias="Reading" />
+    </data>
+    <data>
+      <type name="w_await" alias="Writing" />
+    </data>
+  </linechart>
+
+  <linechart name="Data Rate" subtitledBy="FIELD" shortName="Data Rate" linesNamedBy="TYPE" stacked="TRUE">
+    <yAxis label="MB/s" />
+    <data>
+      <type name="rMB/s" alias="Read" />
+    </data>
+    <data>
+      <type name="wMB/s" alias="Write" />
+    </data>
+  </linechart>
+</charts>

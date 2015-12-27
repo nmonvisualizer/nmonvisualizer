@@ -1,0 +1,92 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<charts>
+  <linechart name="CPU" shortName="CPU" stacked="true">
+    <yAxis label="% CPU" asPercent="true" />
+    <data>
+      <type name="IOStat CPU" />
+    </data>
+  </linechart>
+
+  <linechart name="Disk Busy" shortName="Busy">
+    <yAxis label="%" asPercent="true" />
+    <data>
+      <type name="%util" />
+    </data>
+  </linechart>
+
+  <linechart name="Disk Wait" shortName="Disk Wait">
+    <yAxis label="ms" />
+    <data>
+      <type name="await" />
+    </data>
+  </linechart>
+
+  <linechart name="Disk Wait (Read)" shortName="Read Wait">
+    <yAxis label="ms" />
+    <data>
+      <type name="r_await" />
+    </data>
+  </linechart>
+
+  <linechart name="Disk Wait (Write)" shortName="Wrte Wait">
+    <yAxis label="ms" />
+    <data>
+      <type name="w_await" />
+    </data>
+  </linechart>
+
+  <linechart name="Reads" shortName="Reads">
+    <yAxis label="per second" />
+    <data>
+      <type name="r/s" />
+    </data>
+  </linechart>
+
+  <linechart name="Writes" shortName="Writes">
+    <yAxis label="per second" />
+    <data>
+      <type name="w/s" />
+    </data>
+  </linechart>
+
+  <linechart name="Read MB" shortName="ReadMB">
+    <yAxis label="MB/s" />
+    <data>
+      <type name="rMB/s" />
+    </data>
+  </linechart>
+
+  <linechart name="Write MB" shortName="WriteMB">
+    <yAxis label="MB/s" />
+    <data>
+      <type name="wMB/s" />
+    </data>
+  </linechart>
+
+  <linechart name="Reads Queued" shortName="ReadQ">
+    <yAxis label="reads queued/s" />
+    <data>
+      <type name="rrqm/s" />
+    </data>
+  </linechart>
+
+  <linechart name="Writes Queued" shortName="WriteQ">
+    <yAxis label="writes queued/s" />
+    <data>
+      <type name="wrqm/s" />
+    </data>
+  </linechart>
+
+  <barchart name="Disk Queue Length" shortName="Disk Queue" categoriesNamedBy="FIELD" barsNamedBy="STAT" stacked="true" subtractionNeeded="true">
+    <yAxis label="Length" />
+    <data stat="MINIMUM">
+      <type name="avgqu-sz" />
+    </data>
+    <data stat="AVERAGE">
+      <type name="avgqu-sz" />
+    </data>
+    <data stat="MAXIMUM">
+      <type name="avgqu-sz" />
+    </data>
+  </barchart>
+</charts>

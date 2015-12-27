@@ -45,8 +45,8 @@ import com.ibm.nmon.gui.file.GUIFileChooser;
 import com.ibm.nmon.gui.Styles;
 
 /**
- * Window for displaying a custom set of charts. Includes a list of processed datasets (systems) on
- * the left and a chart on the right.
+ * Window for displaying a custom set of charts. Includes a list of processed datasets (systems) on the left and a chart
+ * on the right.
  */
 public final class ReportFrame extends JFrame implements DataSetListener, PropertyChangeListener, AnnotationListener {
     private static final long serialVersionUID = -2870624156130798498L;
@@ -372,6 +372,21 @@ public final class ReportFrame extends JFrame implements DataSetListener, Proper
         reportSplitPane.loadDefaultSummaryReport();
 
         setTitle("Default All Systems Report");
+
+        configureReport();
+    }
+
+    void loadDefaultIOStatReport() {
+        reportSplitPane.loadDefaultIOStatReport();
+        setTitle("Default IOStat Report");
+
+        configureReport();
+    }
+
+    void loadDefaultIOStatDiskDataReport() {
+        reportSplitPane.loadDefaultIOStatDiskDataReport();
+
+        setTitle("Default IOStat Disk Data Report");
 
         configureReport();
     }

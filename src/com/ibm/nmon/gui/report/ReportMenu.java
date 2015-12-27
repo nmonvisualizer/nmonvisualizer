@@ -81,6 +81,32 @@ final class ReportMenu extends JMenuBar {
 
         loadDefaults.add(item);
 
+        loadDefaults.addSeparator();
+
+        item = new JMenuItem("IOStat Report");
+        item.setMnemonic('i');
+        item.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                ReportMenu.this.parent.loadDefaultIOStatReport();
+                save.setEnabled(false);
+            }
+        });
+
+        loadDefaults.add(item);
+
+        item = new JMenuItem("IOStat Disk Data Report");
+        item.setMnemonic('k');
+        item.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                ReportMenu.this.parent.loadDefaultIOStatDiskDataReport();
+                save.setEnabled(false);
+            }
+        });
+
+        loadDefaults.add(item);
+
         save = new JMenuItem("Save...");
         save.setMnemonic('s');
         save.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_S, InputEvent.CTRL_DOWN_MASK));

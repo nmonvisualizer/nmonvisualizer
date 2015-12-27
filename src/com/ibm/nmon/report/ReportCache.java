@@ -41,6 +41,8 @@ public final class ReportCache {
     public static final String DEFAULT_SUMMARY_CHARTS_KEY = "summary";
     public static final String DEFAULT_INTERVAL_CHARTS_KEY = "interval";
     public static final String DEFAULT_DATASET_CHARTS_KEY = "dataset";
+    public static final String DEFAULT_IOSTAT_CHARTS_KEY = "iostat";
+    public static final String DEFAULT_IOSTAT_DISKDATA_CHARTS_KEY = "iostat_disk";
 
     private final ChartDefinitionParser parser = new ChartDefinitionParser();
 
@@ -56,6 +58,10 @@ public final class ReportCache {
                     "/com/ibm/nmon/report/summary_all_intervals.xml")));
             reports.put(DEFAULT_DATASET_CHARTS_KEY,
                     parser.parseCharts(getClass().getResourceAsStream("/com/ibm/nmon/report/dataset_report.xml")));
+            reports.put(DEFAULT_IOSTAT_CHARTS_KEY,
+                    parser.parseCharts(getClass().getResourceAsStream("/com/ibm/nmon/report/iostat_report.xml")));
+            reports.put(DEFAULT_IOSTAT_DISKDATA_CHARTS_KEY, parser.parseCharts(getClass().getResourceAsStream(
+                    "/com/ibm/nmon/report/iostat_diskdata_report.xml")));
         }
         catch (IOException e) {
             LOGGER.error("cannot parse default report definition xmls", e);
@@ -164,8 +170,7 @@ public final class ReportCache {
                     for (DataType type : dataDefinition.getMatchingTypes(data)) {
                         BaseChartDefinition newChartDefinition = copyChart(chartDefinition);
 
-                        // short name used as filename and/or tabname, so make sure it
-                        // is unique
+                        // short name used as filename and/or tabname, so make sure it is unique
                         newChartDefinition.setShortName(chartDefinition.getShortName() + "_"
                                 + dataDefinition.renameType(type));
 
@@ -249,7 +254,7 @@ public final class ReportCache {
 
                                 multiplexedChartDefinitions.put(name, newChartDefinition);
                             }
-                            
+
                             DataDefinition newData = null;
 
                             if (dataDefinition instanceof DefaultDataDefinition) {
