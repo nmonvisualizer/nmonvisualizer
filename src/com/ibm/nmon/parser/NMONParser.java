@@ -22,8 +22,7 @@ import com.ibm.nmon.data.transform.*;
 import com.ibm.nmon.util.DataHelper;
 
 /**
- * A parser for NMON files. The result of a successfully parsed file will be a populated
- * {@link NMONDataSet} object.
+ * A parser for NMON files. The result of a successfully parsed file will be a populated {@link NMONDataSet} object.
  */
 public final class NMONParser {
     private static final Logger LOGGER = org.slf4j.LoggerFactory.getLogger(NMONParser.class);
@@ -416,6 +415,10 @@ public final class NMONParser {
     private void parseBBBP(String[] values) {
         // ignore header lines that only have BBBP, line number, info id
         if (values.length == 4) {
+            if (values[3].charAt(0) == '\t') {
+                return;
+            }
+
             String command = DataHelper.newString(values[2]);
             StringBuilder builder = systemInfo.get(command);
 
@@ -427,8 +430,13 @@ public final class NMONParser {
                 builder.append('\n');
             }
 
-            // remove leading and trailing "
-            builder.append(values[3], 1, values[3].length() - 1);
+            if (values[3].charAt(0) == '"') {
+                // remove leading and trailing "
+                builder.append(values[3], 1, values[3].length() - 1);
+            }
+            else {
+                builder.append(values[3]);
+            }
         }
     }
 
