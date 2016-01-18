@@ -148,15 +148,7 @@ public final class LineChartAnnotationDialog extends GUIDialog {
             xAxisTime = new JSpinner(new SpinnerDateModel(new Date((long) x), null, null, Calendar.MINUTE));
             ((DateEditor) xAxisTime.getEditor()).getFormat().setTimeZone(gui.getDisplayTimeZone());
 
-            double range = xyPlot.getDomainAxis().getUpperBound() - xyPlot.getDomainAxis().getLowerBound();
-
-            if (range > (86400 * 1000)) {
-                xAxisTime.setEditor(new DateEditor(xAxisTime, Styles.DATE_FORMAT_STRING));
-            }
-            else {
-                xAxisTime.setEditor(new DateEditor(xAxisTime, Styles.DATE_FORMAT_STRING_SHORT));
-            }
-
+            xAxisTime.setEditor(new DateEditor(xAxisTime, Styles.DATE_FORMAT_STRING_WITH_YEAR));
             xAxisTime.addChangeListener(annotationUpdater);
 
             xAxisValue = null;
