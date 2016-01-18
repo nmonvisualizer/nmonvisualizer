@@ -205,9 +205,11 @@ public final class ReportGenerator extends NMONVisualizerApp {
 
         boolean createCharts = true;
 
-        if (!summaryCharts && !dataSetCharts && customDataCharts.isEmpty() && customSummaryCharts.isEmpty()) {
+        if (!summaryCharts && !dataSetCharts && customDataCharts.isEmpty() && customSummaryCharts.isEmpty()
+                && multiplexedFieldCharts.isEmpty() && multiplexedTypeCharts.isEmpty()) {
             System.out.println("--" + "nodata" + ", " + "--" + "nosummary"
-                    + " were specifed and no custom chart definitions (-d or -a) were given: no charts will be output");
+                    + " were specifed and no custom chart definitions" + " (-d, -a, --mf or --mt)"
+                    + " were given: no charts will be output");
             createCharts = false;
         }
 

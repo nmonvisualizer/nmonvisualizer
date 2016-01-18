@@ -396,7 +396,7 @@
       <type regex="CPU0?0?(\d*)" />
       <field name="CPU%" alias="% CPU" />
     </data>
-    
+
     <data>
       <host os="PERFMON" />
       <type regex="Processor \(((?!Total).*)\)" />
