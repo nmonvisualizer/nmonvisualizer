@@ -29,9 +29,8 @@ import com.ibm.nmon.util.TimeZoneFactory;
 import com.ibm.nmon.file.CombinedFileFilter;
 
 /**
- * Main application base class responsible for parsing and managing {@link DataSet DataSets} and
- * {@link AnalysisRecord AnalysisRecords}; managing intervals, times and time zones; and managing
- * application level properties.
+ * Main application base class responsible for parsing and managing {@link DataSet DataSets} and {@link AnalysisRecord
+ * AnalysisRecords}; managing intervals, times and time zones; and managing application level properties.
  * 
  * @see IntervalManager
  * @see NMONParser
@@ -46,6 +45,7 @@ public abstract class NMONVisualizerApp implements IntervalListener {
     private final JSONParser jsonParser;
     private final HATJParser hatJParser;
     private final PerfmonParser perfmonParser;
+    private final TopasOutParser topasoutParser;
 
     private HostRenamer hostRenamer;
 
@@ -75,6 +75,7 @@ public abstract class NMONVisualizerApp implements IntervalListener {
         jsonParser = new JSONParser();
         hatJParser = new HATJParser();
         perfmonParser = new PerfmonParser();
+        topasoutParser = new TopasOutParser(nmonParser);
 
         TimeZone defaultTz = TimeZone.getDefault();
 
@@ -110,15 +111,14 @@ public abstract class NMONVisualizerApp implements IntervalListener {
      * Parse the given file, if possible.
      * </p>
      * <p>
-     * This method uses {@link SystemDataSet SystemDataSets} to store the parsed data. If multiple
-     * files from the same host are parsed, the data is merged into a single data set. There will
-     * never be multiple data sets stored by this class from the same host.
+     * This method uses {@link SystemDataSet SystemDataSets} to store the parsed data. If multiple files from the same
+     * host are parsed, the data is merged into a single data set. There will never be multiple data sets stored by this
+     * class from the same host.
      * </p>
      * <p>
-     * This time zone passed to this file should be the time zone where the data was
-     * <em>collected</em> not where the application is running. All parsed files should line up to
-     * same absolute epoch time. The {@link #setDisplayTimeZone(TimeZone) displayed time zone} will
-     * control how this time is presented to end users.
+     * This time zone passed to this file should be the time zone where the data was <em>collected</em> not where the
+     * application is running. All parsed files should line up to same absolute epoch time. The
+     * {@link #setDisplayTimeZone(TimeZone) displayed time zone} will control how this time is presented to end users.
      */
     public final void parse(String fileToParse, TimeZone timeZone) throws Exception {
         fileToParse = fileToParse.replace('\\', '/');
@@ -209,6 +209,9 @@ public abstract class NMONVisualizerApp implements IntervalListener {
         }
         else if (filter.getPerfmonFileFilter().accept(fileToParse)) {
             data = perfmonParser.parse(fileToParse, getBooleanProperty("scaleProcessesByCPUs"));
+        }
+        else if (filter.getTopasOutFileFilter().accept(fileToParse)) {
+            data = topasoutParser.parse(fileToParse, timeZone, getBooleanProperty("scaleProcessesByCPUs"));
         }
         else {
             throw new IllegalArgumentException("cannot parse " + fileToParse + ": unknown file type");
@@ -366,8 +369,7 @@ public abstract class NMONVisualizerApp implements IntervalListener {
     }
 
     /**
-     * @return the maximum time defined by any parsed DataSet or <code>Long.MAX_VALUE</code> if
-     *         nothing has been parsed
+     * @return the maximum time defined by any parsed DataSet or <code>Long.MAX_VALUE</code> if nothing has been parsed
      */
     public final long getMaxSystemTime() {
         return maxSystemTime;
@@ -390,8 +392,8 @@ public abstract class NMONVisualizerApp implements IntervalListener {
     }
 
     /**
-     * Set an application level property and fire a {@link PropertyChangeEvent} for the associated
-     * property. No attempt is made to see if the property actually changed.
+     * Set an application level property and fire a {@link PropertyChangeEvent} for the associated property. No attempt
+     * is made to see if the property actually changed.
      */
     public final void setProperty(String name, String value) {
         String old = properties.getProperty(name);

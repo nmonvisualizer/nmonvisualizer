@@ -8,7 +8,14 @@ import com.ibm.nmon.data.DataType;
 public final class AIXLPARTransform implements DataTransform {
     @Override
     public DataType buildDataType(String id, String subId, String name, String... fields) {
-        String[] newFields = new String[fields.length + 2];
+        String[] newFields = null;
+
+        if (java.util.Arrays.binarySearch(fields, "Folded") != -1) {
+            newFields = new String[fields.length + 2];
+        }
+        else {
+            newFields = new String[fields.length + 1];
+        }
 
         for (int i = 0, j = 0; i < fields.length; i++, j++) {
             String field = fields[i];

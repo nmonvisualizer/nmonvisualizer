@@ -5,6 +5,7 @@ import org.slf4j.Logger;
 import java.io.File;
 import java.io.IOException;
 
+import java.io.Reader;
 import java.io.LineNumberReader;
 
 import java.text.SimpleDateFormat;
@@ -62,14 +63,19 @@ public final class NMONParser {
     }
 
     public NMONDataSet parse(String filename, TimeZone timeZone, boolean scaleProcessesByCPU) throws IOException {
+        return parse(filename, new java.io.FileReader(filename), timeZone, scaleProcessesByCPU);
+    }
+
+    public NMONDataSet parse(String datasetName, Reader reader, TimeZone timeZone, boolean scaleProcessesByCPU)
+            throws IOException {
         long start = System.nanoTime();
 
         this.scaleProcessesByCPU = scaleProcessesByCPU;
 
-        in = new LineNumberReader(new java.io.FileReader(filename));
+        in = new LineNumberReader(reader);
 
         try {
-            data = new NMONDataSet(filename);
+            data = new NMONDataSet(datasetName);
 
             NMON_FORMAT.setTimeZone(timeZone);
 
@@ -80,7 +86,7 @@ public final class NMONParser {
 
             // no timestamp records after the headers => no other data
             if ((line == null) || !line.startsWith("ZZZZ")) {
-                throw new IOException("file '" + filename + "' does not appear to have any data records");
+                throw new IOException("file '" + datasetName + "' does not appear to have any data records");
             }
             // else line contains the first timestamp record, so start parsing
 
@@ -247,8 +253,8 @@ public final class NMONParser {
     }
 
     private static final java.util.Set<String> IGNORED_TYPES = java.util.Collections
-            .unmodifiableSet(new java.util.HashSet<String>(java.util.Arrays.asList("AVM-IN-MB", "NO-PBUF-COUNT",
-                    "NO-PSBUF-COUNT", "NO-JFS2-FSBUF-COUNT")));
+            .unmodifiableSet(new java.util.HashSet<String>(
+                    java.util.Arrays.asList("AVM-IN-MB", "NO-PBUF-COUNT", "NO-PSBUF-COUNT", "NO-JFS2-FSBUF-COUNT")));
 
     private void parseLine(String line) {
         if (line.startsWith("ZZZZ")) {
@@ -385,8 +391,8 @@ public final class NMONParser {
                     String temp = data.getMetadata("interval");
 
                     if (temp == null) {
-                        LOGGER.error("time {} is less than previous {} at line {}"
-                                + "; no interval defined in AAA records",
+                        LOGGER.error(
+                                "time {} is less than previous {} at line {}" + "; no interval defined in AAA records",
                                 new Object[] { time, previous, in.getLineNumber() });
                         throw new IllegalArgumentException("time is less than previous in ZZZZ " + values[1]);
                     }
@@ -394,9 +400,10 @@ public final class NMONParser {
                         int interval = Integer.parseInt(temp);
                         time = previous + (interval * 1000); // interval is in seconds
 
-                        LOGGER.warn("time {} is less than previous {} at line {}"
-                                + ", guessing at next time by using an interval of {}s", new Object[] { time, previous,
-                                in.getLineNumber(), interval });
+                        LOGGER.warn(
+                                "time {} is less than previous {} at line {}"
+                                        + ", guessing at next time by using an interval of {}s",
+                                new Object[] { time, previous, in.getLineNumber(), interval });
                     }
                 }
 
@@ -523,9 +530,9 @@ public final class NMONParser {
             System.arraycopy(recordData, 0, newData, 0, recordData.length);
 
             // assume double arrays default to 0, so no need to fill in the rest
-            LOGGER.warn(
-                    "{}: DataType {} defines {} fields but there are only {} values; missing values set to 0",
-                    new Object[] { currentRecord.getTimestamp(), type.getId(), type.getFieldCount(), recordData.length });
+            LOGGER.warn("{}: DataType {} defines {} fields but there are only {} values; missing values set to 0",
+                    new Object[] { currentRecord.getTimestamp(), type.getId(), type.getFieldCount(),
+                            recordData.length });
 
             recordData = newData;
 
