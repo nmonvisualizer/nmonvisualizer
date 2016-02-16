@@ -48,6 +48,7 @@ public final class TopasOutParser {
             // LinkedHashMap so insertion order is maintained; removes need to reparse headers later
             Map<String, List<String>> headersToLines = new java.util.LinkedHashMap<String, List<String>>(32);
 
+            List<String> headers = new java.util.ArrayList<String>(32);
             List<String> timestamps = new java.util.ArrayList<String>(128);
 
             String line = null;
@@ -58,7 +59,7 @@ public final class TopasOutParser {
                 String header = line.substring(0, idx);
 
                 if ("AAA".equals(header)) {
-                    // put all the AAA records at the top
+                    // put all the AAA records at the top by writing them out now
                     writer.write(line);
                     writer.write('\n');
                 }
@@ -80,18 +81,24 @@ public final class TopasOutParser {
                     }
                     else {
                         if ("LPAR".equals(header)) {
+                            // fix capitalization of LPAR data to match NMON
                             line = "LPAR,LPAR Stats,PhysicalCPU,virtualCPUs,logicalCPUs,poolCPUs,entitled,weight,PoolIdle,usedAllCPU%,usedPoolCPU%,SharedCPU";
                         }
 
-                        writer.write(line);
-                        writer.write('\n');
+                        headers.add(line);
                     }
                 }
             }
 
+            LOGGER.debug("found {} " + "data types", headers.size());
             LOGGER.debug("found {} " + "ZZZZ timestamps", timestamps.size());
             LOGGER.debug("found {} " + "data types", headersToLines.size());
 
+            for (String header : headers) {
+                writer.write(header);
+                writer.write('\n');
+            }
+            
             // output each timestamp, then all the data for that time
             // assume all arrays are the same size, i.e. there is data at each timestamp for all values
             for (int i = 0; i < timestamps.size(); i++) {
