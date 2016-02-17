@@ -5,7 +5,8 @@ public final class TopasOutFileFilter extends BaseFileFilter {
     public boolean accept(String pathname) {
         String name = pathname.toLowerCase();
 
-        return name.contains("topas");
+        return name.contains("topas")
+                && !(name.endsWith(".zip") || name.endsWith(".gz") || name.endsWith(".tar") || name.endsWith(".7z"));
     }
 
     public TopasOutFileFilter() {}

@@ -14,6 +14,7 @@ import com.ibm.nmon.gui.main.NMONVisualizerGui;
 
 import com.ibm.nmon.data.DataSet;
 import com.ibm.nmon.data.DataType;
+import com.ibm.nmon.data.SubDataType;
 import com.ibm.nmon.data.ProcessDataType;
 
 import com.ibm.nmon.data.definition.ExactDataDefinition;
@@ -312,7 +313,19 @@ public final class DataTypeChartPanel extends LineChartPanel implements Interval
         tempTypes.put("FCXFERIN", "Frames / s");
         tempTypes.put("FCXFEROUT", "Frames / s");
         tempTypes.put("RESP", "Seconds");
-
+        tempTypes.put("IOStat CPU", "%");
+        tempTypes.put(SubDataType.buildId("IOStat Device", "%util"), "% Utilization");
+        tempTypes.put(SubDataType.buildId("IOStat Device", "rMB/s"), "MB / s");
+        tempTypes.put(SubDataType.buildId("IOStat Device", "wMB/s"), "MB / s");
+        tempTypes.put(SubDataType.buildId("IOStat Device", "await"), "ms");
+        tempTypes.put(SubDataType.buildId("IOStat Device", "r_await"), "ms");
+        tempTypes.put(SubDataType.buildId("IOStat Device", "w_await"), "ms");
+        tempTypes.put(SubDataType.buildId("IOStat Device", "svctm"), "ms");
+        tempTypes.put(SubDataType.buildId("IOStat ZPool", "alloc"), "GB");
+        tempTypes.put(SubDataType.buildId("IOStat ZPool", "free"), "GB");
+        tempTypes.put(SubDataType.buildId("IOStat ZPool", "rMB/s"), "MB / s");
+        tempTypes.put(SubDataType.buildId("IOStat ZPool", "wMB/s"), "MB / s");
+        
         tempFields.put("CPUs", "Count");
         tempFields.put("CPU%", "% CPU");
         tempFields.put("User%", "% CPU");

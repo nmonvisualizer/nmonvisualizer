@@ -46,6 +46,7 @@ public abstract class NMONVisualizerApp implements IntervalListener {
     private final HATJParser hatJParser;
     private final PerfmonParser perfmonParser;
     private final TopasOutParser topasoutParser;
+    private final ZPoolIOStatParser zpoolParser;
 
     private HostRenamer hostRenamer;
 
@@ -76,6 +77,7 @@ public abstract class NMONVisualizerApp implements IntervalListener {
         hatJParser = new HATJParser();
         perfmonParser = new PerfmonParser();
         topasoutParser = new TopasOutParser(nmonParser);
+        zpoolParser = new ZPoolIOStatParser();
 
         TimeZone defaultTz = TimeZone.getDefault();
 
@@ -158,10 +160,10 @@ public abstract class NMONVisualizerApp implements IntervalListener {
             data = iostatParser.parse(fileToParse, getDisplayTimeZone());
 
             String hostname = data.getHostname();
-            boolean verifyDate = "AIX".equals(((com.ibm.nmon.data.BasicDataSet) data).getMetadata("OS"));
+            boolean verifyData = "AIX".equals(((com.ibm.nmon.data.BasicDataSet) data).getMetadata("OS"));
 
             // assume AIX, which also needs a parsed date
-            if (hostname.equals(IOStatParser.DEFAULT_HOSTNAME) || verifyDate) {
+            if (hostname.equals(IOStatParser.DEFAULT_HOSTNAME) || verifyData) {
                 Object[] values = getDataForIOStatParse(fileToParse, hostname);
 
                 if (values == null) {
@@ -209,6 +211,9 @@ public abstract class NMONVisualizerApp implements IntervalListener {
         }
         else if (filter.getPerfmonFileFilter().accept(fileToParse)) {
             data = perfmonParser.parse(fileToParse, getBooleanProperty("scaleProcessesByCPUs"));
+        }
+        else if (filter.getZPoolIOStatOutFileFilter().accept(fileToParse)) {
+            data = zpoolParser.parse(fileToParse);
         }
         else if (filter.getTopasOutFileFilter().accept(fileToParse)) {
             data = topasoutParser.parse(fileToParse, timeZone, getBooleanProperty("scaleProcessesByCPUs"));
