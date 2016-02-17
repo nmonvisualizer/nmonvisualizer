@@ -214,6 +214,8 @@ public abstract class NMONVisualizerApp implements IntervalListener {
         }
         else if (filter.getZPoolIOStatOutFileFilter().accept(fileToParse)) {
             data = zpoolParser.parse(fileToParse);
+
+            data.setHostname(getDataForZPoolIOStatParse(fileToParse));
         }
         else if (filter.getTopasOutFileFilter().accept(fileToParse)) {
             data = topasoutParser.parse(fileToParse, timeZone, getBooleanProperty("scaleProcessesByCPUs"));
@@ -271,6 +273,17 @@ public abstract class NMONVisualizerApp implements IntervalListener {
     protected Object[] getDataForIOStatParse(String fileToParse, String hostname) {
         // hostname, date
         return new Object[] { IOStatParser.DEFAULT_HOSTNAME, IOStatParser.getDefaultDate() };
+    }
+
+    protected String getDataForZPoolIOStatParse(String fileToParse) {
+        // default to file name
+        int idx = fileToParse.lastIndexOf('/');
+
+        if (idx != -1) {
+            fileToParse = fileToParse.substring(idx + 1);
+        }
+
+        return fileToParse;
     }
 
     protected Object[] getDataForHATJParse(String fileToParse, String hostname) {

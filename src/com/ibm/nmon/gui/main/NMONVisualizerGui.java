@@ -38,9 +38,7 @@ import com.ibm.nmon.gui.util.LogViewerDialog;
 import com.ibm.nmon.parser.HATJParser;
 import com.ibm.nmon.parser.IOStatParser;
 
-import com.ibm.nmon.gui.parse.HATJPostParser;
-import com.ibm.nmon.gui.parse.IOStatPostParser;
-import com.ibm.nmon.gui.parse.VerboseGCPreParser;
+import com.ibm.nmon.gui.parse.*;
 
 import com.ibm.nmon.report.ReportCache;
 
@@ -60,10 +58,8 @@ public final class NMONVisualizerGui extends NMONVisualizerApp {
             try {
                 int fontSize = Integer.parseInt(temp);
 
-                javax.swing.UIManager.getLookAndFeelDefaults()
-                        .put("defaultFont",
-                                new javax.swing.plaf.FontUIResource(new java.awt.Font("Dialog", java.awt.Font.PLAIN,
-                                        fontSize)));
+                javax.swing.UIManager.getLookAndFeelDefaults().put("defaultFont", new javax.swing.plaf.FontUIResource(
+                        new java.awt.Font("Dialog", java.awt.Font.PLAIN, fontSize)));
             }
             catch (NumberFormatException nfe) {
                 System.err.println("ignoring -DfontSize=" + temp + "; it must be an integer");
@@ -92,8 +88,8 @@ public final class NMONVisualizerGui extends NMONVisualizerApp {
 
                         FileHelper.recurseDirectories(files, CombinedFileFilter.getInstance(false), toParse);
 
-                        new Thread(new ParserRunner(gui, toParse, gui.getDisplayTimeZone()), getClass().getName()
-                                + " Parser").start();
+                        new Thread(new ParserRunner(gui, toParse, gui.getDisplayTimeZone()),
+                                getClass().getName() + " Parser").start();
                     }
                 }
                 catch (Exception e) {
@@ -115,6 +111,7 @@ public final class NMONVisualizerGui extends NMONVisualizerApp {
 
     private VerboseGCPreParser gcPreParser;
     private IOStatPostParser ioStatPostParser;
+    private ZPoolIOStatPostParser zpoolPostParser;
     private HATJPostParser hatJPostParser;
 
     private final GranularityHelper granularityHelper;
@@ -431,6 +428,34 @@ public final class NMONVisualizerGui extends NMONVisualizerApp {
         }
         else {
             return new Object[] { ioStatPostParser.getHostname(), ioStatPostParser.getDate() };
+        }
+    }
+
+    @Override
+    protected String getDataForZPoolIOStatParse(final String fileToParse) {
+        if (zpoolPostParser == null) {
+            zpoolPostParser = new ZPoolIOStatPostParser(this);
+        }
+
+        try {
+            // wait here so parsing does not continue in the background, possibly throwing up more
+            // postparser dialogs
+            SwingUtilities.invokeAndWait(new Runnable() {
+                @Override
+                public void run() {
+                    zpoolPostParser.parseDataSet(fileToParse);
+                }
+            });
+        }
+        catch (Exception e) {
+            logger.error("cannot get hostname for file '{}'", fileToParse, e);
+        }
+
+        if (zpoolPostParser.isSkipped()) {
+            return null;
+        }
+        else {
+            return zpoolPostParser.getHostname();
         }
     }
 
