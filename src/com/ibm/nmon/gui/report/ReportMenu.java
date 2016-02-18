@@ -63,7 +63,7 @@ final class ReportMenu extends JMenuBar {
             @Override
             public void actionPerformed(ActionEvent e) {
                 ReportMenu.this.parent.loadDefaultDataSetReport();
-                save.setEnabled(false);
+                save.setEnabled(true);
             }
         });
 
@@ -75,7 +75,7 @@ final class ReportMenu extends JMenuBar {
             @Override
             public void actionPerformed(ActionEvent e) {
                 ReportMenu.this.parent.loadDefaultSummaryReport();
-                save.setEnabled(false);
+                save.setEnabled(true);
             }
         });
 
@@ -89,7 +89,7 @@ final class ReportMenu extends JMenuBar {
             @Override
             public void actionPerformed(ActionEvent e) {
                 ReportMenu.this.parent.loadDefaultIOStatReport();
-                save.setEnabled(false);
+                save.setEnabled(true);
             }
         });
 
@@ -101,7 +101,7 @@ final class ReportMenu extends JMenuBar {
             @Override
             public void actionPerformed(ActionEvent e) {
                 ReportMenu.this.parent.loadDefaultIOStatDiskDataReport();
-                save.setEnabled(false);
+                save.setEnabled(true);
             }
         });
 

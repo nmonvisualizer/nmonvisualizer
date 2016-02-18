@@ -123,20 +123,17 @@ public class BaseChartPanel extends ChartPanel implements PropertyChangeListener
 
     /**
      * <p>
-     * Visually indicate on the that the element (bar or line) corresponding to the
-     * <code>Dataset's</code> given row and column.
+     * Visually indicate on the that the element (bar or line) corresponding to the <code>Dataset's</code> given row and
+     * column.
      * </p>
      * 
      * <p>
-     * This method <em>should not</em> fire a property change event since this is meant to be called
-     * in response to other user input. This function should toggle already highlighted elements to
-     * an unhighlighted state.
+     * This method <em>should not</em> fire a property change event since this is meant to be called in response to
+     * other user input. This function should toggle already highlighted elements to an unhighlighted state.
      * </p>
      * 
-     * @param row
-     *            the chart's dataset row
-     * @param column
-     *            the chart's dataset column
+     * @param row the chart's dataset row
+     * @param column the chart's dataset column
      */
     public void highlightElement(int row, int column) {}
 
@@ -148,8 +145,7 @@ public class BaseChartPanel extends ChartPanel implements PropertyChangeListener
     public void setElementVisible(int row, int column, boolean visible) {};
 
     /**
-     * Get the dataset associated with this chart or <code>null</code> if there the chart does not
-     * have one.
+     * Get the dataset associated with this chart or <code>null</code> if there the chart does not have one.
      */
     public final DataTupleDataset getDataset() {
         if (getChart() == null) {
@@ -232,7 +228,8 @@ public class BaseChartPanel extends ChartPanel implements PropertyChangeListener
         GUIFileChooser fileChooser = new GUIFileChooser(gui, "Select Save Location");
         fileChooser.setSelectedFile(chartFile);
 
-        ExtensionFileFilter filter = new ExtensionFileFilter(localizationResources.getString("PNG_Image_Files"), ".png");
+        ExtensionFileFilter filter = new ExtensionFileFilter(localizationResources.getString("PNG_Image_Files"),
+                ".png");
         fileChooser.addChoosableFileFilter(filter);
 
         if (fileChooser.showDialog(this, "Save") == JFileChooser.APPROVE_OPTION) {
@@ -245,9 +242,9 @@ public class BaseChartPanel extends ChartPanel implements PropertyChangeListener
             }
 
             if (chartFile.exists()) {
-                int result = JOptionPane.showConfirmDialog(gui.getMainFrame(), "File '" + chartFile.getName()
-                        + "' already exists.\nDo you want to overwrite it?", "Overwrite?",
-                        JOptionPane.OK_CANCEL_OPTION, JOptionPane.QUESTION_MESSAGE);
+                int result = JOptionPane.showConfirmDialog(gui.getMainFrame(),
+                        "File '" + chartFile.getName() + "' already exists.\nDo you want to overwrite it?",
+                        "Overwrite?", JOptionPane.OK_CANCEL_OPTION, JOptionPane.QUESTION_MESSAGE);
 
                 if (result != JOptionPane.OK_OPTION) {
                     return;
@@ -307,7 +304,8 @@ public class BaseChartPanel extends ChartPanel implements PropertyChangeListener
             filename += ".png";
         }
 
-        filename.replace('\n', ' ');
+        filename = filename.replace('\n', ' ');
+        filename = filename.replace(' ', '_');
 
         return filename;
     }
