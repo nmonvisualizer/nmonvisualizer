@@ -126,12 +126,12 @@ public final class ZPoolIOStatParser {
                     String[] fields = new String[diskNames.size()];
                     diskNames.toArray(fields);
 
-                    types.add(new SubDataType("IOStat ZPool", "alloc", "Capacity Allocated", fields));
-                    types.add(new SubDataType("IOStat ZPool", "free", "Capacity Free", fields));
-                    types.add(new SubDataType("IOStat ZPool", "r/s", "reads " + "per second", fields));
-                    types.add(new SubDataType("IOStat ZPool", "w/s", "writes " + "per second", fields));
-                    types.add(new SubDataType("IOStat ZPool", "rMB/s", "MB read " + "per second", fields));
-                    types.add(new SubDataType("IOStat ZPool", "wMB/s", "MB write " + "per second", fields));
+                    types.add(new SubDataType("IOStat ZPool", "alloc", "Capacity Allocated", false, fields));
+                    types.add(new SubDataType("IOStat ZPool", "free", "Capacity Free", false, fields));
+                    types.add(new SubDataType("IOStat ZPool", "r/s", "reads " + "per second", false, fields));
+                    types.add(new SubDataType("IOStat ZPool", "w/s", "writes " + "per second", false, fields));
+                    types.add(new SubDataType("IOStat ZPool", "rMB/s", "MB read " + "per second", false, fields));
+                    types.add(new SubDataType("IOStat ZPool", "wMB/s", "MB write " + "per second", false, fields));
 
                     for (DataType type : types) {
                         data.addType(type);
