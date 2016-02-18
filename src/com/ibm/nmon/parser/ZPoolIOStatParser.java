@@ -30,6 +30,8 @@ public final class ZPoolIOStatParser {
 
     private static final Pattern DATA_SPLITTER = Pattern.compile("\\s+");
 
+    private static final int EXPECTED_DATA_TYPES = 6;
+
     public static final String DEFAULT_HOSTNAME = "zpool";
 
     private LineNumberReader in = null;
@@ -49,7 +51,7 @@ public final class ZPoolIOStatParser {
         // DataType type = new DataType(id, name, fields)
 
         // create a sub data type for each pool, mirror, disk, etc
-        List<DataType> types = new java.util.ArrayList<DataType>(6);
+        List<DataType> types = new java.util.ArrayList<DataType>(EXPECTED_DATA_TYPES);
 
         // track all disks seen and assign unique names
         List<String> diskNames = new java.util.ArrayList<String>(8);
@@ -71,9 +73,11 @@ public final class ZPoolIOStatParser {
                 // ---- separator line
                 discardLine();
 
-                List<List<Double>> values = new java.util.ArrayList<List<Double>>(6);
+                // used to hold all the values for a data record so they can be transposed from disk (row) / metric
+                // (column) to metric (data type) / disk (field)
+                List<List<Double>> values = new java.util.ArrayList<List<Double>>(EXPECTED_DATA_TYPES);
 
-                for (int i = 0; i < 6; i++) {
+                for (int i = 0; i < EXPECTED_DATA_TYPES; i++) {
                     values.add(new java.util.ArrayList<Double>(8));
                 }
 
@@ -116,6 +120,8 @@ public final class ZPoolIOStatParser {
                     if (diskNames.isEmpty()) {
                         throw new IOException("no disks defined in the first data record");
                     }
+
+                    LOGGER.trace("found {} disks: {}", diskNames.size(), diskNames);
 
                     String[] fields = new String[diskNames.size()];
                     diskNames.toArray(fields);
@@ -191,8 +197,6 @@ public final class ZPoolIOStatParser {
             return Double.NaN;
         }
 
-        char last = value.charAt(value.length() - 1);
-
         // operations in thousands, everything else in MB
         int multiplier = 1024;
 
@@ -200,6 +204,8 @@ public final class ZPoolIOStatParser {
             multiplier = 1000;
         }
 
+        // if the last char is not a number, get the power of 1024 / 1000 it represents
+        char last = value.charAt(value.length() - 1);
         int power = 0;
 
         switch (last) {
@@ -235,6 +241,7 @@ public final class ZPoolIOStatParser {
             power = 8;
             value = value.substring(0, value.length() - 1);
             break;
+        // default, do nothing
         }
 
         try {
