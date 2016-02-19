@@ -23,6 +23,9 @@ import com.ibm.nmon.data.SubDataType;
 
 import com.ibm.nmon.util.DataHelper;
 
+/**
+ * Parser for zpool's iostat command. Will parse the data from <code>zpool iostat SAN_ZPOOL -vTd</code>.
+ */
 public final class ZPoolIOStatParser {
     private static final Logger LOGGER = org.slf4j.LoggerFactory.getLogger(ZPoolIOStatParser.class);
 

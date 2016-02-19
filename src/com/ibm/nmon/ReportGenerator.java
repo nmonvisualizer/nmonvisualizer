@@ -57,8 +57,8 @@ public final class ReportGenerator extends NMONVisualizerApp {
 
         try {
             // initialize logging from the classpath properties file
-            java.util.logging.LogManager.getLogManager().readConfiguration(
-                    ReportGenerator.class.getResourceAsStream("/cmdline.logging.properties"));
+            java.util.logging.LogManager.getLogManager()
+                    .readConfiguration(ReportGenerator.class.getResourceAsStream("/cmdline.logging.properties"));
         }
         catch (IOException ioe) {
             System.err.println("cannot initialize logging, will output to System.out");
@@ -207,9 +207,9 @@ public final class ReportGenerator extends NMONVisualizerApp {
 
         if (!summaryCharts && !dataSetCharts && customDataCharts.isEmpty() && customSummaryCharts.isEmpty()
                 && multiplexedFieldCharts.isEmpty() && multiplexedTypeCharts.isEmpty()) {
-            System.out.println("--" + "nodata" + ", " + "--" + "nosummary"
-                    + " were specifed and no custom chart definitions" + " (-d, -a, --mf or --mt)"
-                    + " were given: no charts will be output");
+            System.out.println(
+                    "--" + "nodata" + ", " + "--" + "nosummary" + " were specifed and no custom chart definitions"
+                            + " (-d, -a, --mf or --mt)" + " were given: no charts will be output");
             createCharts = false;
         }
 
@@ -310,8 +310,8 @@ public final class ReportGenerator extends NMONVisualizerApp {
             return TimeHelper.TIMESTAMP_FORMAT_ISO.parse(args[index]).getTime();
         }
         catch (ParseException pe) {
-            throw new IllegalArgumentException("time specified for " + '-' + param + " (" + args[index]
-                    + ") is not valid");
+            throw new IllegalArgumentException(
+                    "time specified for " + '-' + param + " (" + args[index] + ") is not valid");
         }
     }
 
@@ -633,11 +633,12 @@ public final class ReportGenerator extends NMONVisualizerApp {
         return chartsCreated;
     }
 
-    private boolean saveChart(BaseChartDefinition definition, Iterable<? extends DataSet> dataSets, File saveDirectory) {
+    private boolean saveChart(BaseChartDefinition definition, Iterable<? extends DataSet> dataSets,
+            File saveDirectory) {
         JFreeChart chart = factory.createChart(definition, dataSets);
 
         if (chartHasData(chart)) {
-            File chartFile = new File(saveDirectory, definition.getShortName() + ".png");
+            File chartFile = new File(saveDirectory, definition.getShortName().replace(" ", "_") + ".png");
 
             try {
                 ChartUtilities.saveChartAsPNG(chartFile, chart, definition.getWidth(), definition.getHeight());
@@ -785,9 +786,9 @@ public final class ReportGenerator extends NMONVisualizerApp {
         else {
             // use the interval name if possible
             if ("".equals(interval.getName())) {
-                toCreate = new File(outputDirectory, subDirName + '/'
-                        + FILE_TIME_FORMAT.format(new Date(interval.getStart())) + '-'
-                        + FILE_TIME_FORMAT.format(new Date(interval.getEnd())));
+                toCreate = new File(outputDirectory,
+                        subDirName + '/' + FILE_TIME_FORMAT.format(new Date(interval.getStart())) + '-'
+                                + FILE_TIME_FORMAT.format(new Date(interval.getEnd())));
             }
             else {
                 toCreate = new File(outputDirectory, subDirName + '/' + interval.getName());
