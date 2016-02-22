@@ -736,7 +736,7 @@ public final class ReportGenerator extends NMONVisualizerApp {
     }
 
     private void writeChartData(JFreeChart chart, BaseChartDefinition definition, File saveDirectory) {
-        File csvFile = new File(saveDirectory, definition.getShortName() + ".csv");
+        File csvFile = new File(saveDirectory, definition.getShortName().replace(" ", "_") + ".csv");
         FileWriter writer = null;
 
         Plot plot = chart.getPlot();
