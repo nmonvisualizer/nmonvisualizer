@@ -29,7 +29,7 @@ import com.ibm.nmon.util.DataHelper;
 public final class ZPoolIOStatParser {
     private static final Logger LOGGER = org.slf4j.LoggerFactory.getLogger(ZPoolIOStatParser.class);
 
-    private static final SimpleDateFormat TIMESTAMP_FORMAT = new SimpleDateFormat("EEE MMM dd hh:mm:ss Z yyyy");
+    private static final SimpleDateFormat TIMESTAMP_FORMAT = new SimpleDateFormat("EEE MMM dd HH:mm:ss z yyyy");
 
     private static final Pattern DATA_SPLITTER = Pattern.compile("\\s+");
 
