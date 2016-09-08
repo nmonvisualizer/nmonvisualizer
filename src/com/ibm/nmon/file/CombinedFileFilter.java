@@ -61,6 +61,10 @@ public final class CombinedFileFilter implements FileFilter {
         return (TopasOutFileFilter) filters.get(7).getFilter();
     }
 
+    public FIOFileFilter getFIOFileFilter() {
+        return (FIOFileFilter) filters.get(8).getFilter();
+    }
+
     private CombinedFileFilter(boolean acceptDirectories) {
         filters.add(new SwingAndIOFileFilter("NMON Files", new NMONFileFilter(), acceptDirectories));
         filters.add(new SwingAndIOFileFilter("Verbose GC Logs", new GCFileFilter(), acceptDirectories));
@@ -70,6 +74,7 @@ public final class CombinedFileFilter implements FileFilter {
         filters.add(new SwingAndIOFileFilter("Perfmon CSV Files", new PerfmonFileFilter(), acceptDirectories));
         filters.add(new SwingAndIOFileFilter("ZPool IOStat Files", new ZPoolIOStatFileFilter(), acceptDirectories));
         filters.add(new SwingAndIOFileFilter("topasout -a Files", new TopasOutFileFilter(), acceptDirectories));
+        filters.add(new SwingAndIOFileFilter("FIO Files", new FIOFileFilter(), acceptDirectories));
     }
 
     private static final CombinedFileFilter INSTANCE = new CombinedFileFilter(false);

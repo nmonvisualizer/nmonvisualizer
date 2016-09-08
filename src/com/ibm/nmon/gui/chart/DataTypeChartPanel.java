@@ -325,6 +325,10 @@ public final class DataTypeChartPanel extends LineChartPanel implements Interval
         tempTypes.put(SubDataType.buildId("IOStat ZPool", "free"), "GB");
         tempTypes.put(SubDataType.buildId("IOStat ZPool", "rMB/s"), "MB / s");
         tempTypes.put(SubDataType.buildId("IOStat ZPool", "wMB/s"), "MB / s");
+        tempTypes.put("LAT", "μs");
+        tempTypes.put("CLAT", "μs");
+        tempTypes.put("SLAT", "μs");
+        tempTypes.put("BW", "KB / s");
         
         tempFields.put("CPUs", "Count");
         tempFields.put("CPU%", "% CPU");

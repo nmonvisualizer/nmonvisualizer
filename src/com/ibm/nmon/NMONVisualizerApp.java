@@ -46,6 +46,7 @@ public abstract class NMONVisualizerApp implements IntervalListener {
     private final HATJParser hatJParser;
     private final PerfmonParser perfmonParser;
     private final TopasOutParser topasoutParser;
+    private final FIOParser fioParser;
     private final ZPoolIOStatParser zpoolParser;
 
     private HostRenamer hostRenamer;
@@ -77,6 +78,7 @@ public abstract class NMONVisualizerApp implements IntervalListener {
         hatJParser = new HATJParser();
         perfmonParser = new PerfmonParser();
         topasoutParser = new TopasOutParser(nmonParser);
+        fioParser = new FIOParser();
         zpoolParser = new ZPoolIOStatParser();
 
         TimeZone defaultTz = TimeZone.getDefault();
@@ -219,6 +221,9 @@ public abstract class NMONVisualizerApp implements IntervalListener {
         }
         else if (filter.getTopasOutFileFilter().accept(fileToParse)) {
             data = topasoutParser.parse(fileToParse, timeZone, getBooleanProperty("scaleProcessesByCPUs"));
+        }
+        else if (filter.getFIOFileFilter().accept(fileToParse)) {
+            data = fioParser.parse(fileToParse, timeZone);
         }
         else {
             throw new IllegalArgumentException("cannot parse " + fileToParse + ": unknown file type");
