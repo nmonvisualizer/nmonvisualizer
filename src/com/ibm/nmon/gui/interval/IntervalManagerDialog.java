@@ -130,12 +130,12 @@ public final class IntervalManagerDialog extends GUIDialog implements IntervalLi
                 super.setEnabled(b);
 
                 if (b) {
-                    ((JPanel) getContentPane()).getInputMap(JComponent.WHEN_IN_FOCUSED_WINDOW).put(
-                            KeyStroke.getKeyStroke(KeyEvent.VK_S, InputEvent.CTRL_DOWN_MASK), "save");
+                    ((JPanel) getContentPane()).getInputMap(JComponent.WHEN_IN_FOCUSED_WINDOW)
+                            .put(KeyStroke.getKeyStroke(KeyEvent.VK_S, InputEvent.CTRL_DOWN_MASK), "save");
                 }
                 else {
-                    ((JPanel) getContentPane()).getInputMap(JComponent.WHEN_IN_FOCUSED_WINDOW).remove(
-                            KeyStroke.getKeyStroke(KeyEvent.VK_S, InputEvent.CTRL_DOWN_MASK));
+                    ((JPanel) getContentPane()).getInputMap(JComponent.WHEN_IN_FOCUSED_WINDOW)
+                            .remove(KeyStroke.getKeyStroke(KeyEvent.VK_S, InputEvent.CTRL_DOWN_MASK));
                 }
             };
         };
@@ -162,9 +162,9 @@ public final class IntervalManagerDialog extends GUIDialog implements IntervalLi
 
         JTabbedPane tabs = new JTabbedPane();
         // note change the order here => change the hack in setVisible() for the listeners
-        tabs.add("Bulk", bulk);
-        tabs.add("Relative", relative);
         tabs.add("Absolute", absolute);
+        tabs.add("Relative", relative);
+        tabs.add("Bulk", bulk);
 
         tabs.setMnemonicAt(0, java.awt.event.KeyEvent.VK_B);
         tabs.setMnemonicAt(1, java.awt.event.KeyEvent.VK_R);
@@ -220,10 +220,10 @@ public final class IntervalManagerDialog extends GUIDialog implements IntervalLi
         // ensure the start field for absolute requests focus
         if (true) {
             // hack to toggle state so the first interval panel actually has its listeners set
-            bulk.setEnabled(false);
-            bulk.setEnabled(true);
-            relative.setEnabled(false);
             absolute.setEnabled(false);
+            absolute.setEnabled(true);
+            relative.setEnabled(false);
+            bulk.setEnabled(false);
 
             save.setEnabled(gui.getIntervalManager().getIntervalCount() != 0);
 
