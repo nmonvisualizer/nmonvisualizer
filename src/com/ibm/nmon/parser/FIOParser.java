@@ -152,7 +152,7 @@ public final class FIOParser {
                 // else continue aggregating data for the current record
 
                 String operation = values[2]; // 0 => read; 1 => write
-                String blockSize = values[3];
+                String blockSize = DataHelper.newString(values[3]);
 
                 Aggregator aggregator = null;
 
@@ -182,7 +182,12 @@ public final class FIOParser {
                     typesByBlockSize.put(blockSize, type);
                 }
 
-                aggregator.aggregate(Integer.parseInt(values[1]));
+                try {
+                    aggregator.aggregate(Integer.parseInt(values[1]));
+                }
+                catch (NumberFormatException nfe) {
+                    LOGGER.warn("invalid numeric data '{}' at line {}; ignoring", values[1], in.getLineNumber());
+                }
             }
 
             if (currentRecord != null) {

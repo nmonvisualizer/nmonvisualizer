@@ -94,6 +94,7 @@ public final class ReportPanel extends JTabbedPane implements PropertyChangeList
             MultiplexMode multiplexMode) {
         super();
 
+        setTabLayoutPolicy(SCROLL_TAB_LAYOUT);
         this.chartFactory = new ChartFactory(gui);
         this.chartFactory.setGranularity(gui.getGranularity());
 

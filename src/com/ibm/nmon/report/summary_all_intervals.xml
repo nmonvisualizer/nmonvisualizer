@@ -90,7 +90,7 @@
     </data>
   </intervalchart>
 
-  <intervalchart name="Average Ethernet Traffic" shortName="Network Data" linesNamedBy="HOST">
+  <intervalchart name="Average Ethernet Traffic" shortName="Network Data" linesNamedBy="HOST_FIELD">
     <yAxis label="KB / s" />
     <data>
       <host os="UNIX" />

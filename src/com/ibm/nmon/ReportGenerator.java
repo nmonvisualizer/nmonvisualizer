@@ -458,7 +458,7 @@ public final class ReportGenerator extends NMONVisualizerApp {
             }
             catch (Exception e) {
                 System.err.println("invalid start and end times: " + e.getMessage());
-                System.err.println("The default interval will be used instead");
+                System.err.println("; the default interval will be used instead");
                 toChart = Interval.DEFAULT;
             }
         }
@@ -719,7 +719,7 @@ public final class ReportGenerator extends NMONVisualizerApp {
                     System.out.println("Complete");
                 }
                 catch (IOException ioe) {
-                    System.err.println("could not output raw data to " + dataFile.getName());
+                    System.err.println("could not output " + "raw" + " data to " + dataFile.getName());
                 }
                 finally {
                     if (writer != null) {
@@ -761,7 +761,7 @@ public final class ReportGenerator extends NMONVisualizerApp {
                 CSVWriter.write(dataset, writer);
             }
             catch (IOException ioe) {
-                System.err.println("could not output raw data to " + csvFile.getName());
+                System.err.println("could not output " + "chart" + " data to " + csvFile.getName());
             }
             finally {
                 if (writer != null) {
