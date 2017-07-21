@@ -25,7 +25,7 @@ public final class ItemProgressDialog extends JDialog {
     // label for initial, empty item name
     // allows layout to be calculated so that pack() calls (and resizing) is avoided as items are
     // updated
-    private static final String DUMMY = new String(new byte[40]);
+    private static final String DUMMY = "ABCDEFGHIJKLMNOPQRSTUVWXYZABCDEFGHIJKLMNOPQRSTUVWXYZ";
 
     public ItemProgressDialog(JFrame parent, String title, int totalItems) {
         super(parent, title, true);
@@ -58,8 +58,8 @@ public final class ItemProgressDialog extends JDialog {
             // centered in the X, a little bit higher in the Y
             java.awt.Point location = parent.getLocation();
 
-            setLocation(location.x + parent.getWidth() / 2 - getWidth() / 2, location.y + parent.getHeight() / 2
-                    - (getHeight() * 2));
+            setLocation(location.x + parent.getWidth() / 2 - getWidth() / 2,
+                    location.y + parent.getHeight() / 2 - (getHeight() * 2));
 
         }
 

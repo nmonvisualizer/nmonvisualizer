@@ -39,21 +39,20 @@ import com.ibm.nmon.interval.Interval;
 
 /**
  * <p>
- * JTabbed pane for displaying a set of related charts. Charts are defined using
- * {@link BaseChartDefinition}. Each chart will appear on a tab named by
- * {@link BaseChartDefinition#getShortName() getShortName()}.
+ * JTabbed pane for displaying a set of related charts. Charts are defined using {@link BaseChartDefinition}. Each chart
+ * will appear on a tab named by {@link BaseChartDefinition#getShortName() getShortName()}.
  * </p>
  * 
  * <p>
- * This class listens for {@link IntervalListener interval} events as well as time zone and
- * granularity changes. New {@link DataSet data} can be added to or removed from reports at run time
- * (if the given chart definitions should display values from more than one data set).
+ * This class listens for {@link IntervalListener interval} events as well as time zone and granularity changes. New
+ * {@link DataSet data} can be added to or removed from reports at run time (if the given chart definitions should
+ * display values from more than one data set).
  * </p>
  * 
  * <p>
- * This class also ensures that tabs will only be created for charts that are supported by the given
- * data sets. This allows multiple chart definitions with the same short name to be passed in if
- * they match different data sets (i.e. different hostnames or operating systems).
+ * This class also ensures that tabs will only be created for charts that are supported by the given data sets. This
+ * allows multiple chart definitions with the same short name to be passed in if they match different data sets (i.e.
+ * different hostnames or operating systems).
  * </p>
  */
 public final class ReportPanel extends JTabbedPane implements PropertyChangeListener, IntervalListener {
@@ -136,12 +135,15 @@ public final class ReportPanel extends JTabbedPane implements PropertyChangeList
         gui.getIntervalManager().addListener(this);
         gui.addPropertyChangeListener("granularity", this);
         gui.addPropertyChangeListener("timeZone", this);
+        gui.addPropertyChangeListener("lineChartLegend", this);
     }
 
     @Override
     public void setEnabled(boolean enabled) {
         if (enabled != isEnabled()) {
             super.setEnabled(enabled);
+            
+            chartFactory.showLegends(gui.getBooleanProperty("lineChartLegend"));
 
             if ((chartsInUse != null) && !chartsInUse.isEmpty()) {
                 int idx = getSelectedIndex();
@@ -316,9 +318,9 @@ public final class ReportPanel extends JTabbedPane implements PropertyChangeList
                 else {
                     chartNeedsUpdate.set(i);
                 }
-
-                updateChart();
             }
+
+            updateChart();
         }
         else if ("annotation".equals(evt.getPropertyName())) {
             // called by chart panels when annotations / markers are added
@@ -340,6 +342,19 @@ public final class ReportPanel extends JTabbedPane implements PropertyChangeList
             // interval charts may have unnamed intervals that need to be re-displayed
             // just recreate the chart
             updateIntervalCharts();
+        }
+        else if ("lineChartLegend".equals(evt.getPropertyName())) {
+            chartFactory.showLegends((Boolean) evt.getNewValue());
+            
+            for (int i = 0; i < chartsInUse.size(); i++) {
+                BaseChartDefinition chartDefinition = chartsInUse.get(i);
+
+                if (chartDefinition.getClass().equals(LineChartDefinition.class)) {
+                    chartNeedsUpdate.set(i);
+                }
+            }
+
+            updateChart();
         }
     }
 
@@ -444,8 +459,8 @@ public final class ReportPanel extends JTabbedPane implements PropertyChangeList
                     chartsInUse = gui.getReportCache().getReport(reportCacheKey, dataSets);
                 }
                 else if (multiplexMode == MultiplexMode.BY_TYPE) {
-                    chartsInUse = gui.getReportCache()
-                            .multiplexChartsAcrossTypes(reportCacheKey, dataSets.get(0), true);
+                    chartsInUse = gui.getReportCache().multiplexChartsAcrossTypes(reportCacheKey, dataSets.get(0),
+                            true);
                 }
                 else if (multiplexMode == MultiplexMode.BY_FIELD) {
                     chartsInUse = gui.getReportCache().multiplexChartsAcrossFields(reportCacheKey, dataSets.get(0),
@@ -485,8 +500,8 @@ public final class ReportPanel extends JTabbedPane implements PropertyChangeList
                         chartPanel = new LineChartPanel(gui, parent);
                     }
                     else {
-                        LOGGER.error("cannot create chart panel for {} ({})", report.getShortName(), report.getClass()
-                                .getSimpleName());
+                        LOGGER.error("cannot create chart panel for {} ({})", report.getShortName(),
+                                report.getClass().getSimpleName());
                     }
 
                     // this class will receive each chart's change events and forward them rather

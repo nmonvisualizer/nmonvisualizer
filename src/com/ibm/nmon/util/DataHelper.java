@@ -20,8 +20,7 @@ public final class DataHelper {
         /**
          * Collect all the processes in a file and group them by name.
          * 
-         * @return a Map of process names to a list of Processes. The List will never be empty or
-         *         <code>null</code>.
+         * @return a Map of process names to a list of Processes. The List will never be empty or <code>null</code>.
          */
         Map<String, List<Process>> processNameToProcesses = null;
 
@@ -153,8 +152,9 @@ public final class DataHelper {
         // disks do not have digits; paritions do
         boolean hdisk = diskName.startsWith("hdisk");
 
-        if ((diskName.startsWith("sd") || (diskName.startsWith("hd") && !hdisk) || diskName.startsWith("vd") || diskName
-                .startsWith("dasd")) && !Character.isDigit(diskName.charAt(diskName.length() - 1))) {
+        if ((diskName.startsWith("sd") || (diskName.startsWith("hd") && !hdisk) || diskName.startsWith("vd")
+                || diskName.startsWith("xvd") || diskName.startsWith("dasd"))
+                && !Character.isDigit(diskName.charAt(diskName.length() - 1))) {
             return true;
 
         }
@@ -170,8 +170,7 @@ public final class DataHelper {
     }
 
     /**
-     * Get a sorted list of network interfaces, assuming field names in the DataType are like
-     * 'eth0-read-KB/s'.
+     * Get a sorted list of network interfaces, assuming field names in the DataType are like 'eth0-read-KB/s'.
      */
     public static SortedSet<String> getInterfaces(DataType type) {
         SortedSet<String> ifaces = new java.util.TreeSet<String>();
@@ -196,8 +195,7 @@ public final class DataHelper {
     private static final boolean IS_IBM_JVM = System.getProperty("java.vm.vendor").startsWith("IBM");
 
     /**
-     * Create a new String. This method is used to save memory usage for Strings that are created
-     * via substring.
+     * Create a new String. This method is used to save memory usage for Strings that are created via substring.
      */
     public static String newString(String original) {
         // new String to avoid memory leaks when the element is stored

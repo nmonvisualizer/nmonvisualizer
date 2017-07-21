@@ -48,6 +48,10 @@ public class ChartFactory {
         intervalChartBuilder.setGranularity(granularity);
         histogramChartBuilder.setGranularity(granularity);
     }
+    
+    public void showLegends(boolean showLegends) {
+        lineChartBuilder.showLegends(showLegends);
+    }
 
     public void setInterval(Interval interval) {
         lineChartBuilder.setInterval(interval);

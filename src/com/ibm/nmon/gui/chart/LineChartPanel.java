@@ -248,5 +248,4 @@ public class LineChartPanel extends BaseChartPanel implements ChartMouseListener
             LineChartBuilder.setAbsoluteAxis(getChart());
         }
     }
-
 }

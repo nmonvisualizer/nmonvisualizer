@@ -33,6 +33,8 @@ import com.ibm.nmon.gui.chart.data.DataTupleXYDataset;
 import com.ibm.nmon.chart.definition.LineChartDefinition;
 
 public class LineChartBuilder extends BaseChartBuilder<LineChartDefinition> {
+    private boolean showLegends = true;
+
     public LineChartBuilder() {
         super();
     }
@@ -155,8 +157,8 @@ public class LineChartBuilder extends BaseChartBuilder<LineChartDefinition> {
         }
 
         for (DataDefinition dataDefinition : definition.getData()) {
-            DataTupleXYDataset dataset = (DataTupleXYDataset) chart.getXYPlot().getDataset(
-                    dataDefinition.usesSecondaryYAxis() ? 1 : 0);
+            DataTupleXYDataset dataset = (DataTupleXYDataset) chart.getXYPlot()
+                    .getDataset(dataDefinition.usesSecondaryYAxis() ? 1 : 0);
 
             addMatchingData(dataset, dataDefinition, data, definition.getLineNamingMode());
         }
@@ -170,8 +172,8 @@ public class LineChartBuilder extends BaseChartBuilder<LineChartDefinition> {
             throw new IllegalStateException("initChart() must be called first");
         }
 
-        DataTupleXYDataset dataset = (DataTupleXYDataset) chart.getXYPlot().getDataset(
-                definition.usesSecondaryYAxis() ? 1 : 0);
+        DataTupleXYDataset dataset = (DataTupleXYDataset) chart.getXYPlot()
+                .getDataset(definition.usesSecondaryYAxis() ? 1 : 0);
 
         addMatchingData(dataset, definition, data, lineNamingMode);
 
@@ -307,7 +309,7 @@ public class LineChartBuilder extends BaseChartBuilder<LineChartDefinition> {
                 seriesCount += chart.getXYPlot().getDataset(1).getSeriesCount();
             }
 
-            if (seriesCount > 1) {
+            if ((seriesCount > 1) && showLegends) {
                 addLegend();
             }
         }
@@ -372,6 +374,14 @@ public class LineChartBuilder extends BaseChartBuilder<LineChartDefinition> {
         }
     }
 
+    public void showLegends(boolean showLegends) {
+        this.showLegends = showLegends;
+    }
+    
+    public boolean getShowLegends() {
+        return showLegends;
+    }
+
     /**
      * Sets the X axis to display time relative to the given start time.
      */
@@ -412,8 +422,7 @@ public class LineChartBuilder extends BaseChartBuilder<LineChartDefinition> {
     }
 
     /**
-     * This only sets the first Y axis as a percent. There is no support for having other axes with
-     * percent scales.
+     * This only sets the first Y axis as a percent. There is no support for having other axes with percent scales.
      */
     public static void setPercentYAxis(JFreeChart chart) {
         NumberAxis yAxis = (NumberAxis) chart.getXYPlot().getRangeAxis();

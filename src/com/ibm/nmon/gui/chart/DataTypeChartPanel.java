@@ -63,10 +63,12 @@ public final class DataTypeChartPanel extends LineChartPanel implements Interval
 
             if (enabled) {
                 gui.addPropertyChangeListener("granularity", this);
+                gui.addPropertyChangeListener("lineChartLegend", this);
                 gui.getIntervalManager().addListener(this);
 
                 chartBuilder.setInterval(gui.getIntervalManager().getCurrentInterval());
                 chartBuilder.setGranularity(gui.getGranularity());
+                chartBuilder.showLegends(gui.getBooleanProperty("lineChartLegend"));
 
                 if (definition != null) {
                     displayChart();
@@ -74,6 +76,7 @@ public final class DataTypeChartPanel extends LineChartPanel implements Interval
             }
             else {
                 gui.removePropertyChangeListener("granularity", this);
+                gui.removePropertyChangeListener("lineChartLegend", this);
                 gui.getIntervalManager().removeListener(this);
 
                 // _super_ => clear chart but not the data
@@ -125,6 +128,15 @@ public final class DataTypeChartPanel extends LineChartPanel implements Interval
 
         if ("granularity".equals(evt.getPropertyName())) {
             chartBuilder.setGranularity((Integer) evt.getNewValue());
+
+            if (getChart() != null) {
+                displayChart();
+            }
+        }
+        else if ("lineChartLegend".equals(evt.getPropertyName())) {
+            boolean showLegend = (Boolean) evt.getNewValue();
+
+            chartBuilder.showLegends(showLegend);
 
             if (getChart() != null) {
                 displayChart();
@@ -329,7 +341,7 @@ public final class DataTypeChartPanel extends LineChartPanel implements Interval
         tempTypes.put("CLAT", "μs");
         tempTypes.put("SLAT", "μs");
         tempTypes.put("BW", "KB / s");
-        
+
         tempFields.put("CPUs", "Count");
         tempFields.put("CPU%", "% CPU");
         tempFields.put("User%", "% CPU");

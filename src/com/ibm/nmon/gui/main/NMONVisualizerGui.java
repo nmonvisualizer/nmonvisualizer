@@ -129,6 +129,7 @@ public final class NMONVisualizerGui extends NMONVisualizerApp {
         preferences = Preferences.userNodeForPackage(NMONVisualizerGui.class);
 
         setProperty("chartsDisplayed", true);
+        setProperty("lineChartLegend", preferences.getBoolean("lineChartLegend", true));
 
         String systemsNamedBy = preferences.get("systemsNamedBy", null);
 
@@ -345,6 +346,7 @@ public final class NMONVisualizerGui extends NMONVisualizerApp {
             getPreferences().put("systemsNamedBy", getProperty("systemsNamedBy"));
             getPreferences().put("scaleProcessesByCPUs", getProperty("scaleProcessesByCPUs"));
             getPreferences().put("showStatusBar", getProperty("showStatusBar"));
+            getPreferences().put("lineChartLegend", getProperty("lineChartLegend"));
 
             logViewer.dispose();
             mainFrame.dispose();

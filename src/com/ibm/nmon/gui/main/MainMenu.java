@@ -41,8 +41,8 @@ import java.lang.management.MemoryPoolMXBean;
 import java.lang.reflect.Method;
 
 /**
- * Main menu bar for the application. Listens for interval changes and some property changes so the
- * menu items stay in sync with the rest of the UI.
+ * Main menu bar for the application. Listens for interval changes and some property changes so the menu items stay in
+ * sync with the rest of the UI.
  */
 final class MainMenu extends JMenuBar implements IntervalListener, DataSetListener, PropertyChangeListener {
     private static final long serialVersionUID = -7255908769208090151L;
@@ -118,7 +118,8 @@ final class MainMenu extends JMenuBar implements IntervalListener, DataSetListen
         item.setText(TimeFormatCache.formatInterval(Interval.DEFAULT));
         item.setMnemonic('a');
         item.setSelected(true);
-        item.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_0, InputEvent.CTRL_DOWN_MASK | InputEvent.ALT_DOWN_MASK));
+        item.setAccelerator(
+                KeyStroke.getKeyStroke(KeyEvent.VK_0, InputEvent.CTRL_DOWN_MASK | InputEvent.ALT_DOWN_MASK));
 
         item.addActionListener(new ActionListener() {
             @Override
@@ -157,13 +158,11 @@ final class MainMenu extends JMenuBar implements IntervalListener, DataSetListen
                     item.getActionMap().put("doClick", doClick);
                     inputMap = item.getInputMap(JComponent.WHEN_IN_FOCUSED_WINDOW);
 
-                    inputMap.put(
-                            KeyStroke.getKeyStroke(KeyEvent.VK_0 + n, InputEvent.CTRL_DOWN_MASK
-                                    | InputEvent.ALT_DOWN_MASK), "doClick");
+                    inputMap.put(KeyStroke.getKeyStroke(KeyEvent.VK_0 + n,
+                            InputEvent.CTRL_DOWN_MASK | InputEvent.ALT_DOWN_MASK), "doClick");
 
-                    inputMap.put(
-                            KeyStroke.getKeyStroke(KeyEvent.VK_NUMPAD0 + n, InputEvent.CTRL_DOWN_MASK
-                                    | InputEvent.ALT_DOWN_MASK), "doClick");
+                    inputMap.put(KeyStroke.getKeyStroke(KeyEvent.VK_NUMPAD0 + n,
+                            InputEvent.CTRL_DOWN_MASK | InputEvent.ALT_DOWN_MASK), "doClick");
 
                     ++n;
                 }
@@ -243,8 +242,8 @@ final class MainMenu extends JMenuBar implements IntervalListener, DataSetListen
 
         item = new JMenuItem("Table Columns...");
         item.setMnemonic('c');
-        item.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_C, InputEvent.CTRL_DOWN_MASK
-                | InputEvent.SHIFT_DOWN_MASK));
+        item.setAccelerator(
+                KeyStroke.getKeyStroke(KeyEvent.VK_C, InputEvent.CTRL_DOWN_MASK | InputEvent.SHIFT_DOWN_MASK));
 
         item.addActionListener(new ActionListener() {
             @Override
@@ -263,6 +262,21 @@ final class MainMenu extends JMenuBar implements IntervalListener, DataSetListen
             @Override
             public void actionPerformed(ActionEvent e) {
                 gui.setProperty("chartRelativeTime", ((JCheckBoxMenuItem) e.getSource()).isSelected());
+            }
+        });
+
+        chartSubMenu.add(checkItem);
+
+        checkItem = new JCheckBoxMenuItem("Line Chart Legends");
+        checkItem.setMnemonic('l');
+        checkItem.setSelected(gui.getBooleanProperty("lineChartLegend"));
+        checkItem.setAccelerator(
+                KeyStroke.getKeyStroke(KeyEvent.VK_L, InputEvent.CTRL_DOWN_MASK | InputEvent.SHIFT_DOWN_MASK));
+
+        checkItem.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                gui.setProperty("lineChartLegend", ((JCheckBoxMenuItem) e.getSource()).isSelected());
             }
         });
 
@@ -395,9 +409,9 @@ final class MainMenu extends JMenuBar implements IntervalListener, DataSetListen
                         gui.setHostRenamer(renamer);
                     }
                     catch (Exception ex) {
-                        JOptionPane.showMessageDialog(gui.getMainFrame(), "Error parsing file '"
-                                + chooser.getSelectedFile().getName() + "'.\n" + ex.getMessage(), "Parse Error",
-                                JOptionPane.ERROR_MESSAGE);
+                        JOptionPane.showMessageDialog(gui.getMainFrame(),
+                                "Error parsing file '" + chooser.getSelectedFile().getName() + "'.\n" + ex.getMessage(),
+                                "Parse Error", JOptionPane.ERROR_MESSAGE);
 
                         // reset to 'host'
                         ButtonGroup group = ((javax.swing.DefaultButtonModel) ((JCheckBoxMenuItem) e.getSource())
@@ -470,7 +484,8 @@ final class MainMenu extends JMenuBar implements IntervalListener, DataSetListen
                             + "View summary information for that interval in the summary table (see the 'View' menu).\n"
                             + "\nRight clicking will bring up context sensitive menus";
                 }
-                JOptionPane.showMessageDialog(gui.getMainFrame(), message, "What Now?", JOptionPane.INFORMATION_MESSAGE);
+                JOptionPane.showMessageDialog(gui.getMainFrame(), message, "What Now?",
+                        JOptionPane.INFORMATION_MESSAGE);
             }
         });
 
@@ -577,9 +592,10 @@ final class MainMenu extends JMenuBar implements IntervalListener, DataSetListen
                         ibmHeapDump.invoke(null);
                     }
                     catch (Exception e) {
-                        JOptionPane.showMessageDialog(gui.getMainFrame(), "Could not complete heap dump on " + "IBM"
-                                + " JVM\n\n" + e.getClass().getName() + ": " + e.getMessage(), "Heap Dump Error",
-                                JOptionPane.ERROR_MESSAGE);
+                        JOptionPane.showMessageDialog(
+                                gui.getMainFrame(), "Could not complete heap dump on " + "IBM" + " JVM\n\n"
+                                        + e.getClass().getName() + ": " + e.getMessage(),
+                                "Heap Dump Error", JOptionPane.ERROR_MESSAGE);
                     }
                 }
                 else if (vmVendor.contains("Oracle")) {
@@ -608,15 +624,17 @@ final class MainMenu extends JMenuBar implements IntervalListener, DataSetListen
                         detach.invoke(attachedVM);
                     }
                     catch (Exception e) {
-                        JOptionPane.showMessageDialog(gui.getMainFrame(), "Could not complete heap dump on " + "Oracle"
-                                + " JVM\n\n" + e.getClass().getName() + ": " + e.getMessage()
-                                + "\n\nAre you running a JDK?\nIs tools.jar in the classpath?", "Heap Dump Error",
-                                JOptionPane.ERROR_MESSAGE);
+                        JOptionPane.showMessageDialog(gui.getMainFrame(),
+                                "Could not complete heap dump on " + "Oracle" + " JVM\n\n" + e.getClass().getName()
+                                        + ": " + e.getMessage()
+                                        + "\n\nAre you running a JDK?\nIs tools.jar in the classpath?",
+                                "Heap Dump Error", JOptionPane.ERROR_MESSAGE);
                     }
                 }
                 else {
-                    JOptionPane.showMessageDialog(gui.getMainFrame(), "Could not complete heap dump on " + vmVendor
-                            + " JVM\n\n", "Heap Dump Error", JOptionPane.ERROR_MESSAGE);
+                    JOptionPane.showMessageDialog(gui.getMainFrame(),
+                            "Could not complete heap dump on " + vmVendor + " JVM\n\n", "Heap Dump Error",
+                            JOptionPane.ERROR_MESSAGE);
                 }
             }
         });
@@ -662,16 +680,14 @@ final class MainMenu extends JMenuBar implements IntervalListener, DataSetListen
         item.setMnemonic('a');
         item.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
-                JOptionPane.showMessageDialog(
-                        gui.getMainFrame(),
+                JOptionPane.showMessageDialog(gui.getMainFrame(),
                         "Copyright \u00A9 2011-2014\n"
                                 + "IBM Software Group, Collaboration Services.\nAll Rights Reserved.\n\n"
                                 + "Support is on an 'as-is', 'best-effort' basis only.\n\n" + "Version "
                                 + VersionInfo.getVersion() + "\n\n" + "Icons from "
-                                + "http://www.famfamfam.com/lab/icons/silk/" + "\n"
-                                + "Creative Commons Attribution 2.5" + " License\n("
-                                + "http://creativecommons.org/licenses/by/2.5/legalcode" + ")", "NMON Visualizer",
-                        JOptionPane.INFORMATION_MESSAGE);
+                                + "http://www.famfamfam.com/lab/icons/silk/" + "\n" + "Creative Commons Attribution 2.5"
+                                + " License\n(" + "http://creativecommons.org/licenses/by/2.5/legalcode" + ")",
+                        "NMON Visualizer", JOptionPane.INFORMATION_MESSAGE);
             }
         });
 
