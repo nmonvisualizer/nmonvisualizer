@@ -153,7 +153,7 @@ public final class DataHelper {
         boolean hdisk = diskName.startsWith("hdisk");
 
         if ((diskName.startsWith("sd") || (diskName.startsWith("hd") && !hdisk) || diskName.startsWith("vd")
-                || diskName.startsWith("xvd") || diskName.startsWith("dasd"))
+                || diskName.startsWith("fio") || diskName.startsWith("xvd") || diskName.startsWith("dasd"))
                 && !Character.isDigit(diskName.charAt(diskName.length() - 1))) {
             return true;
 
