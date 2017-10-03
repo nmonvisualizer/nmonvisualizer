@@ -137,7 +137,10 @@ public abstract class NMONVisualizerApp implements IntervalListener {
         DataSet data = null;
         CombinedFileFilter filter = CombinedFileFilter.getInstance(false);
 
-        if (filter.getNMONFileFilter().accept(fileToParse)) {
+        if (filter.getTopasOutFileFilter().accept(fileToParse)) {
+            data = topasoutParser.parse(fileToParse, timeZone, getBooleanProperty("scaleProcessesByCPUs"));
+        }
+        else if (filter.getNMONFileFilter().accept(fileToParse)) {
             data = nmonParser.parse(fileToParse, timeZone, getBooleanProperty("scaleProcessesByCPUs"));
         }
         else if (filter.getGCFileFilter().accept(fileToParse)) {
@@ -156,6 +159,11 @@ public abstract class NMONVisualizerApp implements IntervalListener {
             else {
                 data = gcParser.parse(fileToParse, timeZone, values[0], values[1]);
             }
+        }
+        else if (filter.getZPoolIOStatOutFileFilter().accept(fileToParse)) {
+            data = zpoolParser.parse(fileToParse);
+
+            data.setHostname(getDataForZPoolIOStatParse(fileToParse));
         }
         else if (filter.getIOStatFileFilter().accept(fileToParse)) {
             // IOStat data may have a hostname and time zone so get it after parsing
@@ -213,14 +221,6 @@ public abstract class NMONVisualizerApp implements IntervalListener {
         }
         else if (filter.getPerfmonFileFilter().accept(fileToParse)) {
             data = perfmonParser.parse(fileToParse, getBooleanProperty("scaleProcessesByCPUs"));
-        }
-        else if (filter.getZPoolIOStatOutFileFilter().accept(fileToParse)) {
-            data = zpoolParser.parse(fileToParse);
-
-            data.setHostname(getDataForZPoolIOStatParse(fileToParse));
-        }
-        else if (filter.getTopasOutFileFilter().accept(fileToParse)) {
-            data = topasoutParser.parse(fileToParse, timeZone, getBooleanProperty("scaleProcessesByCPUs"));
         }
         else if (filter.getFIOFileFilter().accept(fileToParse)) {
             data = fioParser.parse(fileToParse, timeZone);
