@@ -6,6 +6,7 @@ import java.text.SimpleDateFormat;
 import java.text.ParseException;
 
 import java.util.List;
+import java.util.Set;
 import java.util.Map;
 
 import java.util.TimeZone;
@@ -26,19 +27,15 @@ import com.ibm.nmon.util.DataHelper;
 
 import com.ibm.nmon.util.TimeHelper;
 import static com.ibm.nmon.util.TimeHelper.TIMESTAMP_FORMAT_ISO;
-import static com.ibm.nmon.util.TimeHelper.DATE_FORMAT_ISO;
 
 public final class IOStatParser {
     private static final Logger LOGGER = org.slf4j.LoggerFactory.getLogger(IOStatParser.class);
 
-    private static final SimpleDateFormat TIMESTAMP_FORMAT_US = new SimpleDateFormat("MM/dd/yy HH:mm:ss");
-    private static final SimpleDateFormat TIMESTAMP_FORMAT_OLD = new SimpleDateFormat("'Time: 'hh:mm:ss a");
     private static final SimpleDateFormat TIMESTAMP_FORMAT_AIX = new SimpleDateFormat("HH:mm:ss");
-    private static final SimpleDateFormat DATE_FORMAT_US = new SimpleDateFormat("MM/dd/yyyy");
 
-    private static final Matcher ISO_PATTERN = Pattern.compile(
-            "(Time: )?\\d{4}\\-\\d{2}\\-\\d{2}T\\d{2}:\\d{2}:\\d{2}([\\-+](\\d{4}?|\\d{2}:\\d{2}|\\d{2})|Z)").matcher(
-            "");
+    private static final Matcher ISO_PATTERN = Pattern
+            .compile("(Time: )?\\d{4}\\-\\d{2}\\-\\d{2}T\\d{2}:\\d{2}:\\d{2}([\\-+](\\d{4}?|\\d{2}:\\d{2}|\\d{2})|Z)")
+            .matcher("");
     private static final Matcher INFO = Pattern.compile(
             "(.+)\\s(.+)\\s\\((.+)\\)\\s+(\\d{2,4}[\\/-]\\d{2}[\\/-]\\d{2,4})(\\s+_(.+)_)?(\\s+\\((.+)\\sCPU\\))?")
             .matcher("");
@@ -46,12 +43,27 @@ public final class IOStatParser {
 
     public static final String DEFAULT_HOSTNAME = "iostat";
 
+    private static final Set<String> VALID_TYPES;
+
+    static {
+        Set<String> tmp = new java.util.HashSet<String>();
+
+        tmp.add("System");
+        tmp.add("tty");
+        tmp.add("avg-cpu");
+        tmp.add("Disks");
+        tmp.add("Device");
+        tmp.add("FS");
+        tmp.add("Adapter");
+        tmp.add("Vadapter");
+        tmp.add("Paths/Disks");
+
+        VALID_TYPES = java.util.Collections.unmodifiableSet(tmp);
+    }
+
     private LineNumberReader in = null;
 
     private SimpleDateFormat format = null;
-
-    private boolean isAIX = false;
-    // private boolean isExtendedDiskStats = false;
 
     // this is a full datetime rounded to midnight
     private long dateOffset = 0;
@@ -59,7 +71,9 @@ public final class IOStatParser {
     private BasicDataSet data = null;
     private DataRecord currentRecord = null;
 
-    private Map<String, List<String>> typesByHeader = new java.util.HashMap<String, List<String>>();
+    private boolean firstRecord = true; // latch used to ensure the first record of summary data is not saved
+
+    private Map<String, DataType> dataTypes = new java.util.HashMap<String, DataType>();
 
     // private String[] disk_metrics;
 
@@ -73,106 +87,140 @@ public final class IOStatParser {
         data = new BasicDataSet(filename);
         data.setHostname(DEFAULT_HOSTNAME);
 
-        String line = null;
-
         try {
             in = new LineNumberReader(new java.io.FileReader(filename));
 
-            parseHeader(timeZone);
-            determineTimestampFormat(timeZone);
+            String line = null;
+
+            boolean isAIX = false;
+
+            String type = null;
+            String subtype = null;
+            String[] typeFields = null;
+
+            boolean parseTime = false;
 
             line = in.readLine();
 
-            if (isAIX) {
-                if (line.startsWith("tty")) {
-                    parseAIXTTYAndCPUHeader(line);
-
+            while (line != null) {
+                if ("".equals(line)) {
+                    type = null;
                     line = in.readLine();
+                    continue;
+                }
 
-                    if (line.startsWith("System")) {
-                        data.setHostname(line.substring(("System" + ": ").length()));
-                        line = in.readLine();
+                String[] values = DATA_SPLITTER.split(line);
+                String first = values[0];
+
+                if (type == null) {
+                    if (VALID_TYPES.contains(first)) {
+                        if (values.length < 2) {
+                            LOGGER.warn("'{}' at line {} has too few columns; skipping",
+                                    new Object[] { first, in.getLineNumber() });
+                        }
+                        else if ("configuration".equals(values[1])) {
+                            isAIX = true;
+                            parseAIXConfig(line, timeZone);
+                        }
+                        else {
+                            type = first;
+                            typeFields = values;
+                            parseTime = isAIX; // parse time for each new AIX data type
+
+                            LOGGER.trace("type set to '{}' at line {}", new Object[] { type, in.getLineNumber() });
+                        }
+                    }
+                    else if ("Linux".equals(first)) {
+                        parseLinuxConfig(line, timeZone);
+                    }
+                    else if (ISO_PATTERN.reset(line).matches()) {
+                        createCurrentRecord(line);
+                    }
+                    else {
+                        // will continue to output this for data after an invalid type
+                        LOGGER.warn("invalid type '{}' at line {}", new Object[] { first, in.getLineNumber() });
                     }
                 }
-            }
-            else {
-                if (line.startsWith("avg-cpu:")) {
-                    parseLinuxCPUHeader(line);
+                else { // type != null => handle data
+                    if (parseTime) {
+                        // last column is time in AIX
+                        String time = values[values.length - 1];
+
+                        if (!"time".equals(time)) {
+                            createCurrentRecord(time);
+                            parseTime = false; // reset on next data stanza
+                        }
+                    }
+
+                    // special handling for data types with fixed (or no) subtypes
+                    // these start with space before the values
+                    if ("".equals(first)) {
+                        if ("tty".equals(type)) {
+                            parseAIXTTYAndCPU(type, typeFields, values);
+                        }
+                        else if ("System".equals(type)) {
+                            // for Physical / Logical lines, create a single type for each
+
+                            // first line after System are the field names
+                            if ("Kbps".equals(values[1])) {
+                                // AIX hostname is after System; set here to avoid setting on every data stanza
+                                data.setHostname(typeFields[1]);
+
+                                typeFields = values;
+                            }
+                            else {
+                                DataType dataType = dataTypes.get(values[1]);
+
+                                if (dataType == null) {
+                                    // less 1 on the length to skip time
+                                    String[] fields = new String[values.length - 2];
+
+                                    for (int i = 1; i < values.length - 1; i++) {
+                                        fields[i - 1] = DataHelper.newString(typeFields[i]);
+                                    }
+
+                                    dataType = new DataType("IOStat " + values[1], values[1], fields);
+
+                                    data.addType(dataType);
+                                    dataTypes.put(values[1], dataType);
+                                }
+
+                                double[] data = new double[dataType.getFieldCount()];
+
+                                for (int i = 1; i < data.length; i++) {
+                                    data[i] = Double.parseDouble(values[i + 1]);
+                                }
+
+                                currentRecord.addData(dataType, data);
+                            }
+                        }
+                        else if ("avg-cpu".equals(type)) {
+                            parseLinuxCPU(type, typeFields, values);
+                        }
+                    }
+                    else { // first column != ""
+                        subtype = first;
+
+                        DataType dataType = getDataType(type, subtype, typeFields, isAIX);
+                        parseData(dataType, values, isAIX);
+                    }
                 }
 
                 line = in.readLine();
             }
 
-            // line should now be the header row of the first disk / device block
-            line = parseDataTypes(line);
-
-            // line should now contain a header row or a time stamp (Linux)
-            // read until file is complete
-            while (line != null) {
-                if (isAIX) {
-                    if (line.startsWith("System")) {
-                        // skip repeated System rows
-                        line = in.readLine();
-
-                        // blank line after 'System configuration'
-                        if ("".equals(line)) {
-                            line = in.readLine();
-                        }
-
-                        continue;
-                    }
-                }
-                else {
-                    if (line.startsWith("Time:") || ISO_PATTERN.reset(line).matches()) {
-                        createCurrentRecord(line);
-                        line = in.readLine();
-                        continue;
-                    }
-                }
-                // AIX will create record during TTY parsing
-
-                String[] temp = DATA_SPLITTER.split(line);
-                String typeName = temp[0];
-
-                if ("FS".equals(typeName)) {
-                    typeName = temp[0] + ' ' + temp[1];
-                }
-
-                if ("tty".equals(typeName)) {
-                    parseAIXTTYAndCPU();
-                }
-                else if ("avg-cpu".equals(typeName)) {
-                    parseLinuxCPU();
-                }
-                else if ("".equals(typeName)) {
-                    if (line.equals("")) {
-                        // if the whole line is empty, skip it
-                        line = in.readLine();
-                        continue;
-                    }
-                    else { // otherwise assume leading spaces => AIX summary data
-                        parseAIXSummaryData();
-                    }
-                }
-                else {
-                    parseData(typeName);
-                }
-
-                line = in.readLine(); // next header row
-            }
-
-            if (currentRecord != null) {
-                data.addRecord(currentRecord);
-            }
-
             return data;
         }
-        finally {
+        finally
+
+        {
             if (in != null) {
                 try {
                     in.close();
                 }
-                catch (Exception e) {
+                catch (
+
+                Exception e) {
                     // ignore
                 }
 
@@ -183,339 +231,92 @@ public final class IOStatParser {
 
                 in = null;
                 format = null;
-                isAIX = false;
-                // isExtendedDiskStats = false;
+
                 dateOffset = 0;
                 data = null;
                 currentRecord = null;
 
-                typesByHeader.clear();
+                firstRecord = true;
+
+                dataTypes.clear();
             }
         }
     }
 
-    private void parseHeader(TimeZone timeZone) throws IOException, ParseException {
-        String line = in.readLine(); // header line
+    private void parseAIXConfig(String line, TimeZone timeZone) {
+        data.setMetadata("OS", "AIX");
 
-        // handle AIX initial blank line and other possible bad formatting
-        while ("".equals(line)) {
-            line = in.readLine();
-        }
+        format = TIMESTAMP_FORMAT_AIX;
+        format.setTimeZone(timeZone);
 
-        if (line.startsWith("System configuration: ")) { // AIX
-            isAIX = true;
-            data.setMetadata("OS", "AIX");
-
-            line = line.substring("System configuration: ".length());
-            String[] config = line.split("[ =]");
-
-            for (int i = 0; i < config.length; i++) {
-                data.setMetadata(DataHelper.newString(config[i]), DataHelper.newString(config[++i]));
-            }
-
-            // AIX has no date, use the default
-            dateOffset = getDefaultDate();
-        }
-        else { // Linux
-            Matcher matcher = INFO.reset(line);
-
-            if (matcher.matches()) {
-                data.setHostname(DataHelper.newString(matcher.group(3)));
-                data.setMetadata("OS", DataHelper.newString(matcher.group(1) + ' ' + matcher.group(2)));
-
-                String date = matcher.group(4);
-                String arch = matcher.group(6);
-                String cpuCount = matcher.group(8);
-
-                SimpleDateFormat dateFormat = DATE_FORMAT_ISO;
-
-                if (date.indexOf('/') != -1) {
-                    // handle 2 digit years; note possible year 2100 issue if this code is still in
-                    // use!
-                    if (date.length() == (DATE_FORMAT_US.toPattern().length() - 2)) {
-                        date = date.substring(0, 6) + "20" + date.substring(6);
-                    }
-
-                    dateFormat = DATE_FORMAT_US;
-                    dateOffset = TimeHelper.dayFromDatetime(dateFormat.parse(date).getTime());
-                }
-                // else ISO includes date time, so offset can stay 0
-
-                dateFormat.setTimeZone(timeZone);
-
-                if (arch != null) {
-                    data.setMetadata("ARCH", DataHelper.newString(arch));
-                }
-
-                if (cpuCount != null) {
-                    data.setMetadata("CPU_COUNT", DataHelper.newString(cpuCount));
-                }
-            }
-            else {
-                throw new IOException("file does not start with a recognized Linux iostat header");
-            }
-        }
-
+        // AIX has no date, use the default
         // shift offset to timezone local, not UTC
+        dateOffset = getDefaultDate();
         dateOffset += timeZone.getOffset(dateOffset);
 
-        in.readLine(); // blank line after header
-    }
+        line = line.substring("System configuration: ".length());
+        String[] config = line.split("[ =]");
 
-    private void determineTimestampFormat(TimeZone timeZone) throws IOException {
-        if (isAIX) {
-            format = TIMESTAMP_FORMAT_AIX;
-            format.setTimeZone(timeZone);
+        for (int i = 0; i < config.length; i++) {
+            data.setMetadata(DataHelper.newString(config[i]), DataHelper.newString(config[++i]));
         }
-        else {
-            String line = in.readLine(); // first timestamp line
-
-            if (line.startsWith("Time: ")) {
-                if (ISO_PATTERN.reset(line).matches()) {
-                    // some versions of IOStat output Time: _and_ an ISO datetime
-                    // create a new format here rather than parsing out Time: manually
-                    format = new SimpleDateFormat('\'' + "Time: " + '\'' + TIMESTAMP_FORMAT_ISO.toPattern());
-                }
-                else {
-                    format = TIMESTAMP_FORMAT_OLD;
-                    format.setTimeZone(timeZone);
-                }
-            }
-            else {
-                try {
-                    TIMESTAMP_FORMAT_ISO.parse(line);
-                    // ISO format includes a timezone, ignore the one passed in
-
-                    format = TIMESTAMP_FORMAT_ISO;
-                }
-                catch (ParseException pe) {
-                    try {
-                        TIMESTAMP_FORMAT_US.parse(line);
-
-                        format = TIMESTAMP_FORMAT_US;
-                        format.setTimeZone(timeZone);
-                    }
-                    catch (ParseException pe2) {
-                        throw new IOException("unknown timestamp format");
-                    }
-                }
-            }
-        }
-    }
-
-    private void parseLinuxCPUHeader(String line) throws IOException {
-        // create CPU data type
-        String[] temp = DATA_SPLITTER.split(line);
-        // subtract 2 since avg-cpu (first column) is not a field
-        // also ignore %idle (the last column)
-        String[] fields = new String[temp.length - 2];
-
-        for (int i = 0; i < fields.length; i++) {
-            fields[i] = DataHelper.newString(temp[i + 1]);
-        }
-
-        DataType cpu = new DataType("IOStat CPU", "IOStat Average CPU", fields);
-        data.addType(cpu);
-
-        in.readLine(); // summary CPU data
-        in.readLine(); // blank line after CPU data
     }
 
     // tty line in AIX contains terminal and CPU utilization data
     // split that into two DataTypes
-    private void parseAIXTTYAndCPUHeader(String line) throws IOException {
-        String[] temp = DATA_SPLITTER.split(line);
+    private void parseAIXTTYAndCPUHeader(String[] rawFields) throws IOException {
         List<String> fields = new java.util.ArrayList<String>();
 
         // i = 0 => tty:
-        for (int i = 1; i < temp.length; i++) {
-            if ("avg-cpu".equals(temp[i])) {
+        for (int i = 1; i < rawFields.length; i++) {
+            if ("avg-cpu".equals(rawFields[i])) {
                 // TTY data complete
-                DataType tty = new DataType("IOStat TTY", "IOStat terminal", fields.toArray(new String[0]));
+                DataType tty = new DataType("IOStat" + " TTY", "IOStat" + " Terminal", fields.toArray(new String[0]));
                 data.addType(tty);
                 fields.clear();
             }
-            else if ("time".equals(temp[i])) {
+            else if ("time".equals(rawFields[i])) {
                 continue;
             }
             else {
-                if ("%".equals(temp[i])) {
+                if ("%".equals(rawFields[i])) {
                     // put '% user', etc back together; ignore idle
-                    if ("idle".equals(temp[i + 1])) {
+                    if ("idle".equals(rawFields[i + 1])) {
                         ++i;
                     }
                     else {
-                        fields.add(DataHelper.newString(temp[i++] + temp[i]));
+                        fields.add(DataHelper.newString(rawFields[i++] + rawFields[i]));
                     }
                 }
                 else {
-                    fields.add(DataHelper.newString(temp[i]));
+                    fields.add(DataHelper.newString(rawFields[i]));
                 }
             }
         }
 
         DataType cpu = new DataType("IOStat" + " CPU", "IOStat" + " Average CPU", fields.toArray(new String[0]));
         data.addType(cpu);
-
-        // hack to get parseDataTypes to stop when tty is encountered
-        typesByHeader.put("tty", java.util.Arrays.asList("CPU", "TTY"));
-
-        in.readLine(); // summary tty and CPU data
-        in.readLine(); // blank line after tty;
     }
 
-    private String parseDataTypes(String line) throws IOException {
-        // The first set of data is summary data. Use it to build the DataTypes.
+    // parse tty and CPU utilization data into different data types
+    private void parseAIXTTYAndCPU(String type, String[]typeFields, String[] values) throws IOException, ParseException {
+        DataType dataType = dataTypes.get(type);
 
-        while (line != null) {
-            if (!isAIX && (line.startsWith("Time:") || ISO_PATTERN.reset(line).matches())) {
-                // on Linux, headers are complete with the next timestamp
-                return line;
-            }
+        if (dataType == null) {
+            parseAIXTTYAndCPUHeader(typeFields);
 
-            String[] temp = DATA_SPLITTER.split(line);
-            String type = temp[0];
-            int offset = 1;
-
-            List<String> subDataTypes = typesByHeader.get(type);
-
-            if (subDataTypes != null) {
-                if (isAIX) {
-                    // assume seeing the same header / subtype again => ready to start parsing data
-                    return line;
-                }
-                else {
-                    throw new IOException("duplicate header for " + type + " at line " + in.getLineNumber());
-                }
-            }
-            else {
-                if (isAIX) {
-                    if ("".equals(type)) {
-                        // for Physical / Logical lines, create a single type for each
-                        // less 1 on the length to skip time
-                        String[] fields = new String[temp.length - (offset + 1)];
-
-                        for (int i = offset; i < temp.length - 1; i++) {
-                            fields[i - 1] = DataHelper.newString(temp[i]);
-                        }
-
-                        line = in.readLine().trim(); // trim for leading spaces
-
-                        while (!"".equals(line)) {
-                            type = DataHelper.newString(DATA_SPLITTER.split(line)[0]);
-                            data.addType(new DataType("IOStat " + type, type, fields));
-
-                            line = in.readLine().trim();
-                        }
-
-                        line = in.readLine();
-                        continue;
-                    }
-                    // extended disk stats is not supported
-                    else if ("Disks".equals(type) && "xfers".equals(temp[1])) {
-                        throw new IOException("AIX extended disk statistics (-D) are not currently supported");
-                    }
-                    else if ("System".equals(type)) {
-                        // skip 'System configuration' lines; assume this ends type definitions
-                        // skip next blank and return next header row
-                        in.readLine();
-                        return in.readLine();
-                    }
-                    else if ("FS".equals(type)) {
-                        type = temp[0] + ' ' + temp[1];
-                        ++offset;
-                    }
-                }
-
-                // Each row is a field; each column is a new DataType. This results in a
-                // sub-datatype for
-                // each metric with a field for each disk.
-
-                // less 1 on the length in AIX to skip the time column
-                subDataTypes = new java.util.ArrayList<String>(temp.length - (offset + 1 + (isAIX ? 1 : 0)));
-                int end = temp.length - (isAIX ? 1 : 0);
-
-                for (int i = offset; i < end; i++) {
-                    if ("%".equals(temp[i])) {
-                        // handle spaces after % in AIX
-                        subDataTypes.add(DataHelper.newString(temp[i] + temp[++i]));
-                    }
-                    else {
-                        subDataTypes.add(DataHelper.newString(temp[i]));
-                    }
-                }
-
-                line = in.readLine(); // first field row
-
-                List<String> fields = new java.util.ArrayList<String>();
-
-                // read fields until a blank is encountered
-                while (!line.equals("")) {
-                    temp = DATA_SPLITTER.split(line);
-                    fields.add(DataHelper.newString(temp[0]));
-
-                    line = in.readLine();
-                }
-
-                if (fields.size() == 0) {
-                    LOGGER.warn("no fields defined for {}; data will be ignored", type);
-                }
-                else {
-                    for (String subType : subDataTypes) {
-                        String[] fieldsArray = fields.toArray(new String[fields.size()]);
-                        String name = type + ' ' + subType;
-                        data.addType(new SubDataType("IOStat " + type, subType, name, false, fieldsArray));
-                    }
-
-                    typesByHeader.put(type, subDataTypes);
-
-                    if (LOGGER.isTraceEnabled()) {
-                        LOGGER.trace("{} section contains {} DataTypes: {}", new Object[] { type, subDataTypes.size(),
-                                subDataTypes });
-                        LOGGER.trace("{} section has {} {}: {}", new Object[] { type, fields.size(),
-                                fields.size() > 1 ? "ies" : "y", fields });
-                    }
-                }
-
-                line = in.readLine(); // next header line;
-            }
+            // used only as a marker; parse methods will use real data types
+            dataTypes.put(type, new DataType("dummy", "dummy", "dummy"));
         }
 
-        // should only get here on error; i.e. the file ended before header parsing completed
-        return line;
-    }
-
-    private void parseLinuxCPU() throws IOException {
-        String[] temp = DATA_SPLITTER.split(in.readLine());
-        // DATA_SPLITTER adds a null first element to temp; ignore it
-        // also ignore %idle, the last column
-        double[] cpuData = new double[temp.length - 2];
-
-        for (int i = 0; i < cpuData.length; i++) {
-            cpuData[i] = Double.parseDouble(temp[i + 1]);
-        }
-
-        currentRecord.addData(data.getType("IOStat CPU"), cpuData);
-
-        in.readLine(); // blank line after CPU data
-    }
-
-    // parse tty and CPU utilization into different data types
-    // also create the current DataRecord and set the time here, if available
-    private void parseAIXTTYAndCPU() throws IOException, ParseException {
-        // tty header already read
-        String[] temp = DATA_SPLITTER.split(in.readLine());
-
-        createCurrentRecord(temp[temp.length - 1]);
-
-        // DATA_SPLITTER adds a null first element to temp; ignore it
+        // ignore blank first value
         int n = 1;
 
         DataType tty = data.getType("IOStat TTY");
         double[] ttyData = new double[tty.getFieldCount()];
 
         for (int i = 0; i < ttyData.length; i++) {
-            ttyData[i] = Double.parseDouble(temp[n++]);
+            ttyData[i] = Double.parseDouble(values[n++]);
         }
 
         currentRecord.addData(tty, ttyData);
@@ -524,122 +325,179 @@ public final class IOStatParser {
         double[] cpuData = new double[cpu.getFieldCount()];
 
         for (int i = 0; i < cpuData.length;) {
-            cpuData[i++] = Double.parseDouble(temp[n++]);
+            if (n == 5) {
+                n++; // skip idle
+            }
+            else {
+                cpuData[i++] = Double.parseDouble(values[n++]);
+            }
         }
 
         currentRecord.addData(cpu, cpuData);
-
-        in.readLine(); // blank line after tty and CPU data
     }
 
-    // handle AIX Physical / Logical data
-    private void parseAIXSummaryData() throws IOException {
-        String line = in.readLine();
+    private void parseLinuxConfig(String line, TimeZone timeZone) throws IOException {
+        Matcher matcher = INFO.reset(line);
 
-        while (!"".equals(line)) {
-            String[] temp = DATA_SPLITTER.split(line.trim());
+        if (matcher.matches()) {
+            data.setHostname(DataHelper.newString(matcher.group(3)));
+            data.setMetadata("OS", DataHelper.newString(matcher.group(1) + ' ' + matcher.group(2)));
 
-            DataType type = data.getType("IOStat " + temp[0]);
-            double[] data = new double[type.getFieldCount()];
+            String arch = matcher.group(6);
+            String cpuCount = matcher.group(8);
 
-            for (int i = 0; i < data.length; i++) {
-                data[i] = Double.parseDouble(temp[i + 1]);
+            // Linux must export S_TIME_FORMAT=ISO before running iostat
+            format = TIMESTAMP_FORMAT_ISO;
+            format.setTimeZone(timeZone);
+
+            // ISO includes date time, so offset is 0
+            dateOffset = 0;
+
+            if (arch != null) {
+                data.setMetadata("ARCH", DataHelper.newString(arch));
             }
 
-            currentRecord.addData(type, data);
-
-            line = in.readLine();
+            if (cpuCount != null) {
+                data.setMetadata("CPU_COUNT", DataHelper.newString(cpuCount));
+            }
         }
+        else {
+            throw new IOException("file does not start with a recognized Linux iostat header");
+        }
+    }
+
+    private void parseLinuxCPU(String type, String[] typeFields, String[] values) throws IOException {
+        DataType dataType = dataTypes.get(type);
+
+        if (dataType == null) {
+            // create CPU data type
+            // subtract 2 since avg-cpu (first column) is not a field
+            // also ignore %idle (the last column)
+            String[] fields = new String[typeFields.length - 2];
+
+            for (int i = 0; i < fields.length; i++) {
+                fields[i] = DataHelper.newString(typeFields[i + 1]);
+            }
+
+            DataType cpu = new DataType("IOStat CPU", "IOStat Average CPU", fields);
+            data.addType(cpu);
+
+            dataTypes.put(type, cpu);
+        }
+
+        double[] cpuData = new double[values.length - 2];
+
+        for (int i = 0; i < cpuData.length; i++) {
+            cpuData[i] = Double.parseDouble(values[i + 1]);
+        }
+
+        currentRecord.addData(data.getType("IOStat CPU"), cpuData);
+    }
+
+    private DataType getDataType(String type, String subtype, String[] typeFields, boolean isAIX) throws IOException {
+        DataType dataType = dataTypes.get(subtype);
+
+        if (dataType != null) {
+            return dataType;
+        }
+
+        // less 1 on the length in AIX to skip the time column
+        int end = typeFields.length - (isAIX ? 1 : 0);
+        int offset = 1;
+
+        // AIX 'FS Name' type; skip name
+        if ("FS".equals(type)) {
+            ++offset;
+        }
+
+        List<String> fields = new java.util.ArrayList<String>(end - 1);
+
+        // start at 1 to skip type name
+        for (int i = offset; i < end; i++) {
+            if ("%".equals(typeFields[i])) {
+                // handle spaces after % in AIX
+                fields.add(DataHelper.newString(typeFields[i] + typeFields[++i]));
+            }
+            else {
+                fields.add(DataHelper.newString(typeFields[i]));
+            }
+        }
+
+        String name = type + ' ' + subtype;
+        String[] fieldsArray = fields.toArray(new String[fields.size()]);
+
+        dataType = new SubDataType("IOStat " + type, subtype, name, false, fieldsArray);
+
+        data.addType(dataType);
+
+        if (LOGGER.isTraceEnabled()) {
+            LOGGER.debug("created data type '{}'  with {} fields",
+                    new Object[] { dataType.getId(), dataType.getFieldCount() });
+        }
+
+        dataTypes.put(subtype, dataType);
+
+        return dataType;
     }
 
     // parse a data 'stanza'; i.e. one type's worth of data
     // contrast this with parseDataTypes which parses all the DataTypes and sub-types before
     // stopping
-    private void parseData(String type) throws IOException, ParseException {
-        List<String> subTypes = typesByHeader.get(type);
+    private void parseData(DataType dataType, String[] values, boolean isAIX) throws IOException, ParseException {
+        // ignore AIX time data
+        int dataLength = values.length - (isAIX ? 2 : 1);
+        int fieldCount = dataType.getFieldCount();
 
-        if (subTypes == null) {
-            // type has no fields, ignore
-            // no attempt is made to skip any new fields adding during IOStat capture
-            return;
+        if (dataLength > fieldCount) {
+            LOGGER.warn("'{}' at line {} has {} extra columns; they will be ignored",
+                    new Object[] { dataType.getId(), in.getLineNumber(), dataLength - fieldCount });
+            dataLength = dataType.getFieldCount();
+        }
+        else if (dataLength < dataType.getFieldCount()) {
+            LOGGER.warn("'{}' at line {} has too few columns; zero will be assumed for missing data",
+                    new Object[] { dataType.getId(), in.getLineNumber() });
         }
 
-        Map<DataType, double[]> dataToAdd = new java.util.HashMap<DataType, double[]>();
+        double[] data = new double[fieldCount];
 
-        // create data arrays for all subtypes
-        for (int i = 0; i < subTypes.size(); i++) {
-            String subType = subTypes.get(i);
-            DataType dataType = data.getType(SubDataType.buildId("IOStat " + type, subType));
-            dataToAdd.put(dataType, new double[dataType.getFieldCount()]);
+        ++dataLength;
+        int n = 0;
+
+        for (int i = 1; i < dataLength; i++) {
+            String tmp = values[i];
+
+            if ("-".equals(tmp)) {
+                data[n] = Double.NaN;
+            }
+            else {
+                data[n] = Double.parseDouble(tmp);
+            }
+
+            ++n;
         }
 
-        int subTypeCount = subTypes.size();
-
-        String line = in.readLine();
-
-        while ((line != null) && !"".equals(line)) {
-            String[] temp = DATA_SPLITTER.split(line);
-            String field = temp[0];
-
-            // ignore AIX time data for each disk
-            int dataLength = temp.length - (isAIX ? 2 : 1);
-
-            if (isAIX && (currentRecord == null)) {
-                // no tty data to get a timestamp from
-                // use the data record instead; assume time is the last column
-                createCurrentRecord(temp[temp.length - 1]);
-            }
-
-            if (dataLength > subTypeCount) {
-                LOGGER.warn("'{}' at line {} has {} extra columns; they will be ignored",
-                        new Object[] { field, in.getLineNumber(), dataLength - subTypeCount });
-                dataLength = subTypeCount;
-            }
-            else if (dataLength < subTypeCount) {
-                LOGGER.warn("'{}' at line {} has too few columns; zero will be assumed for missing data", new Object[] {
-                        field, in.getLineNumber() });
-            }
-
-            for (int i = 0; i < subTypes.size(); i++) {
-                String subType = subTypes.get(i);
-
-                DataType dataType = data.getType(SubDataType.buildId("IOStat " + type, subType));
-                double[] subTypeData = dataToAdd.get(dataType);
-
-                if (subTypeData == null) {
-                    subTypeData = new double[dataType.getFieldCount()];
-                    dataToAdd.put(dataType, subTypeData);
-                }
-
-                // for each field (column in the file), look up the field index ...
-                // and add the current data to the type
-                int subTypeIdx = dataType.getFieldIndex(field);
-                String data = temp[i + 1];
-
-                if ("-".equals(data)) {
-                    subTypeData[subTypeIdx] = Double.NaN;
-                }
-                else {
-                    subTypeData[subTypeIdx] = Double.parseDouble(data);
-                }
-            }
-
-            line = in.readLine(); // read next data row, if any
-        }
-
-        for (DataType dataType : dataToAdd.keySet()) {
-            double[] toAdd = dataToAdd.get(dataType);
-            currentRecord.addData(dataType, toAdd);
-        }
+        currentRecord.addData(dataType, data);
     }
 
     private void createCurrentRecord(String timeToParse) throws ParseException {
+        long time = format.parse(timeToParse).getTime() + dateOffset;
+
         if (currentRecord != null) {
-            data.addRecord(currentRecord);
+            // only create a new record if the time actually changes
+            if (currentRecord.getTime() == time) {
+                return;
+            }
+
+            if (firstRecord) {
+                firstRecord = false;
+            }
+            else {
+                data.addRecord(currentRecord);
+            }
+
             currentRecord = null;
         }
 
-        long time = format.parse(timeToParse).getTime() + dateOffset;
         currentRecord = new DataRecord(time, timeToParse);
     }
 
