@@ -27,17 +27,17 @@
 <div id="content">
   <div class="section">
     <h2>Overview</h2>
-    <p>NMONVisualizer can process IOStat files from both AIX and Linux. But the correct command line switches must be used.<p/>
+    <p>NMONVisualizer can process IOStat files from both AIX and Linux if the correct command line switches must be used.<p/>
   </div>
 
   <div class="section">
     <h2>Linux</h2>
     <ul>
-      <li>Must use the <span class="c">-t</span> option to include timestamps.<br>By default, timestamps will be in the default locale of the OS. To ensure consistency, the ISO 8601 format should be used. This can be changed in newer versions of iostat by exporting <span class="c">S_TIME_FORMAT=ISO</span>. This has the added benefit of including a time zone in each timestamp. Note that this option is not avaiable on older versions of IOStat. For these versions, the GUI will prompt for a time zone.</li>
+      <li>Must use the <span class="c">-t</span> option to include timestamps and export <span class="c">S_TIME_FORMAT=ISO</span> to format it.<br>By default, timestamps will be in the default locale of the OS. To ensure consistency, the ISO 8601 format <span class="i">must</span> be used. This has the added benefit of including a time zone in each timestamp. Note that this option is not avaiable on older versions of IOStat so they are not compatible.</li>
       <li>May use
         <ul>
           <li><span class="c">-c</span>, CPU data only</li>
-          <li><span class="c">-n</span>, NFS data</li>
+          <li><span class="c">-d</span>, disk data only</li>
           <li><span class="c">-N</span>, show mpath and LVM names rather than device mapper names (<span class="c">dm-x</span>)</li>
           <li><span class="c">-x</span>, extended disk statistics</li>
           <li><span class="c">-p &lt;device&gt;</span>, partition data</li>
@@ -46,12 +46,18 @@
       </li>
       <li>Cannot use
         <ul>
+          <li><span class="c">-y</span> which skips output of summary data at the start</li>
           <li><span class="c">-z</span> which skips output of zeroed data</li>
           <li><span class="c">-h</span> which outputs human readable NFS output</li>
         </ul>
       </li>
     </ul>
+    <br/>
     Example command: <span class="c">export S_TIME_FORMAT=ISO;iostat -tNxm &lt;interval&gt; &lt;count&gt;</span>
+    <p>
+    <h3>Locales</h3>
+    Note that iostat output is localized to your configured language. In practice, this means that number formatting will change depending on what locale server is configured for. NMONVisualizer should adapt as necessary provided it <span class="i">is running in the same locale</span>. If parsing is failing due to number formatting, please ensure your locale is correctly configured. You can set this manually for the JVM by passing <span class="c">-Duser.language</span> and <span class="c">-Duser.region</span> to the Java command line when you start NMONVisualizer.
+    </p>
   </div>
 
   <div class="section">
@@ -59,18 +65,28 @@
     <ul>
       <li>Must use the <span class="c">-T</span> option to include timestamps.<br>Note that AIX does not have an option to include the time zone like Linux. In addition, the time format does not include the date. So, AIX files will always prompt for this information.</li>
       <li>May use
-        <ul><span class="c">-s</span>, system information, including the hostname</ul>
-        <ul><span class="c">-m</span>, path data</ul>
-        <ul><span class="c">-f</span>, file system data</ul>
+        <ul>
+          <li><span class="c">-a</span>, adapter information</li>
+          <li><span class="c">-s</span>, system information, including the hostname. <span class="i">Recommended</span> to avoid manual hostname entry.</li>
+          <li><span class="c">-m</span>, path data</li>
+          <li><span class="c">-f</span>, file system data</li>
+          <li><span class="c">-Dl</span> extended disk stats in long format. (short format, without <span class="c">-l</span> <span class="i">is not</span> supported).</li>
+        </ul>
       </li>
       <li>Cannot use
         <ul>
-          <li><span class="c">-D</span> which outputs extended disk stats</li>
+          <li><span class="c">-V</span> which skips output of zeroed data</li>
           <li><span class="c">-X</span> which outputs in XML format</li>
         </ul>
       </li>
     </ul>
-    Example command: <span class="c">iostat -Tsfm &lt;interval&gt; &lt;count&gt;</span>
+    <br/>
+    Recommended commands:
+    <ul>
+      <li><span class="c">iostat -Tsam &lt;interval&gt; &lt;count&gt;</span> - output adapter and path information</li>
+      <li><span class="c">iostat -Tsf &lt;interval&gt; &lt;count&gt;</span> - output disk and file system information</li>
+      <li><span class="c">iostat -TsDl &lt;interval&gt; &lt;count&gt;</span> - output extended disk statistics</li>
+    </ul>
   </div>
 </div>
 </body>
