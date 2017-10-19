@@ -681,7 +681,7 @@ final class MainMenu extends JMenuBar implements IntervalListener, DataSetListen
         item.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
                 JOptionPane.showMessageDialog(gui.getMainFrame(),
-                        "Copyright \u00A9 2011-2014\n"
+                        "Copyright \u00A9 2011-2017\n"
                                 + "IBM Software Group, Collaboration Services.\nAll Rights Reserved.\n\n"
                                 + "Support is on an 'as-is', 'best-effort' basis only.\n\n" + "Version "
                                 + VersionInfo.getVersion() + "\n\n" + "Icons from "

@@ -652,7 +652,7 @@ public final class ChartDefinitionParser extends BasicXMLParser {
 
     private void endDataElement() {
         if (typeMatcher == null) {
-            logger.warn("ignoring " + "<data>" + " element without a <type>" + "at line {}" + " <type> is required",
+            logger.warn("ignoring " + "<data>" + " element without a <type>" + "at line {}" + "; <type> is required",
                     getLineNumber());
             return;
         }

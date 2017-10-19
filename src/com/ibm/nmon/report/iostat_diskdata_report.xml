@@ -1,23 +1,26 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<!-- this report must be multiplexed across fields -->
+<!-- this report must be multiplexed across types -->
 <charts>
-  <linechart name="Disk Wait" subtitledBy="FIELD" shortName="Disk Wait" linesNamedBy="TYPE" stacked="TRUE">
+  <linechart name="Disk Wait" shortName="Wait" linesNamedBy="FIELD" stacked="true">
     <yAxis label="ms" />
     <data>
-      <type name="r_await" alias="Reading" />
-    </data>
-    <data>
-      <type name="w_await" alias="Writing" />
+       <type regex="IOStat (Device|Disks|Paths/Disks) \((.*)\)" aliasByGroup="2" />
+      <field name="r_await" alias="Read" />
+      <field name="r_avgserv" alias="Read" />
+      <field name="w_await" alias="Write" />
+      <field name="w_avgserv" alias="Write" />
     </data>
   </linechart>
 
-  <linechart name="Data Rate" subtitledBy="FIELD" shortName="Data Rate" linesNamedBy="TYPE" stacked="TRUE">
+  <linechart name="Data Rate" subtitledBy="TYPE" shortName="Data Rate" linesNamedBy="FIELD" stacked="true">
     <yAxis label="MB/s" />
     <data>
-      <type name="rMB/s" alias="Read" />
+      <host os="LINUX" />
+      <field name="rMB/s" alias="Read" />
     </data>
     <data>
-      <type name="wMB/s" alias="Write" />
+      <host os="LINUX" />
+      <field name="wMB/s" alias="Write" />
     </data>
   </linechart>
 </charts>

@@ -311,7 +311,7 @@ public final class IOStatParser {
             }
         }
 
-        DataType cpu = new DataType("IOStat" + " CPU", "IOStat" + " Average CPU", fields.toArray(new String[0]));
+        DataType cpu = new DataType("IOStat" + " CPU", "IOStat" + " CPU" + " Utilization", fields.toArray(new String[0]));
         data.addType(cpu);
     }
 
@@ -331,7 +331,7 @@ public final class IOStatParser {
         // ignore blank first value
         int n = 1;
 
-        DataType tty = data.getType("IOStat TTY");
+        DataType tty = data.getType("IOStat" + " TTY");
         double[] ttyData = new double[tty.getFieldCount()];
 
         for (int i = 0; i < ttyData.length; i++) {
@@ -340,7 +340,7 @@ public final class IOStatParser {
 
         currentRecord.addData(tty, ttyData);
 
-        DataType cpu = data.getType("IOStat CPU");
+        DataType cpu = data.getType("IOStat" +" CPU");
         double[] cpuData = new double[cpu.getFieldCount()];
 
         for (int i = 0; i < cpuData.length;) {
@@ -362,7 +362,7 @@ public final class IOStatParser {
             throw new IOException("cannot add data without a current record; does the file have timestamps?");
         }
 
-        DataType dataType = data.getType("IOStat " + values[1]);
+        DataType dataType = data.getType("IOStat" + " "+ values[1]);
 
         if (dataType == null) {
             // less 1 on the length to skip time
@@ -372,7 +372,7 @@ public final class IOStatParser {
                 fields[i - 1] = DataHelper.newString(typeFields[i]);
             }
 
-            dataType = new DataType("IOStat " + values[1], values[1], fields);
+            dataType = new DataType("IOStat"+ " " + values[1], values[1], fields);
 
             data.addType(dataType);
         }
@@ -394,8 +394,12 @@ public final class IOStatParser {
 
         // 0, 1 => preserve initial blank in typeFields; do not use blank from values
         for (int i = 0, j = 1; i < row1.length; i++) {
-            if ((i == 1) || ((i > 6) && (i < 11)) || ((i > 12) && (i < 17)) || (i > 17)) {
-                tmp[i] = row1[i] + '_' + row2[j++];
+            if (i == 1) {
+                tmp[i] = "%tm_act";
+                ++j;
+            }
+            else if (((i > 6) && (i < 11)) || ((i > 12) && (i < 17)) || (i > 17)) {
+                tmp[i] = row1[i] + row2[j++];
             }
             else {
                 tmp[i] = row1[i];
@@ -450,7 +454,7 @@ public final class IOStatParser {
             throw new IOException("cannot add data without a current record; does the file have timestamps?");
         }
 
-        DataType cpu = data.getType("IOStat CPU");
+        DataType cpu = data.getType("IOStat" + " CPU");
 
         if (cpu == null) {
             // create CPU data type
@@ -462,7 +466,7 @@ public final class IOStatParser {
                 fields[i] = DataHelper.newString(typeFields[i + 1]);
             }
 
-            cpu = new DataType("IOStat CPU", "IOStat Average CPU", fields);
+            cpu = new DataType("IOStat" +" CPU", "IOStat" + " CPU" + " Utilization", fields);
             data.addType(cpu);
         }
 
@@ -595,8 +599,7 @@ public final class IOStatParser {
             typeFieldsCache.put(type, fieldsArray);
         }
 
-        String name = type + ' ' + subtype;
-        dataType = new SubDataType("IOStat " + type, subtype, name, false, fieldsArray);
+        dataType = new SubDataType("IOStat " + type, subtype, subtype, true, fieldsArray);
 
         data.addType(dataType);
 
