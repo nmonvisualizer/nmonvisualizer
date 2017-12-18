@@ -25,7 +25,18 @@ import com.ibm.nmon.data.SubDataType;
 public final class JSONParser {
     private static final Logger LOGGER = org.slf4j.LoggerFactory.getLogger(JSONParser.class);
 
-    private static final ObjectMapper MAPPER = new ObjectMapper();
+    private static final ObjectMapper MAPPER;
+
+    static {
+        // FIXME hack to avoid SecurityException with Java 9 when Jackson trys to classload java.sql.Timestamps
+        // this will cause JSON parsing to fail with NPEs!
+        if (!System.getProperty("java.vm.specification.version").equals("9")) {
+            MAPPER = new ObjectMapper();
+        }
+        else {
+            MAPPER = null;
+        }
+    }
 
     private BasicDataSet data = null;
     private SimpleDateFormat format = null;
@@ -99,8 +110,8 @@ public final class JSONParser {
             data.setMetadata("timezone", format.getTimeZone().getDisplayName());
         }
         else {
-            LOGGER.info("no 'timezone' value defined; defaulting to {}, ({})", format.getTimeZone().getID(), format
-                    .getTimeZone().getRawOffset() / 3600000.0);
+            LOGGER.info("no 'timezone' value defined; defaulting to {}, ({})", format.getTimeZone().getID(),
+                    format.getTimeZone().getRawOffset() / 3600000.0);
         }
 
         return format;
@@ -229,7 +240,8 @@ public final class JSONParser {
         Object temp = datum.get(typeId);
 
         if (temp == null) {
-            LOGGER.warn("no data for type '{}' at time {}", typeId, format.format(new java.util.Date(record.getTime())));
+            LOGGER.warn("no data for type '{}' at time {}", typeId,
+                    format.format(new java.util.Date(record.getTime())));
             return;
         }
 

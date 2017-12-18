@@ -96,8 +96,8 @@ public final class TreePanel extends JScrollPane implements DataSetListener {
                     selectedPath = current;
                 }
 
-                java.util.Enumeration<TreePath> temp = tree.getExpandedDescendants(new TreePath(tree.getModel()
-                        .getRoot()));
+                java.util.Enumeration<TreePath> temp = tree
+                        .getExpandedDescendants(new TreePath(tree.getModel().getRoot()));
 
                 if (temp != null) {
                     expandedPaths = java.util.Collections.list(temp);
@@ -208,7 +208,6 @@ public final class TreePanel extends JScrollPane implements DataSetListener {
 
     // since saved TreePaths may included nodes that no longer exist, rebuild the path with the
     // new, correct nodes
-    @SuppressWarnings("unchecked")
     private TreePath rebuildPath(TreePath oldPath) {
         Object[] oldPaths = oldPath.getPath();
         DefaultMutableTreeNode[] newPath = new DefaultMutableTreeNode[oldPaths.length];
@@ -219,10 +218,11 @@ public final class TreePanel extends JScrollPane implements DataSetListener {
         int pathIdx = 1;
 
         while ((parent != null) && (pathIdx < newPath.length)) {
-            List<DefaultMutableTreeNode> children = java.util.Collections
-                    .list((java.util.Enumeration<DefaultMutableTreeNode>) parent.children());
+            List<javax.swing.tree.TreeNode> children = java.util.Collections
+                    .list((java.util.Enumeration<javax.swing.tree.TreeNode>) parent.children());
 
-            for (DefaultMutableTreeNode child : children) {
+            for (javax.swing.tree.TreeNode c : children) {
+                DefaultMutableTreeNode child = (DefaultMutableTreeNode) c;
                 if (((DefaultMutableTreeNode) oldPaths[pathIdx]).getUserObject().equals(child.getUserObject())) {
                     newPath[pathIdx] = child;
                     ++pathIdx;

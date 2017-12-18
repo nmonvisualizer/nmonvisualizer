@@ -1,13 +1,17 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <classpath>
 	<classpathentry kind="src" path="src"/>
-	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER"/>
+	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER">
+		<attributes>
+			<attribute name="module" value="true"/>
+		</attributes>
+	</classpathentry>
 	<classpathentry kind="lib" path="lib/jcommon-1.0.23.jar"/>
 	<classpathentry kind="lib" path="lib/jfreechart-1.0.19.jar" sourcepath="D:/Development/Libraries/jfreechart-1.0.19/source"/>
-	<classpathentry kind="lib" path="lib/jackson-annotations-2.7.1.jar"/>
-	<classpathentry kind="lib" path="lib/jackson-core-2.7.1.jar"/>
-	<classpathentry kind="lib" path="lib/jackson-databind-2.7.1-1.jar"/>
 	<classpathentry kind="lib" path="lib/slf4j-api-1.7.16.jar"/>
 	<classpathentry kind="lib" path="lib/slf4j-jdk14-1.7.16.jar"/>
+	<classpathentry kind="lib" path="lib/jackson-annotations-2.9.3.jar"/>
+	<classpathentry kind="lib" path="lib/jackson-core-2.9.3.jar"/>
+	<classpathentry kind="lib" path="lib/jackson-databind-2.9.3.jar"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>
