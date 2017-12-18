@@ -261,6 +261,7 @@ public final class IOStatParser {
 
     private void parseAIXConfig(String line, TimeZone timeZone) {
         data.setMetadata("OS", "AIX");
+        data.setMetadata("AIX", "iostat"); // mimic NMON so OSMatcher works as expected
 
         dateFormat = TIMESTAMP_FORMAT_AIX;
         dateFormat.setTimeZone(timeZone);

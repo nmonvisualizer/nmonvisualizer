@@ -4,7 +4,7 @@
   <linechart name="Disk Wait" shortName="Wait" linesNamedBy="FIELD" stacked="true">
     <yAxis label="ms" />
     <data>
-       <type regex="IOStat (Device|Disks|Paths/Disks) \((.*)\)" aliasByGroup="2" />
+      <type regex="IOStat (Device|Disks|Paths/Disks) \((.*)\)" aliasByGroup="2" />
       <field name="r_await" alias="Read" />
       <field name="r_avgserv" alias="Read" />
       <field name="w_await" alias="Write" />
@@ -16,11 +16,18 @@
     <yAxis label="MB/s" />
     <data>
       <host os="LINUX" />
+      <type regex="IOStat (Device|Disks|Paths/Disks) \((.*)\)" aliasByGroup="2" />
       <field name="rMB/s" alias="Read" />
     </data>
     <data>
       <host os="LINUX" />
+      <type regex="IOStat (Device|Disks|Paths/Disks) \((.*)\)" aliasByGroup="2" />
       <field name="wMB/s" alias="Write" />
+    </data>
+    <data>
+      <host os="AIX" />
+      <type regex="IOStat (Device|Disks|Paths/Disks) \((.*)\)" aliasByGroup="2" />
+      <field name="Kbps" alias="Total" />
     </data>
   </linechart>
 </charts>
