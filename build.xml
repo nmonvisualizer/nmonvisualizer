@@ -5,30 +5,18 @@
   <property name="dir.lib" value="${basedir}/lib" />
 
   <target name="jar" depends="clean-jar,compile,-get-version">
-    <!-- do not include the jar-in-jar-loader; the loader is included unpacked -->
-    <fileset id="file.lib" dir="${dir.lib}">
-      <exclude name="*.zip" />
-    </fileset>
-
-    <pathconvert property="path.lib" refid="file.lib" pathsep=" ">
-      <!-- strip out the absolute path -->
-      <mapper type="flatten" />
-    </pathconvert>
-
     <manifest file="${basedir}/MANIFEST.MF">
-      <attribute name="Main-Class" value="org.eclipse.jdt.internal.jarinjarloader.JarRsrcLoader" />
+      <attribute name="Main-Class" value="com.ibm.nmon.DelegatingMain" />
       <attribute name="Class-Path" value="." />
-      <attribute name="Rsrc-Class-Path" value="./ ${path.lib}" />
-      <attribute name="Rsrc-Main-Class" value="com.ibm.nmon.DelegatingMain" />
     </manifest>
 
     <property name="file.jar" value="${basedir}/NMONVisualizer_${version}.jar" />
 
     <jar destfile="${file.jar}" basedir="${dir.build}" manifest="${basedir}/MANIFEST.MF">
-      <!-- include the jar-in-jar-loader files _unpacked_ in the WAR file so they can be read as the Main-Class -->
-      <zipfileset src="${dir.lib}/jar-in-jar-loader.zip" />
-
-      <fileset refid="file.lib" />
+      <!-- unzip all JAR files in the lib directory into the app JAR file -->
+      <zipgroupfileset id="file.lib" dir="${dir.lib}">
+        <exclude name="*.zip" />
+      </zipgroupfileset>
 
       <fileset dir="${basedir}">
         <include name="LICENSE" />

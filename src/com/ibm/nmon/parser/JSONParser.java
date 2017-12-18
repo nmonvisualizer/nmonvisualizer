@@ -25,18 +25,7 @@ import com.ibm.nmon.data.SubDataType;
 public final class JSONParser {
     private static final Logger LOGGER = org.slf4j.LoggerFactory.getLogger(JSONParser.class);
 
-    private static final ObjectMapper MAPPER;
-
-    static {
-        // FIXME hack to avoid SecurityException with Java 9 when Jackson trys to classload java.sql.Timestamps
-        // this will cause JSON parsing to fail with NPEs!
-        if (!System.getProperty("java.vm.specification.version").equals("9")) {
-            MAPPER = new ObjectMapper();
-        }
-        else {
-            MAPPER = null;
-        }
-    }
+    private static final ObjectMapper MAPPER = new ObjectMapper();
 
     private BasicDataSet data = null;
     private SimpleDateFormat format = null;
