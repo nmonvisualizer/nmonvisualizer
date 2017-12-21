@@ -642,7 +642,7 @@ public final class NMONParser {
         }
 
         if (newProcess) {
-            process = new Process(pid, currentRecord.getTime(), name);
+            process = new Process(pid, currentRecord.getTime(), DataHelper.newString(name));
             processes.put(pid, process); // overwrites old process
 
             processType = new ProcessDataType(process, topFields);
