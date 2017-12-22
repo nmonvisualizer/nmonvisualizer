@@ -373,7 +373,6 @@ public abstract class NMONVisualizerApp implements IntervalListener {
         for (DataSetListener listener : listeners) {
             listener.dataCleared();
         }
-
     }
 
     public final Iterable<SystemDataSet> getDataSets() {

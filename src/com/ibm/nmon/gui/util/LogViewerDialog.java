@@ -46,7 +46,7 @@ public final class LogViewerDialog extends JFrame {
     public static final ImageIcon LOG_ICON = Styles.buildIcon("page_error.png");
 
     private final JComboBox<Level> levels;
-    private final JTextArea log;
+    private JTextArea log;
 
     public LogViewerDialog(NMONVisualizerGui gui) {
         super("Application Log");
@@ -87,8 +87,12 @@ public final class LogViewerDialog extends JFrame {
 
             @Override
             public void actionPerformed(ActionEvent e) {
-
-                log.setText("");
+                log = new JTextArea();
+                log.setColumns(100);
+                log.setRows(30);
+                log.setEditable(false);
+                
+                scroller.setViewportView(log);
             }
         };
 

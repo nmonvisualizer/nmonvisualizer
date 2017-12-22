@@ -142,7 +142,7 @@ public final class ReportPanel extends JTabbedPane implements PropertyChangeList
     public void setEnabled(boolean enabled) {
         if (enabled != isEnabled()) {
             super.setEnabled(enabled);
-            
+
             chartFactory.showLegends(gui.getBooleanProperty("lineChartLegend"));
 
             if ((chartsInUse != null) && !chartsInUse.isEmpty()) {
@@ -345,7 +345,7 @@ public final class ReportPanel extends JTabbedPane implements PropertyChangeList
         }
         else if ("lineChartLegend".equals(evt.getPropertyName())) {
             chartFactory.showLegends((Boolean) evt.getNewValue());
-            
+
             for (int i = 0; i < chartsInUse.size(); i++) {
                 BaseChartDefinition chartDefinition = chartsInUse.get(i);
 
@@ -414,6 +414,7 @@ public final class ReportPanel extends JTabbedPane implements PropertyChangeList
         gui.getIntervalManager().removeListener(this);
         gui.removePropertyChangeListener("granularity", this);
         gui.removePropertyChangeListener("timeZone", this);
+        gui.removePropertyChangeListener("lineChartLegend", this);
 
         // clean up references to charts
         removeAll();
