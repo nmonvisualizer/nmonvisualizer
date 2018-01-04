@@ -63,7 +63,7 @@ public final class LogViewerDialog extends JFrame {
         log.setRows(30);
         log.setEditable(false);
 
-        JScrollPane scroller = new JScrollPane(log);
+        final JScrollPane scroller = new JScrollPane(log);
         scroller.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_ALWAYS);
         scroller.setBorder(Styles.DOUBLE_LINE_BORDER);
 

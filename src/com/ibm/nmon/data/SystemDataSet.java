@@ -9,9 +9,8 @@ import java.util.TreeMap;
 import com.ibm.nmon.interval.Interval;
 
 /**
- * A DataSet designed to hold data for a single 'system' or host across a number of parsed files.
- * Parsed files are identified by the {@link DataSet#getStartTime() start time} of the file, so
- * these times should be unique.
+ * A DataSet designed to hold data for a single 'system' or host across a number of parsed files. Parsed files are
+ * identified by the {@link DataSet#getStartTime() start time} of the file, so these times should be unique.
  */
 public final class SystemDataSet extends ProcessDataSet {
     private static final Logger LOGGER = org.slf4j.LoggerFactory.getLogger(SystemDataSet.class);
@@ -90,8 +89,8 @@ public final class SystemDataSet extends ProcessDataSet {
         }
 
         if (LOGGER.isDebugEnabled()) {
-            LOGGER.debug("data for {} consolidated into data for {} in {}ms ", new Object[] { newData, getHostname(),
-                    (System.nanoTime() - startT) / 1000000.0d });
+            LOGGER.debug("data for {} consolidated into data for {} in {}ms ",
+                    new Object[] { newData, getHostname(), (System.nanoTime() - startT) / 1000000.0d });
         }
     }
 
@@ -137,8 +136,8 @@ public final class SystemDataSet extends ProcessDataSet {
         }
 
         if (LOGGER.isDebugEnabled()) {
-            LOGGER.debug("data for {} consolidated into data for {} in {}ms ", new Object[] { sourceFile,
-                    getHostname(), (System.nanoTime() - startT) / 1000000.0d });
+            LOGGER.debug("data for {} consolidated into data for {} in {}ms ",
+                    new Object[] { sourceFile, getHostname(), (System.nanoTime() - startT) / 1000000.0d });
         }
     }
 
@@ -193,7 +192,6 @@ public final class SystemDataSet extends ProcessDataSet {
                     addDataForType(newData, newType);
                 }
                 else {
-
                     mergeDataForType(newData, newType, combinedTimes);
                 }
             }
@@ -229,8 +227,8 @@ public final class SystemDataSet extends ProcessDataSet {
         }
 
         if (LOGGER.isTraceEnabled()) {
-            LOGGER.trace("{} of {} data records for {} {} added in {}ms ", new Object[] { n, data.getRecordCount(),
-                    data, type, (System.nanoTime() - start) / 1000000.0d });
+            LOGGER.trace("{} of {} data records for {} {} added in {}ms ",
+                    new Object[] { n, data.getRecordCount(), data, type, (System.nanoTime() - start) / 1000000.0d });
         }
     }
 
@@ -255,7 +253,8 @@ public final class SystemDataSet extends ProcessDataSet {
             }
 
             if (recordToUpdate.hasData(updatedProcessType)) {
-                LOGGER.warn("not overwriting existing {} data at time {}", updatedProcessType, newRecord.getTimestamp());
+                LOGGER.warn("not overwriting existing {} data at time {}", updatedProcessType,
+                        newRecord.getTimestamp());
             }
             else if (newRecord.hasData(processType)) {
                 // note processType since the new records have not been updated
@@ -271,9 +270,8 @@ public final class SystemDataSet extends ProcessDataSet {
         }
 
         if (LOGGER.isTraceEnabled()) {
-            LOGGER.trace("{} of {} process data records for {} {} added in {}ms ",
-                    new Object[] { n, data.getRecordCount(), data, updatedProcessType,
-                            (System.nanoTime() - start) / 1000000.0d });
+            LOGGER.trace("{} of {} process data records for {} {} added in {}ms ", new Object[] { n,
+                    data.getRecordCount(), data, updatedProcessType, (System.nanoTime() - start) / 1000000.0d });
         }
     }
 
@@ -332,8 +330,10 @@ public final class SystemDataSet extends ProcessDataSet {
                         if (hasExistingData && existingType.hasField(field)) {
                             combinedData[n] = existingRecord.getData(existingType, field);
 
-                            LOGGER.warn("not overwriting existing {} data at time {}", newType,
-                                    existingRecord.getTimestamp());
+                            if (hasNewData) {
+                                LOGGER.warn("not overwriting existing {} data at time {}", newType,
+                                        existingRecord.getTimestamp());
+                            }
                         }
                         else if (hasNewData) {
                             combinedData[n] = newRecord.getData(newType, field);
@@ -369,8 +369,8 @@ public final class SystemDataSet extends ProcessDataSet {
         }
 
         if (LOGGER.isTraceEnabled()) {
-            LOGGER.trace("data records for {} {} merged in {}ms ",
-                    new Object[] { newData, combinedType, (System.nanoTime() - start) / 1000000.0d });
+            LOGGER.trace("{} data records for {} {} merged in {}ms ", new Object[] { combinedTimes.size(), newData,
+                    combinedType, (System.nanoTime() - start) / 1000000.0d });
         }
     }
 
