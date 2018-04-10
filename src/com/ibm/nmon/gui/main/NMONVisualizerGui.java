@@ -50,7 +50,13 @@ import com.ibm.nmon.util.TimeFormatCache;
 
 public final class NMONVisualizerGui extends NMONVisualizerApp {
     public static void main(final String[] args) throws Exception {
-        javax.swing.UIManager.setLookAndFeel("com.sun.java.swing.plaf.nimbus.NimbusLookAndFeel");
+        try {
+            javax.swing.UIManager.setLookAndFeel("javax.swing.plaf.nimbus.NimbusLookAndFeel");
+        }
+        catch (ClassNotFoundException cnfe) {
+            // for older JVMs, the LaF class is in a Sun package
+            javax.swing.UIManager.setLookAndFeel("com.sun.java.swing.plaf.nimbus.NimbusLookAndFeel");
+        }
 
         String temp = System.getProperty("fontSize");
 
