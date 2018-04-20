@@ -105,6 +105,11 @@ public final class SystemDataSet extends ProcessDataSet {
 
         long start = newData.getStartTime();
         long end = newData.getEndTime();
+        
+        // handle a single DataRecord in the DataSet
+        if (start == end) {
+            end = start + 1000;
+        }
 
         sourceFiles.put(new Interval(start, end), sourceFile);
 

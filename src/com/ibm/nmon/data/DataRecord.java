@@ -70,7 +70,7 @@ public final class DataRecord implements Comparable<DataRecord> {
     }
 
     public void addData(DataType type, double[] data) {
-        if (values.containsKey(type.getId())) {
+        if (values.containsKey(type)) {
             throw new IllegalArgumentException("DataType " + type.getId() + " already defined for timestamp "
                     + timestamp);
         }

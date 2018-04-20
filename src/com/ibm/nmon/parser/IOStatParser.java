@@ -239,6 +239,11 @@ public final class IOStatParser {
                     // ignore
                 }
 
+                // records are added at new timestamp; add the final one by default
+                if (currentRecord != null) {
+                    data.addRecord(currentRecord);
+                }
+
                 if (LOGGER.isDebugEnabled()) {
                     LOGGER.debug("Parse complete for {} in {}ms", data.getSourceFile(),
                             (System.nanoTime() - start) / 1000000.0d);
@@ -312,7 +317,8 @@ public final class IOStatParser {
             }
         }
 
-        DataType cpu = new DataType("IOStat" + " CPU", "IOStat" + " CPU" + " Utilization", fields.toArray(new String[0]));
+        DataType cpu = new DataType("IOStat" + " CPU", "IOStat" + " CPU" + " Utilization",
+                fields.toArray(new String[0]));
         data.addType(cpu);
     }
 
@@ -341,7 +347,7 @@ public final class IOStatParser {
 
         currentRecord.addData(tty, ttyData);
 
-        DataType cpu = data.getType("IOStat" +" CPU");
+        DataType cpu = data.getType("IOStat" + " CPU");
         double[] cpuData = new double[cpu.getFieldCount()];
 
         for (int i = 0; i < cpuData.length;) {
@@ -363,7 +369,7 @@ public final class IOStatParser {
             throw new IOException("cannot add data without a current record; does the file have timestamps?");
         }
 
-        DataType dataType = data.getType("IOStat" + " "+ values[1]);
+        DataType dataType = data.getType("IOStat" + " " + values[1]);
 
         if (dataType == null) {
             // less 1 on the length to skip time
@@ -373,7 +379,7 @@ public final class IOStatParser {
                 fields[i - 1] = DataHelper.newString(typeFields[i]);
             }
 
-            dataType = new DataType("IOStat"+ " " + values[1], values[1], fields);
+            dataType = new DataType("IOStat" + " " + values[1], values[1], fields);
 
             data.addType(dataType);
         }
@@ -467,7 +473,7 @@ public final class IOStatParser {
                 fields[i] = DataHelper.newString(typeFields[i + 1]);
             }
 
-            cpu = new DataType("IOStat" +" CPU", "IOStat" + " CPU" + " Utilization", fields);
+            cpu = new DataType("IOStat" + " CPU", "IOStat" + " CPU" + " Utilization", fields);
             data.addType(cpu);
         }
 
