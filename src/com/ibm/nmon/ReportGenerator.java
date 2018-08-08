@@ -46,6 +46,8 @@ import com.ibm.nmon.file.CombinedFileFilter;
 public final class ReportGenerator extends NMONVisualizerApp {
     private static final SimpleDateFormat FILE_TIME_FORMAT = new SimpleDateFormat("HHmmss");
 
+    private static Integer granularity = 0;
+
     public static void main(String[] args) {
         if (args.length == 0) {
             System.err.println("no path(s) to parse specified");
@@ -71,6 +73,9 @@ public final class ReportGenerator extends NMONVisualizerApp {
         List<String> customSummaryCharts = new java.util.ArrayList<String>();
         List<String> multiplexedFieldCharts = new java.util.ArrayList<String>();
         List<String> multiplexedTypeCharts = new java.util.ArrayList<String>();
+
+        // Reset granularity
+        granularity = 0;
 
         String intervalsFile = "";
 
@@ -102,7 +107,7 @@ public final class ReportGenerator extends NMONVisualizerApp {
                             System.err.println(iae.getMessage());
                             return;
                         }
-                    case 'e':
+                    case 'e': 
                         try {
                             endTime = parseTime(args, ++i, 'e');
                             break nextarg;
@@ -133,6 +138,22 @@ public final class ReportGenerator extends NMONVisualizerApp {
                         customSummaryCharts.add(args[i]);
                         break nextarg;
 
+                    }
+                    case 'g': {
+                        ++i;
+
+                        if (i > args.length) {
+                           System.err.println("Granularity value must be specified " + '-' + 'g');
+                           return;
+                        }
+
+                        try {
+                           granularity = Integer.parseInt(args[i]);
+                        } catch(NumberFormatException e) {
+                           System.err.println(e);
+                        }
+
+                        break nextarg;
                     }
                     case 'i': {
                         ++i;
@@ -234,7 +255,7 @@ public final class ReportGenerator extends NMONVisualizerApp {
         }
 
         ReportGenerator generator = new ReportGenerator(customSummaryCharts, customDataCharts, multiplexedFieldCharts,
-                multiplexedTypeCharts);
+                multiplexedTypeCharts, granularity);
 
         File outputDirectory = null;
 
@@ -330,12 +351,16 @@ public final class ReportGenerator extends NMONVisualizerApp {
     private boolean writeChartData = false;
 
     private ReportGenerator(List<String> customSummaryCharts, List<String> customDataCharts,
-            List<String> multiplexedFieldCharts, List<String> multiplexedTypeCharts) {
+            List<String> multiplexedFieldCharts, List<String> multiplexedTypeCharts, Integer granularity) {
         factory = new ChartFactory(this);
         cache = new ReportCache();
 
         granularityHelper = new GranularityHelper(this);
-        granularityHelper.setAutomatic(true);
+        if (granularity <= 0) {
+            granularityHelper.setAutomatic(true);
+        } else {
+            granularityHelper.setGranularity(granularity);
+        }
 
         this.customSummaryCharts = customSummaryCharts;
         this.customDataCharts = customDataCharts;
@@ -774,7 +799,7 @@ public final class ReportGenerator extends NMONVisualizerApp {
                 }
             }
         }
-    }
+    } 
 
     private File createSubdirectory(String subDirName, Interval interval) {
         File toCreate = null;
@@ -845,7 +870,10 @@ public final class ReportGenerator extends NMONVisualizerApp {
     public void currentIntervalChanged(Interval interval) {
         super.currentIntervalChanged(interval);
 
-        granularityHelper.recalculate();
+        // Only recalculate if granularity was not specified.
+        if (granularity <= 0) {
+            granularityHelper.recalculate();
+        }
 
         factory.setInterval(interval);
         factory.setGranularity(granularityHelper.getGranularity());
