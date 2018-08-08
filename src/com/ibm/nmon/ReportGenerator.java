@@ -107,7 +107,7 @@ public final class ReportGenerator extends NMONVisualizerApp {
                             System.err.println(iae.getMessage());
                             return;
                         }
-                    case 'e': 
+                    case 'e':
                         try {
                             endTime = parseTime(args, ++i, 'e');
                             break nextarg;
@@ -255,7 +255,7 @@ public final class ReportGenerator extends NMONVisualizerApp {
         }
 
         ReportGenerator generator = new ReportGenerator(customSummaryCharts, customDataCharts, multiplexedFieldCharts,
-                multiplexedTypeCharts, granularity);
+                multiplexedTypeCharts);
 
         File outputDirectory = null;
 
@@ -351,7 +351,7 @@ public final class ReportGenerator extends NMONVisualizerApp {
     private boolean writeChartData = false;
 
     private ReportGenerator(List<String> customSummaryCharts, List<String> customDataCharts,
-            List<String> multiplexedFieldCharts, List<String> multiplexedTypeCharts, Integer granularity) {
+            List<String> multiplexedFieldCharts, List<String> multiplexedTypeCharts) {
         factory = new ChartFactory(this);
         cache = new ReportCache();
 
