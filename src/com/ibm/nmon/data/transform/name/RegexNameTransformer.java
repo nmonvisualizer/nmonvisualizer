@@ -11,10 +11,9 @@ import java.util.regex.Matcher;
  * </p>
  * 
  * <p>
- * This class can be specified by either a matching group number or a full replacement string. If a
- * group number is given, {@link Matcher#group(int)} is returned by {@link #transform(String)
- * transform()}. If a replacement string is given, {@link Matcher#replaceAll(String)} is returned.
- * By default the group number will be <code>1</code>.
+ * This class can be specified by either a matching group number or a full replacement string. If a group number is
+ * given, {@link Matcher#group(int)} is returned by {@link #transform(String) transform()}. If a replacement string is
+ * given, {@link Matcher#replaceAll(String)} is returned. By default the group number will be <code>1</code>.
  * </p>
  * 
  * @see Matcher#replaceAll(String)
@@ -73,9 +72,8 @@ public final class RegexNameTransformer implements NameTransformer {
     }
 
     /**
-     * @return either the matching group from the regex specified by the instance of this class or
-     *         the given string after regex replacement. If the regex does not match, the original
-     *         string will be returned.
+     * @return either the matching group from the regex specified by the instance of this class or the given string
+     *         after regex replacement. If the regex does not match, the original string will be returned.
      */
     @Override
     public String transform(String original) {
@@ -104,6 +102,11 @@ public final class RegexNameTransformer implements NameTransformer {
 
     @Override
     public String toString() {
-        return matcher.pattern().pattern() + ';' + group;
+        if (group == -1) {
+            return matcher.pattern().pattern() + ';' + replacement;
+        }
+        else {
+            return matcher.pattern().pattern() + ';' + group;
+        }
     }
 }

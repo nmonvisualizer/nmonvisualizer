@@ -46,8 +46,6 @@ import com.ibm.nmon.file.CombinedFileFilter;
 public final class ReportGenerator extends NMONVisualizerApp {
     private static final SimpleDateFormat FILE_TIME_FORMAT = new SimpleDateFormat("HHmmss");
 
-    private static Integer granularity = 0;
-
     public static void main(String[] args) {
         if (args.length == 0) {
             System.err.println("no path(s) to parse specified");
@@ -74,9 +72,6 @@ public final class ReportGenerator extends NMONVisualizerApp {
         List<String> multiplexedFieldCharts = new java.util.ArrayList<String>();
         List<String> multiplexedTypeCharts = new java.util.ArrayList<String>();
 
-        // Reset granularity
-        granularity = 0;
-
         String intervalsFile = "";
 
         boolean summaryCharts = true;
@@ -87,6 +82,8 @@ public final class ReportGenerator extends NMONVisualizerApp {
 
         boolean writeRawData = false;
         boolean writeChartData = false;
+
+        int granularity = -1;
 
         for (int i = 0; i < args.length; i++) {
             String arg = args[i];
@@ -143,14 +140,15 @@ public final class ReportGenerator extends NMONVisualizerApp {
                         ++i;
 
                         if (i > args.length) {
-                           System.err.println("Granularity value must be specified " + '-' + 'g');
-                           return;
+                            System.err.println("Granularity value must be specified " + '-' + 'g');
+                            return;
                         }
 
                         try {
-                           granularity = Integer.parseInt(args[i]);
-                        } catch(NumberFormatException e) {
-                           System.err.println(e);
+                            granularity = Integer.parseInt(args[i]);
+                        }
+                        catch (NumberFormatException e) {
+                            System.err.println("Granularity value must be an integer " + args[i]);
                         }
 
                         break nextarg;
@@ -255,7 +253,7 @@ public final class ReportGenerator extends NMONVisualizerApp {
         }
 
         ReportGenerator generator = new ReportGenerator(customSummaryCharts, customDataCharts, multiplexedFieldCharts,
-                multiplexedTypeCharts);
+                multiplexedTypeCharts, granularity);
 
         File outputDirectory = null;
 
@@ -351,14 +349,16 @@ public final class ReportGenerator extends NMONVisualizerApp {
     private boolean writeChartData = false;
 
     private ReportGenerator(List<String> customSummaryCharts, List<String> customDataCharts,
-            List<String> multiplexedFieldCharts, List<String> multiplexedTypeCharts) {
+            List<String> multiplexedFieldCharts, List<String> multiplexedTypeCharts, int granularity) {
         factory = new ChartFactory(this);
         cache = new ReportCache();
 
         granularityHelper = new GranularityHelper(this);
+
         if (granularity <= 0) {
             granularityHelper.setAutomatic(true);
-        } else {
+        }
+        else {
             granularityHelper.setGranularity(granularity);
         }
 
@@ -799,7 +799,7 @@ public final class ReportGenerator extends NMONVisualizerApp {
                 }
             }
         }
-    } 
+    }
 
     private File createSubdirectory(String subDirName, Interval interval) {
         File toCreate = null;
@@ -871,7 +871,7 @@ public final class ReportGenerator extends NMONVisualizerApp {
         super.currentIntervalChanged(interval);
 
         // Only recalculate if granularity was not specified.
-        if (granularity <= 0) {
+        if (granularityHelper.isAutomatic()) {
             granularityHelper.recalculate();
         }
 

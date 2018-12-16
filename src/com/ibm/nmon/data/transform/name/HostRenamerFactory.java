@@ -31,6 +31,7 @@ public final class HostRenamerFactory {
             HostMatcher matcher = null;
 
             if (alias != null) {
+                // null in LPAR and NMON will be replaced with actual DataSet in HostRenamer
                 if ("$LPAR".equals(alias)) {
                     transformer = new LPARNameTransformer(null);
                 }

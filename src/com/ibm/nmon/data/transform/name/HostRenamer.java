@@ -37,6 +37,7 @@ public final class HostRenamer {
             if (matcher.matchesHost(data)) {
                 NameTransformer transformer = transformers.get(n);
 
+                // create new transformer with actual data set for LPAR and NMON
                 if (LPARNameTransformer.class.equals(transformer.getClass())) {
                     transformer = new LPARNameTransformer(data);
                 }
@@ -47,8 +48,7 @@ public final class HostRenamer {
                 String newHostname = transformer.transform(data.getHostname());
 
                 if (LOGGER.isDebugEnabled()) {
-                    LOGGER.debug("renaming '{}' to '{}' with '{}'", new Object[] { data.getHostname(), newHostname,
-                            transformer });
+                    LOGGER.debug("renaming '{}' to '{}' with {}:'{}'", data.getHostname(), newHostname, n, transformer);
                 }
 
                 data.setHostname(newHostname);
@@ -56,7 +56,7 @@ public final class HostRenamer {
                 break;
             }
             else {
-                LOGGER.trace("'{}' does not match '{}'", matcher, data);
+                LOGGER.trace("'{}' does not match {}:'{}'", n, matcher, data);
             }
 
             ++n;

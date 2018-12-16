@@ -20,7 +20,6 @@ public final class SimpleNameTransformer implements NameTransformer {
         }
 
         this.alias = alias;
-
     }
 
     /**
