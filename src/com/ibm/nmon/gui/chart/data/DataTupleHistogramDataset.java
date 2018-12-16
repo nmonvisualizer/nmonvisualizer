@@ -78,6 +78,12 @@ public final class DataTupleHistogramDataset extends HistogramDataset implements
     }
 
     @Override
+    public double getWeightedAverage(int row) {
+        calculateGraphData();
+        return graphData[row].weightedAverage;
+    }
+
+    @Override
     public double getMinimum(int row) {
         calculateGraphData();
         return graphData[row].minimum;

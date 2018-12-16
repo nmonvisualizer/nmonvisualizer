@@ -12,20 +12,20 @@ import com.ibm.nmon.data.DataSet;
 import com.ibm.nmon.gui.main.NMONVisualizerGui;
 
 /**
- * Table model that displays min, max, average and standard deviation for each measurement in an
- * AnalysisSet. Data for all data sets is displayed, one row per file / measurement combination.
+ * Table model that displays min, max, average and standard deviation for each measurement in an AnalysisSet. Data for
+ * all data sets is displayed, one row per file / measurement combination.
  */
 public final class ByStatisticTableModel extends AnalysisSetTableModel implements PropertyChangeListener {
     private static final long serialVersionUID = 2863125593272808676L;
 
     // last null is for GRANULARITY_MAXIMUM which will have a custom name
     private static final String[] COLUMN_NAMES = new String[] { "Hostname", "Data Type", "Metric",
-            Statistic.MINIMUM.toString(), Statistic.AVERAGE.toString(), Statistic.MAXIMUM.toString(),
-            Statistic.STD_DEV.toString(), Statistic.MEDIAN.toString(), Statistic.SUM.toString(),
-            Statistic.COUNT.toString(), null };
+            Statistic.MINIMUM.toString(), Statistic.AVERAGE.toString(), Statistic.WEIGHTED_AVERAGE.toString(),
+            Statistic.MAXIMUM.toString(), Statistic.STD_DEV.toString(), Statistic.MEDIAN.toString(),
+            Statistic.SUM.toString(), Statistic.COUNT.toString(), null };
 
-    private static final boolean[] DEFAULT_COLUMNS = new boolean[] { true, true, true, true, true, true, true, false,
-            false, false, false };
+    private static final boolean[] DEFAULT_COLUMNS = new boolean[] { true, true, true, true, true, true, true, true,
+            false, false, false, false };
 
     static {
         if (COLUMN_NAMES.length != DEFAULT_COLUMNS.length) {
@@ -106,7 +106,7 @@ public final class ByStatisticTableModel extends AnalysisSetTableModel implement
         // file 1, key 1
         // file 2, key 1
         // ...
-        // file 1, key 1
+        // file 1, key 2
         // file 2, key 2
         // ...
         // file n, key n
@@ -142,16 +142,18 @@ public final class ByStatisticTableModel extends AnalysisSetTableModel implement
         case 4:
             return gui.getAnalysis(data).getAverage(analysisSet.getType(key), analysisSet.getField(key));
         case 5:
-            return gui.getAnalysis(data).getMaximum(analysisSet.getType(key), analysisSet.getField(key));
+            return gui.getAnalysis(data).getWeightedAverage(analysisSet.getType(key), analysisSet.getField(key));
         case 6:
-            return gui.getAnalysis(data).getStandardDeviation(analysisSet.getType(key), analysisSet.getField(key));
+            return gui.getAnalysis(data).getMaximum(analysisSet.getType(key), analysisSet.getField(key));
         case 7:
-            return gui.getAnalysis(data).getMedian(analysisSet.getType(key), analysisSet.getField(key));
+            return gui.getAnalysis(data).getStandardDeviation(analysisSet.getType(key), analysisSet.getField(key));
         case 8:
-            return gui.getAnalysis(data).getSum(analysisSet.getType(key), analysisSet.getField(key));
+            return gui.getAnalysis(data).getMedian(analysisSet.getType(key), analysisSet.getField(key));
         case 9:
-            return gui.getAnalysis(data).getCount(analysisSet.getType(key), analysisSet.getField(key));
+            return gui.getAnalysis(data).getSum(analysisSet.getType(key), analysisSet.getField(key));
         case 10:
+            return gui.getAnalysis(data).getCount(analysisSet.getType(key), analysisSet.getField(key));
+        case 11:
             return gui.getAnalysis(data).getGranularityMaximum(analysisSet.getType(key), analysisSet.getField(key));
         default:
             return new ArrayIndexOutOfBoundsException(columnIndex);

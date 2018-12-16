@@ -9,6 +9,7 @@ final class GraphData {
     double sum = 0;
 
     double average = Double.NaN;
+    double weightedAverage = Double.NaN;
 
     double median = Double.NaN;
     double percentile95 = Double.NaN;
@@ -61,12 +62,15 @@ final class GraphData {
                 data.percentile95 = AnalysisRecord.calculatePercentile(.95, allValues);
                 data.percentile99 = AnalysisRecord.calculatePercentile(.99, allValues);
 
+                double sumSqs = 0;
                 double sumSqDiffs = 0;
 
                 for (double value : allValues) {
+                    sumSqs += value * value;
                     sumSqDiffs += Math.pow(value - data.average, 2);
                 }
 
+                data.weightedAverage = sumSqs / data.sum;
                 data.standardDeviation = Math.sqrt(sumSqDiffs / data.count);
             }
             else {

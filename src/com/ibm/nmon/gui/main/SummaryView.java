@@ -37,8 +37,8 @@ import com.ibm.nmon.gui.chart.builder.ChartBuilderPlugin;
 import com.ibm.nmon.gui.report.ReportPanel;
 
 /**
- * ChartSplitPane showing summary charts for either all defined intervals or a single interval. The
- * choice is determined by a check box.
+ * ChartSplitPane showing summary charts for either all defined intervals or a single interval. The choice is determined
+ * by a check box.
  * 
  * @see ReportPanel
  */
@@ -370,10 +370,5 @@ final class SummaryView extends ChartSplitPane implements IntervalListener {
         }
 
         // otherwise, the currently selected tab will not change
-    }
-
-    @Override
-    protected String[] getDefaultColumns() {
-        return new String[] { "Series Name", "Minimum", "Average", "Maximum", "Std Dev" };
     }
 }

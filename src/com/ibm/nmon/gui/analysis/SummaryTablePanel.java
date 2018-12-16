@@ -50,14 +50,13 @@ import com.ibm.nmon.interval.Interval;
 import com.ibm.nmon.interval.IntervalListener;
 
 /**
- * Holder panel for summary data. Holds a scrolling JTable which supports drag and drop from the
- * tree of parsed files. The table is actually 2 tables, one that shows summary data (min, max,
- * average, std dev) for selected measurements and another that shows only a single statistic. The
- * latter table is meant for easy entry into a spreadsheet for test result tracking but both tables
- * support copying CSV formatted text to the clipboard.
+ * Holder panel for summary data. Holds a scrolling JTable which supports drag and drop from the tree of parsed files.
+ * The table is actually 2 tables, one that shows summary data (min, max, average, std dev) for selected measurements
+ * and another that shows only a single statistic. The latter table is meant for easy entry into a spreadsheet for test
+ * result tracking but both tables support copying CSV formatted text to the clipboard.
  */
-public final class SummaryTablePanel extends JPanel implements IntervalListener, AnalysisSetListener,
-        PropertyChangeListener {
+public final class SummaryTablePanel extends JPanel
+        implements IntervalListener, AnalysisSetListener, PropertyChangeListener {
     private static final long serialVersionUID = 5581753452007550696L;
 
     private static final Icon TRANSPOSE_ICON = Styles.buildIcon("arrow_rotate_clockwise.png");
@@ -138,7 +137,8 @@ public final class SummaryTablePanel extends JPanel implements IntervalListener,
                         int idx = model.getColumnIndex(Statistic.COUNT.toString());
 
                         if (idx == -1) {
-                            throw new IllegalStateException(model + "has no column named " + Statistic.COUNT.toString());
+                            throw new IllegalStateException(
+                                    model + "has no column named " + Statistic.COUNT.toString());
                         }
                         else {
                             Object value = model.getEnabledValueAt(entry.getIdentifier(), idx);
@@ -165,17 +165,17 @@ public final class SummaryTablePanel extends JPanel implements IntervalListener,
         String newName = Statistic.GRANULARITY_MAXIMUM.getName(gui.getGranularity());
 
         @SuppressWarnings("unchecked")
-        DefaultComboBoxModel<String> model = (DefaultComboBoxModel<String>) ((JComboBox<String>) statsPanel
+        DefaultComboBoxModel<Object> model = (DefaultComboBoxModel<Object>) ((JComboBox<Object>) statsPanel
                 .getComponent(1)).getModel();
 
         boolean reselect = false;
 
-        if (model.getSelectedItem() == model.getElementAt(3)) {
+        if (model.getSelectedItem() == model.getElementAt(4)) {
             reselect = true;
         }
 
-        model.removeElementAt(3);
-        model.insertElementAt(newName, 3);
+        model.removeElementAt(4);
+        model.insertElementAt(newName, 4);
 
         if (reselect) {
             model.setSelectedItem(newName);
@@ -325,8 +325,8 @@ public final class SummaryTablePanel extends JPanel implements IntervalListener,
                                 Set<String> keys = new java.util.HashSet<String>();
 
                                 for (int row : table.getSelectedRows()) {
-                                    keys.add(((AnalysisSetTableModel) table.getModel()).getKey(table
-                                            .convertRowIndexToModel(row)));
+                                    keys.add(((AnalysisSetTableModel) table.getModel())
+                                            .getKey(table.convertRowIndexToModel(row)));
                                 }
 
                                 for (String key : keys) {
@@ -369,17 +369,19 @@ public final class SummaryTablePanel extends JPanel implements IntervalListener,
 
         statsPanel.add(label);
 
-        JComboBox<String> statistic = new JComboBox<String>();
+        // Object and not Statistic to support displaying the granularity value
+        JComboBox<Object> statistic = new JComboBox<Object>();
 
-        DefaultComboBoxModel<String> model = (DefaultComboBoxModel<String>) statistic.getModel();
-        model.addElement(Statistic.AVERAGE.toString());
-        model.addElement(Statistic.MINIMUM.toString());
-        model.addElement(Statistic.MAXIMUM.toString());
+        DefaultComboBoxModel<Object> model = (DefaultComboBoxModel<Object>) statistic.getModel();
+        model.addElement(Statistic.AVERAGE);
+        model.addElement(Statistic.WEIGHTED_AVERAGE);
+        model.addElement(Statistic.MINIMUM);
+        model.addElement(Statistic.MAXIMUM);
         model.addElement(Statistic.GRANULARITY_MAXIMUM.getName(gui.getGranularity()));
-        model.addElement(Statistic.STD_DEV.toString());
-        model.addElement(Statistic.MEDIAN.toString());
-        model.addElement(Statistic.SUM.toString());
-        model.addElement(Statistic.COUNT.toString());
+        model.addElement(Statistic.STD_DEV);
+        model.addElement(Statistic.MEDIAN);
+        model.addElement(Statistic.SUM);
+        model.addElement(Statistic.COUNT);
 
         statistic.setSelectedItem(Statistic.AVERAGE);
 
@@ -387,7 +389,7 @@ public final class SummaryTablePanel extends JPanel implements IntervalListener,
             @Override
             public void actionPerformed(ActionEvent e) {
                 @SuppressWarnings("unchecked")
-                Object o = ((JComboBox<String>) e.getSource()).getModel().getSelectedItem();
+                Object o = ((JComboBox<Object>) e.getSource()).getModel().getSelectedItem();
 
                 if (o.getClass().equals(String.class)) {
                     ((ByDataSetTableModel) dataSetTable.getModel()).setStatistic(Statistic.GRANULARITY_MAXIMUM);
@@ -453,16 +455,16 @@ public final class SummaryTablePanel extends JPanel implements IntervalListener,
         item = new JMenuItem("Copy All");
         item.setMnemonic('a');
         item.setIcon(Styles.COPY_ICON);
-        item.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_A, InputEvent.CTRL_DOWN_MASK
-                | InputEvent.SHIFT_DOWN_MASK));
+        item.setAccelerator(
+                KeyStroke.getKeyStroke(KeyEvent.VK_A, InputEvent.CTRL_DOWN_MASK | InputEvent.SHIFT_DOWN_MASK));
         item.addActionListener(copyTable);
         menu.add(item);
 
         item = new JMenuItem("Clear");
         item.setMnemonic('c');
         item.setIcon(Styles.CLEAR_ICON);
-        item.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_DELETE, InputEvent.CTRL_DOWN_MASK
-                | InputEvent.SHIFT_DOWN_MASK));
+        item.setAccelerator(
+                KeyStroke.getKeyStroke(KeyEvent.VK_DELETE, InputEvent.CTRL_DOWN_MASK | InputEvent.SHIFT_DOWN_MASK));
         item.addActionListener(clearTable);
         menu.add(item);
 
@@ -470,8 +472,8 @@ public final class SummaryTablePanel extends JPanel implements IntervalListener,
 
         item = new JMenuItem("Select Columns...");
         item.setMnemonic('m');
-        item.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_C, InputEvent.CTRL_DOWN_MASK
-                | InputEvent.SHIFT_DOWN_MASK));
+        item.setAccelerator(
+                KeyStroke.getKeyStroke(KeyEvent.VK_C, InputEvent.CTRL_DOWN_MASK | InputEvent.SHIFT_DOWN_MASK));
         item.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
@@ -485,8 +487,8 @@ public final class SummaryTablePanel extends JPanel implements IntervalListener,
         item = new JMenuItem("Transpose");
         item.setMnemonic('t');
         item.setIcon(TRANSPOSE_ICON);
-        item.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_T, InputEvent.CTRL_DOWN_MASK
-                | InputEvent.SHIFT_DOWN_MASK));
+        item.setAccelerator(
+                KeyStroke.getKeyStroke(KeyEvent.VK_T, InputEvent.CTRL_DOWN_MASK | InputEvent.SHIFT_DOWN_MASK));
         item.addActionListener(transposeTable);
         menu.add(item);
     }

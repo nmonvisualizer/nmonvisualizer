@@ -70,7 +70,7 @@ final class ReportSplitPane extends ChartSplitPane {
     void loadDefaultIOStatReport() {
         createReportPanel(com.ibm.nmon.report.ReportCache.DEFAULT_IOSTAT_CHARTS_KEY);
     }
-    
+
     void loadDefaultIOStatDiskDataReport() {
         createReportPanel(com.ibm.nmon.report.ReportCache.DEFAULT_IOSTAT_DISKDATA_CHARTS_KEY);
     }
@@ -143,7 +143,7 @@ final class ReportSplitPane extends ChartSplitPane {
 
     @Override
     protected String[] getDefaultColumns() {
-        return new String[] { "Hostname", "Data Type", "Metric", "Series Name", "Minimum", "Average", "Maximum",
-                "Std Dev" };
+        return new String[] { "Hostname", "Data Type", "Metric", "Series Name", "Minimum", "Average",
+                "Weighted Average", "Maximum", "Std Dev" };
     }
 }

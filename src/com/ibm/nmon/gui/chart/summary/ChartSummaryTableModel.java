@@ -24,10 +24,10 @@ import static com.ibm.nmon.analysis.Statistic.*;
 import com.ibm.nmon.gui.main.NMONVisualizerGui;
 
 /**
- * Table model for {@link ChartSummaryPanel}. This model holds a single {@link DataTupleDataset}
- * which is used to display various summary data about the chart. For bar charts, this model
- * displays a row for each row / column combination in the chart DataSet. For line and interval line
- * charts, there will be one row for each series (i.e. line).
+ * Table model for {@link ChartSummaryPanel}. This model holds a single {@link DataTupleDataset} which is used to
+ * display various summary data about the chart. For bar charts, this model displays a row for each row / column
+ * combination in the chart DataSet. For line and interval line charts, there will be one row for each series (i.e.
+ * line).
  */
 public final class ChartSummaryTableModel extends ChoosableColumnTableModel implements PropertyChangeListener {
     private static final long serialVersionUID = -4224937019632087892L;
@@ -36,14 +36,15 @@ public final class ChartSummaryTableModel extends ChoosableColumnTableModel impl
     static final String VISIBLE = "\u2713";
 
     private static final String[] COLUMN_NAMES = new String[] { VISIBLE, "Hostname", "Data Type", "Metric",
-            "Series Name", MINIMUM.toString(), AVERAGE.toString(), MAXIMUM.toString(), STD_DEV.toString(), null,
-            MEDIAN.toString(), PERCENTILE_95.toString(), PERCENTILE_99.toString(), SUM.toString(), COUNT.toString(),
-            "Graph " + MINIMUM.toString(), "Graph " + AVERAGE.toString(), "Graph " + MAXIMUM.toString(),
-            "Graph " + STD_DEV.toString(), "Graph " + MEDIAN.toString(), "Graph " + PERCENTILE_95.toString(),
-            "Graph " + PERCENTILE_99.toString(), "Graph " + SUM.toString(), "Graph " + COUNT.toString() };
+            "Series Name", MINIMUM.toString(), AVERAGE.toString(), WEIGHTED_AVERAGE.toString(), MAXIMUM.toString(),
+            STD_DEV.toString(), null, MEDIAN.toString(), PERCENTILE_95.toString(), PERCENTILE_99.toString(),
+            SUM.toString(), COUNT.toString(), "Graph " + MINIMUM.toString(), "Graph " + AVERAGE.toString(),
+            "Graph " + WEIGHTED_AVERAGE.toString(), "Graph " + MAXIMUM.toString(), "Graph " + STD_DEV.toString(),
+            "Graph " + MEDIAN.toString(), "Graph " + PERCENTILE_95.toString(), "Graph " + PERCENTILE_99.toString(),
+            "Graph " + SUM.toString(), "Graph " + COUNT.toString() };
 
-    private static final DataTuple NULL_TUPLE = new DataTuple(new SystemDataSet("N/A"), new DataType("N/A", "N/A",
-            "N/A"), "N/A");
+    private static final DataTuple NULL_TUPLE = new DataTuple(new SystemDataSet("N/A"),
+            new DataType("N/A", "N/A", "N/A"), "N/A");
     private static final AnalysisRecord NULL_ANALYSIS = new AnalysisRecord(NULL_TUPLE.getDataSet());
 
     private final NMONVisualizerGui gui;
@@ -67,18 +68,19 @@ public final class ChartSummaryTableModel extends ChoosableColumnTableModel impl
         this.gui = gui;
         this.propertyChangeSupport = new PropertyChangeSupport(this);
 
-        COLUMN_NAMES[9] = GRANULARITY_MAXIMUM.getName(gui.getGranularity());
+        COLUMN_NAMES[10] = GRANULARITY_MAXIMUM.getName(gui.getGranularity());
         buildColumnNameMap();
 
         // default default columns
         if (defaultColumnNames == null) {
-            defaultColumnNames = new String[] { VISIBLE, "Data Type", "Metric", "Minimum", "Average", "Maximum",
+            defaultColumnNames = new String[] { "Series Name", "Minimum", "Average", "Weighted Average", "Maximum",
                     "Std Dev" };
         }
 
         defaultColumns = new boolean[COLUMN_NAMES.length];
         java.util.Arrays.fill(defaultColumns, false);
-        // enable/disable is always shown
+        // enable/disable shown depending on type of chart
+        // force enable here as a hack to ensure width is set correctly in ChartSummaryPanel
         defaultColumns[0] = true;
 
         for (String columnName : defaultColumnNames) {
@@ -162,11 +164,11 @@ public final class ChartSummaryTableModel extends ChoosableColumnTableModel impl
         else if (columnIndex < 5) {
             return String.class;
         }
-        else if (columnIndex == 14) {
+        else if (columnIndex == 15) {
             // count
             return Integer.class;
         }
-        else if (columnIndex == 23) {
+        else if (columnIndex == 25) {
             // graph count
             return Integer.class;
         }
@@ -256,41 +258,46 @@ public final class ChartSummaryTableModel extends ChoosableColumnTableModel impl
         case 6:
             return graphDataOnly ? dataset.getAverage(row) : analysis.getAverage(tuple.getDataType(), tuple.getField());
         case 7:
-            return graphDataOnly ? dataset.getMaximum(row) : analysis.getMaximum(tuple.getDataType(), tuple.getField());
+            return graphDataOnly ? dataset.getWeightedAverage(row)
+                    : analysis.getWeightedAverage(tuple.getDataType(), tuple.getField());
         case 8:
-            return graphDataOnly ? dataset.getStandardDeviation(row) : analysis.getStandardDeviation(
-                    tuple.getDataType(), tuple.getField());
+            return graphDataOnly ? dataset.getMaximum(row) : analysis.getMaximum(tuple.getDataType(), tuple.getField());
         case 9:
-            return graphDataOnly ? Double.NaN : analysis.getGranularityMaximum(tuple.getDataType(), tuple.getField());
+            return graphDataOnly ? dataset.getStandardDeviation(row)
+                    : analysis.getStandardDeviation(tuple.getDataType(), tuple.getField());
         case 10:
-            return graphDataOnly ? dataset.getMedian(row) : analysis.getMedian(tuple.getDataType(), tuple.getField());
+            return graphDataOnly ? Double.NaN : analysis.getGranularityMaximum(tuple.getDataType(), tuple.getField());
         case 11:
-            return graphDataOnly ? dataset.get95thPercentile(row) : analysis.get95thPercentile(tuple.getDataType(),
-                    tuple.getField());
+            return graphDataOnly ? dataset.getMedian(row) : analysis.getMedian(tuple.getDataType(), tuple.getField());
         case 12:
-            return graphDataOnly ? dataset.get99thPercentile(row) : analysis.get99thPercentile(tuple.getDataType(),
-                    tuple.getField());
+            return graphDataOnly ? dataset.get95thPercentile(row)
+                    : analysis.get95thPercentile(tuple.getDataType(), tuple.getField());
         case 13:
-            return graphDataOnly ? dataset.getSum(row) : analysis.getSum(tuple.getDataType(), tuple.getField());
+            return graphDataOnly ? dataset.get99thPercentile(row)
+                    : analysis.get99thPercentile(tuple.getDataType(), tuple.getField());
         case 14:
-            return graphDataOnly ? dataset.getCount(row) : analysis.getCount(tuple.getDataType(), tuple.getField());
+            return graphDataOnly ? dataset.getSum(row) : analysis.getSum(tuple.getDataType(), tuple.getField());
         case 15:
-            return dataset.getMinimum(row);
+            return graphDataOnly ? dataset.getCount(row) : analysis.getCount(tuple.getDataType(), tuple.getField());
         case 16:
-            return dataset.getAverage(row);
+            return dataset.getMinimum(row);
         case 17:
-            return dataset.getMaximum(row);
+            return dataset.getAverage(row);
         case 18:
-            return dataset.getStandardDeviation(row);
+            return dataset.getWeightedAverage(row);
         case 19:
-            return dataset.getMedian(row);
+            return dataset.getMaximum(row);
         case 20:
-            return dataset.get95thPercentile(row);
+            return dataset.getStandardDeviation(row);
         case 21:
-            return dataset.get99thPercentile(row);
+            return dataset.getMedian(row);
         case 22:
-            return dataset.getSum(row);
+            return dataset.get95thPercentile(row);
         case 23:
+            return dataset.get99thPercentile(row);
+        case 24:
+            return dataset.getSum(row);
+        case 25:
             return dataset.getCount(row);
         default:
             throw new ArrayIndexOutOfBoundsException(column);
@@ -538,10 +545,10 @@ public final class ChartSummaryTableModel extends ChoosableColumnTableModel impl
     }
 
     void updateGranularityMax() {
-        COLUMN_NAMES[9] = GRANULARITY_MAXIMUM.getName(gui.getGranularity());
+        COLUMN_NAMES[10] = GRANULARITY_MAXIMUM.getName(gui.getGranularity());
         buildColumnNameMap();
 
-        if (enabledColumns.get(9)) {
+        if (enabledColumns.get(10)) {
             // update granularity max column name
             fireTableStructureChanged();
         }

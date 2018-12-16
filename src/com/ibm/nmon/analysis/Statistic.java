@@ -13,6 +13,12 @@ public enum Statistic {
             return record.getAverage(type, fieldName);
         }
     },
+    WEIGHTED_AVERAGE("Weighted Average") {
+        @Override
+        public double getValue(AnalysisRecord record, DataType type, String fieldName) {
+            return record.getWeightedAverage(type, fieldName);
+        }
+    },
     MINIMUM("Minimum") {
         @Override
         public double getValue(AnalysisRecord record, DataType type, String fieldName) {

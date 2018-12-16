@@ -39,6 +39,7 @@ public final class AnalysisRecord {
         double sum = 0;
 
         double average = Double.NaN;
+        double weightedAverage = Double.NaN;
         double granularityMaximum = Double.MIN_VALUE;
 
         double median = Double.NaN;
@@ -95,6 +96,10 @@ public final class AnalysisRecord {
 
     public double getAverage(DataType type, String fieldName) {
         return analyzeIfNecessary(type, fieldName).average;
+    }
+    
+    public double getWeightedAverage(DataType type, String fieldName) {
+        return analyzeIfNecessary(type, fieldName).weightedAverage;
     }
 
     public double getMinimum(DataType type, String fieldName) {
@@ -237,12 +242,15 @@ public final class AnalysisRecord {
                 holder.percentile95 = calculatePercentile(.95, allValues);
                 holder.percentile99 = calculatePercentile(.99, allValues);
 
+                double sumSqs = 0;
                 double sumSqDiffs = 0;
 
                 for (double value : allValues) {
+                    sumSqs += value * value;
                     sumSqDiffs += Math.pow(value - holder.average, 2);
                 }
 
+                holder.weightedAverage = sumSqs / holder.sum;
                 holder.standardDeviation = Math.sqrt(sumSqDiffs / holder.count);
             }
             else {

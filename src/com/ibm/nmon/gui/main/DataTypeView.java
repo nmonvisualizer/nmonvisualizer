@@ -87,4 +87,9 @@ final class DataTypeView extends ChartSplitPane {
     public void dataCleared() {
         chartPanel.clearChart();
     }
+
+    @Override
+    protected String[] getDefaultColumns() {
+        return new String[] { "Data Type", "Metric", "Minimum", "Average", "Weighted Average", "Maximum", "Std Dev" };
+    }
 }

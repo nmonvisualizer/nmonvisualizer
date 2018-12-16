@@ -168,9 +168,4 @@ final class DataSetView extends ChartSplitPane {
         currentReport = null;
         setTopComponent(null);
     }
-
-    @Override
-    protected String[] getDefaultColumns() {
-        return new String[] { "Series Name", "Minimum", "Average", "Maximum", "Std Dev" };
-    }
 }

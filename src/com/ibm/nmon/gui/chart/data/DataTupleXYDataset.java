@@ -70,6 +70,12 @@ public final class DataTupleXYDataset extends TimeTableXYDataset implements Data
     }
 
     @Override
+    public double getWeightedAverage(int row) {
+        calculateGraphData();
+        return graphData[row].weightedAverage;
+    }
+
+    @Override
     public double getMinimum(int row) {
         calculateGraphData();
         return graphData[row].minimum;

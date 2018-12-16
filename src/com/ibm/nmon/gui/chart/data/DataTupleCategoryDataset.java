@@ -102,6 +102,13 @@ public final class DataTupleCategoryDataset extends DefaultCategoryDataset imple
         return graphData[row].average;
     }
 
+    
+    @Override
+    public double getWeightedAverage(int row) {
+        calculateGraphData();
+        return graphData[row].weightedAverage;
+    }
+
     @Override
     public double getMinimum(int row) {
         calculateGraphData();

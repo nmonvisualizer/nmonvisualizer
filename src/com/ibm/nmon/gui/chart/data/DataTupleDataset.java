@@ -14,6 +14,8 @@ public interface DataTupleDataset {
 
     public Iterable<DataTuple> getAllTuples();
 
+    public double getWeightedAverage(int row);
+    
     public double getAverage(int row);
 
     public double getMinimum(int row);
