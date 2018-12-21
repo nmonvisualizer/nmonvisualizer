@@ -82,7 +82,6 @@ public class LineChartPanel extends BaseChartPanel implements ChartMouseListener
             setAxisTimeZone((TimeZone) evt.getNewValue());
         }
         else if ("annotation".equals(evt.getPropertyName())) {
-            // for LineChartAnnotationDialog
             firePropertyChange(evt.getPropertyName(), evt.getOldValue(), evt.getNewValue());
         }
     }

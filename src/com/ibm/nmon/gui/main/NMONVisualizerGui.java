@@ -41,9 +41,8 @@ import com.ibm.nmon.parser.IOStatParser;
 import com.ibm.nmon.gui.parse.*;
 
 import com.ibm.nmon.report.ReportCache;
-
 import com.ibm.nmon.gui.Styles;
-
+import com.ibm.nmon.gui.chart.builder.ChartFormatter;
 import com.ibm.nmon.util.FileHelper;
 import com.ibm.nmon.util.GranularityHelper;
 import com.ibm.nmon.util.TimeFormatCache;
@@ -123,6 +122,7 @@ public final class NMONVisualizerGui extends NMONVisualizerApp {
     private final GranularityHelper granularityHelper;
 
     private final ReportCache reportCache;
+    private ChartFormatter chartFormatter;
 
     public NMONVisualizerGui() throws Exception {
         super();
@@ -131,6 +131,7 @@ public final class NMONVisualizerGui extends NMONVisualizerApp {
         setGranularity(-1); // automatic
 
         reportCache = new ReportCache();
+        chartFormatter = new ChartFormatter();
 
         preferences = Preferences.userNodeForPackage(NMONVisualizerGui.class);
 
@@ -284,6 +285,19 @@ public final class NMONVisualizerGui extends NMONVisualizerApp {
 
     public ReportCache getReportCache() {
         return reportCache;
+    }
+
+    public ChartFormatter getChartFormatter() {
+        return chartFormatter;
+    }
+
+    public void setChartFormatter(ChartFormatter chartFormatter) {
+        if (chartFormatter != null) {
+            this.chartFormatter = chartFormatter;
+            chartFormatter.reformatAnnotations();
+
+            propertyChangeSupport.firePropertyChange("chartFormatter", null, chartFormatter);
+        }
     }
 
     @Override

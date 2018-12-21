@@ -5,7 +5,6 @@ import java.util.Map;
 import java.awt.Color;
 import java.awt.Font;
 import java.awt.font.TextAttribute;
-import java.awt.BasicStroke;
 
 import javax.swing.BorderFactory;
 import javax.swing.JComponent;
@@ -30,7 +29,7 @@ public final class Styles {
     public static final String NUMBER_FORMAT_STRING = "#,##0.000";
     public static final DecimalFormat NUMBER_FORMAT = new DecimalFormat(Styles.NUMBER_FORMAT_STRING);
 
-    // public static final Font HEADING;
+    public static final Font DEFAULT;
     public static final Font BOLD;
     public static final Font BOLD_ITALIC;
     public static final Font STRIKETHROUGH;
@@ -39,8 +38,6 @@ public final class Styles {
     public static final Font LABEL_ERROR;
 
     public static final Font TITLE;
-
-    public static final Font ANNOTATION_FONT;
 
     public static final Border CONTENT_BORDER = BorderFactory.createEmptyBorder(0, 5, 2, 2);
     public static final Border TITLE_BORDER = BorderFactory.createEmptyBorder(5, 2, 5, 2);
@@ -51,10 +48,6 @@ public final class Styles {
 
     public static final Color ERROR_COLOR = Color.RED;
     public static final Color DEFAULT_COLOR = Color.BLACK;
-
-    public static final Color ANNOTATION_COLOR = new Color(0x222266);
-
-    public static final BasicStroke ANNOTATION_STROKE = new BasicStroke(.6f, 0, 0, 1.0f, new float[] { 1, 2, 5, 2 }, 5);
 
     public static final ImageIcon IBM_ICON = buildIcon("ibmicon.png");
 
@@ -70,22 +63,20 @@ public final class Styles {
     public static final ImageIcon COMPUTER_ICON = buildIcon("computer.png");
 
     static {
-        Font defaultFont = UIManager.getDefaults().getFont("TextField.font");
+        DEFAULT = UIManager.getDefaults().getFont("TextField.font");
 
-        LABEL = defaultFont.deriveFont(Font.BOLD, defaultFont.getSize() * 1.1f);
+        LABEL = DEFAULT.deriveFont(Font.BOLD, DEFAULT.getSize() * 1.1f);
         LABEL_ERROR = LABEL.deriveFont(Font.BOLD | Font.ITALIC);
 
-        TITLE = defaultFont.deriveFont(Font.BOLD, defaultFont.getSize() * 1.25f);
+        TITLE = DEFAULT.deriveFont(Font.BOLD, DEFAULT.getSize() * 1.25f);
 
-        BOLD = defaultFont.deriveFont(Font.BOLD);
-        BOLD_ITALIC = defaultFont.deriveFont(Font.BOLD | Font.ITALIC);
+        BOLD = DEFAULT.deriveFont(Font.BOLD);
+        BOLD_ITALIC = DEFAULT.deriveFont(Font.BOLD | Font.ITALIC);
 
         @SuppressWarnings("rawtypes")
-        Map attributes = defaultFont.getAttributes();
+        Map attributes = DEFAULT.getAttributes();
         attributes.put(TextAttribute.STRIKETHROUGH, TextAttribute.STRIKETHROUGH_ON);
-        STRIKETHROUGH = defaultFont.deriveFont(attributes);
-
-        ANNOTATION_FONT = defaultFont;
+        STRIKETHROUGH = DEFAULT.deriveFont(attributes);
     }
 
     /**

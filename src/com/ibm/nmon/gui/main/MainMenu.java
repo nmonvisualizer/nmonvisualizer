@@ -20,6 +20,8 @@ import com.ibm.nmon.gui.Styles;
 import com.ibm.nmon.gui.file.FileLoadAction;
 import com.ibm.nmon.gui.file.GUIFileChooser;
 import com.ibm.nmon.gui.chart.annotate.AnnotationCache;
+import com.ibm.nmon.gui.chart.builder.ChartFormatter;
+import com.ibm.nmon.gui.chart.builder.ChartFormatterParser;
 import com.ibm.nmon.gui.data.RemoveAllDataSetsAction;
 import com.ibm.nmon.gui.interval.RemoveAllIntervalsAction;
 import com.ibm.nmon.gui.interval.IntervalManagerDialog;
@@ -249,6 +251,32 @@ final class MainMenu extends JMenuBar implements IntervalListener, DataSetListen
             @Override
             public void actionPerformed(ActionEvent e) {
                 gui.getViewManager().displayTableColumnChooser();
+            }
+        });
+
+        chartSubMenu.add(item);
+
+        item = new JMenuItem("Custom Format...");
+        item.setMnemonic('f');
+        item.setAccelerator(
+                KeyStroke.getKeyStroke(KeyEvent.VK_F, InputEvent.CTRL_DOWN_MASK | InputEvent.SHIFT_DOWN_MASK));
+
+        item.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                GUIFileChooser chooser = new GUIFileChooser(gui, "Select Chart Format", "chart.properties");
+
+                if (chooser.showDialog(gui.getMainFrame(), "Load") == JFileChooser.APPROVE_OPTION) {
+                    try {
+                        ChartFormatter formatter = new ChartFormatterParser().loadFromFile(chooser.getSelectedFile());
+                        gui.setChartFormatter(formatter);
+                    }
+                    catch (Exception ex) {
+                        JOptionPane.showMessageDialog(gui.getMainFrame(),
+                                "Error parsing file '" + chooser.getSelectedFile().getName() + "'.\n" + ex.getMessage(),
+                                "Parse Error", JOptionPane.ERROR_MESSAGE);
+                    }
+                }
             }
         });
 

@@ -12,8 +12,6 @@ import org.jfree.chart.renderer.xy.XYBarRenderer;
 
 import org.jfree.data.statistics.HistogramDataset;
 import org.jfree.data.statistics.HistogramType;
-import org.jfree.ui.RectangleInsets;
-import org.jfree.ui.TextAnchor;
 
 import com.ibm.nmon.data.DataSet;
 import com.ibm.nmon.data.DataRecord;
@@ -72,8 +70,6 @@ public final class HistogramChartBuilder extends BaseChartBuilder<HistogramChart
     protected void formatChart() {
         super.formatChart();
 
-        chart.setTitle(definition.getTitle());
-
         XYPlot plot = chart.getXYPlot();
 
         if ("".equals(definition.getXAxisLabel())) {
@@ -123,31 +119,11 @@ public final class HistogramChartBuilder extends BaseChartBuilder<HistogramChart
         for (int i = 0; i < plot.getRendererCount(); i++) {
             XYBarRenderer renderer = (XYBarRenderer) plot.getRenderer(i);
 
-            renderer = ((XYBarRenderer) plot.getRenderer());
-            renderer.setMargin(0.15d);
+            formatter.formatRenderer(renderer);
 
-            renderer.setShadowVisible(false);
-            renderer.setDrawBarOutline(false);
-            renderer.setBarPainter(new GradientPainters.GradientXYBarPainter());
-
-            renderer.setBaseToolTipGenerator(new StandardXYToolTipGenerator("{1} - {2}", Styles.NUMBER_FORMAT,
-                    Styles.NUMBER_FORMAT));
-
-            renderer.setBaseOutlineStroke(OUTLINE_STROKE);
-            renderer.setBaseOutlinePaint(OUTLINE_COLOR);
+            renderer.setBaseToolTipGenerator(
+                    new StandardXYToolTipGenerator("{1} - {2}", Styles.NUMBER_FORMAT, Styles.NUMBER_FORMAT));
         }
-
-        for (int i = 0; i < plot.getRangeAxisCount(); i++) {
-            plot.getRangeAxis(i).setLabelFont(LABEL_FONT);
-            plot.getRangeAxis(i).setTickLabelFont(AXIS_FONT);
-        }
-
-        plot.getDomainAxis().setLabelFont(LABEL_FONT);
-        plot.getDomainAxis().setTickLabelFont(AXIS_FONT);
-
-        // gray grid lines
-        plot.setRangeGridlinePaint(GRID_COLOR);
-        plot.setRangeGridlineStroke(GRID_LINES);
     }
 
     public void addHistogram(AnalysisRecord analysis) {
@@ -196,8 +172,9 @@ public final class HistogramChartBuilder extends BaseChartBuilder<HistogramChart
                             dataset.addSeries(fieldName, toAdd, definition.getBins());
                         }
                         else {
-                            dataset.addSeries(fieldName, toAdd, definition.getBins(), definition.getXAxisRange()
-                                    .getLowerBound(), definition.getXAxisRange().getUpperBound());
+                            dataset.addSeries(fieldName, toAdd, definition.getBins(),
+                                    definition.getXAxisRange().getLowerBound(),
+                                    definition.getXAxisRange().getUpperBound());
                         }
 
                         dataset.associateTuple(fieldName, null, new DataTuple(data, type, field));
@@ -224,14 +201,9 @@ public final class HistogramChartBuilder extends BaseChartBuilder<HistogramChart
                     double value = stat.getValue(analysis, tuple.getDataType(), tuple.getField());
 
                     ValueMarker marker = new ValueMarker(value);
-                    marker.setLabel((useFieldName ? dataset.getSeriesKey(i) + " " : "")
-                            + stat.getName(getGranularity()) + ": " + Styles.NUMBER_FORMAT.format(value));
-                    marker.setStroke(Styles.ANNOTATION_STROKE);
-                    marker.setPaint(Styles.ANNOTATION_COLOR);
-                    marker.setLabelFont(Styles.ANNOTATION_FONT);
-                    marker.setLabelPaint(Styles.ANNOTATION_COLOR);
-                    marker.setLabelOffset(new RectangleInsets(insetTop, 5, 5, 10));
-                    marker.setLabelTextAnchor(TextAnchor.TOP_RIGHT);
+                    marker.setLabel((useFieldName ? dataset.getSeriesKey(i) + " " : "") + stat.getName(getGranularity())
+                            + ": " + Styles.NUMBER_FORMAT.format(value));
+                    formatter.formatMarker(marker, false, insetTop);
 
                     plot.addDomainMarker(marker);
 
@@ -239,8 +211,6 @@ public final class HistogramChartBuilder extends BaseChartBuilder<HistogramChart
                 }
             }
         }
-
-        // chart.getXYPlot().configureRangeAxes();
 
         if (chart.getLegend() == null) {
             int seriesCount = chart.getXYPlot().getDataset(0).getSeriesCount();

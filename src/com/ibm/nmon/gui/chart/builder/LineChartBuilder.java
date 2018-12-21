@@ -87,8 +87,6 @@ public class LineChartBuilder extends BaseChartBuilder<LineChartDefinition> {
     protected void formatChart() {
         super.formatChart();
 
-        chart.setTitle(definition.getTitle());
-
         XYPlot plot = chart.getXYPlot();
 
         plot.getDomainAxis().setLabel(definition.getXAxisLabel());
@@ -105,50 +103,29 @@ public class LineChartBuilder extends BaseChartBuilder<LineChartDefinition> {
             renderer.setBaseToolTipGenerator(tooltipGenerator);
         }
         else {
-            // show filled markers at each data point
-            StandardXYItemRenderer renderer = (StandardXYItemRenderer) plot.getRenderer(0);
-
-            renderer.setBaseShapesVisible(true);
-            renderer.setBaseShapesFilled(true);
-
-            // if no data for more than 1 granularity's time period, do not draw a connecting line
-            renderer.setPlotDiscontinuous(true);
-            renderer.setGapThresholdType(UnitType.ABSOLUTE);
-
-            recalculateGapThreshold(0);
-
-            renderer.setBaseToolTipGenerator(tooltipGenerator);
+            formatRenderer(0);
         }
 
         if (definition.hasSecondaryYAxis()) {
             plot.getRangeAxis(1).setLabel(definition.getSecondaryYAxisLabel());
-
-            // show filled markers at each data point
-            StandardXYItemRenderer renderer = (StandardXYItemRenderer) plot.getRenderer(1);
-
-            renderer.setBaseShapesVisible(true);
-            renderer.setBaseShapesFilled(true);
-
-            // if no data for more than 1 granularity's time period, do not draw a connecting line
-            renderer.setPlotDiscontinuous(true);
-            renderer.setGapThresholdType(UnitType.ABSOLUTE);
-
-            recalculateGapThreshold(1);
-
-            renderer.setBaseToolTipGenerator(tooltipGenerator);
+            formatRenderer(1);
         }
+    }
 
-        for (int i = 0; i < plot.getRangeAxisCount(); i++) {
-            plot.getRangeAxis(i).setLabelFont(LABEL_FONT);
-            plot.getRangeAxis(i).setTickLabelFont(AXIS_FONT);
-        }
+    private void formatRenderer(int index) {
+        // show filled markers at each data point
+        StandardXYItemRenderer renderer = (StandardXYItemRenderer) chart.getXYPlot().getRenderer(index);
 
-        plot.getDomainAxis().setLabelFont(LABEL_FONT);
-        plot.getDomainAxis().setTickLabelFont(AXIS_FONT);
+        renderer.setBaseShapesVisible(true);
+        renderer.setBaseShapesFilled(true);
 
-        // gray grid lines
-        plot.setRangeGridlinePaint(GRID_COLOR);
-        plot.setRangeGridlineStroke(GRID_LINES);
+        // if no data for more than 1 granularity's time period, do not draw a connecting line
+        renderer.setPlotDiscontinuous(true);
+        renderer.setGapThresholdType(UnitType.ABSOLUTE);
+
+        recalculateGapThreshold(index);
+
+        renderer.setBaseToolTipGenerator(tooltipGenerator);
     }
 
     public void addLine(DataSet data) {
@@ -377,7 +354,7 @@ public class LineChartBuilder extends BaseChartBuilder<LineChartDefinition> {
     public void showLegends(boolean showLegends) {
         this.showLegends = showLegends;
     }
-    
+
     public boolean getShowLegends() {
         return showLegends;
     }

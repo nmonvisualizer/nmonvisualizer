@@ -19,8 +19,6 @@ import org.jfree.chart.entity.CategoryItemEntity;
 
 import org.jfree.chart.plot.CategoryPlot;
 
-import com.ibm.nmon.gui.Styles;
-
 import com.ibm.nmon.gui.chart.data.DataTupleCategoryDataset;
 
 import com.ibm.nmon.gui.main.NMONVisualizerGui;
@@ -103,6 +101,7 @@ public final class BarChartPanel extends BaseChartPanel implements ChartMouseLis
             CategoryPlot plot = getChart().getCategoryPlot();
 
             plot.clearAnnotations();
+            
             for (Annotation a : annotations) {
                 if (a instanceof CategoryTextAnnotation) {
                     CategoryTextAnnotation annotation = (CategoryTextAnnotation) a;
@@ -248,8 +247,7 @@ public final class BarChartPanel extends BaseChartPanel implements ChartMouseLis
                 }
 
                 CategoryTextAnnotation annotation = new CategoryTextAnnotation(text, categoryKey, y);
-                annotation.setFont(Styles.ANNOTATION_FONT);
-                annotation.setPaint(Styles.ANNOTATION_COLOR);
+                gui.getChartFormatter().formatAnnotation(annotation);
 
                 getChart().getCategoryPlot().addAnnotation(annotation);
 

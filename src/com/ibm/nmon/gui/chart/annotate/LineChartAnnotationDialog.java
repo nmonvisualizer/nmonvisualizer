@@ -44,7 +44,6 @@ import javax.swing.JSpinner.DateEditor;
 import org.jfree.chart.plot.XYPlot;
 import org.jfree.chart.plot.ValueMarker;
 import org.jfree.chart.annotations.XYTextAnnotation;
-import org.jfree.ui.RectangleInsets;
 import org.jfree.ui.TextAnchor;
 
 import com.ibm.nmon.gui.Styles;
@@ -353,8 +352,8 @@ public final class LineChartAnnotationDialog extends GUIDialog {
 
                 if (useXAxisValue.isSelected()) {
                     if (useTime) {
-                        annotation.setText(((DateEditor) xAxisTime.getEditor()).getFormat()
-                                .format(xAxisTime.getValue()));
+                        annotation
+                                .setText(((DateEditor) xAxisTime.getEditor()).getFormat().format(xAxisTime.getValue()));
                     }
                     else {
                         annotation.setText(xAxisValue.getText());
@@ -457,10 +456,9 @@ public final class LineChartAnnotationDialog extends GUIDialog {
 
             if ("Vertical".equals(line)) {
                 ValueMarker marker = new DomainValueMarker(getX());
-                marker.setLabelOffset(new RectangleInsets(5, 5, 5, 5));
                 marker.setLabelTextAnchor(TextAnchor.TOP_RIGHT);
                 marker.setLabel(text);
-                formatMarker(marker);
+                gui.getChartFormatter().formatMarker(marker, false, 0);
 
                 if (marker != null) {
                     xyPlot.addDomainMarker(marker);
@@ -472,7 +470,7 @@ public final class LineChartAnnotationDialog extends GUIDialog {
                 ValueMarker marker = new RangeValueMarker(getY());
                 marker.setLabelTextAnchor(TextAnchor.BASELINE_LEFT);
                 marker.setLabel(text);
-                formatMarker(marker);
+                gui.getChartFormatter().formatMarker(marker, true, 0);
 
                 if (marker != null) {
                     xyPlot.addRangeMarker(marker);
@@ -483,8 +481,7 @@ public final class LineChartAnnotationDialog extends GUIDialog {
             else if ("None".equals(line)) {
                 if (!"".equals(text)) {
                     XYTextAnnotation annotation = new XYTextAnnotation(text, getX(), getY());
-                    annotation.setFont(Styles.ANNOTATION_FONT);
-                    annotation.setPaint(Styles.ANNOTATION_COLOR);
+                    gui.getChartFormatter().formatAnnotation(annotation);
 
                     if (annotation != null) {
                         xyPlot.addAnnotation(annotation);
@@ -512,13 +509,6 @@ public final class LineChartAnnotationDialog extends GUIDialog {
 
         private double getY() {
             return ((Number) yAxisValue.getValue()).doubleValue();
-        }
-
-        private void formatMarker(ValueMarker marker) {
-            marker.setStroke(Styles.ANNOTATION_STROKE);
-            marker.setPaint(Styles.ANNOTATION_COLOR);
-            marker.setLabelFont(Styles.ANNOTATION_FONT);
-            marker.setLabelPaint(Styles.ANNOTATION_COLOR);
         }
     };
 

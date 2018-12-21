@@ -8,6 +8,7 @@ import java.util.Set;
 
 import org.jfree.chart.JFreeChart;
 
+import com.ibm.nmon.gui.chart.builder.ChartFormatter;
 import com.ibm.nmon.gui.chart.builder.LineChartBuilder;
 import com.ibm.nmon.gui.chart.builder.LineChartBuilderPlugin;
 import com.ibm.nmon.gui.main.NMONVisualizerGui;
@@ -40,6 +41,7 @@ public final class DataTypeChartPanel extends LineChartPanel implements Interval
 
         chartBuilder = new LineChartBuilder();
         chartBuilder.addPlugin(new LineChartBuilderPlugin(gui));
+        chartBuilder.setFormatter(gui.getChartFormatter());
     }
 
     public void setData(DataSet data, DataType type) {
@@ -63,11 +65,13 @@ public final class DataTypeChartPanel extends LineChartPanel implements Interval
 
             if (enabled) {
                 gui.addPropertyChangeListener("granularity", this);
+                gui.addPropertyChangeListener("chartFormatter", this);
                 gui.addPropertyChangeListener("lineChartLegend", this);
                 gui.getIntervalManager().addListener(this);
 
                 chartBuilder.setInterval(gui.getIntervalManager().getCurrentInterval());
                 chartBuilder.setGranularity(gui.getGranularity());
+                chartBuilder.setFormatter(gui.getChartFormatter());
                 chartBuilder.showLegends(gui.getBooleanProperty("lineChartLegend"));
 
                 if (definition != null) {
@@ -76,6 +80,7 @@ public final class DataTypeChartPanel extends LineChartPanel implements Interval
             }
             else {
                 gui.removePropertyChangeListener("granularity", this);
+                gui.removePropertyChangeListener("chartFormatter", this);
                 gui.removePropertyChangeListener("lineChartLegend", this);
                 gui.getIntervalManager().removeListener(this);
 
@@ -132,6 +137,10 @@ public final class DataTypeChartPanel extends LineChartPanel implements Interval
             if (getChart() != null) {
                 displayChart();
             }
+        }
+        else if ("chartFormatter".equals(evt.getPropertyName())) {
+            chartBuilder.setFormatter((ChartFormatter) evt.getNewValue());
+            displayChart();
         }
         else if ("lineChartLegend".equals(evt.getPropertyName())) {
             boolean showLegend = (Boolean) evt.getNewValue();

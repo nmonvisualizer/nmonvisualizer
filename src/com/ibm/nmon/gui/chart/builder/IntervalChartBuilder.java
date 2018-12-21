@@ -73,12 +73,9 @@ public final class IntervalChartBuilder extends BaseChartBuilder<IntervalChartDe
     protected void formatChart() {
         super.formatChart();
 
-        chart.setTitle(definition.getTitle());
-
         CategoryPlot plot = (CategoryPlot) chart.getPlot();
 
         plot.getDomainAxis().setLabel(definition.getXAxisLabel());
-
         plot.getRangeAxis().setLabel(definition.getYAxisLabel());
 
         if (definition.usePercentYAxis()) {
@@ -93,18 +90,12 @@ public final class IntervalChartBuilder extends BaseChartBuilder<IntervalChartDe
 
             renderer.setBaseToolTipGenerator(new StandardCategoryToolTipGenerator("{1} {0} - {2}", new DecimalFormat(
                     "#,##0.00")));
-
-            plot.getRangeAxis(i).setLabelFont(LABEL_FONT);
-            plot.getRangeAxis(i).setTickLabelFont(AXIS_FONT);
         }
 
         // position of first line start and last line end
         // 1.5% of the chart area within the axis will be blank space on each end
         plot.getDomainAxis().setLowerMargin(.015);
         plot.getDomainAxis().setUpperMargin(.015);
-
-        plot.getDomainAxis().setLabelFont(LABEL_FONT);
-        plot.getDomainAxis().setTickLabelFont(AXIS_FONT);
 
         // position of first point start and last line end
         // 1.5% of the chart area within the axis will be blank space on each end
@@ -113,10 +104,6 @@ public final class IntervalChartBuilder extends BaseChartBuilder<IntervalChartDe
 
         // let each interval name have as much room as possible
         plot.getDomainAxis().setCategoryMargin(0);
-
-        // gray grid lines
-        plot.setRangeGridlinePaint(GRID_COLOR);
-        plot.setRangeGridlineStroke(GRID_LINES);
     }
 
     public void addLine(IntervalChartDefinition lineDefinition, List<AnalysisRecord> records) {

@@ -30,7 +30,7 @@ import com.ibm.nmon.gui.Styles;
 import com.ibm.nmon.gui.chart.*;
 
 import com.ibm.nmon.gui.chart.builder.ChartBuilderPlugin;
-
+import com.ibm.nmon.gui.chart.builder.ChartFormatter;
 import com.ibm.nmon.gui.main.NMONVisualizerGui;
 import com.ibm.nmon.gui.util.ItemProgressDialog;
 
@@ -96,6 +96,7 @@ public final class ReportPanel extends JTabbedPane implements PropertyChangeList
         setTabLayoutPolicy(SCROLL_TAB_LAYOUT);
         this.chartFactory = new ChartFactory(gui);
         this.chartFactory.setGranularity(gui.getGranularity());
+        this.chartFactory.setFormatter(gui.getChartFormatter());
 
         this.gui = gui;
         this.parent = parent;
@@ -136,6 +137,7 @@ public final class ReportPanel extends JTabbedPane implements PropertyChangeList
         gui.addPropertyChangeListener("granularity", this);
         gui.addPropertyChangeListener("timeZone", this);
         gui.addPropertyChangeListener("lineChartLegend", this);
+        gui.addPropertyChangeListener("chartFormatter", this);
     }
 
     @Override
@@ -143,6 +145,8 @@ public final class ReportPanel extends JTabbedPane implements PropertyChangeList
         if (enabled != isEnabled()) {
             super.setEnabled(enabled);
 
+            chartFactory.setGranularity(gui.getGranularity());
+            chartFactory.setFormatter(gui.getChartFormatter());
             chartFactory.showLegends(gui.getBooleanProperty("lineChartLegend"));
 
             if ((chartsInUse != null) && !chartsInUse.isEmpty()) {
@@ -342,6 +346,10 @@ public final class ReportPanel extends JTabbedPane implements PropertyChangeList
             // interval charts may have unnamed intervals that need to be re-displayed
             // just recreate the chart
             updateIntervalCharts();
+        }
+        else if ("chartFormatter".equals(evt.getPropertyName())) {
+            chartFactory.setFormatter((ChartFormatter) evt.getNewValue());
+            resetReport();
         }
         else if ("lineChartLegend".equals(evt.getPropertyName())) {
             chartFactory.showLegends((Boolean) evt.getNewValue());

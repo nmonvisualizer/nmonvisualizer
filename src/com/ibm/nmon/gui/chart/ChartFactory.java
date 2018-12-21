@@ -59,6 +59,13 @@ public class ChartFactory {
         intervalChartBuilder.setInterval(interval);
         histogramChartBuilder.setInterval(interval);
     }
+    
+    public void setFormatter(ChartFormatter formatter) {
+        lineChartBuilder.setFormatter(formatter);
+        barChartBuilder.setFormatter(formatter);
+        intervalChartBuilder.setFormatter(formatter);
+        histogramChartBuilder.setFormatter(formatter);
+    }
 
     public void addPlugin(ChartBuilderPlugin plugin) {
         lineChartBuilder.addPlugin(plugin);

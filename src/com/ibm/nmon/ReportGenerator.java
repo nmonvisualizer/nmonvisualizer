@@ -30,6 +30,8 @@ import com.ibm.nmon.data.ProcessDataSet;
 import com.ibm.nmon.gui.chart.data.DataTupleDataset;
 
 import com.ibm.nmon.gui.chart.ChartFactory;
+import com.ibm.nmon.gui.chart.builder.ChartFormatter;
+import com.ibm.nmon.gui.chart.builder.ChartFormatterParser;
 import com.ibm.nmon.report.ReportCache;
 import com.ibm.nmon.chart.definition.BaseChartDefinition;
 
@@ -73,6 +75,7 @@ public final class ReportGenerator extends NMONVisualizerApp {
         List<String> multiplexedTypeCharts = new java.util.ArrayList<String>();
 
         String intervalsFile = "";
+        String formatFile = "";
 
         boolean summaryCharts = true;
         boolean dataSetCharts = true;
@@ -135,6 +138,18 @@ public final class ReportGenerator extends NMONVisualizerApp {
                         customSummaryCharts.add(args[i]);
                         break nextarg;
 
+                    }
+                    case 'f': {
+                        ++i;
+
+                        if (i > args.length) {
+                            System.err.println("Chart format properties must be specified " + '-' + 'f');
+                            return;
+                        }
+
+                        formatFile = args[i];
+
+                        break nextarg;
                     }
                     case 'g': {
                         ++i;
@@ -269,9 +284,6 @@ public final class ReportGenerator extends NMONVisualizerApp {
         generator.outputDirectory = outputDirectory.isDirectory() ? outputDirectory : outputDirectory.getParentFile();
         generator.writeChartData = writeChartData;
 
-        // parse files
-        generator.parse(filesToParse);
-
         // parse intervals
         if (!"".equals(intervalsFile)) {
             try {
@@ -280,8 +292,26 @@ public final class ReportGenerator extends NMONVisualizerApp {
             catch (IOException ioe) {
                 System.err.println("cannot load intervals from '" + intervalsFile + "'");
                 ioe.printStackTrace();
+                return;
             }
         }
+
+        ChartFormatter chartFormatter = new ChartFormatter(); // use default format
+
+        if (!"".equals(formatFile)) {
+            try {
+                chartFormatter = new ChartFormatterParser().loadFromFile(formatFile);
+            }
+            catch (Exception e) {
+                System.err.println("cannot parse chart format from '" + formatFile + "'\n" + e.getMessage());
+                return;
+            }
+        }
+
+        generator.factory.setFormatter(chartFormatter);
+
+        // parse files
+        generator.parse(filesToParse);
 
         // set interval after parse so min and max system times are set
         generator.createIntervalIfNecessary(startTime, endTime);
@@ -725,6 +755,9 @@ public final class ReportGenerator extends NMONVisualizerApp {
                     }
                 }
             }
+
+            System.out.print("\tWriting process CSV for " + data.getHostname() + " ... ");
+            System.out.flush();
 
             if (data instanceof ProcessDataSet) {
                 ProcessDataSet processData = (ProcessDataSet) data;

@@ -73,8 +73,6 @@ public final class BarChartBuilder extends BaseChartBuilder<BarChartDefinition> 
     protected void formatChart() {
         super.formatChart();
 
-        chart.setTitle(definition.getTitle());
-
         CategoryPlot plot = (CategoryPlot) chart.getPlot();
 
         plot.getDomainAxis().setLabel(definition.getCategoryAxisLabel());
@@ -91,18 +89,10 @@ public final class BarChartBuilder extends BaseChartBuilder<BarChartDefinition> 
         for (int i = 0; i < plot.getRendererCount(); i++) {
             BarRenderer renderer = (BarRenderer) plot.getRenderer(i);
 
-            renderer.setShadowVisible(false);
-            renderer.setDrawBarOutline(false);
-            renderer.setBarPainter(new GradientPainters.GradientBarPainter());
+            formatter.formatRenderer(renderer);
 
-            renderer.setBaseToolTipGenerator(new StandardCategoryToolTipGenerator("{1} {0} - {2} ({3})",
-                    Styles.NUMBER_FORMAT));
-
-            renderer.setBaseOutlineStroke(OUTLINE_STROKE);
-            renderer.setBaseOutlinePaint(OUTLINE_COLOR);
-
-            plot.getRangeAxis(i).setLabelFont(LABEL_FONT);
-            plot.getRangeAxis(i).setTickLabelFont(AXIS_FONT);
+            renderer.setBaseToolTipGenerator(
+                    new StandardCategoryToolTipGenerator("{1} {0} - {2} ({3})", Styles.NUMBER_FORMAT));
         }
 
         plot.getDomainAxis().setCategoryMargin(0.15d);
@@ -112,13 +102,6 @@ public final class BarChartBuilder extends BaseChartBuilder<BarChartDefinition> 
         // 1.5% of the chart area within the axis will be blank space on each end
         plot.getDomainAxis().setLowerMargin(.015);
         plot.getDomainAxis().setUpperMargin(.015);
-
-        plot.getDomainAxis().setLabelFont(LABEL_FONT);
-        plot.getDomainAxis().setTickLabelFont(AXIS_FONT);
-
-        // gray grid lines
-        plot.setRangeGridlinePaint(GRID_COLOR);
-        plot.setRangeGridlineStroke(GRID_LINES);
     }
 
     public void addBar(AnalysisRecord record) {
@@ -199,7 +182,8 @@ public final class BarChartBuilder extends BaseChartBuilder<BarChartDefinition> 
 
         // smaller font size for charts with a lot of bars
         if (dataset.getColumnCount() > 32) {
-            plot.getDomainAxis().setTickLabelFont(AXIS_FONT.deriveFont(AXIS_FONT.getSize() * 0.9f));
+            plot.getDomainAxis()
+                    .setTickLabelFont(formatter.getAxisFont().deriveFont(formatter.getAxisFont().getSize() * 0.9f));
         }
 
         plot.configureRangeAxes();

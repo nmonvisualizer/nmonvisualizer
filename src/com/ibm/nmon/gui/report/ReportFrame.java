@@ -121,8 +121,8 @@ public final class ReportFrame extends JFrame implements DataSetListener, Proper
             @Override
             public void valueChanged(ListSelectionEvent e) {
                 if (!e.getValueIsAdjusting()) {
-                    DataSet selected = systems.getModel().getElementAt(
-                            systems.getSelectionModel().getMinSelectionIndex());
+                    DataSet selected = systems.getModel()
+                            .getElementAt(systems.getSelectionModel().getMinSelectionIndex());
 
                     if (selected == null) {
                         reportSplitPane.setData(ReportFrame.this.gui.getDataSets());
@@ -293,7 +293,7 @@ public final class ReportFrame extends JFrame implements DataSetListener, Proper
             }
         }
         else if ("annotation".equals(evt.getPropertyName())) {
-            if (evt.getNewValue() != null) {
+            if ((evt.getNewValue() != null) && !addingAnnotation) {
                 addingAnnotation = true;
                 AnnotationCache.add(evt.getNewValue());
                 addingAnnotation = false;
@@ -315,7 +315,6 @@ public final class ReportFrame extends JFrame implements DataSetListener, Proper
     public void annotationsCleared() {
         if (!addingAnnotation) {
             BaseChartPanel currentChart = reportSplitPane.getChartPanel();
-
             if (currentChart != null) {
                 addingAnnotation = true;
                 currentChart.addAnnotations(AnnotationCache.getAnnotations());
