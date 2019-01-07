@@ -1,5 +1,5 @@
 NMONVisualizer
-(C) Copyright 2011-2014 IBM Corp. 
+(C) Copyright 2011-2019 IBM Corp. 
 
 This product is licensed under the terms of the Apache 2.0 license.
 
@@ -7,7 +7,7 @@ JFreeChart 1.0 & JCommon 1.0
 Licensed under LGPL (http://www.gnu.org/licenses/lgpl.html)
 Available from http://www.jfree.org/jfreechart/
 
-Jackson JSON Parser 2.3
+Jackson JSON Parser 2.9
 Licensed under Apache 2.0
 Available from http://wiki.fasterxml.com/JacksonHome
 
@@ -35,9 +35,6 @@ Available from http://www.slf4j.org/
  LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION
  OF CONTRACT, TORT OR OTHERWISE,  ARISING FROM, OUT OF OR IN CONNECTION
  WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
-
-jar-in-jar-loader.zip, part of the Eclipse SDK v3.7
-Licensed under EPL v1.0
 
 Silk Icons provided by Mark James
 Licensed under Creative Commons Attribution 2.5 License (http://creativecommons.org/licenses/by/2.5/legalcode)
