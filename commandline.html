@@ -46,6 +46,8 @@
       <li><span class="c">-s</span> - start datetime of charts in ISO 8601 datetime format (<span class="c">yyyy-MM-ddTHH:mm:ssX</span>)</li>
       <li><span class="c">-e</span> - end datetime of charts in ISO 8601 datetime format (<span class="c">yyyy-MM-ddTHH:mm:ssX</span>)</li>
       <li><span class="c">-i</span> - use the given interval CSV file to create charts for a number of intervals.</li>
+      <li><span class="c">-g</span> - use the given granularity, in seconds. This will add a data point on the chart at each time period.</li>
+      <li><span class="c">-f &lt;filename&gt;</span> - use the given properties file to load a custom chart format.</li>
       <li><span class="c">-d &lt;filename&gt;</span> - use the given XML file to create a <a href="customreports.html">custom</a> set of charts <span class="i">for each</span> host / dataset. If more than one dataset is parsed, a separate directory will be used for each hostname.</li>
       <li><span class="c">-a &lt;filename&gt;</span> - use the given XML file to create a <a href="customreports.html">custom</a> set of charts <span class="i">across all</span> hosts / datasets</li>
       <li><span class="c">--mt &lt;filename&gt;</span> - like <span class="c">-d</span> but instead of plotting each chart's matching data types on a single chart, a chart will be created for <span class="i">each type</span>.</li>
@@ -64,7 +66,39 @@
   </div>
   <div class="section">
     <h3>Intervals File</h3>
-    <p>The value given for the the <span class="c">-i</span> should be a valid CSV file that contains at least one interval. The format of this file is <span class="c">interval name, start, end</span>. The interval name is optional. Both the start and end must be a valid ISO 8601 datetime string.</p>
+    <p>The value given for <span class="c">-i</span> should be a valid CSV file that contains at least one interval. The format of this file is <span class="c">interval name, start, end</span>. The interval name is optional. Both the start and end must be a valid ISO 8601 datetime string.</p>
+  </div>
+  <div class="section">
+    <h3>Chart Format File</h3>
+    <p>The value given for <span class="c">-f</span> should be a valid properties file that specifies custom chart colors. The colors, as property values, can be specified as:
+      <ul>
+        <li>Hex values like <span class="c">0xa0a0a0</span> or <span class="c">#A0A0A0</span>. Lower or uppercase is accepted.</li>
+        <li>An array of RGB values like <span class="c">[ 128, 128, 128 ]</span></li>
+        <li>A color name as definied in <a href="http://www.jfree.org/jfreechart/api/javadoc/org/jfree/chart/ChartColor.html">ChartColor</a>. Lower or uppercase is accepted.</li>
+      </ul>
+    </p>
+    <p>
+      The following colors, as properties, can be set:
+      <ul>
+        <li><span class="c">background</span> - the chart background, outside the plot area.</li>
+        <li><span class="c">plotBackground</span> - the background of the graph itself.</li>
+        <li><span class="c">text</span> - the color of the title axis and legend text.</li>
+        <li><span class="c">elements</span> - the color of the chart elements like axis lines and tick marks.</li>
+        <li><span class="c">gridLines</span> - the grid line color on graphs.</li>
+        <li><span class="c">annotations</span> - the color of annotation lines and text.</li>
+        <li><span class="c">series</span> - the colors of the lines and bars. This can be a comma separated list. The colors are iterated through for each line or bar and colors will repeat if there are not enough in the list for all the series in the chart.</li>
+      </ul>
+    </p>
+    <p>A sample dark theme could be something like the following:
+      <span class="c">
+  background=BLACK
+  plotBackground=DARK_GRAY
+  text=WHITE
+  elements=[ 248, 248, 248 ]
+  gridLines=0xa0a0a0
+  annotations=GREEN
+  series= VERY_LIGHT_RED, VERY_LIGHT_BLUE, VERY_LIGHT_GREEN, VERY_LIGHT_YELLOW, VERY_LIGHT_CYAN, VERY_LIGHT_MAGENTA, LIGHT_RED, LIGHT_BLUE, LIGHT_GREEN, LIGHT_YELLOW, LIGHT_CYAN, LIGHT_MAGENTA</span>
+   </p>
   </div>
 </div>
 </body>
