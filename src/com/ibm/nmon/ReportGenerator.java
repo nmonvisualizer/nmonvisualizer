@@ -160,7 +160,7 @@ public final class ReportGenerator extends NMONVisualizerApp {
                         }
 
                         try {
-                            granularity = Integer.parseInt(args[i]);
+                            granularity = Integer.parseInt(args[i]) * 1000;
                         }
                         catch (NumberFormatException e) {
                             System.err.println("Granularity value must be an integer " + args[i]);
@@ -316,6 +316,9 @@ public final class ReportGenerator extends NMONVisualizerApp {
         // set interval after parse so min and max system times are set
         generator.createIntervalIfNecessary(startTime, endTime);
 
+        System.out.println();
+        System.out.println("Using granularity of " + (generator.granularityHelper.getGranularity() / 1000) + "s");
+
         if (createCharts) {
             if (generator.getIntervalManager().getIntervalCount() != 0) {
                 // create charts for all intervals
@@ -346,7 +349,6 @@ public final class ReportGenerator extends NMONVisualizerApp {
             }
 
             System.out.println("Raw data complete!");
-
         }
     }
 
