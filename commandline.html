@@ -46,7 +46,7 @@
       <li><span class="c">-s</span> - start datetime of charts in ISO 8601 datetime format (<span class="c">yyyy-MM-ddTHH:mm:ssX</span>)</li>
       <li><span class="c">-e</span> - end datetime of charts in ISO 8601 datetime format (<span class="c">yyyy-MM-ddTHH:mm:ssX</span>)</li>
       <li><span class="c">-i</span> - use the given interval CSV file to create charts for a number of intervals.</li>
-      <li><span class="c">-g</span> - use the given granularity, in seconds. This will add a data point on the chart at each time period.</li>
+      <li><span class="c">-g</span> - sets the granularity, <span class="i">in seconds</span>. This will add a data point on the chart every <span class="c">granularity</span> seconds. The minimum value is <span class="c">1</span>. The maximum value <span class="i">must</span> be less than the interval of the processed data or no data points will be plotted on the chart. The default value is calculated so that the chart will have 100 data points.</li>
       <li><span class="c">-f &lt;filename&gt;</span> - use the given properties file to load a custom chart format.</li>
       <li><span class="c">-d &lt;filename&gt;</span> - use the given XML file to create a <a href="customreports.html">custom</a> set of charts <span class="i">for each</span> host / dataset. If more than one dataset is parsed, a separate directory will be used for each hostname.</li>
       <li><span class="c">-a &lt;filename&gt;</span> - use the given XML file to create a <a href="customreports.html">custom</a> set of charts <span class="i">across all</span> hosts / datasets</li>
