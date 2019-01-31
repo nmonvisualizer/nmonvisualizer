@@ -108,6 +108,9 @@ public abstract class NMONVisualizerApp implements IntervalListener {
         hostRenamer = HostRenamer.BY_HOST;
 
         setProperty("scaleProcessesByCPUs", "true");
+
+        // requires access to AnalysisRecords
+        com.ibm.nmon.data.matcher.TopProcessMatcher.INSTANCE.setApp(this);
     }
 
     /**

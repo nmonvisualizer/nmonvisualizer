@@ -525,6 +525,9 @@ public final class ChartDefinitionParser extends BasicXMLParser {
                 if ("$PROCESSES".equals(name)) {
                     typeMatcher = ProcessMatcher.INSTANCE;
                 }
+                else if ("$TOP_PROCESSES".equals(name)) {
+                    typeMatcher = TopProcessMatcher.INSTANCE;
+                }
                 else if (TypeMatcher.ALL.toString().equals(name)) {
                     typeMatcher = TypeMatcher.ALL;
                 }

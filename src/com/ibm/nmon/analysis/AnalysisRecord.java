@@ -16,17 +16,16 @@ import com.ibm.nmon.util.TimeFormatCache;
 
 /**
  * <p>
- * Holder class for analyzing data from a specific DataSet. If the DataSet does not have data for
- * the given DataType / field combination all methods in this class will return <code>NaN</code>
- * except for {@link #getCount(DataType, String) getCount()}, which returns zero.
+ * Holder class for analyzing data from a specific DataSet. If the DataSet does not have data for the given DataType /
+ * field combination all methods in this class will return <code>NaN</code> except for
+ * {@link #getCount(DataType, String) getCount()}, which returns zero.
  * </p>
  * 
  * <p>
- * This class caches statistics for measurements during a given Interval rather than recalculating
- * from the raw data each time. Calculations are done lazily, when a statistic is requested, not
- * when a measurement is added to the record. Data is cached as SoftReference objects, so while this
- * class could potentially use a large amount of memory, it should not cause OutOfMemoryExceptions.
- * </p
+ * This class caches statistics for measurements during a given Interval rather than recalculating from the raw data
+ * each time. Calculations are done lazily, when a statistic is requested, not when a measurement is added to the
+ * record. Data is cached as SoftReference objects, so while this class could potentially use a large amount of memory,
+ * it should not cause OutOfMemoryExceptions. </p
  */
 public final class AnalysisRecord {
     private static final Logger LOGGER = org.slf4j.LoggerFactory.getLogger(AnalysisRecord.class);
@@ -97,7 +96,7 @@ public final class AnalysisRecord {
     public double getAverage(DataType type, String fieldName) {
         return analyzeIfNecessary(type, fieldName).average;
     }
-    
+
     public double getWeightedAverage(DataType type, String fieldName) {
         return analyzeIfNecessary(type, fieldName).weightedAverage;
     }
@@ -272,9 +271,8 @@ public final class AnalysisRecord {
         }
 
         if (LOGGER.isDebugEnabled()) {
-            LOGGER.debug("{}: {}-{} analyzed for {} in {}ms ",
-                    new Object[] { data, type, fieldName, TimeFormatCache.formatInterval(interval),
-                            (System.nanoTime() - startT) / 1000000.0d });
+            LOGGER.debug("{}: {}-{} analyzed for {} in {}ms", data, type, fieldName,
+                    TimeFormatCache.formatInterval(interval), (System.nanoTime() - startT) / 1000000.0d);
         }
 
         return holder;
