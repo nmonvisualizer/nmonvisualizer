@@ -60,6 +60,7 @@ public abstract class BasicXMLParser {
             int searchStart = 0;
 
             while (line != null) {
+                line= line.trim();
                 int elementStart = line.indexOf('<', searchStart) + 1;
 
                 // no xml element => try next line
@@ -80,7 +81,6 @@ public abstract class BasicXMLParser {
                     // no '>' => append next line and try again
                     if (elementEnd == -1) {
                         line += in.readLine();
-                        continue;
                     }
                     else if (line.charAt(elementEnd - 1) == '-') {
                         // comment complete
