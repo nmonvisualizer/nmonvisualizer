@@ -49,12 +49,13 @@ public final class ChartDefinitionParser extends BasicXMLParser {
             parse(filename);
 
             if (logger.isDebugEnabled()) {
-                logger.debug("parse complete for file '{}' in {}ms", filename, (System.nanoTime() - start) / 1000000.0d);
+                logger.debug("parse complete for file '{}' in {}ms", filename,
+                        (System.nanoTime() - start) / 1000000.0d);
             }
 
             if (charts.isEmpty()) {
-                throw new IOException("chart definition file '" + filename
-                        + "' does not appear to have any charts defined");
+                throw new IOException(
+                        "chart definition file '" + filename + "' does not appear to have any charts defined");
             }
 
             return java.util.Collections.unmodifiableList(new java.util.ArrayList<BaseChartDefinition>(charts));
@@ -76,8 +77,8 @@ public final class ChartDefinitionParser extends BasicXMLParser {
         }
 
         if (charts.isEmpty()) {
-            throw new IOException("chart definition input stream '" + in
-                    + "' does not appear to have any charts defined");
+            throw new IOException(
+                    "chart definition input stream '" + in + "' does not appear to have any charts defined");
         }
 
         try {
@@ -121,14 +122,16 @@ public final class ChartDefinitionParser extends BasicXMLParser {
 
                 if (attributes.get("asPercent") != null) {
                     logger.warn("ignoring " + "asPercent" + " attribute for " + "<yAxis2>" + " element for chart '"
-                            + (currentChart == null ? currentChart : currentChart.getShortName()) + '\''
-                            + " at line {}" + "; secondary axes do not support percentages", getLineNumber());
+                            + (currentChart == null ? currentChart : currentChart.getShortName()) + '\'' + " at line {}"
+                            + "; secondary axes do not support percentages", getLineNumber());
                 }
 
                 if (currentChart instanceof BarChartDefinition && ((BarChartDefinition) currentChart).isStacked()) {
-                    logger.warn("ignoring " + "<yAxis2>" + " element for chart "
-                            + (currentChart == null ? currentChart : currentChart.getShortName()) + " at line {}"
-                            + "; stacked bar charts do not support secondary axes", getLineNumber());
+                    logger.warn(
+                            "ignoring " + "<yAxis2>" + " element for chart "
+                                    + (currentChart == null ? currentChart : currentChart.getShortName())
+                                    + " at line {}" + "; stacked bar charts do not support secondary axes",
+                            getLineNumber());
                 }
                 else {
                     ((YAxisChartDefinition) currentChart).setSecondaryYAxisLabel(attributes.get("label"));
@@ -161,24 +164,25 @@ public final class ChartDefinitionParser extends BasicXMLParser {
                 String maxString = attributes.get("max");
 
                 if (((minString != null) && (maxString == null)) || ((maxString != null) && (minString == null))) {
-                    logger.warn("ignoring " + "<histogram>" + " attributes 'min' and 'max' "
-                            + "must both be specified " + " at line {}" + ", if a defined range is desired",
-                            getLineNumber());
+                    logger.warn("ignoring " + "<histogram>" + " attributes 'min' and 'max' " + "must both be specified "
+                            + " at line {}" + ", if a defined range is desired", getLineNumber());
                 }
                 else {
                     try {
-                        ((HistogramChartDefinition) currentChart).setXAxisRange(new org.jfree.data.Range(Integer
-                                .parseInt(minString), Integer.parseInt(maxString)));
+                        ((HistogramChartDefinition) currentChart).setXAxisRange(
+                                new org.jfree.data.Range(Integer.parseInt(minString), Integer.parseInt(maxString)));
                     }
                     catch (NumberFormatException nfe) {
-                        logger.warn("ignoring " + "<histogram>" + " attributes 'min' and 'max' "
-                                + "with values '{}' and '{}'" + " at line {}" + ", are not a valid numbers", minString,
-                                maxString, getLineNumber());
+                        logger.warn(
+                                "ignoring " + "<histogram>" + " attributes 'min' and 'max' "
+                                        + "with values '{}' and '{}'" + " at line {}" + ", are not a valid numbers",
+                                minString, maxString, getLineNumber());
                     }
                     catch (IllegalArgumentException iae) {
-                        logger.warn("ignoring " + "<histogram>" + " attributes 'min' and 'max' "
-                                + "with values '{}' and '{}'" + " at line {}" + ", invalid range", minString,
-                                maxString, getLineNumber());
+                        logger.warn(
+                                "ignoring " + "<histogram>" + " attributes 'min' and 'max' "
+                                        + "with values '{}' and '{}'" + " at line {}" + ", invalid range",
+                                minString, maxString, getLineNumber());
                     }
                 }
             }
@@ -320,6 +324,12 @@ public final class ChartDefinitionParser extends BasicXMLParser {
             ((LineChartDefinition) currentChart).setLineNamingMode(mode);
         }
 
+        String showDataPoints = attributes.get("showDataPoints");
+
+        if (showDataPoints != null) {
+            ((LineChartDefinition) currentChart).setShowDataPoints(Boolean.valueOf(showDataPoints));
+        }
+
         parseSize("<linechart>", attributes);
 
         logger.debug("parsed line chart {}", currentChart.getShortName());
@@ -355,6 +365,12 @@ public final class ChartDefinitionParser extends BasicXMLParser {
         if (attributes.get("linesNamedBy") != null) {
             NamingMode mode = NamingMode.valueOf(attributes.get("linesNamedBy"));
             ((LineChartDefinition) currentChart).setLineNamingMode(mode);
+        }
+        
+        String showDataPoints = attributes.get("showDataPoints");
+
+        if (showDataPoints != null) {
+            ((LineChartDefinition) currentChart).setShowDataPoints(Boolean.valueOf(showDataPoints));
         }
 
         parseSize("<intervalchart>", attributes);
@@ -466,8 +482,9 @@ public final class ChartDefinitionParser extends BasicXMLParser {
 
     private void parseHost(Map<String, String> attributes) {
         if (!inData) {
-            logger.warn("ignoring " + "<host>" + " element outside of <data>" + " at line {}"
-                    + "; <data> will be skipped", getLineNumber());
+            logger.warn(
+                    "ignoring " + "<host>" + " element outside of <data>" + " at line {}" + "; <data> will be skipped",
+                    getLineNumber());
             skip = true;
             return;
         }
@@ -512,8 +529,9 @@ public final class ChartDefinitionParser extends BasicXMLParser {
 
     private void parseType(Map<String, String> attributes) {
         if (!inData) {
-            logger.warn("ignoring " + "<type>" + " element outside of <data>" + " at line {}"
-                    + "; <data> will be skipped", getLineNumber());
+            logger.warn(
+                    "ignoring " + "<type>" + " element outside of <data>" + " at line {}" + "; <data> will be skipped",
+                    getLineNumber());
             skip = true;
             return;
         }
@@ -557,8 +575,9 @@ public final class ChartDefinitionParser extends BasicXMLParser {
 
     private void parseField(Map<String, String> attributes) {
         if (!inData) {
-            logger.warn("ignoring " + "<field>" + " element outside of <data>" + " at line {}"
-                    + "; <data> will be skipped", getLineNumber());
+            logger.warn(
+                    "ignoring " + "<field>" + " element outside of <data>" + " at line {}" + "; <data> will be skipped",
+                    getLineNumber());
             skip = true;
             return;
         }
@@ -774,7 +793,8 @@ public final class ChartDefinitionParser extends BasicXMLParser {
                 if (existing != null) {
                     logger.warn(
                             "an existing regex substitution has already been defined, ignoring additional substitutions"
-                                    + " at line {}", getLineNumber());
+                                    + " at line {}",
+                            getLineNumber());
                     return existing;
                 }
                 else {

@@ -5,14 +5,16 @@ import com.ibm.nmon.data.definition.NamingMode;
 
 /**
  * <p>
- * Defines a line chart which has a labeled X axis. Lines are defined as a collection of
- * {@link DataDefinition DataDefinitions}. Lines are named by a single {@link NamingMode}.
+ * Defines a line chart which has a labeled X axis. Lines are defined as a collection of {@link DataDefinition
+ * DataDefinitions}. Lines are named by a single {@link NamingMode}.
  * </p>
  */
 public class LineChartDefinition extends YAxisChartDefinition {
     private String xAxisLabel = "";
 
     private NamingMode lineNamingMode;
+
+    private boolean showDataPoints;
 
     public LineChartDefinition(String shortName, String title) {
         this(shortName, title, false);
@@ -22,6 +24,7 @@ public class LineChartDefinition extends YAxisChartDefinition {
         super(shortName, title, stacked);
 
         lineNamingMode = NamingMode.FIELD;
+        showDataPoints = true;
     }
 
     public LineChartDefinition(LineChartDefinition copy, boolean copyData) {
@@ -55,5 +58,13 @@ public class LineChartDefinition extends YAxisChartDefinition {
         else {
             lineNamingMode = mode;
         }
+    }
+
+    public boolean showDataPoints() {
+        return showDataPoints;
+    }
+
+    public void setShowDataPoints(boolean showDataPoints) {
+        this.showDataPoints = showDataPoints;
     }
 }

@@ -47,6 +47,11 @@ public final class IntervalChartBuilder extends BaseChartBuilder<IntervalChartDe
         LineAndShapeRenderer renderer = new LineAndShapeRenderer();
         renderer.setBaseSeriesVisible(true, false);
 
+        if (!definition.showDataPoints()) {
+            renderer.setAutoPopulateSeriesShape(false);
+            renderer.setBaseShape(new java.awt.Rectangle(), false);
+        }
+
         CategoryPlot plot = new CategoryPlot(new DataTupleCategoryDataset(true), categoryAxis, valueAxis, renderer);
 
         if (definition.hasSecondaryYAxis()) {
@@ -58,6 +63,11 @@ public final class IntervalChartBuilder extends BaseChartBuilder<IntervalChartDe
 
             renderer = new LineAndShapeRenderer();
             renderer.setBaseSeriesVisible(true, false);
+
+            if (!definition.showDataPoints()) {
+                renderer.setAutoPopulateSeriesShape(false);
+                renderer.setBaseShape(new java.awt.Rectangle(), false);
+            }
 
             plot.setRenderer(1, renderer);
             plot.setRangeAxis(1, valueAxis);
@@ -88,8 +98,8 @@ public final class IntervalChartBuilder extends BaseChartBuilder<IntervalChartDe
             renderer.setBaseShapesVisible(true);
             renderer.setBaseShapesFilled(true);
 
-            renderer.setBaseToolTipGenerator(new StandardCategoryToolTipGenerator("{1} {0} - {2}", new DecimalFormat(
-                    "#,##0.00")));
+            renderer.setBaseToolTipGenerator(
+                    new StandardCategoryToolTipGenerator("{1} {0} - {2}", new DecimalFormat("#,##0.00")));
         }
 
         // position of first line start and last line end
@@ -147,8 +157,8 @@ public final class IntervalChartBuilder extends BaseChartBuilder<IntervalChartDe
 
                             if ("".equals(intervalName)) {
                                 if (record.getInterval().getDuration() >= (86400 * 1000)) {
-                                    intervalName = TimeFormatCache.formatDateTime(record.getInterval().getStart())
-                                            + '-' + TimeFormatCache.formatDateTime(record.getInterval().getEnd());
+                                    intervalName = TimeFormatCache.formatDateTime(record.getInterval().getStart()) + '-'
+                                            + TimeFormatCache.formatDateTime(record.getInterval().getEnd());
                                 }
                                 else {
                                     intervalName = TimeFormatCache.formatTime(record.getInterval().getStart()) + '-'

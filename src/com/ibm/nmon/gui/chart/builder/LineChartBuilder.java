@@ -59,7 +59,7 @@ public class LineChartBuilder extends BaseChartBuilder<LineChartDefinition> {
             StandardXYItemRenderer renderer = new StandardXYItemRenderer();
             renderer.setBaseSeriesVisible(true, false);
 
-            plot = new XYPlot(dataset, timeAxis, valueAxis, renderer);
+                 plot = new XYPlot(dataset, timeAxis, valueAxis, renderer);
         }
 
         if (definition.hasSecondaryYAxis()) {
@@ -101,6 +101,11 @@ public class LineChartBuilder extends BaseChartBuilder<LineChartDefinition> {
             renderer.setLegendArea(new java.awt.Rectangle(10, 10));
 
             renderer.setBaseToolTipGenerator(tooltipGenerator);
+
+            if (!definition.showDataPoints()) {
+                renderer.setAutoPopulateSeriesShape(false);
+                renderer.setBaseShape(new java.awt.Rectangle(), false);
+            }
         }
         else {
             formatRenderer(0);
@@ -126,6 +131,12 @@ public class LineChartBuilder extends BaseChartBuilder<LineChartDefinition> {
         recalculateGapThreshold(index);
 
         renderer.setBaseToolTipGenerator(tooltipGenerator);
+        
+
+        if (!definition.showDataPoints()) {
+            renderer.setAutoPopulateSeriesShape(false);
+            renderer.setBaseShape(new java.awt.Rectangle(), false);
+        }
     }
 
     public void addLine(DataSet data) {
