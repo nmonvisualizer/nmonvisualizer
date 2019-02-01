@@ -381,14 +381,14 @@
  <linechart name="Top Processes" shortName="Top Processes" linesNamedBy="TYPE">
     <yAxis label="% CPU" asPercent="true" />
     <data>
-      <type name="$TOP_PROCESSES" />
+      <type name="$TOP_PROCESSES_BY_CPU" />
       <!-- Unix -->
       <field name="%CPU" alias="% CPU" />
       <!-- Windows -->
       <field name="% Processor Time" />
     </data>
   </linechart>
-
+ 
   <linechart name="CPU Utilization by Logical Core" shortName="All CPUs" linesNamedBy="TYPE">
     <yAxis label="% CPU" asPercent="true" />
     <data>

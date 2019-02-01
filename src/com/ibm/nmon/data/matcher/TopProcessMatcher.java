@@ -20,19 +20,49 @@ import com.ibm.nmon.analysis.AnalysisRecord;
  * Matches processes via {@link ProcessDataType} CPU utilization. The {@link AnalysisRecord#getWeightedAverage weighted
  * average} is calculated and the 10 processes with the highest utilization are matched.
  */
-public final class TopProcessMatcher implements TypeMatcher {
+public abstract class TopProcessMatcher implements TypeMatcher {
     private static final Logger LOGGER = org.slf4j.LoggerFactory.getLogger(TopProcessMatcher.class);
 
-    public static final TopProcessMatcher INSTANCE = new TopProcessMatcher();
+    public static final TopProcessMatcher BY_CPU = new TopProcessMatcher() {
+        @Override
+        protected double getValue(AnalysisRecord analysis, DataType type) {
+            if (type.hasField("%CPU")) {
+                return analysis.getWeightedAverage(type, "%CPU");
+            }
+            else if (type.hasField("% Processor Time")) {
+                return analysis.getWeightedAverage(type, "% Processor Time");
+            }
+            else {
+                return Double.NaN;
+            }
+        }
+    };
+
+    public static final TopProcessMatcher BY_MEMORY = new TopProcessMatcher() {
+        @Override
+        protected double getValue(AnalysisRecord analysis, DataType type) {
+            if (type.hasField("Size")) {
+                return analysis.getWeightedAverage(type, "Size");
+            }
+            else if (type.hasField("Working Set")) {
+                return analysis.getWeightedAverage(type, "Working Set");
+            }
+            else {
+                return Double.NaN;
+            }
+        }
+    };
+
     private static final int TOP_N = 10;
+
+    public static void setApp(NMONVisualizerApp app) {
+        BY_CPU.app = app;
+        BY_MEMORY.app = app;
+    }
 
     private TopProcessMatcher() {}
 
     private NMONVisualizerApp app;
-
-    public void setApp(NMONVisualizerApp app) {
-        this.app = app;
-    }
 
     @Override
     public List<DataType> getMatchingTypes(DataSet data) {
@@ -52,18 +82,17 @@ public final class TopProcessMatcher implements TypeMatcher {
         for (DataType type : data.getTypes()) {
             if (type instanceof ProcessDataType) {
 
-                if (type.hasField("%CPU")) {
-                    sortedByCPU.put(analysis.getWeightedAverage(type, "%CPU"), type);
-                }
-                else if (type.hasField("% Processor Time")) {
-                    sortedByCPU.put(analysis.getWeightedAverage(type, "% Processor Time"), type);
+                double value = getValue(analysis, type);
+
+                if (!Double.isNaN(value)) {
+                    sortedByCPU.put(value, type);
                 }
                 // else ignore
             }
         }
 
         if (LOGGER.isDebugEnabled()) {
-            LOGGER.debug("{}: sorted {} processes for {} in {} ms", data, ((ProcessDataSet) data).getProcessCount(),
+            LOGGER.debug("{}: sorted {} processes in {} ms", data, ((ProcessDataSet) data).getProcessCount(),
                     (System.nanoTime() - startT) / 1000000.0d);
         }
 
@@ -83,6 +112,8 @@ public final class TopProcessMatcher implements TypeMatcher {
 
         return types;
     }
+
+    protected abstract double getValue(AnalysisRecord analysis, DataType type);
 
     @Override
     public String toString() {
