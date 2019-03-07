@@ -372,22 +372,24 @@ public final class IOStatParser {
         DataType dataType = data.getType("IOStat" + " " + values[1]);
 
         if (dataType == null) {
-            // less 1 on the length to skip time
-            String[] fields = new String[values.length - 2];
+            // typeFields will be [, Kbps, tps, Kb_read, Kb_wrtn, time]; skip first empty value and time
+            String[] fields = new String[typeFields.length - 2];
 
-            for (int i = 1; i < values.length - 1; i++) {
+            for (int i = 1; i < typeFields.length - 1; i++) {
                 fields[i - 1] = DataHelper.newString(typeFields[i]);
             }
 
-            dataType = new DataType("IOStat" + " " + values[1], values[1], fields);
+            dataType = new DataType("IOStat" + " " + values[1], DataHelper.newString(values[1]), fields);
 
             data.addType(dataType);
         }
 
         double[] data = new double[dataType.getFieldCount()];
 
-        for (int i = 1; i < data.length; i++) {
-            data[i] = numberFormat.parse(values[i + 1]).doubleValue();
+        // values will be like [, Physical, 1.0, 2.0, 3.0, 4.0, 12:24:56]
+        // + 2 to skip , Physical; data.length will avoid reading time
+        for (int i = 0; i < data.length; i++) {
+            data[i] = numberFormat.parse(values[i + 2]).doubleValue();
         }
 
         currentRecord.addData(dataType, data);

@@ -729,7 +729,7 @@ public final class NMONParser {
             currentRecord.addData(processType, data);
         }
         else {
-            LOGGER.warn("command line for process id {} redefined at line {}", pid, in.getLineNumber());
+            LOGGER.debug("command line for process {} reused at line {}", process, in.getLineNumber());
         }
     }
 
