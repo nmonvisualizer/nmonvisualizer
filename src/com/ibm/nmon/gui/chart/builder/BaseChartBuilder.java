@@ -176,6 +176,7 @@ abstract class BaseChartBuilder<C extends BaseChartDefinition> {
     private final void updateSubtitle() {
         TextTitle subtitle = (TextTitle) chart.getSubtitle(0);
 
+        // short circuit if NONE or only 1 Statistic
         if (definition.getSubtitleNamingMode() == NONE) {
             subtitle.setText("");
             return;
@@ -189,7 +190,8 @@ abstract class BaseChartBuilder<C extends BaseChartDefinition> {
 
         if (definition.getSubtitleNamingMode() == STAT) {
             if (stats.size() == 1) {
-                subtitle.setText(stats.iterator().next().toString());
+                subtitle.setText(definition.getSubtitleNamingMode().getName(definition.getData().iterator().next(),
+                        null, null, null, interval, granularity));
             }
             else {
                 subtitle.setText("");
@@ -258,144 +260,151 @@ abstract class BaseChartBuilder<C extends BaseChartDefinition> {
         }
 
         // now set the subtitle based on the NamingMode
-        NamingMode mode = definition.getSubtitleNamingMode();
+        subtitle.setText(getSubtitle(definition.getSubtitleNamingMode(), stats, dataSets, dataTypes, fields));
 
-        // only set if there is a single data set, type of field
-        if (mode == HOST) {
+    }
+
+    private String getSubtitle(NamingMode mode, Set<Statistic> stats, Set<DataSet> dataSets, Set<DataType> dataTypes,
+            Set<String> fields) {
+
+        // if Set is not unique for the given NamingMode, change it
+        // default to a blank subtitle
+        NamingMode actualMode = NONE;
+        switch (mode) {
+        case NONE: {}
+        case STAT: {
+            throw new IllegalStateException("NamingMode" + mode + " should already have been handled");
+        }
+        case HOST: {
             if (dataSets.size() == 1) {
-                subtitle.setText(dataSets.iterator().next().getHostname());
+                actualMode = HOST;
             }
-            else {
-                subtitle.setText("");
-            }
+            break;
         }
-        else if (mode == TYPE) {
+        case TYPE: {
             if (dataTypes.size() == 1) {
-                subtitle.setText(dataTypes.iterator().next().toString());
+                actualMode = TYPE;
             }
-            else {
-                subtitle.setText("");
-            }
+            break;
         }
-        else if (mode == FIELD) {
+        case FIELD: {
             if (fields.size() == 1) {
-                subtitle.setText(fields.iterator().next());
+                actualMode = FIELD;
             }
-            else {
-                subtitle.setText("");
-            }
+            break;
         }
         // for compound modes, both must be unique; if one part is unique, use that instead
-        else if (mode == HOST_TYPE) {
+        case HOST_TYPE: {
             if (dataTypes.size() == 1) {
                 if (dataSets.size() == 1) {
-                    subtitle.setText(dataSets.iterator().next().getHostname() + SEPARATOR
-                            + dataTypes.iterator().next().toString());
+                    actualMode = HOST_TYPE;
                 }
                 else {
-                    subtitle.setText(dataTypes.iterator().next().toString());
+                    actualMode = TYPE;
                 }
             }
-            else {
-                if (dataSets.size() == 1) {
-                    subtitle.setText(dataSets.iterator().next().getHostname());
-                }
-                else {
-                    subtitle.setText("");
-                }
+            else if (dataSets.size() == 1) {
+                actualMode = HOST;
             }
+            break;
         }
-        else if (mode == HOST_FIELD) {
+        case HOST_FIELD: {
             if (fields.size() == 1) {
                 if (dataSets.size() == 1) {
-                    subtitle.setText(dataSets.iterator().next().getHostname() + SEPARATOR + fields.iterator().next());
+                    actualMode = HOST_FIELD;
                 }
                 else {
-                    subtitle.setText(fields.iterator().next());
+                    actualMode = FIELD;
                 }
             }
-            else {
-                if (dataSets.size() == 1) {
-                    subtitle.setText(dataSets.iterator().next().getHostname());
-                }
-                else {
-                    subtitle.setText("");
-                }
+            else if (dataSets.size() == 1) {
+                actualMode = HOST;
             }
+            break;
         }
-        else if (mode == HOST_STAT) {
+        case HOST_STAT: {
             if (stats.size() == 1) {
                 if (dataSets.size() == 1) {
-                    subtitle.setText(
-                            dataSets.iterator().next().getHostname() + SEPARATOR + stats.iterator().next().toString());
+                    actualMode = HOST_STAT;
                 }
                 else {
-                    subtitle.setText(stats.iterator().next().toString());
+                    actualMode = STAT;
                 }
             }
-            else {
-                if (dataSets.size() == 1) {
-                    subtitle.setText(dataSets.iterator().next().getHostname());
-                }
-                else {
-                    subtitle.setText("");
-                }
+            else if (dataSets.size() == 1) {
+                actualMode = HOST;
             }
+            break;
         }
-        else if (mode == TYPE_FIELD) {
+        case TYPE_FIELD: {
             if (fields.size() == 1) {
                 if (dataTypes.size() == 1) {
-                    subtitle.setText(dataTypes.iterator().next().toString() + SEPARATOR + fields.iterator().next());
+                    actualMode = TYPE_FIELD;
                 }
                 else {
-                    subtitle.setText(fields.iterator().next());
+                    actualMode = FIELD;
                 }
             }
-            else {
-                if (dataTypes.size() == 1) {
-                    subtitle.setText(dataTypes.iterator().next().toString());
-                }
-                else {
-                    subtitle.setText("");
-                }
+            else if (dataTypes.size() == 1) {
+                actualMode = TYPE;
             }
+            break;
         }
-        else if (mode == TYPE_STAT) {
+        case TYPE_STAT: {
             if (stats.size() == 1) {
                 if (dataTypes.size() == 1) {
-                    subtitle.setText(
-                            dataTypes.iterator().next().toString() + SEPARATOR + stats.iterator().next().toString());
+                    actualMode = TYPE_STAT;
                 }
                 else {
-                    subtitle.setText(stats.iterator().next().toString());
+                    actualMode = STAT;
                 }
             }
-            else {
-                if (dataTypes.size() == 1) {
-                    subtitle.setText(stats.iterator().next().toString());
-                }
-                else {
-                    subtitle.setText("");
-                }
+            else if (dataTypes.size() == 1) {
+                actualMode = TYPE;
             }
+            break;
         }
-        else if (mode == FIELD_STAT) {
+        case FIELD_STAT: {
             if (stats.size() == 1) {
                 if (fields.size() == 1) {
-                    subtitle.setText(fields.iterator().next() + SEPARATOR + stats.iterator().next().toString());
+                    actualMode = FIELD_STAT;
                 }
                 else {
-                    subtitle.setText(stats.iterator().next().toString());
+                    actualMode = STAT;
                 }
             }
-            else {
-                if (fields.size() == 1) {
-                    subtitle.setText(fields.iterator().next());
-                }
-                else {
-                    subtitle.setText("");
-                }
+            else if (fields.size() == 1) {
+                actualMode = FIELD;
+            }
+            break;
+        }
+        case DATE: {
+            // use the first DataDefinition
+            // return here to avoid using HOST, TYPE or FIELD values when there is more than one value
+            return DATE.getName(definition.getData().iterator().next(),
+                    dataSets.size() == 1 ? dataSets.iterator().next() : null,
+                    dataTypes.size() == 1 ? dataTypes.iterator().next() : null,
+                    fields.size() == 1 ? fields.iterator().next() : null, interval, granularity);
+        }
+        }
+
+        String subtitle = "";
+
+        for (DataDefinition dataDefinition : definition.getData()) {
+            String oldSubtitle = subtitle;
+
+            // note that getName() ignores data, type, field, etc if not needed, so it is safe to pass the first element
+            // in each Set
+            // the above switch logic has already set the NamingMode to the necessary value
+            subtitle = actualMode.getName(dataDefinition, dataSets.iterator().next(), dataTypes.iterator().next(),
+                    fields.iterator().next(), interval, granularity);
+
+            // end after first successful rename
+            if (!subtitle.equals(oldSubtitle)) {
+                break;
             }
         }
+
+        return subtitle;
     }
 }

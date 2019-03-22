@@ -45,7 +45,7 @@ import com.ibm.nmon.gui.chart.annotate.AnnotationCache;
 public final class ChartFormatter {
     // default fonts for all charts; not configurable
     private static final Font TITLE_FONT = new Font("null", Font.BOLD, 18);
-    private static final Font SUBTITLE_FONT = new Font("null", Font.PLAIN, 16);
+    private static final Font SUBTITLE_FONT = new Font("null", Font.PLAIN, 14);
     private static final Font LABEL_FONT = new Font("null", Font.BOLD, 16);
     private static final Font AXIS_FONT = new Font("null", Font.PLAIN, 14);
     private static final Font LEGEND_FONT = new Font("null", Font.PLAIN, 14);

@@ -59,7 +59,7 @@ public class LineChartBuilder extends BaseChartBuilder<LineChartDefinition> {
             StandardXYItemRenderer renderer = new StandardXYItemRenderer();
             renderer.setBaseSeriesVisible(true, false);
 
-                 plot = new XYPlot(dataset, timeAxis, valueAxis, renderer);
+            plot = new XYPlot(dataset, timeAxis, valueAxis, renderer);
         }
 
         if (definition.hasSecondaryYAxis()) {
@@ -131,7 +131,6 @@ public class LineChartBuilder extends BaseChartBuilder<LineChartDefinition> {
         recalculateGapThreshold(index);
 
         renderer.setBaseToolTipGenerator(tooltipGenerator);
-        
 
         if (!definition.showDataPoints()) {
             renderer.setAutoPopulateSeriesShape(false);
@@ -181,7 +180,8 @@ public class LineChartBuilder extends BaseChartBuilder<LineChartDefinition> {
                 List<String> fieldNames = new java.util.ArrayList<String>(fields.size());
 
                 for (String field : fields) {
-                    fieldNames.add(lineNamingMode.getName(definition, data, type, field, getGranularity()));
+                    fieldNames.add(
+                            lineNamingMode.getName(definition, data, type, field, getInterval(), getGranularity()));
                 }
 
                 addData(dataset, data, type, fields, fieldNames);

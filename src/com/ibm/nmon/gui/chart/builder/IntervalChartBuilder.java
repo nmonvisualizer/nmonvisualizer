@@ -148,7 +148,7 @@ public final class IntervalChartBuilder extends BaseChartBuilder<IntervalChartDe
 
                     for (String field : fields) {
                         String name = lineDefinition.getLineNamingMode().getName(definition, data, type, field,
-                                getGranularity());
+                                getInterval(), getGranularity());
 
                         for (AnalysisRecord record : records) {
                             double value = definition.getStatistic().getValue(record, type, field);

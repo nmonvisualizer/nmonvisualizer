@@ -33,8 +33,8 @@ public final class TimeFormatCache {
     private static final Map<Long, String> FORMATTED_DATETIMES = new LRUMap<Long, String>(100);
     private static final Map<Long, String> FORMATTED_TIMES = new LRUMap<Long, String>(100);
 
-    private static final SimpleDateFormat DATETIME_FORMAT = new SimpleDateFormat(Styles.DATE_FORMAT_STRING);
-    private static final SimpleDateFormat TIME_FORMAT = new SimpleDateFormat(Styles.DATE_FORMAT_STRING_SHORT);
+    public static final SimpleDateFormat DATETIME_FORMAT = new SimpleDateFormat(Styles.DATE_FORMAT_STRING);
+    public static final SimpleDateFormat TIME_FORMAT = new SimpleDateFormat(Styles.DATE_FORMAT_STRING_SHORT);
 
     private static long DEFAULT_INTERVAL_MIN;
     private static long DEFAULT_INTERVAL_MAX;
@@ -47,7 +47,6 @@ public final class TimeFormatCache {
                 if ((DEFAULT_INTERVAL_MIN > 0) && (DEFAULT_INTERVAL_MAX < Long.MAX_VALUE)) {
                     formattedInterval = "All Data" + ": " + formatDateTime(DEFAULT_INTERVAL_MIN) + " - "
                             + formatDateTime(DEFAULT_INTERVAL_MAX);
-
                 }
                 else {
                     formattedInterval = "All Data";

@@ -7,6 +7,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import java.text.SimpleDateFormat;
+
 import com.ibm.nmon.data.definition.*;
 import com.ibm.nmon.data.matcher.*;
 import com.ibm.nmon.data.transform.name.*;
@@ -30,6 +32,8 @@ public final class ChartDefinitionParser extends BasicXMLParser {
     private final Map<String, SimpleNameTransformer> fieldTransformers = new java.util.HashMap<String, SimpleNameTransformer>(
             3);
     private RegexNameTransformer regexFieldRegexTransformer;
+
+    private SimpleDateFormat dateFormat;
 
     private boolean inData;
 
@@ -313,15 +317,14 @@ public final class ChartDefinitionParser extends BasicXMLParser {
 
         if (attributes.get("subtitledBy") != null) {
             NamingMode mode = NamingMode.valueOf(attributes.get("subtitledBy"));
-
-            if (mode != null) {
-                currentChart.setSubtitleNamingMode(mode);
-            }
+            currentChart.setSubtitleNamingMode(mode);
+            parseDateFormat(mode, attributes);
         }
 
         if (attributes.get("linesNamedBy") != null) {
             NamingMode mode = NamingMode.valueOf(attributes.get("linesNamedBy"));
             ((LineChartDefinition) currentChart).setLineNamingMode(mode);
+            parseDateFormat(mode, attributes);
         }
 
         String showDataPoints = attributes.get("showDataPoints");
@@ -356,17 +359,16 @@ public final class ChartDefinitionParser extends BasicXMLParser {
 
         if (attributes.get("subtitledBy") != null) {
             NamingMode mode = NamingMode.valueOf(attributes.get("subtitledBy"));
-
-            if (mode != null) {
-                currentChart.setSubtitleNamingMode(mode);
-            }
+            currentChart.setSubtitleNamingMode(mode);
+            parseDateFormat(mode, attributes);
         }
 
         if (attributes.get("linesNamedBy") != null) {
             NamingMode mode = NamingMode.valueOf(attributes.get("linesNamedBy"));
             ((LineChartDefinition) currentChart).setLineNamingMode(mode);
+            parseDateFormat(mode, attributes);
         }
-        
+
         String showDataPoints = attributes.get("showDataPoints");
 
         if (showDataPoints != null) {
@@ -402,20 +404,20 @@ public final class ChartDefinitionParser extends BasicXMLParser {
 
         if (attributes.get("subtitledBy") != null) {
             NamingMode mode = NamingMode.valueOf(attributes.get("subtitledBy"));
-
-            if (mode != null) {
-                currentChart.setSubtitleNamingMode(mode);
-            }
+            currentChart.setSubtitleNamingMode(mode);
+            parseDateFormat(mode, attributes);
         }
 
         if (attributes.get("barsNamedBy") != null) {
             NamingMode mode = NamingMode.valueOf(attributes.get("barsNamedBy"));
             ((BarChartDefinition) currentChart).setBarNamingMode(mode);
+            parseDateFormat(mode, attributes);
         }
 
         if (attributes.get("categoriesNamedBy") != null) {
             NamingMode mode = NamingMode.valueOf(attributes.get("categoriesNamedBy"));
             ((BarChartDefinition) currentChart).setCategoryNamingMode(mode);
+            parseDateFormat(mode, attributes);
         }
 
         parseSize("<barchart>", attributes);
@@ -446,14 +448,13 @@ public final class ChartDefinitionParser extends BasicXMLParser {
         if (attributes.get("barsNamedBy") != null) {
             NamingMode mode = NamingMode.valueOf(attributes.get("barsNamedBy"));
             ((HistogramChartDefinition) currentChart).setHistogramNamingMode(mode);
+            parseDateFormat(mode, attributes);
         }
 
         if (attributes.get("subtitledBy") != null) {
             NamingMode mode = NamingMode.valueOf(attributes.get("subtitledBy"));
-
-            if (mode != null) {
-                currentChart.setSubtitleNamingMode(mode);
-            }
+            currentChart.setSubtitleNamingMode(mode);
+            parseDateFormat(mode, attributes);
         }
 
         String temp = attributes.get("bins");
@@ -675,6 +676,29 @@ public final class ChartDefinitionParser extends BasicXMLParser {
         }
     }
 
+    private void parseDateFormat(NamingMode mode, Map<String, String> attributes) {
+        if (mode != NamingMode.DATE) {
+            dateFormat = null;
+        }
+        else {
+            String format = attributes.get("dateFormat");
+
+            if (format == null) {
+                dateFormat = null;
+            }
+            else {
+                try {
+                    dateFormat = new SimpleDateFormat(format);
+                }
+                catch (Exception e) {
+                    logger.warn("ignoring invalid '" + "dateFormat" + "' attribute" + " '{}'" + " at line {}"
+                            + "; it will be ignored", format, getLineNumber());
+                    dateFormat = null;
+                }
+            }
+        }
+    }
+
     private void endDataElement() {
         if (typeMatcher == null) {
             logger.warn("ignoring " + "<data>" + " element without a <type>" + " at line {}" + "; <type> is required",
@@ -722,6 +746,7 @@ public final class ChartDefinitionParser extends BasicXMLParser {
         for (FieldMatcher fieldMatcher : consolidatedMatchers) {
             DefaultDataDefinition definition = new DefaultDataDefinition(hostMatcher, typeMatcher, fieldMatcher,
                     currentStat, useSecondaryYAxis);
+            definition.setDateFormat(dateFormat);
 
             for (String field : fieldTransformers.keySet()) {
                 definition.addFieldTransformer(field, fieldTransformers.get(field));
@@ -780,7 +805,7 @@ public final class ChartDefinitionParser extends BasicXMLParser {
                 return new SimpleNameTransformer(alias);
             }
             else {
-                logger.warn("ignoring invalid 'alias' attribute" + " at line {}", getLineNumber());
+                logger.warn("ignoring invalid '" + "alias" + "' attribute" + " at line {}", getLineNumber());
                 return existing;
             }
         }
@@ -818,7 +843,7 @@ public final class ChartDefinitionParser extends BasicXMLParser {
                             return new RegexNameTransformer(regex, Integer.parseInt(group));
                         }
                         catch (NumberFormatException nfe) {
-                            logger.warn("'aliasByGroup' must be a number" + " at line {}", getLineNumber());
+                            logger.warn("'" + "aliasByGroup" + "' must be a number" + " at line {}", getLineNumber());
                         }
 
                         return existing;
@@ -851,6 +876,8 @@ public final class ChartDefinitionParser extends BasicXMLParser {
         fieldMatchers.clear();
         fieldTransformers.clear();
         regexFieldRegexTransformer = null;
+
+        dateFormat = null;
 
         inData = false;
         skip = false;

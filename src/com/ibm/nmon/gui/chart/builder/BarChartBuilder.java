@@ -130,9 +130,9 @@ public final class BarChartBuilder extends BaseChartBuilder<BarChartDefinition> 
                 for (DataType type : dataDefinition.getMatchingTypes(data)) {
                     for (String field : dataDefinition.getMatchingFields(type)) {
                         String barName = definition.getBarNamingMode().getName(dataDefinition, data, type, field,
-                                getGranularity());
+                                getInterval(), getGranularity());
                         String categoryName = definition.getCategoryNamingMode().getName(dataDefinition, data, type,
-                                field, getGranularity());
+                                field, getInterval(), getGranularity());
 
                         Statistic currentStat = dataDefinition.getStatistic();
                         double value = currentStat.getValue(record, type, field);
