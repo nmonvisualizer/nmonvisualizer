@@ -40,6 +40,8 @@ public final class NMONParser {
     private String[] topFields = null;
     private int topCommandIndex = -1;
 
+    private String[] summaryFields = null;
+
     private int fileCPUs = 1;
     private boolean seenFirstDataType = false;
     private boolean isAIX = false;
@@ -134,6 +136,7 @@ public final class NMONParser {
             currentRecord = null;
             topFields = null;
             topCommandIndex = -1;
+            summaryFields = null;
             fileCPUs = 1;
             seenFirstDataType = false;
             isAIX = false;
@@ -191,7 +194,7 @@ public final class NMONParser {
                 // TOP data has a bogus extra header line of "TOP,%CPU Utilization"
                 // look for 'TOP,+PID,Time,...' instead
                 if ("+PID".equals(values[1])) {
-                    topFields = parseTopFields(values);
+                    parseTopFields(values);
                 }
             }
             else if (line.startsWith("ZZZZ")) {
@@ -203,6 +206,9 @@ public final class NMONParser {
             }
             else if (line.startsWith("UARG")) {
                 // AIX puts UARG type definition in header - ignore
+            }
+            else if (line.startsWith("SUMMARY")) {
+                parseSummaryFields(DATA_SPLITTER.split(line));
             }
             else if (line.isEmpty()) {
                 continue;
@@ -310,6 +316,25 @@ public final class NMONParser {
                         // assume TOP data type is created in the header
                         parseTopData(values);
                     }
+                    else if ("SUMMARY".equals(values[0])) {
+                        if (summaryFields == null) {
+                            LOGGER.warn("undefined data type {} at line {}", values[0], in.getLineNumber());
+                            return;
+                        }
+                        
+                        int commandIdx = values.length - 1; // command name is the last value
+                        type = data.getType(SubDataType.buildId("SUMMARY", values[commandIdx]));
+
+                      if (type == null) {
+                          type = new SubDataType("SUMMARY", values[commandIdx], "Summary of Processes", false, summaryFields);
+                          data.addType(type);
+                      }
+
+                        // remove the trailing command
+                        String[] withoutCommand = new String[values.length - 1];
+                        System.arraycopy(values, 0, withoutCommand, 0, commandIdx);
+                        parseData(type, withoutCommand);
+                    }
                     else {
                         if (type == null) {
                             if ("VM".equals(values[0])) {
@@ -352,6 +377,9 @@ public final class NMONParser {
                     // handle case where other BBB records wrote later in the file
                     else if (values[0].startsWith("BBB")) {
                         parseSystemInfo(values);
+                    }
+                    else if ("SUMMARY".equals(values[0])) {
+                        parseSummaryFields(DATA_SPLITTER.split(line));
                     }
                     // otherwise, assume it is a new data type since data types can be added at any
                     // time in the NMON file
@@ -541,12 +569,12 @@ public final class NMONParser {
         }
     }
 
-    private String[] parseTopFields(String[] values) {
+    private void parseTopFields(String[] values) {
         // assume TOP record is like TOP,pid,TXXX,...,command,...
         // so remove TOP, pid, TXXX, and command
         // last field in AIX is WLMclass; skip that too
         // add 1 for calculated Wait% utilization
-        String[] topFields = new String[values.length - (isAIX ? 5 : 4) + 1];
+        topFields = new String[values.length - (isAIX ? 5 : 4) + 1];
 
         // 3 => skip TOP, pid & timestamp
         int valuesIdx = 3;
@@ -570,8 +598,16 @@ public final class NMONParser {
                 }
             }
         }
+    }
 
-        return topFields;
+    private void parseSummaryFields(String[] values) {
+        // 2 => skip data type, timestamp and command
+        // command will be the subTypeId of the DataType
+        summaryFields = new String[values.length - 3];
+
+        for (int i = 0; i < summaryFields.length; i++) {
+            summaryFields[i] = DataHelper.newString(values[i + 2]);
+        }
     }
 
     private void parseTopData(String[] values) {
