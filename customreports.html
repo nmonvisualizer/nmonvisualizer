@@ -49,12 +49,13 @@
     </ul>
     </p>
     <p>Bar charts also support a <span class="c">subtractionNeeded</span> attribute to specify that the bar value should be subtracted from the previous bar's value. This is useful for stacked charts where the underlying data for each field is a sum of other data.</p>
+    <p>Line and interval charts support a <span class="c">showDataPoints</span> attribute that defaults to <span class="c">true</span>. A value of <span class="c">false</span> will prevent the chart from displaying any data point markers on the chart lines.</p>
     <p>Histograms support a  <span class="c">bins</span> attribute to specify the number of bins to use in the chart. Each bin is displayed as a separate bar on the chart. This value defaults to <span class="c">10</span>. Histograms also support the ability to display annotation markers on a chart via the <span class="c">showMarkers</span> attribute and <span class="c">&lt;marker&gt;</span> sub-elements. Each <span class="c">&lt;marker&gt;</span> element requires a <span class="c">stat</span> attribute that corresponds to a valid <a href="#stat">statistic</a>. By default, <span class="c">showMarkers</span> is <span class="c">true</span> and markers are displayed for <span class="c">AVERAGE</span>, <span class="c">MEDIAN</span> and <span class="c">PERCENTILE_95</span>.<p>
 
     <h3>Naming &amp; Legends</h3>
     <p>By default, lines and bars as displayed in a chart legend, are named by their field. On bar charts, the X axis displays a category which defaults to the type name. Optional attributes exist to change the defaults.</p>
     <p>For line and interval charts, the attribute is <span class="c">linesNamedBy</span>. This is most useful when charting multiple types, each with the same field name. For bar charts, there are two attributes: <span class="c">barsNamedBy</span> and <span class="c">categoriesNamedBy</span>; these should not be set to the same value. Histograms support  <span class="c">barsNamedBy</span>.</p>
-    <p>All charts also support a <span class="c">subtitledBy</span> attribute that adds a subtitle to the chart. By default, the subtitle naming mode is <span class="c">HOST</span>. Note that the naming mode is only applied if there is a single instance of the given value for the mode. For example, if the mode is <span class="c">HOST</span>, the hostname <span class="i">will not</span> be displayed if the chart only displays data from a single system. Similarly, for the compound naming modes, the actual subtitle may be shortened if one of the values is unique for the charted data.</p>
+    <p>All charts also support a <span class="c">subtitledBy</span> attribute that adds a subtitle to the chart. By default, the subtitle naming mode is <span class="c">HOST</span>. Note that the naming mode is only applied if there is a single instance of the given value for the mode. For example, if the mode is <span class="c">HOST</span>, the hostname <span class="i">will not</span> be displayed if the chart displays data from multiple system. Similarly, for the compound naming modes, the actual subtitle may be shortened if one of the values is not unique for the charted data.</p>
     <p>The following naming modes are supported:
     <ul>
       <li><span class="c">HOST</span> - the hostname of the dataset</li>
@@ -67,6 +68,7 @@
       <li><span class="c">TYPE_FIELD</span> - the type name plus the field</li>
       <li><span class="c">TYPE_STAT</span> - the type name plus the stat</li>
       <li><span class="c">FIELD_STAT</span> - the field name plus the stat</li>
+      <li><span class="c">DATE</span> - the initial datetime of the data being charted, formatted as <span class="c">HH:mm:ss MMM dd</span>.<br/>The format can be changed by setting the <span class="c">dateFormat</span> attribute in the chart element. Any format supported by <a href="https://docs.oracle.com/javase/6/docs/api/java/text/SimpleDateFormat.html">SimpleDateFormat</a> is allowed. In addition, any of the above naming modes can be enclosed in single quotes. For example <span class="c">&lt;linechart name="CPU Utilization" shortName="CPU" stacked="true" subtitledBy="DATE" dateFormat="HH:mm 'HOST' 'TYPE'"&gt;</span> would create a subtitle like <span class="c">14:13 app1.foobar.com CPU_ALL</span>.
     </ul>
     </p>
     <p>Note that these values must be capitalized in the XML.</p>
@@ -112,6 +114,7 @@
     <ul>
       <li><span class="c">$ALL</span> - matches all values. This is the default but can be useful in combination with renaming.</li>
       <li><span class="c">$PROCESSES</span> - matches all processes and returns only the aggregate process data if there are multiple processes with the same name.</li>
+      <li><span class="c">$TOP_PROCESSES_BY_CPU</span> &amp; <span class="c">$TOP_PROCESSES_BY_MEMORY</span> - matches all processes and returns only the top 10 processes by CPU utilization or memory usage, respectively.</li>
       <li><span class="c">$DISKS</span> - matches all disks (e.g. <span class="c">/dev/sda</span> but not <span class="c">/dev/sda1</span>) for nmon <span class="c">DISK</span> data types.</li>
       <li><span class="c">$PARTITIONS</span> - matches all partitions for nmon <span class="c">DISK</span> data types.</li>
     </ul>
@@ -165,7 +168,9 @@
     &lt;type name="CPU_ALL" /&gt;
     &lt;field name="CPU%" /&gt;
   &lt;/data&gt;
-&lt;/intervalchart&gt;</p>
+&lt;/intervalchart&gt;</span><br/>
+Note <span class="c">CPU%</span> in this example is a generated value. It is not in the original NMON file but is generated as <span class="c">User% + Sys%</span>.
+</p>
 
     <p>XML files used by NMONVisualizer internally are in the <a href="https://github.com/nmonvisualizer/nmonvisualizer/tree/master/src/com/ibm/nmon/report"><span class="c">com.ibm.nmon.report</span></a> package.</p>
   </div>
