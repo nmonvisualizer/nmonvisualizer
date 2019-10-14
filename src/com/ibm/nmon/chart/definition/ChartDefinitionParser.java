@@ -185,7 +185,7 @@ public final class ChartDefinitionParser extends BasicXMLParser {
                     catch (IllegalArgumentException iae) {
                         logger.warn(
                                 "ignoring " + "<histogram>" + " attributes 'min' and 'max' "
-                                        + "with values '{}' and '{}'" + " at line {}" + ", invalid range",
+                                        + "with values '{}' and '{}'" + " at line {}" + ", invalid " + "range",
                                 minString, maxString, getLineNumber());
                     }
                 }
@@ -677,24 +677,25 @@ public final class ChartDefinitionParser extends BasicXMLParser {
     }
 
     private void parseDateFormat(NamingMode mode, Map<String, String> attributes) {
-        if (mode != NamingMode.DATE) {
+        // only parse once
+        if (dateFormat != null) {
+            return;
+        }
+
+        // if mode != NamingMode.DATE then dateFormat will just be ignored by all other NamingModes
+        String format = attributes.get("dateFormat");
+
+        if (format == null) {
             dateFormat = null;
         }
         else {
-            String format = attributes.get("dateFormat");
-
-            if (format == null) {
-                dateFormat = null;
+            try {
+                dateFormat = new SimpleDateFormat(format);
             }
-            else {
-                try {
-                    dateFormat = new SimpleDateFormat(format);
-                }
-                catch (Exception e) {
-                    logger.warn("ignoring invalid '" + "dateFormat" + "' attribute" + " '{}'" + " at line {}"
-                            + "; it will be ignored", format, getLineNumber());
-                    dateFormat = null;
-                }
+            catch (Exception e) {
+                logger.warn("ignoring " + "invalid '" + "dateFormat" + "' attribute" + " '{}'" + " at line {}", format,
+                        getLineNumber());
+                dateFormat = null;
             }
         }
     }
@@ -805,7 +806,7 @@ public final class ChartDefinitionParser extends BasicXMLParser {
                 return new SimpleNameTransformer(alias);
             }
             else {
-                logger.warn("ignoring invalid '" + "alias" + "' attribute" + " at line {}", getLineNumber());
+                logger.warn("ignoring " + "invalid '" + "alias" + "' attribute" + " at line {}", getLineNumber());
                 return existing;
             }
         }
