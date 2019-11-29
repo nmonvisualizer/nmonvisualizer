@@ -35,6 +35,9 @@ import com.ibm.nmon.gui.chart.builder.ChartFormatterParser;
 import com.ibm.nmon.report.ReportCache;
 import com.ibm.nmon.chart.definition.BaseChartDefinition;
 
+import com.ibm.nmon.data.transform.name.HostRenamer;
+import com.ibm.nmon.data.transform.name.HostRenamerFactory;
+
 import com.ibm.nmon.util.CSVWriter;
 
 import com.ibm.nmon.util.GranularityHelper;
@@ -74,8 +77,9 @@ public final class ReportGenerator extends NMONVisualizerApp {
         List<String> multiplexedFieldCharts = new java.util.ArrayList<String>();
         List<String> multiplexedTypeCharts = new java.util.ArrayList<String>();
 
-        String intervalsFile = "";
         String formatFile = "";
+        String renamerFile = "";
+        String intervalsFile = "";
 
         boolean summaryCharts = true;
         boolean dataSetCharts = true;
@@ -168,11 +172,22 @@ public final class ReportGenerator extends NMONVisualizerApp {
 
                         break nextarg;
                     }
+                    case 'h': {
+                        ++i;
+
+                        if (i > args.length) {
+                            System.err.println("file must be specified for " + '-' + 'h');
+                            return;
+                        }
+
+                        renamerFile = args[i];
+                        break nextarg;
+                    }
                     case 'i': {
                         ++i;
 
                         if (i > args.length) {
-                            System.err.println("file must be specified for " + '-' + 's');
+                            System.err.println("file must be specified for " + '-' + 'i');
                             return;
                         }
 
@@ -309,6 +324,17 @@ public final class ReportGenerator extends NMONVisualizerApp {
         }
 
         generator.factory.setFormatter(chartFormatter);
+
+        if (!"".equals(renamerFile)) {
+            try {
+                HostRenamer hostRenamer = HostRenamerFactory.loadFromFile(new File(renamerFile));
+                generator.setHostRenamer(hostRenamer);
+            }
+            catch (Exception e) {
+                System.err.println("cannot parse host renamer from '" + renamerFile + "'\n" + e.getMessage());
+                return;
+            }
+        }
 
         // parse files
         generator.parse(filesToParse);
