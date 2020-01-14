@@ -24,8 +24,8 @@ public abstract class BaseChartDefinition implements Cloneable {
         setShortName(shortName);
         setTitle(title);
 
-        this.width = 1920 / 2;
-        this.height = 1080 / 2;
+        this.width = 1920;
+        this.height = 1080;
 
         data = new java.util.ArrayList<DataDefinition>(3);
     }

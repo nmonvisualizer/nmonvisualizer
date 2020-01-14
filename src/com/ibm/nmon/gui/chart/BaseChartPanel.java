@@ -81,8 +81,8 @@ public class BaseChartPanel extends ChartPanel implements PropertyChangeListener
         this.gui = gui;
         this.parent = parent;
 
-        this.saveWidth = 1920 / 2;
-        this.saveHeight = 1080 / 2;
+        this.saveWidth = 1920;
+        this.saveHeight = 1080;
 
         setEnabled(false);
         clearChart();
