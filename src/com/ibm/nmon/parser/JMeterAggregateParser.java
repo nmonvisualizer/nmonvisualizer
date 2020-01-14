@@ -9,9 +9,7 @@ import java.io.IOException;
 
 import java.text.ParseException;
 
-import java.util.List;
 import java.util.Map;
-import java.util.LinkedHashMap;
 import java.util.Set;
 
 import java.util.regex.Pattern;
@@ -69,7 +67,7 @@ public final class JMeterAggregateParser {
       Map<String, Integer> fieldIndexes = parseHeader(DATA_SPLITTER.split(line));
 
       // for every millisecond, there will be one or more double[] for each transaction
-      Map<Long, Map<String, List<double[]>>> dataByMilli = parseData(fieldIndexes, in);
+      Map<Long, Map<String, TransactionAggregate>> dataByMilli = parseData(fieldIndexes, in);
 
       LOGGER.debug(
           "parsed {} lines into {} seconds of data", in.getLineNumber(), dataByMilli.size());
@@ -147,6 +145,7 @@ public final class JMeterAggregateParser {
     int n = 0;
 
     for (String field : fieldIndexes.keySet()) {
+      // max, sum and average actions on aggregated data, respectively
       if (MAX_FIELDS.contains(field)) {
         fieldActions[n] = 'm';
       } else if (SUM_FIELDS.contains(field)) {
@@ -161,7 +160,8 @@ public final class JMeterAggregateParser {
     return fieldIndexes;
   }
 
-  private Map<Long, Map<String, List<double[]>>> parseData(
+  // map every time to a set of TransactionAggregates
+  private Map<Long, Map<String, TransactionAggregate>> parseData(
       Map<String, Integer> fieldIndexes, LineNumberReader in) throws IOException {
     int actualFields = fieldIndexes.size();
     int expectedFields =
@@ -175,9 +175,9 @@ public final class JMeterAggregateParser {
 
     // since multiple threads can be running, it is possible to have multiple entries at the same
     // millisecond
-    // for every timestamp, store that data for each transaction name and aggregate it later
-    Map<Long, Map<String, List<double[]>>> dataBySecond =
-        new java.util.HashMap<Long, Map<String, List<double[]>>>();
+    // for every timestamp, store that data for each transaction name and aggregate it
+    Map<Long, Map<String, TransactionAggregate>> dataBySecond =
+        new java.util.HashMap<Long, Map<String, TransactionAggregate>>();
     String line = null;
 
     while ((line = in.readLine()) != null) {
@@ -201,7 +201,7 @@ public final class JMeterAggregateParser {
 
       // round time to the nearest second
       try {
-        time = Math.round(Long.parseLong(data[timestampIndex])/ 1000.0d) * 1000;
+        time = Math.round(Long.parseLong(data[timestampIndex]) / 1000.0d) * 1000;
       } catch (NumberFormatException nfe) {
         LOGGER.warn(
             "skipping invalid data record '{}'  at line {}; " + "invalid timeStamp '{}'",
@@ -217,7 +217,8 @@ public final class JMeterAggregateParser {
       int n = 0;
 
       for (int idx : fieldIndexes.values()) {
-        if (idx == successIndex) {
+        if (idx == successIndex) { // convert success to 0 or 1 so throughput can be calculated from
+          // successes
           values[n++] = Boolean.parseBoolean(data[idx]) ? 1 : 0;
         } else {
           try {
@@ -237,26 +238,21 @@ public final class JMeterAggregateParser {
         }
       }
 
-      Map<String, List<double[]>> timeData = dataBySecond.get(time);
+      Map<String, TransactionAggregate> timeData = dataBySecond.get(time);
 
-      
-      if (timeData == null) {
-        timeData = new java.util.HashMap<String, List<double[]>>();
+      if (timeData == null) { // new time; add current values
+        timeData = new java.util.HashMap<String, TransactionAggregate>(transactionNames.size());
 
-        List<double[]> l = new java.util.LinkedList<double[]>();
-
-        l.add(values);
-        timeData.put(transactionName, l);
+        timeData.put(transactionName, new TransactionAggregate(values));
         dataBySecond.put(time, timeData);
       } else {
-        List<double[]> l = timeData.get(transactionName);
+        TransactionAggregate a = timeData.get(transactionName);
 
-        if (l == null) {
-          l = new java.util.LinkedList<double[]>();
+        if (a == null) { // existing time, new transaction; add current values
+          timeData.put(transactionName, new TransactionAggregate(values));
+        } else { // update aggregated data with new values
+          a.aggregate(values);
         }
-
-        l.add(values);
-        timeData.put(transactionName, l);
       }
     }
 
@@ -268,10 +264,9 @@ public final class JMeterAggregateParser {
   }
 
   private void convertData(
-      Map<Long, Map<String, List<double[]>>> dataByMilli, Map<String, Integer> fieldIndexes) {
-    int actualFields = fieldIndexes.size();
+      Map<Long, Map<String, TransactionAggregate>> dataByMilli, Map<String, Integer> fieldIndexes) {
     String[] transactions = transactionNames.toArray(new String[transactionNames.size()]);
-
+    int actualFields = fieldIndexes.size();
     // deal with memory savings now that all names are known
     for (int i = 0; i < transactions.length; i++) {
       transactions[i] = DataHelper.newString(transactions[i]);
@@ -286,7 +281,7 @@ public final class JMeterAggregateParser {
 
     // for every millisecond of data, get each transaction
     // for every transaction, calculated the aggregated value
-    for (Map.Entry<Long, Map<String, List<double[]>>> forSecond : dataByMilli.entrySet()) {
+    for (Map.Entry<Long, Map<String, TransactionAggregate>> forSecond : dataByMilli.entrySet()) {
       long time = forSecond.getKey();
       // pivot data into a transaction sized array for each field / data type
       double[][] fieldsByTransaction = new double[actualFields][];
@@ -295,38 +290,23 @@ public final class JMeterAggregateParser {
         fieldsByTransaction[i] = new double[transactions.length];
       }
 
-      Map<String, List<double[]>> byTransaction = forSecond.getValue();
+      Map<String, TransactionAggregate> byTransaction = forSecond.getValue();
 
-      // missing transactions at each time will happen so iterate over array instead of map
+      // missing transactions at each time will happen so iterate over array instead of values
       for (int i = 0; i < transactions.length; i++) {
-        List<double[]> forTransaction = byTransaction.get(transactions[i]);
+        TransactionAggregate a = byTransaction.get(transactions[i]);
 
-        if (forTransaction == null) {
-          continue;
-        }
-
-        // actually pivot the data; note j, then i
-        for (double[] data : forTransaction) {
+        // actually pivot the data; note j, then i in array assignment
+        if (a == null) {
+          // use NaN as chart data when no values exist rather than 0
           for (int j = 0; j < actualFields; j++) {
-
-            if (fieldActions[j] == 'm') {
-              if (data[j] > fieldsByTransaction[j][i]) {
-                fieldsByTransaction[j][i] = data[j];
-              }
-              // else ignore
-            } else {
-              fieldsByTransaction[j][i] += data[j];
-            }
+            fieldsByTransaction[j][i] = Double.NaN;
           }
-        }
+        } else {
+          double[] data = a.getAggregated();
 
-        if (forTransaction.size() > 1) {
-          // calculate average from how many times the tx occurred
           for (int j = 0; j < actualFields; j++) {
-            if (fieldActions[j] == 'a') {
-              fieldsByTransaction[j][i] /= forTransaction.size();
-            }
-            // else leave sum and max as-is
+            fieldsByTransaction[j][i] += data[j];
           }
         }
       }
@@ -385,6 +365,43 @@ public final class JMeterAggregateParser {
       if (MAX_FIELDS.contains(field)) {
         throw new IllegalStateException("a SUM_FIELD cannot also be a MAX_FIELD");
       }
+    }
+  }
+
+  // for each transaction, at each time, hold a running aggregation of the data
+  private final class TransactionAggregate {
+    private final double[] data;
+    private int count;
+
+    TransactionAggregate(double[] data) {
+      this.data = data;
+      this.count = 1;
+    }
+
+    void aggregate(double[] toAggregate) {
+      for (int i = 0; i < data.length; i++) {
+        if (fieldActions[i] == 'm') {
+          if (toAggregate[i] > data[i]) {
+            data[i] = toAggregate[i];
+          }
+          // else ignore
+        } else { // sum or average
+          data[i] += toAggregate[i];
+        }
+      }
+      ++count;
+    }
+
+    // note cannot be called more than once!
+    double[] getAggregated() {
+      for (int i = 0; i < data.length; i++) {
+        if (fieldActions[i] == 'a') {
+          data[i] /= count;
+        }
+        // else leave sum and max as-is
+      }
+
+      return data;
     }
   }
 }
