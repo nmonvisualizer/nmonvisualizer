@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<charts>
+  <linechart name="JMeter Throughput" shortName="TPS" stacked="true">
+    <yAxis label="Requests per Second" />
+    <data>
+      <type name="success" />
+      <field regex="By .*" />
+    </data>
+  </linechart>
+
+  <linechart name="JMeter Response Time" shortName="Response">
+    <yAxis label="Response Time (ms)" />
+    <data>
+      <type name="elapsed" />
+      <field regex="By .*" />
+    </data>
+  </linechart>
+
+  <linechart name="JMeter HTTP Response Codes" shortName="HTTP Codes" linesNamedBy="FIELD_STAT">
+    <yAxis label="Response Code" />
+    <data stat="MINIMUM">
+      <type name="responseCode" />
+      <field regex="By .*" />
+    </data>
+    <data stat="MAXIMUM">
+      <type name="responseCode" />
+      <field regex="By .*" />
+    </data>
+  </linechart>
+
+  <linechart name="JMeter Threads" shortName="Threads" linesNamedBy="STAT">
+    <yAxis label="Running Threads" />
+    <data stat="MAXIMUM">
+      <type name="allThreads" />
+      <field regex="By .*" />
+    </data>
+  </linechart>
+</charts>

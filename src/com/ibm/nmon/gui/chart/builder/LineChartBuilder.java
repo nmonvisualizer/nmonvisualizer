@@ -32,6 +32,8 @@ import com.ibm.nmon.gui.chart.data.DataTupleXYDataset;
 
 import com.ibm.nmon.chart.definition.LineChartDefinition;
 
+import com.ibm.nmon.analysis.Statistic;
+
 public class LineChartBuilder extends BaseChartBuilder<LineChartDefinition> {
     private boolean showLegends = true;
 
@@ -184,12 +186,12 @@ public class LineChartBuilder extends BaseChartBuilder<LineChartDefinition> {
                             lineNamingMode.getName(definition, data, type, field, getInterval(), getGranularity()));
                 }
 
-                addData(dataset, data, type, fields, fieldNames);
+                addData(definition, dataset, data, type, fields, fieldNames);
             }
         }
     }
 
-    private void addData(DataTupleXYDataset dataset, DataSet data, DataType type, List<String> fields,
+    private void addData(DataDefinition dataDefinition, DataTupleXYDataset dataset, DataSet data, DataType type, List<String> fields,
             List<String> fieldNames) {
         long start = System.nanoTime();
 
@@ -209,10 +211,22 @@ public class LineChartBuilder extends BaseChartBuilder<LineChartDefinition> {
 
                         if (!Double.isNaN(value)) {
                             if (Double.isNaN(totals[i])) {
-                                totals[i] = 0;
+                                if (dataDefinition.getStatistic() == Statistic.MINIMUM) {
+                                    totals[i] = Double.MAX_VALUE;
+                                }
+                                else {
+                                    totals[i] = 0;                                   
+                                }
                             }
 
-                            totals[i] += value;
+                            switch (dataDefinition.getStatistic()) {
+                            case AVERAGE: totals[i] += value; break;
+                            case MAXIMUM: if (value > totals[i]) { totals[i] = value;} ;break;
+                            case MINIMUM: if (value < totals[i]) { totals[i] = value;};break;
+                            case COUNT: totals[i] +=1; break;
+                            case SUM: ++totals[i]; break;
+                            default : throw new IllegalArgumentException("canonot calculate " + dataDefinition.getStatistic() + " on a line chart");
+                            }
                         }
                     }
                 }
@@ -235,9 +249,15 @@ public class LineChartBuilder extends BaseChartBuilder<LineChartDefinition> {
                         // every data point
                         // this causes a huge amount of GC and very slow response times so the false
                         // value is important here
-                        dataset.add(graphTime, totals[i] / n, fieldNames.get(i), false);
+                        if (dataDefinition.getStatistic() == Statistic.AVERAGE) {
+                            dataset.add(graphTime, totals[i] / n, fieldNames.get(i), false);
+                        }
+                        else {
+                            dataset.add(graphTime, totals[i], fieldNames.get(i), false);
+                        }
                     }
 
+                    // reset totals
                     totals[i] = Double.NaN;
                 }
 
