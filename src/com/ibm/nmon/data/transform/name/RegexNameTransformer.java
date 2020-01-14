@@ -82,7 +82,6 @@ public final class RegexNameTransformer implements NameTransformer {
             return original;
         }
         else if (matcher.groupCount() == 0) {
-            logger.warn("regex '{}' does not contain any groups", matcher);
             return original;
         }
         else if (matcher.groupCount() < group) {
