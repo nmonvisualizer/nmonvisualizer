@@ -7,7 +7,7 @@
 		</attributes>
 	</classpathentry>
 	<classpathentry kind="lib" path="lib/jcommon-1.0.23.jar"/>
-	<classpathentry kind="lib" path="lib/jfreechart-1.5.0.jar"/>
+	<classpathentry kind="lib" path="lib/jfreechart-1.0.19.jar"/>
 	<classpathentry kind="lib" path="lib/slf4j-api-1.7.16.jar"/>
 	<classpathentry kind="lib" path="lib/slf4j-jdk14-1.7.16.jar"/>
 	<classpathentry kind="lib" path="lib/jackson-annotations-2.9.3.jar"/>
