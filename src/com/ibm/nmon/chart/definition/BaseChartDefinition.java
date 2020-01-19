@@ -6,8 +6,8 @@ import com.ibm.nmon.data.definition.DataDefinition;
 import com.ibm.nmon.data.definition.NamingMode;
 
 /**
- * Base class for chart definitions. A chart definition will have a short name and a title. The
- * short name is used as an identifier in the GUI. The title will be used as the title in the chart.
+ * Base class for chart definitions. A chart definition will have a short name and a title. The short name is used as an
+ * identifier in the GUI. The title will be used as the title in the chart.
  */
 public abstract class BaseChartDefinition implements Cloneable {
     private String shortName;

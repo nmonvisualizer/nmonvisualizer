@@ -398,13 +398,13 @@ abstract class BaseChartBuilder<C extends BaseChartDefinition> {
             // in each Set
             // but, handle null values when no data selected due to bad report definitions
             Iterator<DataSet> ids = dataSets.iterator();
-            DataSet set = ids.hasNext() ?  ids.next() : null;
+            DataSet set = ids.hasNext() ? ids.next() : null;
 
             Iterator<DataType> idt = dataTypes.iterator();
-            DataType type = idt.hasNext() ?  idt.next() : null;
+            DataType type = idt.hasNext() ? idt.next() : null;
 
             Iterator<String> ifd = fields.iterator();
-            String field = ifd.hasNext() ?  ifd.next() : null;
+            String field = ifd.hasNext() ? ifd.next() : null;
 
             // the above switch logic has already set the NamingMode to the necessary value
             subtitle = actualMode.getName(dataDefinition, set, type, field, interval, granularity);

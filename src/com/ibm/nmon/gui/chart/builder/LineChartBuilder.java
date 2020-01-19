@@ -191,8 +191,8 @@ public class LineChartBuilder extends BaseChartBuilder<LineChartDefinition> {
         }
     }
 
-    private void addData(DataDefinition dataDefinition, DataTupleXYDataset dataset, DataSet data, DataType type, List<String> fields,
-            List<String> fieldNames) {
+    private void addData(DataDefinition dataDefinition, DataTupleXYDataset dataset, DataSet data, DataType type,
+            List<String> fields, List<String> fieldNames) {
         long start = System.nanoTime();
 
         double[] totals = new double[fields.size()];
@@ -215,17 +215,35 @@ public class LineChartBuilder extends BaseChartBuilder<LineChartDefinition> {
                                     totals[i] = Double.MAX_VALUE;
                                 }
                                 else {
-                                    totals[i] = 0;                                   
+                                    totals[i] = 0;
                                 }
                             }
 
                             switch (dataDefinition.getStatistic()) {
-                            case AVERAGE: totals[i] += value; break;
-                            case MAXIMUM: if (value > totals[i]) { totals[i] = value;} ;break;
-                            case MINIMUM: if (value < totals[i]) { totals[i] = value;};break;
-                            case COUNT: totals[i] +=1; break;
-                            case SUM: ++totals[i]; break;
-                            default : throw new IllegalArgumentException("canonot calculate " + dataDefinition.getStatistic() + " on a line chart");
+                            case AVERAGE:
+                                totals[i] += value;
+                                break;
+                            case MAXIMUM:
+                                if (value > totals[i]) {
+                                    totals[i] = value;
+                                }
+                                ;
+                                break;
+                            case MINIMUM:
+                                if (value < totals[i]) {
+                                    totals[i] = value;
+                                }
+                                ;
+                                break;
+                            case COUNT:
+                                totals[i] += 1;
+                                break;
+                            case SUM:
+                                ++totals[i];
+                                break;
+                            default:
+                                throw new IllegalArgumentException(
+                                        "canonot calculate " + dataDefinition.getStatistic() + " on a line chart");
                             }
                         }
                     }
