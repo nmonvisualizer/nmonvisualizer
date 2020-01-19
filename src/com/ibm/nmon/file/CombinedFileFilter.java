@@ -49,20 +49,24 @@ public final class CombinedFileFilter implements FileFilter {
         return (HATJFileFilter) filters.get(4).getFilter();
     }
 
+    public JMeterFileFilter getJMeterFileFilter() {
+        return (JMeterFileFilter) filters.get(5).getFilter();
+    }
+
     public PerfmonFileFilter getPerfmonFileFilter() {
-        return (PerfmonFileFilter) filters.get(5).getFilter();
+        return (PerfmonFileFilter) filters.get(6).getFilter();
     }
 
     public ZPoolIOStatFileFilter getZPoolIOStatOutFileFilter() {
-        return (ZPoolIOStatFileFilter) filters.get(6).getFilter();
+        return (ZPoolIOStatFileFilter) filters.get(7).getFilter();
     }
 
     public TopasOutFileFilter getTopasOutFileFilter() {
-        return (TopasOutFileFilter) filters.get(7).getFilter();
+        return (TopasOutFileFilter) filters.get(8).getFilter();
     }
 
     public FIOFileFilter getFIOFileFilter() {
-        return (FIOFileFilter) filters.get(8).getFilter();
+        return (FIOFileFilter) filters.get(9).getFilter();
     }
 
     private CombinedFileFilter(boolean acceptDirectories) {
@@ -71,6 +75,7 @@ public final class CombinedFileFilter implements FileFilter {
         filters.add(new SwingAndIOFileFilter("IOStat Files", new IOStatFileFilter(), acceptDirectories));
         filters.add(new SwingAndIOFileFilter("JSON Files", new JSONFileFilter(), acceptDirectories));
         filters.add(new SwingAndIOFileFilter("HATJ CSV Files", new HATJFileFilter(), acceptDirectories));
+        filters.add(new SwingAndIOFileFilter("JMeter Aggregate Files", new JMeterFileFilter(), acceptDirectories));
         filters.add(new SwingAndIOFileFilter("Perfmon CSV Files", new PerfmonFileFilter(), acceptDirectories));
         filters.add(new SwingAndIOFileFilter("ZPool IOStat Files", new ZPoolIOStatFileFilter(), acceptDirectories));
         filters.add(new SwingAndIOFileFilter("topasout -a Files", new TopasOutFileFilter(), acceptDirectories));

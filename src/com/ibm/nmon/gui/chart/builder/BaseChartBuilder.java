@@ -4,6 +4,7 @@ import org.slf4j.Logger;
 
 import java.util.List;
 import java.util.Set;
+import java.util.Iterator;
 
 import org.jfree.chart.JFreeChart;
 import org.jfree.chart.plot.CategoryPlot;
@@ -395,9 +396,18 @@ abstract class BaseChartBuilder<C extends BaseChartDefinition> {
 
             // note that getName() ignores data, type, field, etc if not needed, so it is safe to pass the first element
             // in each Set
+            // but, handle null values when no data selected due to bad report definitions
+            Iterator<DataSet> ids = dataSets.iterator();
+            DataSet set = ids.hasNext() ? ids.next() : null;
+
+            Iterator<DataType> idt = dataTypes.iterator();
+            DataType type = idt.hasNext() ? idt.next() : null;
+
+            Iterator<String> ifd = fields.iterator();
+            String field = ifd.hasNext() ? ifd.next() : null;
+
             // the above switch logic has already set the NamingMode to the necessary value
-            subtitle = actualMode.getName(dataDefinition, dataSets.iterator().next(), dataTypes.iterator().next(),
-                    fields.iterator().next(), interval, granularity);
+            subtitle = actualMode.getName(dataDefinition, set, type, field, interval, granularity);
 
             // end after first successful rename
             if (!subtitle.equals(oldSubtitle)) {

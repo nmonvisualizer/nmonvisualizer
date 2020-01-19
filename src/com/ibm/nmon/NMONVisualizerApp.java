@@ -48,6 +48,7 @@ public abstract class NMONVisualizerApp implements IntervalListener {
     private final TopasOutParser topasoutParser;
     private final FIOParser fioParser;
     private final ZPoolIOStatParser zpoolParser;
+    private final JMeterAggregateParser jMeterParser;
 
     private HostRenamer hostRenamer;
 
@@ -80,6 +81,7 @@ public abstract class NMONVisualizerApp implements IntervalListener {
         topasoutParser = new TopasOutParser(nmonParser);
         fioParser = new FIOParser();
         zpoolParser = new ZPoolIOStatParser();
+        jMeterParser = new JMeterAggregateParser();
 
         TimeZone defaultTz = TimeZone.getDefault();
 
@@ -221,6 +223,9 @@ public abstract class NMONVisualizerApp implements IntervalListener {
                 hostname = (String) values[0];
                 data.setHostname(hostname);
             }
+        }
+        else if (filter.getJMeterFileFilter().accept(fileToParse)) {
+            data = jMeterParser.parse(fileToParse);
         }
         else if (filter.getPerfmonFileFilter().accept(fileToParse)) {
             data = perfmonParser.parse(fileToParse, getBooleanProperty("scaleProcessesByCPUs"));

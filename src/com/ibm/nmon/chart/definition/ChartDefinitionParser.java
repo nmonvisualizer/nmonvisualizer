@@ -218,6 +218,16 @@ public final class ChartDefinitionParser extends BasicXMLParser {
                         logger.warn("ignoring " + "invalid " + "'stat'" + " attribute {} at line {}", stat,
                                 getLineNumber());
                     }
+
+                    if (currentChart.getClass() == LineChartDefinition.class) {
+                        if ((currentStat != Statistic.AVERAGE) && (currentStat != Statistic.MAXIMUM)
+                                && (currentStat != Statistic.MINIMUM) && (currentStat != Statistic.COUNT)
+                                && (currentStat != Statistic.SUM)) {
+                            logger.warn("ignoring " + "invalid " + "'stat'" + " attribute {} at line {}"
+                                    + "; only AVERAGE, MAXIMUM, MINIMUM, COUNT and SUM are valid in <linechart>", stat,
+                                    getLineNumber());
+                        }
+                    }
                 }
 
                 useSecondaryYAxis = Boolean.parseBoolean(attributes.get("useYAxis2"));
