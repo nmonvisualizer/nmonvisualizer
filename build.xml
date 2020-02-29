@@ -62,7 +62,7 @@
   <target name="compile" depends="-get-version">
     <mkdir dir="${dir.build}" />
 
-    <javac srcdir="${dir.src}" destdir="${dir.build}" debug="on" target="6" source="6" includeantruntime="false">
+    <javac srcdir="${dir.src}" destdir="${dir.build}" debug="on" target="7" source="7" includeantruntime="false">
       <classpath>
         <fileset dir="${dir.lib}">
           <include name="**/*.jar" />
