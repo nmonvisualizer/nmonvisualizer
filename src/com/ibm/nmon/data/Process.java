@@ -114,12 +114,7 @@ public final class Process implements Comparable<Process> {
 
     @Override
     public int hashCode() {
-        if (id == -1) {
-            return name.hashCode();
-        }
-        else {
-            return ((id * 17) << 16) & ((int) (startTime ^ (startTime >>> 32)));
-        }
+       return typeId.hashCode();
     }
 
     @Override

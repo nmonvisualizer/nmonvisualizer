@@ -30,8 +30,10 @@ public final class PerfmonParser {
 
     private static final SimpleDateFormat TIMESTAMP_FORMAT = new SimpleDateFormat("MM/dd/yyyy HH:mm:ss");
 
-    // Issue #26 \D to prevent splitting on something like \SRVXYZ\Processor Information(2,10)\% DPC Time see in Win2012
-    private static final Pattern DATA_SPLITTER = Pattern.compile("\"?,\\D\"?");
+    // older versions of Windows output CSV without "
+    private static final Pattern DATA_SPLITTER = Pattern.compile(",");
+    private static final Pattern DATA_SPLITTER_QUOTES = Pattern.compile("\",\"");
+
     private static final Pattern SUBCATEGORY_SPLITTER = Pattern.compile(":");
     // "\\hostname\category (optional subcategory)\metric"
     // note storing a matcher vs a pattern is _NOT_ thread safe
@@ -65,10 +67,19 @@ public final class PerfmonParser {
 
             String line = in.readLine();
 
-            parseHeader(DATA_SPLITTER.split(line));
+            // assume all columns will be quoted if the first one is
+            Pattern splitter = null;
+            if (line.startsWith("\"")) {
+                splitter = DATA_SPLITTER_QUOTES;
+            }
+            else {
+                splitter = DATA_SPLITTER;
+            }
+
+            parseHeader(splitter.split(line));
 
             while ((line = in.readLine()) != null) {
-                parseData(DATA_SPLITTER.split(line));
+                parseData(splitter.split(line));
             }
 
             long postProcessStart = System.nanoTime();
@@ -138,7 +149,8 @@ public final class PerfmonParser {
         int idx = header[0].lastIndexOf('(');
 
         if (idx == -1) {
-            LOGGER.warn("version header '{0}' is not in the right format, the time zone will default to UTC", header[0]);
+            LOGGER.warn("version header '{0}' is not in the right format, the time zone will default to UTC",
+                    header[0]);
             TIMESTAMP_FORMAT.setTimeZone(TimeZone.getTimeZone("UTC"));
         }
         else {
@@ -439,15 +451,15 @@ public final class PerfmonParser {
                         processName = DataHelper.newString(processName.substring(0, idx));
                     }
                     catch (NumberFormatException nfe) {
-                        LOGGER.warn("invalid pid {} at line {}; using {} instead", temp, in.getLineNumber(), pid);
+                        // process name might contain _
+                        // ignore and continue parsing pid using other methods
                     }
                 }
-                else {
-                    idx = processName.indexOf('#');
 
-                    if (idx != -1) {
-                        processName = DataHelper.newString(processName.substring(0, idx));
-                    }
+                idx = processName.indexOf('#');
+
+                if (idx != -1) {
+                    processName = DataHelper.newString(processName.substring(0, idx));
                 }
 
                 if (pid == 0) {
@@ -455,7 +467,7 @@ public final class PerfmonParser {
                     pid = data.getProcessCount() + 1;
                 }
 
-                Process process = new Process(pid, startTime, processName, data.getTypeIdPrefix());
+                Process process = new Process(pid, startTime, processName, data.getTypeIdPrefix() + " " + processName);
                 data.addProcess(process);
 
                 type = new ProcessDataType(process, fieldsArray);
