@@ -836,7 +836,7 @@ public final class NMONParser {
         	DataType lpar = data.getType("LPAR");
         	if (currentRecord.hasData(lpar)) {
                 CPUs = currentRecord.getData(lpar, "entitled");
-            } else {
+        	} else {
                 DataType cpuAll = data.getType("PCPU_ALL");
 
                 // hasData should also cover cpuAll == null
