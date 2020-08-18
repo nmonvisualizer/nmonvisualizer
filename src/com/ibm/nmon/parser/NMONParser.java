@@ -835,7 +835,7 @@ public final class NMONParser {
         if (isAIX) {
         	DataType lpar = data.getType("LPAR");
         	if (currentRecord.hasData(lpar)) {
-                CPUs = currentRecord.getData(lpar, "PhysicalCPU");
+                CPUs = currentRecord.getData(lpar, "entitled");
             } else {
                 DataType cpuAll = data.getType("PCPU_ALL");
 
