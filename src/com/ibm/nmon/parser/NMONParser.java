@@ -833,11 +833,16 @@ public final class NMONParser {
         double CPUs = fileCPUs;
 
         if (isAIX) {
-            DataType cpuAll = data.getType("PCPU_ALL");
+        	DataType lpar = data.getType("LPAR");
+        	if (currentRecord.hasData(lpar)) {
+                CPUs = currentRecord.getData(lpar, "PhysicalCPU");
+            } else {
+                DataType cpuAll = data.getType("PCPU_ALL");
 
-            // hasData should also cover cpuAll == null
-            if (currentRecord.hasData(cpuAll)) {
-                CPUs = currentRecord.getData(cpuAll, "Entitled Capacity");
+                // hasData should also cover cpuAll == null
+                if (currentRecord.hasData(cpuAll)) {
+                    CPUs = currentRecord.getData(cpuAll, "Entitled Capacity");
+                }
             }
         }
         else {
