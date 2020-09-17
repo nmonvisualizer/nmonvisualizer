@@ -36,7 +36,19 @@
     <h3>Running</h3>
     <p>To run the ReportGenerator, specify the class from the command line like the following:<br/>
        <span class="c">java -jar NMONVisualizer_&lt;release_date&gt;.jar com.ibm.nmon.ReportGenerator &lt;file|directory to parse&gt;</span></p>
-    <p>Note that only nmon files are parsed. If a directory is given, then this directory will be searched <span class="i">recursively</span>. so ensure that the JVM has enough memory allocated to it (via <span class="c">-Xmx</span>).</p>
+    <p>Note that only nmon files are parsed. If a directory is given, then this directory will be searched <span class="i">recursively</span>, so ensure that the JVM has enough memory allocated to it (via <span class="c">-Xmx</span>). Also, multiple files / directories can be specified.</p>
+    <p>If no additional options are specified, the following processing occurs:
+      <ul>
+        <li>The default granularity is calculated so that the chart will have 100 data points. Change with the <span class="c">-g</span> option.</li>
+        <li>The default interval will be set to the earliest and latest datetimes where data is present across all processed files. Change with the <span class="c">-s</span> and <span class="c">-e</span> options. Or, use the <span class="c">-i</span> option to load an interval file.</li>
+        <li>A set of summary charts is created from <a class="c" href="https://github.com/nmonvisualizer/nmonvisualizer/blob/master/src/com/ibm/nmon/report/summary_single_interval.xml">summary_single_interval.xml</a>. This is the same set of charts shown when <span class="c">All Systems</span> is selected in the GUI. Disable with the <span class="c">--nosummary</span> option. Add additional summary charts with <span class="c">-a</span>.</li>
+        <li>For each host, a set of charts is created from <a class="c" href="https://github.com/nmonvisualizer/nmonvisualizer/blob/master/src/com/ibm/nmon/report/dataset_report.xml">dataset_report.xml</a>. Charts for each host will be in a separate directory. This is the same set of charts shown when a hostname is selected in the GUI. Disable with the <span class="c">--nodata</span> option. Add additional  charts for each host with <span class="c">-d</span>.</li>
+        <li>Only charts (as PNG files) are created by default. CSV data can be generated for each host with <span class="c">--rawdata</span> or for each chart with <span class="c">--chartdata</span>.</li>
+        <li>Default chart formats are used. Use the <span class="c">-f</span> option to change.</li>
+        <li>Hosts are not renamed. Use the <span class="c">-h</span> option if needed.</li>
+        <li>If a single file or directory to parse is specified, all output is created in that directory. For multiple files / directories, output is created in the current working directory.</li>
+      </ul>
+    </p>
   </div>
   <div class="section">
     <h3>Options</h3>
@@ -45,8 +57,8 @@
       <li><span class="c">--nosummary</span> - do not generate summary charts across all hosts / datasets</li>
       <li><span class="c">-s</span> - start datetime of charts in ISO 8601 datetime format (<span class="c">yyyy-MM-ddTHH:mm:ssX</span>)</li>
       <li><span class="c">-e</span> - end datetime of charts in ISO 8601 datetime format (<span class="c">yyyy-MM-ddTHH:mm:ssX</span>)</li>
-      <li><span class="c">-i</span> - use the given interval CSV file to create charts for a number of intervals.</li>
-      <li><span class="c">-g</span> - sets the granularity, <span class="i">in seconds</span>. This will add a data point on the chart every <span class="c">granularity</span> seconds. The minimum value is <span class="c">1</span>. The maximum value <span class="i">must</span> be less than the interval of the processed data or no data points will be plotted on the chart. The default value is calculated so that the chart will have 100 data points.</li>
+      <li><span class="c">-i</span> - use the given interval CSV file to create charts for a number of intervals. All charts specified will be created for each interval, as well as the default interval (all data or the times set by <span class="c">-s</span> and <span class="c">-e</span>).</li>
+      <li><span class="c">-g</span> - sets the granularity, <span class="i">in seconds</span>. This will add a data point on the chart every <span class="c">granularity</span> seconds. The minimum value is <span class="c">1</span>. The maximum value <span class="i">must</span> be less than the interval of the processed data or no data points will be plotted on the chart.</li>
       <li><span class="c">-f &lt;filename&gt;</span> - use the given properties file to load a custom chart format.</li>
       <li><span class="c">-h &lt;filename&gt;</span> - use the given JSON file to load a <a href="renaming.html">host renaming</a> configuration.</li>
       <li><span class="c">-d &lt;filename&gt;</span> - use the given XML file to create a <a href="customreports.html">custom</a> set of charts <span class="i">for each</span> host / dataset. If more than one dataset is parsed, a separate directory will be used for each hostname.</li>
@@ -60,6 +72,7 @@
     <p>Since the <span class="c">--mt</span> and <span class="c">--mf</span> multiplex a single chart definition into multiple output charts, it is possible to create a large number of charts, especially when working with a large number of parsed data sets. In most cases, there should be a limited (maybe one) chart definition per file. Note that any chart subtitles are ignored. With <span class="c">--mt</span>, the type name is used; with <span class="c">--mf</span>, the field name is used. The file names used for the output will append the type or field, respectively. For the file name, types and fields are renamed as specified in the chart definition. The raw type or field name is use for the subtitle.</p>
     <p>Neither of the <span class="c">-s</span> and <span class="c">-e</span> switches are required. Either one, both or none can be specified.</p>
     <p>The intervals loaded when using <span class="c">-i</span> will be in addition to the interval specified with the <span class="c">-s</span> and / or <span class="c">-e</span> switches. If more than one interval is loaded, a separate output directory for each interval will be created. All charts specified via the other switches will be created for each interval.</p>
+    <p>Running without any options is equivalent to:<br/><span class="c">--nodata --nosummary \<br/>-d &lt;nmon_code&gt;/src/com/ibm/nmon/report/dataset_report.xml \<br/>-a &lt;nmon_code&gt;/src/com/ibm/nmon/report/summary_single_interval.xml \<br/>&lt;file|directory to parse&gt;</span></p>
   </div>
   <div class="section">
     <h3>Errors</h3>
@@ -98,7 +111,7 @@
   elements=[ 248, 248, 248 ]
   gridLines=0xa0a0a0
   annotations=GREEN
-  series= VERY_LIGHT_RED, VERY_LIGHT_BLUE, VERY_LIGHT_GREEN, VERY_LIGHT_YELLOW, VERY_LIGHT_CYAN, VERY_LIGHT_MAGENTA, LIGHT_RED, LIGHT_BLUE, LIGHT_GREEN, LIGHT_YELLOW, LIGHT_CYAN, LIGHT_MAGENTA</span>
+  series=VERY_LIGHT_RED, VERY_LIGHT_BLUE, VERY_LIGHT_GREEN, VERY_LIGHT_YELLOW, VERY_LIGHT_CYAN, VERY_LIGHT_MAGENTA, LIGHT_RED, LIGHT_BLUE, LIGHT_GREEN, LIGHT_YELLOW, LIGHT_CYAN, LIGHT_MAGENTA</span>
    </p>
   </div>
 </div>
