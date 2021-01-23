@@ -297,7 +297,14 @@ public final class PerfmonParser {
                     dataByType.put(builder.unique, holder);
                 }
 
-                holder.add(parseDouble(rawData[i]));
+                try {
+                    holder.add(parseDouble(rawData[i]));
+                }
+                catch (NumberFormatException nfe) {
+                    LOGGER.warn("invalid double '{}' at line {}, column {}; it will be NaN", rawData[i],
+                            in.getLineNumber(), i + 1);
+                    holder.add(Double.NaN);
+                }
             }
         }
 
@@ -358,7 +365,7 @@ public final class PerfmonParser {
 
     private double parseDouble(String value) {
         // assume start with space, whole string is space (i.e. empty)
-        if (value.charAt(0) == ' ') {
+        if (value.isEmpty() || (value.charAt(0) == ' ')) {
             return Double.NaN;
         }
         else {
