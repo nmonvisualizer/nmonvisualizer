@@ -10,7 +10,7 @@ import java.io.LineNumberReader;
 
 import java.text.SimpleDateFormat;
 import java.text.ParseException;
-
+import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import java.util.TimeZone;
@@ -321,14 +321,15 @@ public final class NMONParser {
                             LOGGER.warn("undefined data type {} at line {}", values[0], in.getLineNumber());
                             return;
                         }
-                        
+
                         int commandIdx = values.length - 1; // command name is the last value
                         type = data.getType(SubDataType.buildId("SUMMARY", values[commandIdx]));
 
-                      if (type == null) {
-                          type = new SubDataType("SUMMARY", values[commandIdx], "Summary of Processes", false, summaryFields);
-                          data.addType(type);
-                      }
+                        if (type == null) {
+                            type = new SubDataType("SUMMARY", values[commandIdx], "Summary of Processes", false,
+                                    summaryFields);
+                            data.addType(type);
+                        }
 
                         // remove the trailing command
                         String[] withoutCommand = new String[values.length - 1];
@@ -553,7 +554,11 @@ public final class NMONParser {
             currentRecord.addData(type, recordData);
         }
         catch (IllegalArgumentException ile) {
-            // assume wrong number of columns, so add missing data in at the end
+            if (type.getFieldCount() == recordData.length) {
+                throw ile;
+            }
+
+            // else assume wrong number of columns, so add missing data in at the end
             double[] newData = new double[type.getFieldCount()];
             System.arraycopy(recordData, 0, newData, 0, recordData.length);
 
@@ -788,6 +793,11 @@ public final class NMONParser {
 
         String id = DataHelper.newString(values[0]);
 
+        if ("".equals(id)) {
+            LOGGER.warn("not creating data type with empty id" + " at line {} for data {}", in.getLineNumber(),
+                    java.util.Arrays.toString(values));
+            return null;
+        }
         // the type name may contain the hostname, remove it if so
         String name = values[1];
         int idx = name.indexOf(data.getHostname());
@@ -833,10 +843,11 @@ public final class NMONParser {
         double CPUs = fileCPUs;
 
         if (isAIX) {
-        	DataType lpar = data.getType("LPAR");
-        	if (currentRecord.hasData(lpar)) {
+            DataType lpar = data.getType("LPAR");
+            if (currentRecord.hasData(lpar)) {
                 CPUs = currentRecord.getData(lpar, "entitled");
-        	} else {
+            }
+            else {
                 DataType cpuAll = data.getType("PCPU_ALL");
 
                 // hasData should also cover cpuAll == null
