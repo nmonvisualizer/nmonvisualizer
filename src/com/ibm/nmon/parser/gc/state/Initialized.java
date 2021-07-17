@@ -54,14 +54,4 @@ final class Initialized extends GCStateWithParent {
 
         return this;
     }
-
-    @Override
-    public GCState endElement(GCParserContext context, String elementName) {
-        if (transitionElement.equals(elementName)) {
-            return parent;
-        }
-        else {
-            return this;
-        }
-    }
 }

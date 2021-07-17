@@ -41,6 +41,10 @@ abstract class JavaGCCycle implements GCState {
     protected final void calculateTotalSizes(GCParserContext context) {
         DataType type = context.getDataType("GCBEF");
         DataRecord currentRecord = context.getCurrentRecord();
+        
+        if (!currentRecord.hasData(type)) {
+            return;
+        }
 
         double freeNurseryBefore = currentRecord.getData(type, "free_nursery");
         double usedNurseryBefore = currentRecord.getData(type, "used_nursery");
