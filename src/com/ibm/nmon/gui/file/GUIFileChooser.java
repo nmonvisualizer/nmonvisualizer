@@ -14,8 +14,8 @@ import javax.swing.JPanel;
 import com.ibm.nmon.gui.main.NMONVisualizerGui;
 
 /**
- * Base class for file selection dialogs. Supports the notion of a default file name that can be
- * used when the user has not entered a file name.
+ * Base class for file selection dialogs. Supports the notion of a default file name that can be used when the user has
+ * not entered a file name.
  */
 public class GUIFileChooser extends JFileChooser {
     private static final long serialVersionUID = 3483905864541979923L;
@@ -41,6 +41,10 @@ public class GUIFileChooser extends JFileChooser {
         setFileSelectionMode(JFileChooser.FILES_ONLY);
 
         String directory = gui.getPreferences().get("lastSaveDirectory", null);
+
+        if (directory == null) {
+            directory = ".";
+        }
 
         if (defaultFileName != null) {
             setSelectedFile(new File(directory, defaultFileName));

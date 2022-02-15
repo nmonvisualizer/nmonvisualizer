@@ -17,9 +17,8 @@ import java.io.File;
 import java.util.List;
 
 /**
- * Creates a JFileChooser so the user can select files to parse. Delegates actual parsing to
- * {@link ParserRunner}. Directory selection is supported as is recursion into a directory
- * structure.
+ * Creates a JFileChooser so the user can select files to parse. Delegates actual parsing to {@link ParserRunner}.
+ * Directory selection is supported as is recursion into a directory structure.
  */
 public final class FileLoadAction implements ActionListener {
     private final JFileChooser chooser;
@@ -31,6 +30,10 @@ public final class FileLoadAction implements ActionListener {
         this.gui = gui;
 
         String directory = gui.getPreferences().get("lastDirectory", null);
+
+        if (directory == null) {
+            directory = ".";
+        }
 
         chooser = new JFileChooser(directory);
         chooser.setAcceptAllFileFilterUsed(true);
@@ -79,8 +82,8 @@ public final class FileLoadAction implements ActionListener {
 
         if (!toParse.isEmpty()) {
             // parse files outside of the Swing event thread
-            new Thread(new ParserRunner(gui, toParse, timeZones.getSelectedTimeZone()), getClass().getName()
-                    + " Parser").start();
+            new Thread(new ParserRunner(gui, toParse, timeZones.getSelectedTimeZone()),
+                    getClass().getName() + " Parser").start();
         }
     }
 }
