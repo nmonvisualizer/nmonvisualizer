@@ -106,18 +106,15 @@
 									</excludes>
 								</filter>
 								<filter>
-									<artifact>
-										com.fasterxml.jackson.core:jackson-core</artifact>
+									<artifact>com.fasterxml.jackson.core:jackson-core</artifact>
 									<excludes>
-										<exclude>
-											com/fasterxml/jackson/core/type/TypeReference.class</exclude>
+										<exclude>com/fasterxml/jackson/core/type/TypeReference.class</exclude>
 										<exclude>META-INF/NOTICE</exclude>
 										<exclude>META-INF/LICENSE</exclude>
 									</excludes>
 								</filter>
 								<filter>
-									<artifact>
-										com.fasterxml.jackson.core:jackson-databind</artifact>
+									<artifact>com.fasterxml.jackson.core:jackson-databind</artifact>
 									<excludes>
 										<exclude>META-INF/NOTICE</exclude>
 										<exclude>META-INF/LICENSE</exclude>
@@ -126,8 +123,7 @@
 								<filter>
 									<artifact>org.jfree:jfreechart</artifact>
 									<excludes>
-										<exclude>
-											org/jfree/chart/renderer/xy/StandardXYItemRenderer*</exclude>
+										<exclude>org/jfree/chart/renderer/xy/StandardXYItemRenderer*</exclude>
 									</excludes>
 								</filter>
 							</filters>
