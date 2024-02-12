@@ -3,3 +3,5 @@
 /NMONVisualizer_*.jar
 /NMONVisualizerAPI_*.jar
 /MANIFEST.MF
+/dependency-reduced-pom.xml
+/target
