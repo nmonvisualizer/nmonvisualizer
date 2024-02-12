@@ -6,7 +6,7 @@
 
 	<groupId>com.ibm</groupId>
 	<artifactId>NMONVisualizer</artifactId>
-	<version>0.0.1-SNAPSHOT</version>
+	<version>1.0-SNAPSHOT</version>
 	<name>NMONVisualizer</name>
 
 	<properties>
