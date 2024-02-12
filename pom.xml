@@ -136,14 +136,14 @@
 					<execution>
 						<id>create-version-file</id>
 						<phase>compile</phase>
+						<goals>
+							<goal>run</goal>
+						</goals>
 						<configuration>
 							<target>
 								<echo file="target/classes/com/ibm/nmon/version.properties">version=${maven.build.timestamp}</echo>
 							</target>
 						</configuration>
-						<goals>
-							<goal>run</goal>
-						</goals>
 					</execution>
 					<execution>
 						<id>after-install</id>
