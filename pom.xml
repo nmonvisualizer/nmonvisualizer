@@ -6,7 +6,7 @@
 
 	<groupId>com.ibm</groupId>
 	<artifactId>NMONVisualizer</artifactId>
-	<version>0.1.20240212</version>
+	<version>0.0.1-SNAPSHOT</version>
 	<name>NMONVisualizer</name>
 
 	<properties>
@@ -134,6 +134,19 @@
 				<version>3.1.0</version>
 				<executions>
 					<execution>
+						<id>create-version-file</id>
+						<phase>compile</phase>
+						<configuration>
+							<target>
+								<echo file="target/classes/com/ibm/nmon/version.properties">version=${maven.build.timestamp}</echo>
+							</target>
+						</configuration>
+						<goals>
+							<goal>run</goal>
+						</goals>
+					</execution>
+					<execution>
+						<id>after-install</id>
 						<phase>install</phase>
 						<goals>
 							<goal>run</goal>
