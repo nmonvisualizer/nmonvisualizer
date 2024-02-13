@@ -5,3 +5,6 @@
 /MANIFEST.MF
 /dependency-reduced-pom.xml
 /target
+.DS_Store
+launch.json
+

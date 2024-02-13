@@ -453,6 +453,15 @@ public final class ReportGenerator extends NMONVisualizerApp {
         System.out.println("Parsing NMON files...");
 
         for (String fileToParse : filesToParse) {
+            // ignore ReportGenerator error log files from previous executions
+            if (fileToParse.endsWith(".log") && fileToParse.contains("ReportGenerator")) {
+                continue;
+            }
+            // ignore chart directories from previous executions which may contain CSV files from --rawdata or --chartdata
+            if (fileToParse.endsWith(".csv") && fileToParse.contains("/charts/")) {
+                continue;
+            }
+
             System.out.print("\t" + fileToParse + "... ");
             System.out.flush();
 
