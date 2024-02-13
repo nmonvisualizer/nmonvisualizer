@@ -6,5 +6,5 @@
 /dependency-reduced-pom.xml
 /target
 .DS_Store
+.vscode
 launch.json
-

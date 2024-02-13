@@ -71,7 +71,8 @@ public class LineChartBuilder extends BaseChartBuilder<LineChartDefinition> {
             valueAxis = new NumberAxis();
             valueAxis.setAutoRangeIncludesZero(true);
 
-            // secondary axis data cannot be stacked, so use the the standard, line based rendering
+            // secondary axis data cannot be stacked, so use the the standard, line based
+            // rendering
             // for both types
             StandardXYItemRenderer renderer = new StandardXYItemRenderer();
             renderer.setBaseSeriesVisible(true, false);
@@ -126,7 +127,8 @@ public class LineChartBuilder extends BaseChartBuilder<LineChartDefinition> {
         renderer.setBaseShapesVisible(true);
         renderer.setBaseShapesFilled(true);
 
-        // if no data for more than 1 granularity's time period, do not draw a connecting line
+        // if no data for more than 1 granularity's time period, do not draw a
+        // connecting line
         renderer.setPlotDiscontinuous(true);
         renderer.setGapThresholdType(UnitType.ABSOLUTE);
 
@@ -345,58 +347,77 @@ public class LineChartBuilder extends BaseChartBuilder<LineChartDefinition> {
         if (definition.isStacked() && (datasetIndex == 0)) {
             return;
         }
-        else {
-            long start = System.nanoTime();
 
-            XYPlot plot = chart.getXYPlot();
+        long start = System.nanoTime();
 
-            if (plot.getDataset(datasetIndex).getItemCount(0) > 0) {
-                DataTupleXYDataset dataset = (DataTupleXYDataset) plot.getDataset(datasetIndex);
-                int seriesCount = dataset.getSeriesCount();
+        XYPlot plot = chart.getXYPlot();
+        DataTupleXYDataset dataset = (DataTupleXYDataset) plot.getDataset(datasetIndex);
+        int seriesCount = dataset.getSeriesCount();
 
-                double[] averageDistance = new double[seriesCount];
-                int[] count = new int[seriesCount];
+        // for each series, calculate the average distance between X values
+        // use the maximum of those averages as the gap threshold
+        double maxAverage = Double.MIN_VALUE;
 
-                double[] previousX = new double[seriesCount];
+        for (int i = 0; i < seriesCount; i++) {
+            int itemCount = dataset.getItemCount();
 
-                java.util.Arrays.fill(averageDistance, 0);
-                java.util.Arrays.fill(count, 0);
-                java.util.Arrays.fill(previousX, dataset.getXValue(0, 0));
-
-                for (int i = 1; i < dataset.getItemCount(0); i++) {
-                    double currentX = dataset.getXValue(0, i);
-
-                    for (int j = 0; j < seriesCount; j++) {
-                        double y = dataset.getYValue(j, i);
-
-                        if (!Double.isNaN(y)) {
-                            averageDistance[j] += currentX - previousX[j];
-                            previousX[j] = currentX;
-                            ++count[j];
-                        }
-                    }
-                }
-
-                double maxAverage = Double.MIN_VALUE;
-
-                for (int i = 0; i < seriesCount; i++) {
-                    averageDistance[i] /= count[i];
-
-                    if (averageDistance[i] > maxAverage) {
-                        maxAverage = averageDistance[i];
-                    }
-                }
-
-                ((StandardXYItemRenderer) plot.getRenderer(datasetIndex)).setGapThreshold(maxAverage * 1.25);
+            // no data; gaps are meaningless
+            if (itemCount == 0) {
+                continue;
             }
-            else {
-                ((StandardXYItemRenderer) plot.getRenderer()).setGapThreshold(Integer.MAX_VALUE);
+
+            // not all X values will have data; so count rather than using itemCount for the average
+            int actualCount = 0;
+            double averageDistance = 0;
+            // do not start calculations until the first value is found
+            double previousX = dataset.getXValue(i, 0);
+            double previousY = dataset.getYValue(i, 0);
+
+            for (int j = 1; j < itemCount; j++) {
+                // find the first non-NaN Y value
+                if (Double.isNaN(previousY)) {
+                    previousX = dataset.getXValue(i, j);
+                    previousY = dataset.getYValue(i, j);
+                    continue;
+                }
+
+                // only calculate if there is a Y value at this X value
+                double currentX = dataset.getXValue(i, j);
+                double currentY = dataset.getYValue(i, j);
+
+                // find the next non-NaN Y value
+                if (Double.isNaN(currentY)) {
+                    continue;
+                }
+
+                averageDistance += currentX - previousX;
+                ++actualCount;
+
+                previousX = currentX;
+                previousY = currentY;
+            }
+
+            averageDistance /= actualCount;
+
+            if (averageDistance > maxAverage) {
+                maxAverage = averageDistance;
             }
 
             if (logger.isTraceEnabled()) {
-                logger.trace("complete for chart '{}', series {} in {}ms", definition.getTitle(), datasetIndex,
-                        (System.nanoTime() - start) / 1000000.0d);
+                logger.trace("average gap distance is {} for chart '{}', series '{}'", averageDistance,
+                        definition.getTitle(), dataset.getSeriesKey(i));
             }
+        }
+
+        // no data => no gaps
+        if (maxAverage != Double.MIN_VALUE) {
+            // use the max average for all series, plus some leeway, as the threshold
+            ((StandardXYItemRenderer) plot.getRenderer(datasetIndex)).setGapThreshold(maxAverage * 1.25);
+        }
+
+        if (logger.isDebugEnabled()) {
+            logger.debug("gap threshold recalculated to {} for chart '{}', series {} in {}ms", maxAverage * 1.25,
+                    definition.getTitle(), datasetIndex, (System.nanoTime() - start) / 1E6d);
         }
     }
 

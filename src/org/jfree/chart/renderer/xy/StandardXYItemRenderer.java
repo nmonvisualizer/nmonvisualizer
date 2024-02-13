@@ -2,7 +2,7 @@
  * JFreeChart : a free chart library for the Java(tm) platform
  * ===========================================================
  *
- * (C) Copyright 2000-2008, by Object Refinery Limited and Contributors.
+ * (C) Copyright 2000-2013, by Object Refinery Limited and Contributors.
  *
  * Project Info:  http://www.jfree.org/jfreechart/index.html
  *
@@ -21,13 +21,13 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301,
  * USA.
  *
- * [Java is a trademark or registered trademark of Sun Microsystems, Inc.
- * in the United States and other countries.]
+ * [Oracle and Java are registered trademarks of Oracle and/or its affiliates. 
+ * Other names may be trademarks of their respective owners.]
  *
  * ---------------------------
  * StandardXYItemRenderer.java
  * ---------------------------
- * (C) Copyright 2001-2008, by Object Refinery Limited and Contributors.
+ * (C) Copyright 2001-2013, by Object Refinery Limited and Contributors.
  *
  * Original Author:  David Gilbert (for Object Refinery Limited);
  * Contributor(s):   Mark Watson (www.markwatson.com);
@@ -104,15 +104,8 @@
  * 21-Nov-2007 : Deprecated override flag methods (DG);
  * 02-Jun-2008 : Fixed tooltips for data items at lower edges of data area (DG);
  * 17-Jun-2008 : Apply legend shape, font and paint attributes (DG);
+ * 03-Jul-2013 : Use ParamChecks (DG);
  *
- */
-
-/* ===========================================================
- * IBM Modifications
- * ===========================================================
- * (C) Copyright IBM Corp, 2011
- * 
- * 09-Sep-2011 : Modified drawItem to handle missing data values (see http://sourceforge.net/tracker/?func=detail&aid=3381041&group_id=15494&atid=115494) (Hunter Presnall / IBM)
  */
 
 package org.jfree.chart.renderer.xy;
@@ -142,6 +135,7 @@ import org.jfree.chart.plot.PlotOrientation;
 import org.jfree.chart.plot.PlotRenderingInfo;
 import org.jfree.chart.plot.XYPlot;
 import org.jfree.chart.urls.XYURLGenerator;
+import org.jfree.chart.util.ParamChecks;
 import org.jfree.data.xy.XYDataset;
 import org.jfree.io.SerialUtilities;
 import org.jfree.ui.RectangleEdge;
@@ -508,10 +502,7 @@ public class StandardXYItemRenderer extends AbstractXYItemRenderer
      * @see #getGapThresholdType()
      */
     public void setGapThresholdType(UnitType thresholdType) {
-        if (thresholdType == null) {
-            throw new IllegalArgumentException(
-                    "Null 'thresholdType' argument.");
-        }
+        ParamChecks.nullNotPermitted(thresholdType, "thresholdType");
         this.gapThresholdType = thresholdType;
         fireChangeEvent();
     }
@@ -637,9 +628,7 @@ public class StandardXYItemRenderer extends AbstractXYItemRenderer
      * @see #getLegendLine()
      */
     public void setLegendLine(Shape line) {
-        if (line == null) {
-            throw new IllegalArgumentException("Null 'line' argument.");
-        }
+        ParamChecks.nullNotPermitted(line, "line");
         this.legendLine = line;
         fireChangeEvent();
     }
@@ -652,6 +641,7 @@ public class StandardXYItemRenderer extends AbstractXYItemRenderer
      *
      * @return A legend item for the series.
      */
+    @Override
     public LegendItem getLegendItem(int datasetIndex, int series) {
         XYPlot plot = getPlot();
         if (plot == null) {
@@ -780,11 +770,9 @@ public class StandardXYItemRenderer extends AbstractXYItemRenderer
      *
      * @return The renderer state.
      */
-    public XYItemRendererState initialise(Graphics2D g2,
-                                          Rectangle2D dataArea,
-                                          XYPlot plot,
-                                          XYDataset data,
-                                          PlotRenderingInfo info) {
+    @Override
+    public XYItemRendererState initialise(Graphics2D g2, Rectangle2D dataArea,
+            XYPlot plot, XYDataset data, PlotRenderingInfo info) {
 
         State state = new State(info);
         state.seriesPath = new GeneralPath();
@@ -811,18 +799,11 @@ public class StandardXYItemRenderer extends AbstractXYItemRenderer
      *                        (<code>null</code> permitted).
      * @param pass  the pass index.
      */
-    public void drawItem(Graphics2D g2,
-                         XYItemRendererState state,
-                         Rectangle2D dataArea,
-                         PlotRenderingInfo info,
-                         XYPlot plot,
-                         ValueAxis domainAxis,
-                         ValueAxis rangeAxis,
-                         XYDataset dataset,
-                         int series,
-                         int item,
-                         CrosshairState crosshairState,
-                         int pass) {
+    @Override
+    public void drawItem(Graphics2D g2, XYItemRendererState state,
+            Rectangle2D dataArea, PlotRenderingInfo info, XYPlot plot,
+            ValueAxis domainAxis, ValueAxis rangeAxis, XYDataset dataset,
+            int series, int item, CrosshairState crosshairState, int pass) {
 
         boolean itemVisible = getItemVisible(series, item);
 
@@ -1029,6 +1010,7 @@ public class StandardXYItemRenderer extends AbstractXYItemRenderer
      *
      * @return A boolean.
      */
+    @Override
     public boolean equals(Object obj) {
 
         if (obj == this) {
@@ -1082,6 +1064,7 @@ public class StandardXYItemRenderer extends AbstractXYItemRenderer
      *
      * @throws CloneNotSupportedException  if the renderer cannot be cloned.
      */
+    @Override
     public Object clone() throws CloneNotSupportedException {
         StandardXYItemRenderer clone = (StandardXYItemRenderer) super.clone();
         clone.seriesShapesFilled
