@@ -6,7 +6,6 @@ import java.awt.Toolkit;
 import javax.swing.AbstractAction;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.awt.event.InputEvent;
 import java.awt.event.KeyEvent;
 
 import java.awt.event.ItemListener;
@@ -113,7 +112,7 @@ public final class LogViewerDialog extends JFrame {
 
         ((JComponent) getComponent(0)).getActionMap().put("clear", clearAction);
         ((JComponent) getComponent(0)).getInputMap(JComponent.WHEN_IN_FOCUSED_WINDOW).put(
-                KeyStroke.getKeyStroke(KeyEvent.VK_DELETE, InputEvent.CTRL_DOWN_MASK), "clear");
+                KeyStroke.getKeyStroke(KeyEvent.VK_DELETE, Toolkit.getDefaultToolkit().getMenuShortcutKeyMaskEx()), "clear");
 
         JPanel header = new JPanel();
         header.add(logLevel);

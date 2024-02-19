@@ -2,10 +2,10 @@ package com.ibm.nmon.gui.table;
 
 import java.awt.event.ActionListener;
 import java.awt.event.ActionEvent;
-import java.awt.event.InputEvent;
 import java.awt.event.KeyEvent;
 import javax.swing.KeyStroke;
 
+import java.awt.Toolkit;
 import java.awt.BorderLayout;
 import java.awt.Component;
 
@@ -148,9 +148,9 @@ public final class TableColumnChooser extends GUIDialog {
         actions.put("none", noneAction);
         actions.put("defaults", defaultsAction);
 
-        inputs.put(KeyStroke.getKeyStroke(KeyEvent.VK_A, InputEvent.CTRL_DOWN_MASK), "all");
-        inputs.put(KeyStroke.getKeyStroke(KeyEvent.VK_X, InputEvent.CTRL_DOWN_MASK), "none");
-        inputs.put(KeyStroke.getKeyStroke(KeyEvent.VK_D, InputEvent.CTRL_DOWN_MASK), "defaults");
+        inputs.put(KeyStroke.getKeyStroke(KeyEvent.VK_A, Toolkit.getDefaultToolkit().getMenuShortcutKeyMaskEx()), "all");
+        inputs.put(KeyStroke.getKeyStroke(KeyEvent.VK_X, Toolkit.getDefaultToolkit().getMenuShortcutKeyMaskEx()), "none");
+        inputs.put(KeyStroke.getKeyStroke(KeyEvent.VK_D, Toolkit.getDefaultToolkit().getMenuShortcutKeyMaskEx()), "defaults");
 
         setVisible(true);
     }

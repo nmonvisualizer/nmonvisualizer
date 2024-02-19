@@ -12,7 +12,6 @@ import java.awt.event.ActionEvent;
 import java.awt.event.HierarchyListener;
 import java.awt.event.HierarchyEvent;
 
-import java.awt.event.InputEvent;
 import java.awt.event.KeyEvent;
 
 import javax.swing.BorderFactory;
@@ -179,7 +178,7 @@ final class IntervalList extends JPanel implements HierarchyListener, PropertyCh
             }
         });
         getInputMap(JComponent.WHEN_IN_FOCUSED_WINDOW).put(
-                KeyStroke.getKeyStroke(KeyEvent.VK_DELETE, InputEvent.CTRL_DOWN_MASK), "clear");
+                KeyStroke.getKeyStroke(KeyEvent.VK_DELETE, java.awt.Toolkit.getDefaultToolkit().getMenuShortcutKeyMaskEx()), "clear");
     }
 
     GUITable getTable() {

@@ -32,6 +32,7 @@ import com.ibm.nmon.interval.Interval;
 import com.ibm.nmon.util.TimeFormatCache;
 import com.ibm.nmon.util.VersionInfo;
 
+import java.awt.Toolkit;
 import java.awt.event.ActionListener;
 import java.awt.event.ActionEvent;
 import java.awt.event.InputEvent;
@@ -80,7 +81,7 @@ final class MainMenu extends JMenuBar implements IntervalListener, DataSetListen
         JMenuItem item = new JMenuItem("Load...");
         item.setMnemonic('l');
         item.addActionListener(new FileLoadAction(gui));
-        item.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_O, InputEvent.CTRL_DOWN_MASK));
+        item.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_O, Toolkit.getDefaultToolkit().getMenuShortcutKeyMaskEx()));
 
         menu.add(item);
 
@@ -121,7 +122,7 @@ final class MainMenu extends JMenuBar implements IntervalListener, DataSetListen
         item.setMnemonic('a');
         item.setSelected(true);
         item.setAccelerator(
-                KeyStroke.getKeyStroke(KeyEvent.VK_0, InputEvent.CTRL_DOWN_MASK | InputEvent.ALT_DOWN_MASK));
+                KeyStroke.getKeyStroke(KeyEvent.VK_0, Toolkit.getDefaultToolkit().getMenuShortcutKeyMaskEx() | InputEvent.ALT_DOWN_MASK));
 
         item.addActionListener(new ActionListener() {
             @Override
@@ -142,7 +143,7 @@ final class MainMenu extends JMenuBar implements IntervalListener, DataSetListen
         item.getActionMap().put("doClick", doClick);
         InputMap inputMap = item.getInputMap(JComponent.WHEN_IN_FOCUSED_WINDOW);
 
-        inputMap.put(KeyStroke.getKeyStroke(KeyEvent.VK_NUMPAD0, InputEvent.CTRL_DOWN_MASK | InputEvent.ALT_DOWN_MASK),
+        inputMap.put(KeyStroke.getKeyStroke(KeyEvent.VK_NUMPAD0, Toolkit.getDefaultToolkit().getMenuShortcutKeyMaskEx() | InputEvent.ALT_DOWN_MASK),
                 "doClick");
 
         group.add(item);
@@ -161,10 +162,10 @@ final class MainMenu extends JMenuBar implements IntervalListener, DataSetListen
                     inputMap = item.getInputMap(JComponent.WHEN_IN_FOCUSED_WINDOW);
 
                     inputMap.put(KeyStroke.getKeyStroke(KeyEvent.VK_0 + n,
-                            InputEvent.CTRL_DOWN_MASK | InputEvent.ALT_DOWN_MASK), "doClick");
+                            Toolkit.getDefaultToolkit().getMenuShortcutKeyMaskEx() | InputEvent.ALT_DOWN_MASK), "doClick");
 
                     inputMap.put(KeyStroke.getKeyStroke(KeyEvent.VK_NUMPAD0 + n,
-                            InputEvent.CTRL_DOWN_MASK | InputEvent.ALT_DOWN_MASK), "doClick");
+                            Toolkit.getDefaultToolkit().getMenuShortcutKeyMaskEx() | InputEvent.ALT_DOWN_MASK), "doClick");
 
                     ++n;
                 }
@@ -191,7 +192,7 @@ final class MainMenu extends JMenuBar implements IntervalListener, DataSetListen
             item.setMnemonic('r');
             item.setIcon(Styles.CLEAR_ICON);
             item.addActionListener(new RemoveAllIntervalsAction(gui, gui.getMainFrame()));
-            item.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_DELETE, InputEvent.CTRL_DOWN_MASK));
+            item.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_DELETE, Toolkit.getDefaultToolkit().getMenuShortcutKeyMaskEx()));
 
             menu.add(item);
         }
@@ -212,7 +213,7 @@ final class MainMenu extends JMenuBar implements IntervalListener, DataSetListen
                 new IntervalManagerDialog(gui).setVisible(true);
             }
         });
-        item.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_I, InputEvent.CTRL_DOWN_MASK));
+        item.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_I, Toolkit.getDefaultToolkit().getMenuShortcutKeyMaskEx()));
 
         menu.add(item);
 
@@ -225,7 +226,7 @@ final class MainMenu extends JMenuBar implements IntervalListener, DataSetListen
 
         JMenuItem item = new JMenuItem("Set Granularity...");
         item.setMnemonic('g');
-        item.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_G, InputEvent.CTRL_DOWN_MASK));
+        item.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_G, Toolkit.getDefaultToolkit().getMenuShortcutKeyMaskEx()));
 
         item.addActionListener(new ActionListener() {
             @Override
@@ -245,7 +246,7 @@ final class MainMenu extends JMenuBar implements IntervalListener, DataSetListen
         item = new JMenuItem("Table Columns...");
         item.setMnemonic('c');
         item.setAccelerator(
-                KeyStroke.getKeyStroke(KeyEvent.VK_C, InputEvent.CTRL_DOWN_MASK | InputEvent.SHIFT_DOWN_MASK));
+                KeyStroke.getKeyStroke(KeyEvent.VK_C, Toolkit.getDefaultToolkit().getMenuShortcutKeyMaskEx() | InputEvent.SHIFT_DOWN_MASK));
 
         item.addActionListener(new ActionListener() {
             @Override
@@ -259,7 +260,7 @@ final class MainMenu extends JMenuBar implements IntervalListener, DataSetListen
         item = new JMenuItem("Custom Format...");
         item.setMnemonic('f');
         item.setAccelerator(
-                KeyStroke.getKeyStroke(KeyEvent.VK_F, InputEvent.CTRL_DOWN_MASK | InputEvent.SHIFT_DOWN_MASK));
+                KeyStroke.getKeyStroke(KeyEvent.VK_F, Toolkit.getDefaultToolkit().getMenuShortcutKeyMaskEx() | InputEvent.SHIFT_DOWN_MASK));
 
         item.addActionListener(new ActionListener() {
             @Override
@@ -299,7 +300,7 @@ final class MainMenu extends JMenuBar implements IntervalListener, DataSetListen
         checkItem.setMnemonic('l');
         checkItem.setSelected(gui.getBooleanProperty("lineChartLegend"));
         checkItem.setAccelerator(
-                KeyStroke.getKeyStroke(KeyEvent.VK_L, InputEvent.CTRL_DOWN_MASK | InputEvent.SHIFT_DOWN_MASK));
+                KeyStroke.getKeyStroke(KeyEvent.VK_L, Toolkit.getDefaultToolkit().getMenuShortcutKeyMaskEx() | InputEvent.SHIFT_DOWN_MASK));
 
         checkItem.addActionListener(new ActionListener() {
             @Override
@@ -349,7 +350,7 @@ final class MainMenu extends JMenuBar implements IntervalListener, DataSetListen
         checkItem = new JCheckBoxMenuItem("Summary Table");
         checkItem.setMnemonic('t');
         checkItem.setIcon(Styles.buildIcon("table.png"));
-        checkItem.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_T, InputEvent.CTRL_DOWN_MASK));
+        checkItem.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_T, Toolkit.getDefaultToolkit().getMenuShortcutKeyMaskEx()));
         checkItem.setSelected(!gui.getBooleanProperty("chartsDisplayed"));
 
         checkItem.addActionListener(new ActionListener() {
@@ -362,7 +363,7 @@ final class MainMenu extends JMenuBar implements IntervalListener, DataSetListen
 
         item = new JMenuItem("Custom Report...");
         item.setMnemonic('r');
-        item.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_R, InputEvent.CTRL_DOWN_MASK));
+        item.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_R, Toolkit.getDefaultToolkit().getMenuShortcutKeyMaskEx()));
         item.setIcon(Styles.REPORT_ICON);
         item.addActionListener(new ActionListener() {
             @Override
@@ -523,7 +524,7 @@ final class MainMenu extends JMenuBar implements IntervalListener, DataSetListen
 
         item = new JMenuItem("View Log...");
         item.setMnemonic('l');
-        item.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_L, InputEvent.CTRL_DOWN_MASK));
+        item.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_L, Toolkit.getDefaultToolkit().getMenuShortcutKeyMaskEx()));
         item.setIcon(LogViewerDialog.LOG_ICON);
         item.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {

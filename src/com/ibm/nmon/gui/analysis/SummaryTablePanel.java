@@ -1,5 +1,7 @@
 package com.ibm.nmon.gui.analysis;
 
+import java.util.Set;
+
 import java.awt.BorderLayout;
 import java.awt.event.ActionListener;
 import java.awt.event.ActionEvent;
@@ -9,7 +11,6 @@ import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.beans.PropertyChangeListener;
 import java.beans.PropertyChangeEvent;
-import java.util.Set;
 
 import javax.swing.AbstractAction;
 import javax.swing.Action;
@@ -30,6 +31,8 @@ import javax.swing.RowFilter;
 import javax.swing.TransferHandler;
 import javax.swing.SwingConstants;
 import javax.swing.table.TableRowSorter;
+
+import java.awt.Toolkit;
 
 import com.ibm.nmon.analysis.AnalysisSet;
 import com.ibm.nmon.analysis.AnalysisSetListener;
@@ -438,14 +441,14 @@ public final class SummaryTablePanel extends JPanel
 
         JMenuItem item = new JMenuItem("Load Definition...");
         item.setMnemonic('n');
-        item.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_N, InputEvent.CTRL_DOWN_MASK));
+        item.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_N, Toolkit.getDefaultToolkit().getMenuShortcutKeyMaskEx()));
         item.addActionListener(loadAnalysis);
         menu.add(item);
 
         item = new JMenuItem("Save Definition...");
         item.setMnemonic('s');
         item.setIcon(Styles.SAVE_ICON);
-        item.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_S, InputEvent.CTRL_DOWN_MASK));
+        item.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_S, Toolkit.getDefaultToolkit().getMenuShortcutKeyMaskEx()));
         item.addActionListener(saveAnalysis);
         item.setEnabled(analysisSet.size() > 0);
         menu.add(item);
@@ -456,7 +459,7 @@ public final class SummaryTablePanel extends JPanel
         item.setMnemonic('a');
         item.setIcon(Styles.COPY_ICON);
         item.setAccelerator(
-                KeyStroke.getKeyStroke(KeyEvent.VK_A, InputEvent.CTRL_DOWN_MASK | InputEvent.SHIFT_DOWN_MASK));
+                KeyStroke.getKeyStroke(KeyEvent.VK_A, Toolkit.getDefaultToolkit().getMenuShortcutKeyMaskEx() | InputEvent.SHIFT_DOWN_MASK));
         item.addActionListener(copyTable);
         menu.add(item);
 
@@ -464,7 +467,7 @@ public final class SummaryTablePanel extends JPanel
         item.setMnemonic('c');
         item.setIcon(Styles.CLEAR_ICON);
         item.setAccelerator(
-                KeyStroke.getKeyStroke(KeyEvent.VK_DELETE, InputEvent.CTRL_DOWN_MASK | InputEvent.SHIFT_DOWN_MASK));
+                KeyStroke.getKeyStroke(KeyEvent.VK_DELETE, Toolkit.getDefaultToolkit().getMenuShortcutKeyMaskEx() | InputEvent.SHIFT_DOWN_MASK));
         item.addActionListener(clearTable);
         menu.add(item);
 
@@ -473,7 +476,7 @@ public final class SummaryTablePanel extends JPanel
         item = new JMenuItem("Select Columns...");
         item.setMnemonic('m');
         item.setAccelerator(
-                KeyStroke.getKeyStroke(KeyEvent.VK_C, InputEvent.CTRL_DOWN_MASK | InputEvent.SHIFT_DOWN_MASK));
+                KeyStroke.getKeyStroke(KeyEvent.VK_C, Toolkit.getDefaultToolkit().getMenuShortcutKeyMaskEx() | InputEvent.SHIFT_DOWN_MASK));
         item.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
@@ -488,7 +491,7 @@ public final class SummaryTablePanel extends JPanel
         item.setMnemonic('t');
         item.setIcon(TRANSPOSE_ICON);
         item.setAccelerator(
-                KeyStroke.getKeyStroke(KeyEvent.VK_T, InputEvent.CTRL_DOWN_MASK | InputEvent.SHIFT_DOWN_MASK));
+                KeyStroke.getKeyStroke(KeyEvent.VK_T, Toolkit.getDefaultToolkit().getMenuShortcutKeyMaskEx() | InputEvent.SHIFT_DOWN_MASK));
         item.addActionListener(transposeTable);
         menu.add(item);
     }

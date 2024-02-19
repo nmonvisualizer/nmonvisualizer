@@ -112,7 +112,7 @@ final class SummaryView extends ChartSplitPane implements IntervalListener {
             }
         });
 
-        inputs.put(KeyStroke.getKeyStroke(KeyEvent.VK_I, InputEvent.CTRL_DOWN_MASK | InputEvent.SHIFT_DOWN_MASK),
+        inputs.put(KeyStroke.getKeyStroke(KeyEvent.VK_I, java.awt.Toolkit.getDefaultToolkit().getMenuShortcutKeyMaskEx() | InputEvent.SHIFT_DOWN_MASK),
                 "allIntervals");
 
         allIntervalsReport.addPropertyChangeListener("chart", summaryTable);

@@ -43,7 +43,7 @@ public final class DataTupleHistogramDataset extends HistogramDataset implements
 
         // default implementation uses a 0 to 1 scale; we want 0 to 100
         if (getType() == HistogramType.RELATIVE_FREQUENCY) {
-            return new Double((Double) toReturn * 100);
+            return toReturn.doubleValue() * 100;
         }
         else {
             return toReturn;

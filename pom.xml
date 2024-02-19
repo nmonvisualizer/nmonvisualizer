@@ -101,12 +101,6 @@
 									</excludes>
 								</filter>
 								<filter>
-									<artifact>com.fasterxml.jackson.core:jackson-core</artifact>
-									<excludes>
-										<exclude>com/fasterxml/jackson/core/type/TypeReference.class</exclude>
-									</excludes>
-								</filter>
-								<filter>
 									<artifact>org.jfree:jfreechart</artifact>
 									<excludes>
 										<exclude>org/jfree/chart/renderer/xy/StandardXYItemRenderer*</exclude>
@@ -124,7 +118,7 @@
 				<executions>
 					<execution>
 						<id>create-version-file</id>
-						<phase>compile</phase>
+						<phase>install</phase>
 						<goals>
 							<goal>run</goal>
 						</goals>

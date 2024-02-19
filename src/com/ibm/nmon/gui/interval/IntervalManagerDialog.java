@@ -2,6 +2,7 @@ package com.ibm.nmon.gui.interval;
 
 import java.awt.BorderLayout;
 
+import java.awt.Toolkit;
 import java.awt.KeyboardFocusManager;
 
 import java.awt.event.ActionListener;
@@ -9,8 +10,6 @@ import java.awt.event.ActionEvent;
 
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
-
-import java.awt.event.InputEvent;
 import java.awt.event.KeyEvent;
 
 import java.beans.PropertyChangeListener;
@@ -131,11 +130,11 @@ public final class IntervalManagerDialog extends GUIDialog implements IntervalLi
 
                 if (b) {
                     ((JPanel) getContentPane()).getInputMap(JComponent.WHEN_IN_FOCUSED_WINDOW)
-                            .put(KeyStroke.getKeyStroke(KeyEvent.VK_S, InputEvent.CTRL_DOWN_MASK), "save");
+                            .put(KeyStroke.getKeyStroke(KeyEvent.VK_S, Toolkit.getDefaultToolkit().getMenuShortcutKeyMaskEx()), "save");
                 }
                 else {
                     ((JPanel) getContentPane()).getInputMap(JComponent.WHEN_IN_FOCUSED_WINDOW)
-                            .remove(KeyStroke.getKeyStroke(KeyEvent.VK_S, InputEvent.CTRL_DOWN_MASK));
+                            .remove(KeyStroke.getKeyStroke(KeyEvent.VK_S, Toolkit.getDefaultToolkit().getMenuShortcutKeyMaskEx()));
                 }
             };
         };
@@ -210,7 +209,7 @@ public final class IntervalManagerDialog extends GUIDialog implements IntervalLi
         actions.put("load", loadAction);
         actions.put("save", saveAction);
 
-        inputs.put(KeyStroke.getKeyStroke(KeyEvent.VK_O, InputEvent.CTRL_DOWN_MASK), "load");
+        inputs.put(KeyStroke.getKeyStroke(KeyEvent.VK_O, Toolkit.getDefaultToolkit().getMenuShortcutKeyMaskEx()), "load");
     }
 
     @Override
