@@ -1,0 +1,89 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd">
+<head>
+<title>NMONVisualizer - Keyboard Shortcuts</title>
+<link rel="stylesheet"href="nmonvisualizer.css" type="text/css" />
+<link rel="icon" href="favicon.ico" type="image/png" />
+</head>
+<body>
+<h1>NMONVisualizer</h1>
+<h2 class="top">keyboard shortcuts</h2>
+
+<div id="nav">
+  <a href="index.html">Home</a><br/>
+  <a href="screenshots.html">Screenshots</a><br/>
+  <a class="b" href="shortcuts.html">Keyboard Shortcuts</a><br/>
+  <a href="iostat.html">IOStat</a><br/>
+  <a href="fio.html">FIO</a><br/>
+  <a href="json.html">JSON</a><br/>
+  <a href="commandline.html">Command Line</a><br/>
+  <a href="customreports.html">Custom Reports</a><br/>
+  <a href="renaming.html">Renaming Hosts</a><br/>
+  <a href="startup.html">Start nmon at Boot</a><br/>
+  <hr/>
+  <a href="https://github.com/nmonvisualizer/nmonvisualizer">Project on GitHub</a><br/>
+  <a href="https://github.com/nmonvisualizer/nmonvisualizer/releases">Releases</a><br/>
+  <a href="https://github.com/nmonvisualizer/nmonvisualizer/issues/new">Submit a Bug</a><br/>
+</div>
+
+<div id="content">
+  <div class="section">
+    <p>NMONVisualizer supports a number of keyboard shortcuts to make navigating the GUI easier and faster.<p/>
+    <p>On MacOS, use <span class=c">COMMAND</span> instead of <span class="c">CTRL</span> and <span class=c">OPTION</span> instead of <span class="c">ALT</span>.</p>
+  </div>
+
+  <div class="section">
+    <h3>Main UI</h3>
+    <ul>
+      <li><span class="c">CTRL + O</span> - Opens a file dialog to parse a new file</li>
+      <li><span class="c">CTRL + G</span> - Opens a dialog box that allows setting the granularity</li>
+    <li><span class="c">CTRL + ALT + 0</span> - Display all data across all times that have been processed (i.e. the default interval)</li>
+      <li><span class="c">CTRL + ALT + 1</span> - Display data from the first defined interval; successive numbers up to 9 display other intervals (e.g. <span class="c">CTRL + ALT + 9</span>)</li>
+      <li><span class="c">CTRL + SHIFT + I</span> - Toggle between showing charts for the current interval or showing summary charts for each interval. Equivalent to selecting the <span class="c">Graph All Intervals</span> checkbox.</li>
+      <li><span class="c">CTRL + L</span> - Opens the log dialog to see information errors & warnings. Also allows increasing the log level to get more details about what the UI is doing.</li>
+      <li><span class="c">ESC</span> - closes any dialog box</li>
+      <li><span class="c">CTRL + SHIFT + C</span> - Display a dialog box to choose which columns to display on chart or table summaries</li>
+        <ul>
+          <li><span class="c">CTRL + A</span> - Select all columns</li>
+          <li><span class="c">CTRL + X</span> - Select no columns</li>
+          <li><span class="c">CTRL + D</span> - Select default columns</li>
+        </ul>
+      <li><span class="c">CTRL + I</span> - Show the interval management UI</li>
+      <li><span class="c">CTRL + T</span> - Toggle between displaying charts or tables</li>
+      <li><span class="c">CTRL + R</span> - Show the custom report UI</li>
+    </ul>
+  </div>
+
+  <div class="section">
+    <h3>Interval Management UI (<span class="c">CTRL + I</span>)</h3>
+    <ul>
+      <li><span class="c">CTRL + O</span> - Load an interval properties file</li>
+      <li><span class="c">CTRL + S</span> - Save the defined intervals to a properties file</li>
+      <li><span class="c">CTRL + Backspace</span> - Clear all the intervals (use <span class="c">CMD + fn + Backspace</span> on MacOS)</li>
+      <li><span class="c">CTRL + T</span> - Set the interval's end time to the start time. This is the same as the <span class="c">Start = End</span> Button</li>
+      <li><span class="c">ALT + B</span>, <span class="c">ALT + R</span> or <span class="c">ALT + A</span> - switch between Absolute, Relative & Bulk interval panels, respectively</li>
+    </ul>
+  </div>
+
+  <div class="section">
+    <h3>Table UI (<span class="c">CTRL + T</span>)</h3>
+    <ul>
+      <li><span class="c">CTRL + N</span> - Load a table definition file</li>
+      <li><span class="c">CTRL + S</span> - Save a table definition file</li>
+      <li><span class="c">CTRL + SHIFT + A</span> - Copy all the table data to the clipboard, as CSV</li>
+      <li><span class="c">CTRL + SHIFT + BACKSPACE</span> - Clear the table</li>
+      <li><span class="c">CTRL + SHIFT + C</span> - Show the column chooser dialog</li>
+      <li><span class="c">CTRL + SHIFT + T</span> - Transpose the table. Switches between viewing all statistics by host & metric or a single statistic by metric + host.</li>
+    </ul>
+  </div>
+
+  <div class="section">
+    <h3>Custom Report UI (<span class="c">CTRL + R</span>)</h3>
+    <ul>
+      <li><span class="c">CTRL + O</span> - Load a custom report XML file</li>
+      <li><span class="c">CTRL + S</span> - Save all the charts in the report as PNG image files</li>
+      <li><span class="c">CTRL + G</span> - Opens a dialog box that allows setting the granularity</li>
+    </ul>
+  </div>
+</div>
+</body>
+</html>

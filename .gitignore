@@ -3,3 +3,7 @@
 /NMONVisualizer*.jar
 /MANIFEST.MF
 /.project
+/target
+/*.xml
+.DS_Store
+.vscode
