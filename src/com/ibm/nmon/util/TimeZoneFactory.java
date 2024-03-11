@@ -54,7 +54,7 @@ public final class TimeZoneFactory {
 			    if (i > 0) {
 			    	rawOffset += extraOffsetMinutes;
 			    } else {
-			    	rawOffset += -1 * extraOffsetMinutes;
+			    	rawOffset -= extraOffsetMinutes;
 			    }
 			}
 		}
