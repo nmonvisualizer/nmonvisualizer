@@ -219,6 +219,20 @@
     </data>
   </linechart>
 
+  <linechart name="Physical CPUs Used" shortName="Physical CPUs Used" linesNamedBy="HOST_FIELD" subtitledBy="NONE">
+    <yAxis label="CPUs" />
+    <data>
+      <host os="AIX" />
+      <type name="LPAR" />
+      <field name="PhysicalCPU" />
+    </data>
+    <data>
+      <host os="AIX" />
+      <type name="LPAR" />
+      <field name="entitled" />
+    </data>
+  </linechart>
+  
   <linechart name="CPUs Used" shortName="CPUs Used" linesNamedBy="HOST" subtitledBy="NONE">
     <yAxis label="CPUs" />
     <data>
