@@ -403,10 +403,7 @@ public final class DataTypeChartPanel extends LineChartPanel implements Interval
         tempFields.put("throughput", "Tx / s");
         tempFields.put("hits", "Hits / s");
 
-        tempExceptions.add("EC_User%");
-        tempExceptions.add("EC_Sys%");
-        tempExceptions.add("EC_Wait%");
-        tempExceptions.add("EC_CPU%");
+        tempExceptions.add("EC_Used%");
         tempExceptions.add("VP_User%");
         tempExceptions.add("VP_Sys%");
         tempExceptions.add("VP_Wait%");

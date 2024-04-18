@@ -174,7 +174,7 @@
     </data>
   </intervalchart>
 
-  <intervalchart name="Average CPUs Used" shortName="CPUs Used" linesNamedBy="HOST">
+  <intervalchart name="Average Physical CPU Utilization" shortName="Physical CPU" linesNamedBy="HOST">
     <yAxis label="CPUs" />
     <data>
       <host os="AIX" />
@@ -183,12 +183,12 @@
     </data>
   </intervalchart>
 
-  <intervalchart name="Average % Entitlement Used" shortName="CPU Entitlement" linesNamedBy="HOST">
+  <intervalchart name="Average % Entitlement Used" shortName="% Entitlement" linesNamedBy="HOST">
       <yAxis label="% Entitlement Used" />
     <data>
       <host os="AIX" />
       <type name="LPAR" />
-      <field name="EC_CPU%" />
+      <field name="EC_Used%" />
     </data>
   </intervalchart>
 </charts>

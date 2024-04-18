@@ -211,7 +211,7 @@
       <type name="CPU_ALL" />
       <field name="CPU%" alias="% CPU"/>
     </data>
-    
+
     <data>
       <host os="PERFMON" />
       <type name="Processor (Total)" />
@@ -219,7 +219,26 @@
     </data>
   </linechart>
 
-  <linechart name="Physical CPUs Used" shortName="Physical CPUs Used" linesNamedBy="HOST_FIELD" subtitledBy="NONE">
+  <linechart name="Physical CPU Utilization" shortName="Physical CPU" linesNamedBy="HOST" subtitledBy="NONE">
+    <yAxis label="CPUs" />
+    <data>
+      <host os="AIX" />
+      <type name="PCPU_ALL" />
+      <field name="Total" />
+    </data>
+  </linechart>
+
+  <linechart name="% Entitlement Used" shortName="% Entitlement" linesNamedBy="HOST" subtitledBy="NONE">
+    <yAxis label="% Entitlement Used" />
+    <data>
+      <host os="AIX" />
+      <type name="LPAR" />
+
+      <field name="EC_Used%" />
+    </data>
+  </linechart>
+
+  <linechart name="Physical CPU vs Entitled" shortName="Entitled" linesNamedBy="HOST_FIELD" subtitledBy="NONE">
     <yAxis label="CPUs" />
     <data>
       <host os="AIX" />
@@ -230,26 +249,6 @@
       <host os="AIX" />
       <type name="LPAR" />
       <field name="entitled" />
-    </data>
-  </linechart>
-  
-  <linechart name="CPUs Used" shortName="CPUs Used" linesNamedBy="HOST" subtitledBy="NONE">
-    <yAxis label="CPUs" />
-    <data>
-      <host os="AIX" />
-      <type name="PCPU_ALL" />
-
-      <field name="Total" />
-    </data>
-  </linechart>
-  
-  <linechart name="% Entitlement Used" shortName="CPU Entitlement" linesNamedBy="HOST" subtitledBy="NONE">
-    <yAxis label="% Entitlement Used" />
-    <data>
-      <host os="AIX" />
-      <type name="LPAR" />
-
-      <field name="EC_CPU%" />
     </data>
   </linechart>
 </charts>
