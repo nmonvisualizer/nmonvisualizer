@@ -65,7 +65,7 @@
   </linechart>
 
   <linechart name="Memory Usage by Component" shortName="Memory Use" stacked="true">
-    <yAxis label="MB" asPercent="true" />
+    <yAxis label="% Used" asPercent="true" />
     <data>
       <host os="AIX" />
       <type name="MEMNEW" />
