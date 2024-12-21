@@ -22,8 +22,8 @@ import com.ibm.nmon.data.SubDataType;
 public class WindowsBytesTransform implements DataTransform {
     private static final Matcher VALID_TYPES = Pattern.compile(
             "LogicalDisk.*|PhysicalDisk.*|Network Interface.*|Memory|System").matcher("");
-    // match all Bytes, but not KBytes or MBytes
-    private static final Matcher VALID_FIELDS = Pattern.compile("(.*?[^KM])?Bytes(.*)").matcher("");
+    // match all Bytes, but not KBytes, MBytes, etc
+    private static final Matcher VALID_FIELDS = Pattern.compile("([^%].*?[^KMGTEP])?Bytes(.*)").matcher("");
 
     private Map<String, Set<Integer>> changedFields = new java.util.HashMap<String, Set<Integer>>();
 
