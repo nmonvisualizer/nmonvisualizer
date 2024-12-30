@@ -26,7 +26,7 @@ public final class SetFieldMatcher implements FieldMatcher {
             return java.util.Collections.emptyList();
         }
         else {
-            List<String> toReturn = new java.util.ArrayList<String>(type.getFieldCount());
+            List<String> toReturn = new java.util.ArrayList<String>(fields.size());
 
             for (String field : fields) {
                 if (type.hasField(field)) {

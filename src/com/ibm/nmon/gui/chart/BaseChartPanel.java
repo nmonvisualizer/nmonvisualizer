@@ -69,7 +69,7 @@ public class BaseChartPanel extends ChartPanel implements PropertyChangeListener
 
         setBackground(java.awt.Color.WHITE);
 
-        // keep the chart for resizing when empty
+        // keep the chart from resizing when empty
         setPreferredSize(null);
 
         // disable zooming

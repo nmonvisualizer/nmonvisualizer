@@ -25,7 +25,7 @@ public final class ExactFieldMatcher implements FieldMatcher {
             return java.util.Collections.emptyList();
         }
         else {
-            List<String> toReturn = new java.util.ArrayList<String>(type.getFieldCount());
+            List<String> toReturn = new java.util.ArrayList<String>();
 
             for (String field : type.getFields()) {
                 if (this.field.equals(field)) {

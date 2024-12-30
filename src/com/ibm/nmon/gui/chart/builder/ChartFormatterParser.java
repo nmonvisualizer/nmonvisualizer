@@ -187,7 +187,6 @@ public class ChartFormatterParser {
             catch (NumberFormatException nfe) {
                 throw new IllegalArgumentException(
                         "cannot parse '" + rgb[2] + "' from '" + data + "' as a color for " + name + ".");
-
             }
 
             try {
@@ -196,7 +195,7 @@ public class ChartFormatterParser {
             catch (IllegalArgumentException iae) {
                 // handle illegal values (e.g. -1 or 257)
                 throw new IllegalArgumentException(
-                        "cannot parse '" + data + "' as a color for " + name + "." + "\n" + iae.getMessage());
+                        "cannot parse '" + data + "' as a color for " + name + ".", iae);
             }
         }
         else {

@@ -216,6 +216,9 @@ public class LineChartBuilder extends BaseChartBuilder<LineChartDefinition> {
                                 if (dataDefinition.getStatistic() == Statistic.MINIMUM) {
                                     totals[i] = Double.MAX_VALUE;
                                 }
+                                else if (dataDefinition.getStatistic() == Statistic.MAXIMUM) {
+                                    totals[i] = Double.MIN_VALUE;
+                                }
                                 else {
                                     totals[i] = 0;
                                 }
@@ -229,19 +232,17 @@ public class LineChartBuilder extends BaseChartBuilder<LineChartDefinition> {
                                 if (value > totals[i]) {
                                     totals[i] = value;
                                 }
-                                ;
                                 break;
                             case MINIMUM:
                                 if (value < totals[i]) {
                                     totals[i] = value;
                                 }
-                                ;
                                 break;
                             case COUNT:
-                                totals[i] += 1;
+                                ++totals[i];
                                 break;
                             case SUM:
-                                ++totals[i];
+                                totals[i] += value;
                                 break;
                             default:
                                 throw new IllegalArgumentException(
@@ -265,10 +266,8 @@ public class LineChartBuilder extends BaseChartBuilder<LineChartDefinition> {
                     }
 
                     if (!Double.isNaN(totals[i])) {
-                        // if the plot is listening for dataset changes, it will fire an event for
-                        // every data point
-                        // this causes a huge amount of GC and very slow response times so the false
-                        // value is important here
+                        // if the plot is listening for dataset changes, it will fire an event for every data point
+                        // this causes a huge amount of GC and very slow response times so the false value is important
                         if (dataDefinition.getStatistic() == Statistic.AVERAGE) {
                             dataset.add(graphTime, totals[i] / n, fieldNames.get(i), false);
                         }
@@ -299,7 +298,12 @@ public class LineChartBuilder extends BaseChartBuilder<LineChartDefinition> {
                 }
 
                 if (!Double.isNaN(totals[i])) {
-                    dataset.add(graphTime, totals[i] / n, fieldNames.get(i), false);
+                    if (dataDefinition.getStatistic() == Statistic.AVERAGE) {
+                        dataset.add(graphTime, totals[i] / n, fieldNames.get(i), false);
+                    }
+                    else {
+                        dataset.add(graphTime, totals[i], fieldNames.get(i), false);
+                    }
                 }
             }
         }
@@ -315,9 +319,8 @@ public class LineChartBuilder extends BaseChartBuilder<LineChartDefinition> {
         }
 
         if (logger.isDebugEnabled()) {
-            logger.debug("{}: {}-({} fields) added {} data points to chart '{}'  in {}ms", data, type,
-                    fieldNames.size(), dataset.getItemCount(), definition.getTitle(),
-                    (System.nanoTime() - start) / 1000000.0d);
+            logger.debug("{}: {}-({} fields) added {} data points to chart '{}' in {}ms", data, type, fieldNames.size(),
+                    dataset.getItemCount(), definition.getTitle(), (System.nanoTime() - start) / 1000000.0d);
         }
     }
 
