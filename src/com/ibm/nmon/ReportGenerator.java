@@ -91,6 +91,8 @@ public final class ReportGenerator extends NMONVisualizerApp {
         boolean writeChartData = false;
 
         int granularity = -1;
+        int width = -1;
+        int height = -1;
 
         for (int i = 0; i < args.length; i++) {
             String arg = args[i];
@@ -147,7 +149,7 @@ public final class ReportGenerator extends NMONVisualizerApp {
                         ++i;
 
                         if (i > args.length) {
-                            System.err.println("Chart format properties must be specified " + '-' + 'f');
+                            System.err.println("Chart format properties" + " must be specified for " + '-' + 'f');
                             return;
                         }
 
@@ -159,7 +161,7 @@ public final class ReportGenerator extends NMONVisualizerApp {
                         ++i;
 
                         if (i > args.length) {
-                            System.err.println("Granularity value must be specified " + '-' + 'g');
+                            System.err.println("Granularity" + " must be specified for " + '-' + 'g');
                             return;
                         }
 
@@ -167,7 +169,7 @@ public final class ReportGenerator extends NMONVisualizerApp {
                             granularity = Integer.parseInt(args[i]) * 1000;
                         }
                         catch (NumberFormatException e) {
-                            System.err.println("Granularity value must be an integer " + args[i]);
+                            System.err.println("Granularity" + " value " + args[i] + " must be an integer");
                         }
 
                         break nextarg;
@@ -176,7 +178,7 @@ public final class ReportGenerator extends NMONVisualizerApp {
                         ++i;
 
                         if (i > args.length) {
-                            System.err.println("file must be specified for " + '-' + 'h');
+                            System.err.println("file" + " must be specified for " + '-' + 'h');
                             return;
                         }
 
@@ -187,7 +189,7 @@ public final class ReportGenerator extends NMONVisualizerApp {
                         ++i;
 
                         if (i > args.length) {
-                            System.err.println("file must be specified for " + '-' + 'i');
+                            System.err.println("file" + " must be specified for " + '-' + 'i');
                             return;
                         }
 
@@ -203,6 +205,36 @@ public final class ReportGenerator extends NMONVisualizerApp {
                             }
                             else if ("nosummary".equals(param)) {
                                 summaryCharts = false;
+                            }
+                            else if ("width".equals(param)) {
+                                ++i;
+
+                                if (i > args.length) {
+                                    System.err.println("Width" + " must be specified for " + '-' + '-' + "width");
+                                    return;
+                                }
+
+                                try {
+                                    width = Integer.parseInt(args[i]);
+                                }
+                                catch (NumberFormatException e) {
+                                    System.err.println("Width" + " value " + args[i] + " must be an integer");
+                                }
+                            }
+                            else if ("height".equals(param)) {
+                                ++i;
+
+                                if (i > args.length) {
+                                    System.err.println("Height" + " must be specified for " + '-' + '-' + "height");
+                                    return;
+                                }
+
+                                try {
+                                    height = Integer.parseInt(args[i]);
+                                }
+                                catch (NumberFormatException e) {
+                                    System.err.println("Height" + " value " + args[i] + " must be an integer");
+                                }
                             }
                             else if ("mf".equals(param)) {
                                 ++i;
@@ -283,7 +315,7 @@ public final class ReportGenerator extends NMONVisualizerApp {
         }
 
         ReportGenerator generator = new ReportGenerator(customSummaryCharts, customDataCharts, multiplexedFieldCharts,
-                multiplexedTypeCharts, granularity);
+                multiplexedTypeCharts, granularity, width, height);
 
         File outputDirectory = null;
 
@@ -406,8 +438,23 @@ public final class ReportGenerator extends NMONVisualizerApp {
 
     private boolean writeChartData = false;
 
+    private final int width;
+    private final int height;
+
     private ReportGenerator(List<String> customSummaryCharts, List<String> customDataCharts,
-            List<String> multiplexedFieldCharts, List<String> multiplexedTypeCharts, int granularity) {
+            List<String> multiplexedFieldCharts, List<String> multiplexedTypeCharts, int granularity, int width,
+            int height) {
+        // use -1 to default to sized set in BaseChartDefinition
+        if ((width < 1) && (width != -1)) {
+            throw new IllegalArgumentException("width" + " must be > 0");
+        }
+        if (height < 1 && (height != -1)) {
+            throw new IllegalArgumentException("height" + " must be > 0");
+        }
+
+        this.width = width;
+        this.height = height;
+
         factory = new ChartFactory(this);
         cache = new ReportCache();
 
@@ -457,7 +504,8 @@ public final class ReportGenerator extends NMONVisualizerApp {
             if (fileToParse.endsWith(".log") && fileToParse.contains("ReportGenerator")) {
                 continue;
             }
-            // ignore chart directories from previous executions which may contain CSV files from --rawdata or --chartdata
+            // ignore chart directories from previous executions
+            // these may contain CSV files from --rawdata or --chartdata
             if (fileToParse.endsWith(".csv") && fileToParse.contains("/charts/")) {
                 continue;
             }
@@ -733,7 +781,8 @@ public final class ReportGenerator extends NMONVisualizerApp {
             File chartFile = new File(saveDirectory, definition.getShortName().replace(" ", "_") + ".png");
 
             try {
-                ChartUtilities.saveChartAsPNG(chartFile, chart, definition.getWidth(), definition.getHeight());
+                ChartUtilities.saveChartAsPNG(chartFile, chart, width == -1 ? definition.getWidth() : width,
+                        height == -1 ? definition.getHeight() : height);
             }
             catch (IOException ioe) {
                 System.err.println("cannot create chart " + chartFile.getName());

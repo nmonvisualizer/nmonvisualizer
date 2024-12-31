@@ -35,11 +35,11 @@ public class ChartFactory {
         this.app = app;
 
         lineChartBuilder = new LineChartBuilder();
-        lineChartBuilder.addPlugin(new LineChartBuilderPlugin(app));
-
         barChartBuilder = new BarChartBuilder();
         intervalChartBuilder = new IntervalChartBuilder();
         histogramChartBuilder = new HistogramChartBuilder();
+
+        lineChartBuilder.addPlugin(new LineChartBuilderPlugin(app));
     }
 
     public void setGranularity(int granularity) {
@@ -65,13 +65,6 @@ public class ChartFactory {
         barChartBuilder.setFormatter(formatter);
         intervalChartBuilder.setFormatter(formatter);
         histogramChartBuilder.setFormatter(formatter);
-    }
-
-    public void addPlugin(ChartBuilderPlugin plugin) {
-        lineChartBuilder.addPlugin(plugin);
-        barChartBuilder.addPlugin(plugin);
-        intervalChartBuilder.addPlugin(plugin);
-        histogramChartBuilder.addPlugin(plugin);
     }
 
     /**

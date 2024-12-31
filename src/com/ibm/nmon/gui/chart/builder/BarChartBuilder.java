@@ -5,6 +5,7 @@ import org.jfree.chart.axis.CategoryAxis;
 
 import org.jfree.chart.axis.NumberAxis;
 import org.jfree.chart.axis.ValueAxis;
+import org.jfree.chart.axis.CategoryLabelPositions;
 
 import org.jfree.chart.plot.CategoryPlot;
 
@@ -97,6 +98,9 @@ public final class BarChartBuilder extends BaseChartBuilder<BarChartDefinition> 
 
         plot.getDomainAxis().setCategoryMargin(0.15d);
         plot.getDomainAxis().setTickMarksVisible(false);
+
+        // assume bar names will usually be hostnames or longer values; draw them on the chart at a 45 degree angle
+        plot.getDomainAxis().setCategoryLabelPositions(CategoryLabelPositions.UP_45);
 
         // position of first bar start and last bar end
         // 1.5% of the chart area within the axis will be blank space on each end

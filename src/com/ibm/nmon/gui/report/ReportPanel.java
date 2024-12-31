@@ -288,10 +288,6 @@ public final class ReportPanel extends JTabbedPane implements PropertyChangeList
         return previousTab;
     }
 
-    public void addPlugin(ChartBuilderPlugin plugin) {
-        chartFactory.addPlugin(plugin);
-    }
-
     @Override
     public void propertyChange(PropertyChangeEvent evt) {
         if ("chart".equals(evt.getPropertyName())) {

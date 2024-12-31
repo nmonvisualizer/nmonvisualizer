@@ -19,11 +19,6 @@ import javax.swing.JPanel;
 
 import javax.swing.SwingConstants;
 
-import org.jfree.chart.JFreeChart;
-import org.jfree.chart.axis.CategoryLabelPositions;
-
-import org.jfree.chart.plot.CategoryPlot;
-
 import com.ibm.nmon.data.DataSet;
 
 import com.ibm.nmon.interval.Interval;
@@ -32,7 +27,6 @@ import com.ibm.nmon.report.ReportCache;
 
 import com.ibm.nmon.gui.Styles;
 import com.ibm.nmon.gui.chart.BaseChartPanel;
-import com.ibm.nmon.gui.chart.builder.ChartBuilderPlugin;
 
 import com.ibm.nmon.gui.report.ReportPanel;
 
@@ -57,18 +51,6 @@ final class SummaryView extends ChartSplitPane implements IntervalListener {
 
         singleIntervalReport = new ReportPanel(gui, ReportCache.DEFAULT_SUMMARY_CHARTS_KEY);
         singleIntervalReport.setBorder(null); // make consistent with addBorderIfNecessary
-
-        singleIntervalReport.addPlugin(new ChartBuilderPlugin() {
-            @Override
-            public void configureChart(JFreeChart chart) {
-                if (chart.getPlot() instanceof CategoryPlot) {
-                    // assume bar names will usually be hostnames
-                    // draw them on the chart at a 45 degree angle
-                    CategoryPlot plot = (CategoryPlot) chart.getPlot();
-                    plot.getDomainAxis().setCategoryLabelPositions(CategoryLabelPositions.UP_45);
-                }
-            }
-        });
 
         allIntervalsReport = new ReportPanel(gui, ReportCache.DEFAULT_INTERVAL_CHARTS_KEY);
         allIntervalsReport.setBorder(null); // make consistent with addBorderIfNecessary
