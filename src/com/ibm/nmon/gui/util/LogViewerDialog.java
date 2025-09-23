@@ -2,41 +2,36 @@ package com.ibm.nmon.gui.util;
 
 import java.awt.BorderLayout;
 import java.awt.Toolkit;
-
-import javax.swing.AbstractAction;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.awt.event.KeyEvent;
-
-import java.awt.event.ItemListener;
 import java.awt.event.ItemEvent;
-
-import java.util.logging.Logger;
-import java.util.logging.LogRecord;
-import java.util.logging.Level;
+import java.awt.event.ItemListener;
+import java.awt.event.KeyEvent;
+import java.awt.event.WindowEvent;
+import java.awt.event.WindowFocusListener;
 import java.util.logging.Handler;
+import java.util.logging.Level;
+import java.util.logging.LogRecord;
+import java.util.logging.Logger;
 
+import javax.swing.AbstractAction;
+import javax.swing.ImageIcon;
+import javax.swing.JButton;
+import javax.swing.JComboBox;
 import javax.swing.JComponent;
 import javax.swing.JDialog;
 import javax.swing.JFrame;
-import javax.swing.JPanel;
 import javax.swing.JLabel;
-import javax.swing.JButton;
-import javax.swing.JComboBox;
+import javax.swing.JPanel;
 import javax.swing.JRootPane;
 import javax.swing.JScrollPane;
 import javax.swing.JTextArea;
 import javax.swing.KeyStroke;
+import javax.swing.SwingUtilities;
 import javax.swing.TransferHandler;
 
-import javax.swing.ImageIcon;
-
-import javax.swing.SwingUtilities;
-
 import com.ibm.nmon.gui.Styles;
-
 import com.ibm.nmon.gui.main.NMONVisualizerGui;
-
 import com.ibm.nmon.util.BasicFormatter;
 
 public final class LogViewerDialog extends JFrame {
@@ -140,8 +135,20 @@ public final class LogViewerDialog extends JFrame {
         add(footer, BorderLayout.PAGE_END);
 
         pack();
+        
+        final LogHandler logHandler = configureLogging();
 
-        configureLogging();
+        addWindowFocusListener(new WindowFocusListener() {
+            @Override
+            public void windowGainedFocus(WindowEvent e) {
+                logHandler.setVisible(true);
+            }
+
+            @Override
+            public void windowLostFocus(WindowEvent e) {
+                logHandler.setVisible(false);
+            }
+        });
     }
 
     protected JRootPane createRootPane() {
@@ -162,7 +169,7 @@ public final class LogViewerDialog extends JFrame {
         return rootPane;
     }
 
-    private void configureLogging() {
+    private LogHandler configureLogging() {
         Logger root = Logger.getLogger("");
 
         levels.setSelectedItem(root.getLevel());
@@ -171,11 +178,18 @@ public final class LogViewerDialog extends JFrame {
         for (Handler handler : root.getHandlers()) {
             root.removeHandler(handler);
         }
+        
+        LogHandler logHandler = new LogHandler();
 
-        root.addHandler(new LogHandler());
+        root.addHandler(logHandler);
+        
+        return logHandler;
     }
-
+    
     private class LogHandler extends Handler {
+        private boolean visible = false;
+        private StringBuilder pending = new StringBuilder();
+        
         LogHandler() {
             setFormatter(new BasicFormatter());
         }
@@ -183,7 +197,14 @@ public final class LogViewerDialog extends JFrame {
         @Override
         public void publish(LogRecord record) {
             if (isLoggable(record)) {
-                SwingUtilities.invokeLater(new QueuedLog(getFormatter().format(record)));
+                synchronized (this) {
+                    String str = getFormatter().format(record);
+                    if (visible) {
+                        SwingUtilities.invokeLater(new QueuedLog(str));
+                    } else {
+                        pending.append(str);
+                    }
+                }
             }
         }
 
@@ -192,6 +213,17 @@ public final class LogViewerDialog extends JFrame {
 
         @Override
         public void close() {}
+        
+        public void setVisible(boolean visible) {
+            this.visible = visible;
+            
+            synchronized (this) {
+                if (visible && pending.length() > 0) {
+                    SwingUtilities.invokeLater(new QueuedLog(pending.toString()));
+                    pending.setLength(0);
+                }
+            }
+        }
     }
 
     // helper class to ensure log events are added to the text area in the Swing event thread
