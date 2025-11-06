@@ -2,6 +2,7 @@ package com.ibm.nmon.util;
 
 import org.slf4j.Logger;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.SortedSet;
@@ -58,10 +59,19 @@ public final class DataHelper {
         long start = System.nanoTime();
         Map<String, List<Process>> processNameToProcesses = DataHelper.getProcessesByName(data, false);
 
+        List<Process> allProcesses = new ArrayList<>();
+        for (List<Process> processes : processNameToProcesses.values()) {
+            allProcesses.addAll(processes);
+        }
+        if (allProcesses.size() > 0) {
+            aggregateProcesses(data, allProcesses, "ALLPROCESSES", logger);
+        }
+
         for (List<Process> processes : processNameToProcesses.values()) {
             if (processes.size() > 1) {
-                aggregateProcesses(data, processes, logger);
+                aggregateProcesses(data, processes, processes.get(0).getName(), logger);
             }
+            allProcesses.addAll(processes);
         }
 
         if (logger.isDebugEnabled()) {
@@ -69,7 +79,7 @@ public final class DataHelper {
         }
     }
 
-    private static void aggregateProcesses(ProcessDataSet data, List<Process> processes, Logger logger) {
+    private static void aggregateProcesses(ProcessDataSet data, List<Process> processes, String name, Logger logger) {
         long start = System.nanoTime();
         long earliestStart = Long.MAX_VALUE;
 
@@ -95,8 +105,6 @@ public final class DataHelper {
         }
 
         fields[fieldCount - 1] = "Count";
-
-        String name = processes.get(0).getName();
 
         Process aggregate = new Process(-1, earliestStart, name);
         aggregate.setCommandLine("all " + name + " processes");
