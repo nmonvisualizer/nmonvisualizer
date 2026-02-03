@@ -1,0 +1,38 @@
+# https://docs.github.com/en/actions/using-workflows/workflow-syntax-for-github-actions
+name: Release
+on: 
+  push:
+    tags:
+    - '*'
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      # https://github.com/marketplace/actions/checkout
+      - uses: actions/checkout@v6
+      - name: Compile and Package the Maven repository
+        run: mvn install package
+      # https://docs.github.com/en/rest/releases/releases#create-a-release
+      # https://docs.github.com/en/rest/releases/assets#upload-a-release-asset
+      - name: Create release and upload assets
+        run: |
+          FILE="NMONVisualizer_$(date +%Y-%m-%d).jar" && \
+          RELEASE="$(curl \
+                       --silent \
+                       --show-error \
+                       --fail \
+                       --request POST \
+                       --url https://api.github.com/repos/${{github.repository}}/releases \
+                       --data '{"tag_name":"${{github.ref_name}}","name":"${{github.ref_name}}","draft":false,"prerelease":false}' \
+                       --header "Accept: application/vnd.github.v3+json" \
+                       --header "Authorization: Bearer ${{ secrets.GITHUB_TOKEN }}" | jq '.id')" && \
+          curl \
+            --silent \
+            --show-error \
+            --fail \
+            --request POST \
+            --url https://uploads.github.com/repos/${{github.repository}}/releases/${RELEASE}/assets?name=${FILE} \
+            --header "Accept: application/vnd.github.v3+json" \
+            --header "Content-Type: $(file -b --mime-type ${FILE})" \
+            --header "Authorization: Bearer ${{ secrets.GITHUB_TOKEN }}" \
+            --data-binary @${FILE}

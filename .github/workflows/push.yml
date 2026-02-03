@@ -1,0 +1,11 @@
+# https://docs.github.com/en/actions/using-workflows/workflow-syntax-for-github-actions
+name: OnPush
+on: [push, pull_request]
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      # https://github.com/marketplace/actions/checkout
+      - uses: actions/checkout@v6
+      - name: Compile and Package the Maven repository
+        run: mvn install package
