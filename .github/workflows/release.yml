@@ -16,6 +16,7 @@ jobs:
       # https://docs.github.com/en/rest/releases/assets#upload-a-release-asset
       - name: Create release and upload assets
         run: |
+          FILE="NMONVisualizer_$(date +%Y-%m-%d).jar" && \
           RELEASE="$(curl \
                        --silent \
                        --show-error \
@@ -30,8 +31,8 @@ jobs:
             --show-error \
             --fail \
             --request POST \
-            --url https://uploads.github.com/repos/${{github.repository}}/releases/${RELEASE}/assets?name=NMONVisualizer_${{github.ref_name}}.jar \
+            --url https://uploads.github.com/repos/${{github.repository}}/releases/${RELEASE}/assets?name=${FILE} \
             --header "Accept: application/vnd.github.v3+json" \
-            --header "Content-Type: $(file -b --mime-type NMONVisualizer.jar)" \
+            --header "Content-Type: $(file -b --mime-type ${FILE})" \
             --header "Authorization: Bearer ${{ secrets.GITHUB_TOKEN }}" \
-            --data-binary @NMONVisualizer.jar
+            --data-binary @${FILE}

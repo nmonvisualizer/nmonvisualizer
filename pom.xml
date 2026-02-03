@@ -139,9 +139,6 @@
 								<copy
 									file="${project.build.directory}/${project.build.finalName}.jar"
 									tofile="${basedir}/${project.build.finalName}.jar" />
-								<copy
-									file="${project.build.directory}/${project.build.finalName}.jar"
-									tofile="${basedir}/${project.artifactId}.jar" />
 							</target>
 						</configuration>
 					</execution>
