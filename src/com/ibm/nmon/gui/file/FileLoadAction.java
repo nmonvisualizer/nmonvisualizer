@@ -25,6 +25,7 @@ public final class FileLoadAction implements ActionListener {
     private final NMONVisualizerGui gui;
 
     private final TimeZoneComboBox timeZones;
+    private final TimeZoneComboBox displayTimeZones;
 
     public FileLoadAction(NMONVisualizerGui gui) {
         this.gui = gui;
@@ -48,8 +49,10 @@ public final class FileLoadAction implements ActionListener {
         chooser.setFileFilter(chooser.getAcceptAllFileFilter());
 
         timeZones = new TimeZoneComboBox(gui.getDisplayTimeZone());
+        displayTimeZones = new TimeZoneComboBox(gui.getDisplayTimeZone());
 
-        GUIFileChooser.addComponentToChooser(chooser, "Time Zone:", timeZones);
+        GUIFileChooser.addComponentToChooser(chooser, "File(s) TZ:", timeZones);
+        GUIFileChooser.addComponentToChooser(chooser, "Display TZ:", displayTimeZones);
 
     }
 
@@ -82,6 +85,7 @@ public final class FileLoadAction implements ActionListener {
 
         if (!toParse.isEmpty()) {
             // parse files outside of the Swing event thread
+            gui.setDisplayTimeZone(displayTimeZones.getSelectedTimeZone());
             new Thread(new ParserRunner(gui, toParse, timeZones.getSelectedTimeZone()),
                     getClass().getName() + " Parser").start();
         }
